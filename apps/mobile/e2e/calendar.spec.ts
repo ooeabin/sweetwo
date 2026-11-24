@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { setWheel } from './wheel';
 import { axe as runAxe } from './axe';
 import { type MemDb, mockOnboarding, mockRealtime } from './mocks';
+import { fillAmount } from './form';
 
 /** 추가 입구: 넓은 창은 제목 줄 버튼, 좁은 창은 화면 안 회색 ‘+ … 추가’ 줄(AddRow, 2026-11-09 + 버튼 대신) */
 const addEntry = (page: Page, name: string) =>
@@ -304,21 +305,17 @@ test('경조사 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건너
 
   await page.goto('/calendar');
   await addEntry(page, '+ 일정 추가').click();
-  await expect(page.getByRole('heading', { name: '어떤 날이에요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '경조사 추가' })).toBeVisible();
   await expect(page.getByLabel('어떤 날이에요?')).toHaveAttribute('placeholder', '예: 어머니 생신');
   await axe(page);
   await page.getByRole('button', { name: '생일', exact: true }).click();
   await expect(page.getByLabel('어떤 날이에요?')).toHaveValue('생일');
   await page.getByLabel('어떤 날이에요?').fill('어머니 생신');
-  await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '언제예요?' })).toBeVisible();
   await page.getByRole('radio', { name: '음력' }).click();
   await setWheel(page, '언제예요?', 2026, 8, 3);
   await expect(page.getByRole('switch', { name: '매년 돌아와요' })).toBeChecked();
+  await fillAmount(page, '쓸 금액을 메모해 둘까요?', 300_000);
   await axe(page);
-  await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '쓸 금액을 메모해 둘까요?' })).toBeVisible();
-  await page.getByLabel('쓸 금액을 메모해 둘까요?').fill('300000');
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/calendar$/);
   expect(db.cares.at(-1)).toMatchObject({
@@ -331,12 +328,11 @@ test('경조사 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건너
     budget: 300_000,
   });
 
-  // 추석: 날짜를 채우고 건너뜀, 금액은 건너뛰기
+  // 추석: 날짜를 채우고 건너뜀(날짜 섹션 없음), 금액은 안 적음
   await addEntry(page, '+ 일정 추가').click();
   await page.getByRole('button', { name: '추석', exact: true }).click();
-  await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '쓸 금액을 메모해 둘까요?' })).toBeVisible();
-  await page.getByRole('button', { name: '건너뛰기' }).click();
+  await expect(page.getByRole('radio', { name: '음력' })).toHaveCount(0);
+  await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/calendar$/);
   expect(db.cares.at(-1)).toMatchObject({
     name: '추석',
@@ -350,13 +346,11 @@ test('경조사 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건너
   await addEntry(page, '+ 일정 추가').click();
   await page.getByRole('button', { name: '행사', exact: true }).click();
   await page.getByLabel('어떤 날이에요?').fill('민지 결혼식');
-  await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('switch', { name: '매년 돌아와요' })).not.toBeChecked();
   await setWheel(page, '언제예요?', 2026, 9, 1);
-  await expect(page.getByText('이미 지난 날이에요. 기록으로 남길까요?')).toBeVisible();
-  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
+  await expect(page.getByText('이미 지난 날이에요. 기록으로 남길까요?').first()).toBeVisible();
+  await expect(page.getByRole('button', { name: '추가하기' })).toBeDisabled();
   await setWheel(page, '언제예요?', 2026, 11, 21);
-  await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/calendar$/);
   expect(db.cares.at(-1)).toMatchObject({
@@ -370,7 +364,6 @@ test('경조사 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건너
   await page.getByRole('button', { name: /^10월 30일/ }).click();
   await page.getByRole('button', { name: '이 날에 경조사 추가' }).click();
   await page.getByLabel('어떤 날이에요?').fill('집들이');
-  await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('spinbutton', { name: '일', exact: true })).toHaveAttribute(
     'aria-valuenow',
     '30',
@@ -408,16 +401,14 @@ test('상세(Y-05)와 기록(Y-08): 7일 지난 날 기록하기(꺼내 쓰기 �
   await axe(page);
 
   await overdue.click();
-  await expect(page.getByRole('heading', { name: '얼마 썼어요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '기록하기' })).toBeVisible();
   await expect(page.getByLabel('얼마 썼어요?')).toHaveValue('100,000');
   // 2026-11-08 ‘목표에서 꺼내 쓰기’ 없앰(ADR 0007)
   await expect(page.getByRole('button', { name: '목표에서 꺼내 쓰기' })).toHaveCount(0);
   await axe(page);
-  await page.getByRole('button', { name: '다음' }).click();
   await page.getByRole('button', { name: '선물' }).click();
   await page.getByLabel('어떤 선물이에요?').fill('꽃');
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByRole('button', { name: '건너뛰기' }).click();
+  await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/calendar\/day\/c-wed$/);
   expect(db.careRecords.at(-1)).toMatchObject({
     care_day_id: 'c-wed',
@@ -442,7 +433,6 @@ test('상세(Y-05)와 기록(Y-08): 7일 지난 날 기록하기(꺼내 쓰기 �
   await page.getByRole('menuitem', { name: '수정' }).click();
   await expect(page.getByLabel('어떤 날이에요?')).toHaveValue('어머니 생신');
   await page.getByLabel('어떤 날이에요?').fill('엄마 생신');
-  await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('spinbutton', { name: '일', exact: true })).toHaveAttribute(
     'aria-valuenow',
     '20',
@@ -471,7 +461,7 @@ test('기록 사진(Y-08c): 처음엔 사진 동의 → 형식·크기·10장 �
   const db = await mockOnboarding(page, { now: DAY });
   seed(db);
   db.cares.push(care({ id: 'c-mom', month: 10, day: 14 }));
-  await page.goto('/calendar/day/c-mom/record/c?on=2026-10-14');
+  await page.goto('/calendar/day/c-mom/record?on=2026-10-14');
   await expect(page.getByRole('heading', { name: '기억하고 싶은 게 있나요?' })).toBeVisible();
   await expect(page.getByText('사진 10장까지, 한 장에 10MB 이하')).toBeVisible();
   const input = page.locator('.hg-attach input[type="file"]');
@@ -699,11 +689,10 @@ test('QA 9구간: Y-07d 건너뛰기도 같은 날 확인(S9-09), 못 불러오�
   await page.goto('/calendar');
   await addEntry(page, '+ 일정 추가').click();
   await page.getByRole('button', { name: '추석', exact: true }).click();
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByRole('button', { name: '건너뛰기' }).click();
+  await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page.getByText('같은 날이 있어요. 그래도 추가할까요?')).toBeVisible();
   expect(db.cares).toHaveLength(1);
-  await page.getByRole('button', { name: '건너뛰기' }).click();
+  await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/calendar$/);
   expect(db.cares).toHaveLength(2);
 

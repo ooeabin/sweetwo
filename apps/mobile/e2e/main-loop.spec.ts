@@ -125,12 +125,14 @@ test('찬우·예빈 큰 흐름: 첫 저금 → 초대 → 합류 → 월급날 
   await c.getByRole('radio', { name: '내 집 마련' }).click();
   await c.getByRole('button', { name: '다음' }).click();
   await c.getByRole('button', { name: '기한 없이 모을게요' }).click();
+  await c.getByRole('button', { name: '다음' }).click();
   await c.getByRole('button', { name: '같이 모으기 시작하기' }).click();
   await expect(c).toHaveURL(/\/salary\/items\/goal-h$/);
   expect(s.bundles[0]).toMatchObject({ member_a: chanwoo.id, member_b: YEBIN });
   await y.goto('/salary/bundles/bundle-1');
   await expect(y).toHaveURL(/\/salary\/bundles\/bundle-1\/join$/);
   await y.getByRole('radio', { name: '결혼 비용' }).click();
+  await y.getByRole('button', { name: '다음' }).click();
   await y.getByRole('button', { name: '같이 모으기 시작하기' }).click();
   await expect(y).toHaveURL(/\/salary\/items\/goal-y$/);
   const yCard = y.getByRole('region', { name: '같이 모으기', exact: true });

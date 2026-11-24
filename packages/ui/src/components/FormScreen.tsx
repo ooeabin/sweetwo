@@ -111,23 +111,23 @@ export function FormStepHead({
         {index}/{total}
       </p>
       {done && done.length > 0 && (
-        <dl className="hg-form__done">
+        <ul className="hg-form__done">
           {done.map((x) => (
-            <div key={x.label} className="hg-form__donerow">
+            <li key={x.label} className="hg-form__donerow">
               {x.onClick ? (
                 <button type="button" className="hg-form__donebtn" onClick={x.onClick}>
-                  <dt>{x.label}</dt>
-                  <dd>{x.value}</dd>
+                  <span className="hg-form__donename">{x.label}</span>
+                  <span className="hg-form__doneval">{x.value}</span>
                 </button>
               ) : (
                 <>
-                  <dt>{x.label}</dt>
-                  <dd>{x.value}</dd>
+                  <span className="hg-form__donename">{x.label}</span>
+                  <span className="hg-form__doneval">{x.value}</span>
                 </>
               )}
-            </div>
+            </li>
           ))}
-        </dl>
+        </ul>
       )}
     </div>
   );

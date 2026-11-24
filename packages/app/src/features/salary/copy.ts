@@ -629,6 +629,11 @@ export const copy = {
   noteDue: (date: string) => date,
   notBeforeToday: '오늘부터 고를 수 있어요', // [확인 필요]
   // W-15 같이 모으기로 묶기
+  bundleTitle: '같이 모으기', // [확인 필요] 스테퍼 머리 제목
+  bundleJoinTitle: '같이 모으기에 들어가기', // [확인 필요]
+  doneBundlePartner: '같이 모을 저축·투자', // [확인 필요] 스테퍼 앞 답 줄 이름
+  doneBundleMine: '내 저축·투자', // [확인 필요]
+  doneBundleNew: '새 저축·투자', // [확인 필요]
   bundlePartnerQ: (name: string) => `${name}님 저축·투자 중 같이 모을 걸 골라 주세요`, // [확인 필요]
   bundleFromMine: '내 저축·투자에서 시작할게요', // [확인 필요]
   bundleMineQ: '어떤 저축·투자로 같이 모을까요?', // [확인 필요]
