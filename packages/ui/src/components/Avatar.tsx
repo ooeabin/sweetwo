@@ -1,4 +1,5 @@
-import { avatarInitialCount, avatarInitials } from '@sweetwo/core';
+import { avatarInitialCount, avatarInitials, avatarPhotoSrc } from '@sweetwo/core';
+import { useState } from 'react';
 import { cx } from './cx';
 import { Icon } from './Icon';
 
@@ -30,11 +31,14 @@ const SIZE: Record<AvatarSize, string | false> = {
 };
 
 export function Avatar({ name, no = 1, size = 'md', src, empty, alt, className }: AvatarProps) {
+  // 사진이 안 열리면(주소 만료, 소셜 주소 등) 깨진 그림 대신 글자 원(2026-11-24). 모든 사용처가 여기서 한 번에 처리
+  const [failed, setFailed] = useState<string | null>(null);
   const base = cx('hg-avatar', SIZE[size], className);
-  if (src && !empty)
+  const photo = avatarPhotoSrc(src, { empty, failed });
+  if (photo)
     return (
       <span className={cx(base, 'hg-avatar--photo')} aria-hidden={alt ? undefined : true}>
-        <img src={src} alt={alt ?? ''} />
+        <img src={photo} alt={alt ?? ''} onError={() => setFailed(photo)} />
       </span>
     );
   const initials = empty ? '' : avatarInitials(name);

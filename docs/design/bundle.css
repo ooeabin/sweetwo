@@ -582,9 +582,13 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-avatars { display: inline-flex; }
 .hg-avatar--empty { background: var(--surface-alt); color: var(--muted); }  /* 파트너 빈 자리: 사람 아이콘 */
 .hg-avatars .hg-avatar + .hg-avatar { margin-left: -8px; box-shadow: 0 0 0 2px var(--surface); }
-/* 2026-11-24 구역 5: 줄 앞 칸 두 사람은 겹치지 않고 8px 띄움(겹치면 앞 원의 글자 끝이 가려졌음). 이름이 있는 줄(S-12), 겹침은 이름 없는 작은 묶음 */
-.hg-avatars.hg-avatars--apart { gap: var(--space-2); }
-.hg-avatars.hg-avatars--apart .hg-avatar + .hg-avatar { margin-left: 0; box-shadow: none; }
+/* 2026-11-24 두 사람 겹침(S-12 연결됨·해제 대기·초대 중 모두 같은 규칙, 구역 5의 ‘떨어뜨림’을 되돌림): 원 40(lg), 겹침 −12(space-3), 뒤 원이 위(다 보임)·2px surface 고리.
+   가려지는 앞 원은 글자를 보이는 쪽 가운데에 놓고, 글자 수에 맞게 크기를 줄여 잘리지 않게 함(2글자 12px, 3글자 8px) */
+.hg-avatars.hg-avatars--lap { --lap: var(--space-3); }
+.hg-avatars--lap .hg-avatar + .hg-avatar { margin-left: calc(var(--lap) * -1); }
+.hg-avatars--lap .hg-avatar:not(:last-child) { --vis: calc(var(--avatar) - var(--lap) - 4px); padding-right: calc(var(--lap) + 2px); }
+.hg-avatars--lap .hg-avatar--n2:not(:last-child) { font-size: min(calc(var(--avatar) * 0.38), calc(var(--vis) / 2)); }
+.hg-avatars--lap .hg-avatar--n3:not(:last-child) { font-size: min(calc(var(--avatar) * 0.28), calc(var(--vis) / 3)); }
 
 /* Slider */
 .hg-slider { display: flex; flex-direction: column; gap: var(--space-3); max-width: 480px; }
