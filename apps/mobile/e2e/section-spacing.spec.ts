@@ -8,13 +8,13 @@ const NOW = new Date('2026-10-07T10:00:00+09:00');
 /** B.top − A.bottom (px, 소수 첫째 자리까지) */
 async function gap(page: Page, a: string, b: string) {
   return page.evaluate(
-    ([sa, sb]) => {
+    ([sa, sb]: [string, string]) => {
       const A = document.querySelector(sa);
       const B = document.querySelector(sb);
       if (!A || !B) return null;
       return Math.round((B.getBoundingClientRect().top - A.getBoundingClientRect().bottom) * 10) / 10;
     },
-    [a, b],
+    [a, b] as [string, string],
   );
 }
 
