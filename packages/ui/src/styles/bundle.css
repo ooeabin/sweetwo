@@ -3031,6 +3031,8 @@ button.hg-datepill { cursor: pointer; }
 .hg-choice--rows .hg-choice__label { color: var(--ink-2); }
 .hg-choice__dot { flex: none; display: inline-grid; place-items: center; box-sizing: border-box; width: 24px; height: 24px; border: 2px solid var(--border-control); border-radius: var(--radius-full); color: transparent; }
 .hg-choice__item.is-on .hg-choice__dot { border-color: var(--accent-app); background: var(--accent-app); color: var(--on-accent-app); }  /* 고른 선택지 원: 오렌지 채움 + 체크 */
+/* 고른 카드의 설명은 slate(다크에서 떠 있는 판(#3a3a3d) 위 stone은 대비 4.5:1 아래) */
+.hg-choice__item.is-on .hg-choice__sub, .hg-option--card.is-on .hg-help { color: var(--slate); }
 .hg-frame--alt .hg-choice { --choice-plate: var(--hairline-soft); }
 .hg-frame--alt .hg-option--card { background: var(--hairline-soft); }
 .hg-frame--alt .hg-option--card.is-on { background: var(--choice-on); }

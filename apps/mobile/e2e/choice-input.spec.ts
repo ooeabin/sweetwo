@@ -5,7 +5,8 @@ import { mockOnboarding, seed } from './mocks';
 test.use({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 
-test('W-11: 고르기는 F 떠 있는 흰 알약, 글자 칸은 밑줄, 빠른 금액 칩은 늘 회색', async ({ page }) => {
+test('W-11: 고르기는 F 떠 있는 흰 알약, 글자 칸은 밑줄, 빠른 금액 칩은 늘 회색', async ({ page }, info) => {
+  test.skip(info.project.name !== 'light', '색 수치는 light만');
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
