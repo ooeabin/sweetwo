@@ -1,3 +1,4 @@
+import { goOffline } from './offline';
 import { test, expect } from '@playwright/test';
 import { axe } from './axe';
 import { asReturningFromProvider, mockSupabase } from './mocks';
@@ -124,11 +125,11 @@ test('앱 로그인 복귀 페이지는 code와 state를 딥링크로 넘긴다'
 });
 
 // 2026-11-10 워드마크는 번들 안 data: URL이라 네트워크가 끊겨도 보임(전에는 깨진 이미지에 “sweeTwo” 글자)
-test('A-02 오프라인: 워드마크가 네트워크 없이 보임', async ({ page, context }) => {
+test('A-02 오프라인: 워드마크가 네트워크 없이 보임', async ({ page }) => {
   await mockSupabase(page);
   await page.goto('/');
   await expect(page.getByRole('button', { name: '시작하기' })).toBeVisible();
-  await context.setOffline(true);
+  await goOffline(page);
   await page.evaluate(() => window.dispatchEvent(new Event('offline')));
   await page.getByRole('button', { name: '시작하기' }).click();
   await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();

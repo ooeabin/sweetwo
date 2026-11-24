@@ -1,3 +1,4 @@
+import { goOffline, goOnline } from './offline';
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { type MemDb, mockOnboarding } from './mocks';
@@ -309,11 +310,11 @@ test('알림 센터: 같은 시각 더 불러오기, 달성 아이콘 자리, 1�
   }
 
   // 오프라인에서 누르면 줄은 읽음으로 보이고, 연결되면 서버에 보냄
-  await page.context().setOffline(true);
+  await goOffline(page);
   await panel.locator('.hg-noti__item').first().click();
   await page.waitForTimeout(300);
   expect(db.notifications.find((n) => n.kind === 'goal_achieved')?.read_at ?? null).toBeNull();
-  await page.context().setOffline(false);
+  await goOnline(page);
   await expect
     .poll(() => db.notifications.find((n) => n.kind === 'goal_achieved')?.read_at ?? null)
     .not.toBeNull();

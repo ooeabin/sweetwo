@@ -10,12 +10,14 @@ let online = !hasNav() || navigator.onLine !== false;
 const listeners = new Set<() => void>();
 let started = false;
 let inflight: Promise<boolean> | null = null;
+let inflightEpoch = 0;
 let timer: ReturnType<typeof setInterval> | null = null;
 
 const emit = () => listeners.forEach((f) => f());
 function set(next: boolean) {
   if (next === online) return;
   online = next;
+  if (!next) drops++;
   syncTimer();
   emit();
 }
@@ -27,8 +29,13 @@ export function subscribeOnline(f: () => void) {
   listeners.add(f);
   return () => void listeners.delete(f);
 }
-/** 실제 요청이 성공했으면 바로 온라인으로 */
-export const reportReachable = () => set(true);
+/** 오프라인으로 바뀐 횟수: 끊기기 전에 시작한 요청의 늦은 성공은 온라인으로 치지 않음 */
+let drops = 0;
+export const connectionEpoch = () => drops;
+/** 실제 요청이 성공했으면 바로 온라인으로(그 요청이 시작된 뒤 끊김이 없었을 때만) */
+export const reportReachable = (startedAt = drops) => {
+  if (startedAt === drops) set(true);
+};
 
 type Probe = () => Promise<boolean>;
 function defaultProbe(): Promise<boolean> {
@@ -55,16 +62,22 @@ export function __resetOnline(initial: boolean) {
 
 /** 실제 확인을 한 번 하고 결과를 상태에 반영. 동시에 여러 번 불러도 요청은 하나 */
 export function probeOnline(): Promise<boolean> {
-  inflight ??= probeImpl()
+  if (inflight && inflightEpoch === drops) return inflight;
+  const epoch = drops;
+  inflightEpoch = epoch;
+  const mine: Promise<boolean> = probeImpl()
     .catch(() => false)
     .then((ok) => {
+      // 확인하는 동안 끊김 신호가 새로 왔으면 이 결과(성공)는 낡았음
+      if (ok && epoch !== drops) return false;
       set(ok);
       return ok;
     })
     .finally(() => {
-      inflight = null;
+      if (inflight === mine) inflight = null;
     });
-  return inflight;
+  inflight = mine;
+  return mine;
 }
 
 /** 시작할 때처럼 바로 답이 필요할 때: onLine이 참이면 그대로, 거짓이면 실제 확인 */
@@ -89,7 +102,11 @@ function start() {
   if (started || typeof window === 'undefined') return;
   started = true;
   window.addEventListener('online', () => void probeOnline());
-  window.addEventListener('offline', () => void probeOnline());
+  // offline 이벤트는 바로 오프라인으로 보되(쓰기를 막음) 실제 확인으로 곧 바로잡음
+  window.addEventListener('offline', () => {
+    set(false);
+    void probeOnline();
+  });
   document.addEventListener('visibilitychange', () => {
     if (visible() && !online) void probeOnline();
   });

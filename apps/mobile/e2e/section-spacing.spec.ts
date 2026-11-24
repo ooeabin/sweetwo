@@ -12,7 +12,9 @@ async function gap(page: Page, a: string, b: string) {
       const A = document.querySelector(sa);
       const B = document.querySelector(sb);
       if (!A || !B) return null;
-      return Math.round((B.getBoundingClientRect().top - A.getBoundingClientRect().bottom) * 10) / 10;
+      return (
+        Math.round((B.getBoundingClientRect().top - A.getBoundingClientRect().bottom) * 10) / 10
+      );
     },
     [a, b] as [string, string],
   );
@@ -33,7 +35,11 @@ test('FormScreen(W-11): 섹션 사이 32, 제목과 내용 12, 띠 8 + 아래 �
   await expect(page.locator('.hg-form__sec').first()).toBeVisible();
   expect(await gap(page, '.hg-form__sec:nth-of-type(1)', '.hg-form__sec:nth-of-type(2)')).toBe(32);
   expect(
-    await gap(page, '.hg-form__sec:nth-of-type(1) .hg-form__q', '.hg-form__sec:nth-of-type(1) .hg-form__chips'),
+    await gap(
+      page,
+      '.hg-form__sec:nth-of-type(1) .hg-form__q',
+      '.hg-form__sec:nth-of-type(1) .hg-form__chips',
+    ),
   ).toBe(12);
   const folds = page.locator('.hg-form__folds');
   await expect(folds).toBeVisible();
@@ -41,7 +47,13 @@ test('FormScreen(W-11): 섹션 사이 32, 제목과 내용 12, 띠 8 + 아래 �
     const f = document.querySelector('.hg-form__folds') as HTMLElement;
     const r = f.getBoundingClientRect();
     const first = f.querySelector('.hg-form__fold') as HTMLElement;
-    return { bandH: parseFloat(getComputedStyle(f, '::before').height), toRow: first.getBoundingClientRect().top - r.top - parseFloat(getComputedStyle(f, '::before').height) };
+    return {
+      bandH: parseFloat(getComputedStyle(f, '::before').height),
+      toRow:
+        first.getBoundingClientRect().top -
+        r.top -
+        parseFloat(getComputedStyle(f, '::before').height),
+    };
   });
   expect(band.bandH).toBe(8);
   expect(band.toRow).toBe(12);

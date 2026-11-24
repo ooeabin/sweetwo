@@ -1,3 +1,4 @@
+import { goOffline, goOnline } from './offline';
 import { test, expect, type Page, type Route } from '@playwright/test';
 import { fillAmount } from './form';
 import { axe as runAxe } from './axe';
@@ -440,18 +441,15 @@ test('W-10 ‘매달 금액 바꾸기’ 주소(?line=): 그 저금 줄 시트�
   await expect(page).toHaveURL(/\/salary\/items\/goal-h$/);
 });
 
-test('오프라인: 줄을 눌러도 시트 없이 “인터넷에 연결되면 할 수 있어요”', async ({
-  page,
-  context,
-}) => {
+test('오프라인: 줄을 눌러도 시트 없이 “인터넷에 연결되면 할 수 있어요”', async ({ page }) => {
   const { go } = await open(page);
   await go();
   await expect(page.getByRole('button', { name: '편집하기' })).toBeVisible();
-  await context.setOffline(true);
+  await goOffline(page);
   await page.getByRole('button', { name: '생활비 88만 원' }).click();
   await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
-  await context.setOffline(false);
+  await goOnline(page);
 });
 
 // ── QA 5구간(2026-11-12) ────────────────────────────────────────────
@@ -527,15 +525,15 @@ test('못 불러오면 오류 카드 + 다시 시도, 구간 탭은 그대로(S5
   await expect(page.locator('.hg-plansum')).toBeVisible();
 });
 
-test('오프라인: ‘+ 저금 추가’도 W-11로 가지 않음(S5-08)', async ({ page, context }) => {
+test('오프라인: ‘+ 저금 추가’도 W-11로 가지 않음(S5-08)', async ({ page }) => {
   const { go } = await open(page);
   await go();
   await expect(page.getByRole('button', { name: '편집하기' })).toBeVisible();
-  await context.setOffline(true);
+  await goOffline(page);
   await page.getByRole('button', { name: '+ 저축·투자 추가' }).click();
   await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
   await expect(page).toHaveURL(/\/salary\/plan$/);
-  await context.setOffline(false);
+  await goOnline(page);
 });
 
 test('저금 그만 모음 되돌리기는 원래 자리(S5-09)', async ({ page }) => {

@@ -1,3 +1,4 @@
+import { goOffline, goOnline } from './offline';
 import { test, expect, type Page } from '@playwright/test';
 import { axe } from './axe';
 import { emitAuth, emitInvite, fakeBridge, fb, pressHardwareBack } from './fake-bridge';
@@ -333,12 +334,12 @@ test('A-02 소셜 버튼(S1-30): 공식 문구, ‘최근 사용’은 이름이
   await expect(
     page.getByRole('button', { name: '카카오로 3초 만에 로그인', exact: true }),
   ).toBeVisible();
-  await page.context().setOffline(true);
+  await goOffline(page);
   await page.evaluate(() => window.dispatchEvent(new Event('offline')));
   const kakao = page.getByRole('button', { name: '카카오로 3초 만에 로그인', exact: true });
   await expect(kakao).toBeDisabled();
   await expect(kakao).toHaveCSS('background-color', 'rgb(254, 229, 0)');
-  await page.context().setOffline(false);
+  await goOnline(page);
 });
 
 test('태블릿(터치) 질문 화면(S1-24): Enter 안내와 넓은 창 바 없이 휴대폰처럼 가운데 열', async ({

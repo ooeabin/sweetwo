@@ -63,10 +63,15 @@ test('만기일 당일: 할 일 한 줄 → 다른 통장으로 옮겼어요(통
   const band = page.locator('.hg-hubband', { hasText: '청년 적금이 만기됐어요' });
   await expect(band).toBeVisible();
   await band.getByRole('button').first().click();
-  await expect(page.getByRole('radiogroup', { name: '만기 금액은 어디로 옮겼어요?' })).toBeVisible();
+  await expect(
+    page.getByRole('radiogroup', { name: '만기 금액은 어디로 옮겼어요?' }),
+  ).toBeVisible();
   await axe(page);
   // 한 화면: 다른 통장으로(처음 값) → 통장 칩 → 정리하기
-  await page.getByRole('group', { name: '어느 통장으로 옮겼어요?' }).getByRole('button', { name: /입출금 통장/ }).click();
+  await page
+    .getByRole('group', { name: '어느 통장으로 옮겼어요?' })
+    .getByRole('button', { name: /입출금 통장/ })
+    .click();
   await expect(page.getByText('입출금 통장 300만 원 > 1,500만 원')).toBeVisible();
   await page.getByRole('button', { name: '정리하기', exact: true }).click();
   await expect(page).toHaveURL(/\/assets\/a-bank$/);
@@ -131,7 +136,10 @@ test('F-04 투자: 시세 바꾸기, 팔았어요(일부) → 받은 통장 → 
   await page.getByRole('radio', { name: '일부' }).click();
   await fillAmount(page, '받은 금액', 5_000_000);
   await fillAmount(page, '남은 평가금액', 5_000_000);
-  await page.getByRole('group', { name: '어느 통장에 들어왔어요?' }).getByRole('button', { name: /입출금 통장/ }).click();
+  await page
+    .getByRole('group', { name: '어느 통장에 들어왔어요?' })
+    .getByRole('button', { name: /입출금 통장/ })
+    .click();
   await expect(page.getByText('입출금 통장 300만 원 > 800만 원')).toBeVisible();
   await page.getByRole('button', { name: '적기', exact: true }).click();
   await expect(page.getByText('입출금 통장 +500만 원')).toBeVisible();
@@ -164,7 +172,10 @@ test('F-04 투자: 전부 팔았어요 → 받은 통장 → 결과(F-04d)가 �
   });
   await page.goto('/assets/a-stock/sold');
   await fillAmount(page, '받은 금액', 11_000_000);
-  await page.getByRole('group', { name: '어느 통장에 들어왔어요?' }).getByRole('button', { name: /입출금 통장/ }).click();
+  await page
+    .getByRole('group', { name: '어느 통장에 들어왔어요?' })
+    .getByRole('button', { name: /입출금 통장/ })
+    .click();
   await page.getByRole('button', { name: '적기', exact: true }).click();
   await expect(page.getByRole('heading', { name: '팔았어요' }).first()).toBeVisible();
   await expect(page.getByText('입출금 통장 +1,100만 원')).toBeVisible();
@@ -238,7 +249,9 @@ test('만기일 + 31일째: 홈 띠는 내려가고, 상세 “만기일이 지�
   await expect(note).toBeVisible();
   await axe(page);
   await note.getByRole('button', { name: '정리하기' }).click();
-  await expect(page.getByRole('radiogroup', { name: '만기 금액은 어디로 옮겼어요?' })).toBeVisible();
+  await expect(
+    page.getByRole('radiogroup', { name: '만기 금액은 어디로 옮겼어요?' }),
+  ).toBeVisible();
   // 만기 전 항목에는 띠 없음
   await page.goto('/assets/a-bank');
   await expect(page.getByRole('heading', { name: '입출금 통장' })).toBeVisible();

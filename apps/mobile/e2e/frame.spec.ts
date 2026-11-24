@@ -1,3 +1,4 @@
+import { goOffline, goOnline } from './offline';
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { homeTaskTexts } from './home-tasks';
@@ -65,7 +66,6 @@ test('Ctrl+2 월급 탭, Ctrl+N 홈은 추가 메뉴, 월급 탭은 저금 추�
 
 test('오프라인 띠, 연결 해제 대기 띠(받은 사람 → S-12d), 맨 위 띠는 하나만(오프라인 먼저)', async ({
   page,
-  context,
 }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
@@ -95,13 +95,13 @@ test('오프라인 띠, 연결 해제 대기 띠(받은 사람 → S-12d), 맨 �
   await expect(page.getByText('예빈님이 연결 해제를 요청했어요')).toBeVisible();
   await expect(page.getByText('연결 해제를 기다리고 있어요')).toHaveCount(0);
   await expect(page.getByText('10월 20일에 해제돼요')).toBeVisible();
-  await context.setOffline(true);
+  await goOffline(page);
   // 받아 둔 화면이 있으면 13-9 “오프라인 / 마지막 저장 {시각}”(2026-11-12 S6-17)
   await expect(page.getByText('마지막 저장', { exact: false })).toBeVisible();
   // 맨 위 띠는 하나만, 오프라인이 먼저(2026-11-11 QA 4구간 D3): 해제 대기 띠는 다시 연결되면 보임
   await expect(page.getByText('10월 20일에 해제돼요')).toHaveCount(0);
   await expect(page.locator('.hg-body__banners .hg-banner')).toHaveCount(1);
-  await context.setOffline(false);
+  await goOnline(page);
   await expect(page.getByText('연결이 끊겼어요')).toHaveCount(0);
   await expect(page.getByText('10월 20일에 해제돼요')).toBeVisible();
   await page.getByRole('button', { name: '확인하기', exact: true }).click();

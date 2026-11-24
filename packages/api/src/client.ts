@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient, type SupportedStorage } from '@supabase/supabase-js';
 import type { Database } from '@sweetwo/core';
-import { isOnline, probeOnline, reportReachable } from './connectivity';
+import { connectionEpoch, isOnline, probeOnline, reportReachable } from './connectivity';
 
 // Supabase 클라이언트는 하나만. 앱에는 공개돼도 되는 값(VITE_)만 들어간다.
 // - 웹(개발·e2e): supabase-js가 세션을 localStorage에(15 A-02 6번)
@@ -98,10 +98,11 @@ const blockedByReadOnly = (url: string) => {
   return !(m?.[1] && READ_RPC.has(m[1]));
 };
 // 실제 요청이 성공하면 바로 온라인, 네트워크 오류면 실제 확인(connectivity.ts)
-const watched = (p: Promise<Response>) =>
-  p.then(
+const watched = (p: Promise<Response>) => {
+  const epoch = connectionEpoch();
+  return p.then(
     (r) => {
-      reportReachable();
+      reportReachable(epoch);
       return r;
     },
     (e: unknown) => {
@@ -109,6 +110,7 @@ const watched = (p: Promise<Response>) =>
       throw e;
     },
   );
+};
 const trackedFetch: typeof fetch = async (input, init) => {
   const method = (init?.method ?? (input instanceof Request ? input.method : 'GET')).toUpperCase();
   const write = method !== 'GET' && method !== 'HEAD';

@@ -1,3 +1,4 @@
+import { goOffline, goOnline } from './offline';
 import { test, expect } from '@playwright/test';
 import { emptyV22, mockOnboarding, seed } from './mocks';
 
@@ -24,14 +25,12 @@ test('브라우저가 거짓으로 오프라인이라 알려도(navigator.onLine
   await expect(page.getByRole('status').filter({ hasText: '오프라인' })).toHaveCount(0);
 });
 
-test('실제로 끊기면(setOffline) 오프라인 띠, 다시 연결되면 사라짐', async ({ page, context }) => {
+test('실제로 끊기면(setOffline) 오프라인 띠, 다시 연결되면 사라짐', async ({ page }) => {
   await open(page);
   await page.goto('/');
   await expect(page.locator('.hg-together')).toContainText('내 집 마련');
-  await page.route('**/auth/v1/health', (r) => r.abort('internetdisconnected'));
-  await context.setOffline(true);
+  await goOffline(page);
   await expect(page.getByRole('status').filter({ hasText: '오프라인' })).toBeVisible();
-  await page.unroute('**/auth/v1/health');
-  await context.setOffline(false);
+  await goOnline(page);
   await expect(page.getByRole('status').filter({ hasText: '오프라인' })).toHaveCount(0);
 });

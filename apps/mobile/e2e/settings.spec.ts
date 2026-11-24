@@ -1,3 +1,4 @@
+import { goOffline, goOnline } from './offline';
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { type MemDb, mockOnboarding, mockV22Settings } from './mocks';
@@ -808,11 +809,11 @@ test('휴지통(S-21): 되살리기(연결된 두 사람 저금 항목도 바로
   await expect(page.getByText('원래 함께 있던 항목이 없어 이것만 되살렸어요')).toBeVisible();
 
   // 오프라인: 영구 삭제·비우기 비활성(S11-10)
-  await page.context().setOffline(true);
+  await goOffline(page);
   await expect(page.getByRole('button', { name: '휴지통 비우기' })).toBeDisabled();
   await expect(rowOf('옛 대출').getByRole('button', { name: '옛 대출 더보기' })).toBeDisabled();
   await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
-  await page.context().setOffline(false);
+  await goOnline(page);
 
   await rowOf('옛 대출').getByRole('button', { name: '옛 대출 더보기' }).click();
   await page.getByRole('menuitem', { name: '영구 삭제' }).click();
@@ -1086,7 +1087,6 @@ test('약관 개정 재동의(A-05r): 바뀐 필수 항목만 → 들어오려�
 
 test('연결 해제 요청 받음(S-12d) 오프라인: ‘해제할게요’ 비활성 + 이유 한 줄(S3-08)', async ({
   page,
-  context,
 }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
@@ -1107,11 +1107,11 @@ test('연결 해제 요청 받음(S-12d) 오프라인: ‘해제할게요’ 비
   await page.goto('/settings/couple/unlink/review');
   const go = page.getByRole('button', { name: '해제할게요' });
   await expect(go).toBeEnabled();
-  await context.setOffline(true);
+  await goOffline(page);
   await expect(go).toBeDisabled();
   await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
   await axe(page);
-  await context.setOffline(false);
+  await goOnline(page);
   await expect(go).toBeEnabled();
 });
 
