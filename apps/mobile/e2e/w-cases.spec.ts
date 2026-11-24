@@ -231,6 +231,8 @@ test.describe('W-02a 키패드(좁은 창)', () => {
     await key(page, '9');
     await expect(input(page)).toHaveValue('99,999,999,999');
     await expect(page.locator('.hg-amount.is-shake')).toBeVisible();
+    // 2026-11-24 막히면 칸 아래 안내도 보임(공통 AmountInput)
+    await expect(page.getByText('999억 원까지 넣을 수 있어요')).toBeVisible();
     await key(page, '00');
     await expect(input(page)).toHaveValue('99,999,999,999');
     await expect(page.getByRole('heading', { name: /이번 달은 얼마였어요/ })).toBeVisible();

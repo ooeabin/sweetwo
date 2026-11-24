@@ -41,8 +41,6 @@ test('첫 확인 → 수입 카드에 “월급 +350만 원 자동”, 지우면
   await page.goto('/salary');
   await page.getByRole('button', { name: '모두 계획대로 됐어요' }).click();
   await expect(page.locator('.hg-toast')).toContainText('계획대로 됐어요');
-  await expect(page.getByRole('group', { name: '이번 달 수입' })).not.toContainText(
-    '만 원',
-  );
+  await expect(page.getByRole('group', { name: '이번 달 수입' })).not.toContainText('만 원');
   expect(sv.moneyIns.filter((m) => !m.deleted_at)).toHaveLength(0);
 });

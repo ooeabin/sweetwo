@@ -64,7 +64,10 @@ test('손대지 않고 첫 확인 → 프로필 월급으로 자동 기록(그�
 test('0원으로 저장하면 기록 없이 닫고 다시 안 물음', async ({ page }) => {
   const { sv } = await open(page);
   await openList(page);
-  await page.locator('.hg-fdhero').getByRole('button', { name: /월급 금액 고치기/ }).click();
+  await page
+    .locator('.hg-fdhero')
+    .getByRole('button', { name: /월급 금액 고치기/ })
+    .click();
   await page.getByRole('dialog').getByLabel('월급 금액').fill('0');
   await page.getByRole('dialog').getByRole('button', { name: '확인' }).click();
   await expect(page.locator('.hg-fdhero__amt')).toContainText('0원');

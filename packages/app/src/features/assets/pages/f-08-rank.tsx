@@ -67,7 +67,7 @@ export function F08Rank() {
   const pair = r?.pair.mode === 'pair' ? r.pair : null;
   const fresh = nav0?.fresh.mode === 'pair' ? nav0.fresh : null;
   // 첫 결과 무료: 본 적이 없으면 들어오자마자 기록(광고 없음). 서버가 이미 봤다고 하면 광고 단계로
-  const needFirst = !!pair && !fresh && r?.viewed === false && !first;
+  const needFirst = !!pair && !fresh && r?.viewed === false && !first && r?.state.kind !== 'empty';
   useEffect(() => {
     if (!needFirst || recording.current) return;
     recording.current = true;

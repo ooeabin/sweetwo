@@ -80,14 +80,18 @@ test('W-10 ‘매달 95만 원씩’ 바꾸기: 이 줄 금액만 열고 바로 
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('매달 금액을 바꿨어요')).toBeVisible();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h$/);
-  await expect(page.locator('.hg-listrow', { hasText: '매달 모으는 금액' })).toContainText('80만 원');
+  await expect(page.locator('.hg-listrow', { hasText: '매달 모으는 금액' })).toContainText(
+    '80만 원',
+  );
   expect(amountOf()).toBe(800_000);
   // 다른 줄은 그대로, 이번 달 체크 안 한 줄도 새 금액
   expect(db.splits[0]?.split_line.map((l) => l.amount)).toEqual([
     440_000, 800_000, 880_000, 880_000, 350_000,
   ]);
   await page.getByRole('button', { name: '되돌리기' }).click();
-  await expect(page.locator('.hg-listrow', { hasText: '매달 모으는 금액' })).toContainText('95만 원');
+  await expect(page.locator('.hg-listrow', { hasText: '매달 모으는 금액' })).toContainText(
+    '95만 원',
+  );
   expect(amountOf()).toBe(950_000);
 });
 

@@ -258,12 +258,20 @@ test('F-08 (나) 순위 없음: 또래 가구 중간값 한 줄(광고 없음) �
   const banner = page.getByRole('button', { name: /또래 가구 중간값 보기/ });
   await expect(banner).toBeVisible();
   await expect(banner).not.toContainText('광고');
+  // 2026-11-24 원 그래픽(“중간”)을 없앰, › 는 같은 줄 오른쪽 끝
+  await expect(banner).toHaveText('또래 가구 중간값 보기');
+  await expect(banner.locator('.hg-rankrow__badge')).toHaveCount(0);
+  await expect(banner.locator('.hg-chevron')).toBeVisible();
   await banner.click();
   await expect(page).toHaveURL(/\/assets\/rank$/);
   // 1993년생 → 30대 중간값
   await expect(page.getByText('또래 가구 중간값은 1억 5,585만 원이에요')).toBeVisible();
   await expect(page.getByText(/상위 \d+%/)).toHaveCount(0);
   await axe(page);
+  // 2026-11-24 ‘같이 순위 보기’는 아래 고정 주 버튼
+  await expect(
+    page.locator('.hg-stickybar').getByRole('button', { name: '예빈님과 같이 순위 보기' }),
+  ).toBeVisible();
   await page.getByRole('button', { name: '예빈님과 같이 순위 보기' }).click();
   await expect(page).toHaveURL(/\/assets\/rank\/consent$/);
   await expect(
@@ -318,8 +326,13 @@ test('F-08c 받는 쪽(예빈 요청) ‘좋아요’ → (가) 첫 결과는 �
   await expect(page).toHaveURL(/\/assets\/rank$/);
   await expect(page.getByText('상위 62%예요')).toBeVisible();
   await expect(page.getByText('전체 가구 가운데')).toBeVisible();
+  // 2026-11-24 그래프 아래 작은 글은 한 줄 + ‘자세히’ 시트로
+  await expect(page.getByText(/둘의 자산을 합쳐 비교했어요/)).toHaveCount(0);
+  await page.getByRole('button', { name: '자세히' }).click();
   await expect(page.getByText(/둘의 자산을 합쳐 비교했어요/)).toBeVisible();
   await expect(page.getByText(/전체 가구 기준이에요/)).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(page.getByText(/30대 가구/)).toHaveCount(0); // 연령대 분포가 아직 없어 연령대라고 하지 않음
   expect(db.rank?.views).toEqual([{ paid_by_ad: false }]);
   expect((await fb(page)).ads).toBe(0);
@@ -380,6 +393,8 @@ test('새로 확인하기: 브리지가 없으면(개발 브라우저) 광고 �
   await page.goto('/assets/rank');
   // F-08에서도 지난 결과 + ‘새로 확인하기’(광고)
   await expect(page.getByText('상위 41%예요')).toBeVisible();
+  // 2026-11-24 지난 결과를 볼 때는 지난달 대비 문장을 숨김
+  await expect(page.getByText(/월보다 .*%p/)).toHaveCount(0);
   const refresh = page.getByRole('button', { name: /9월에 본 결과예요/ });
   await expect(refresh).toContainText('광고');
   await axe(page);
@@ -592,4 +607,45 @@ test('H-04 내 자산이 생기면 지금처럼 순자산 금액', async ({ page
   await page.goto('/');
   await expect(tile(page)).toContainText('1,200만 원');
   await expect(tile(page)).not.toContainText('어디쯤');
+});
+
+test('F-08 (가): 그래프 아래는 한 줄 + ‘자세히’ 시트(‘중간’ 설명, 합쳐 비교, 기준)', async ({
+  page,
+}) => {
+  const db = await start(page);
+  db.rank = { pair: true, topPct: 38, views: [{ paid_by_ad: false }], requests: [] };
+  Object.assign(db.me, { rank_month: '2026-10-01', rank_pct: 38, rank_net: 12_000_000 });
+  await page.goto('/assets/rank');
+  await expect(page.getByText('2025년 가계금융복지조사 기준', { exact: true })).toBeVisible();
+  await expect(page.getByText('‘중간’은 전체 가구를 줄 세웠을 때 한가운데예요')).toHaveCount(0);
+  await page.getByRole('button', { name: '자세히' }).click();
+  const sheet = page.getByRole('dialog', { name: '순위는 이렇게 봐요' });
+  await expect(sheet).toContainText('‘중간’은 전체 가구를 줄 세웠을 때 한가운데예요');
+  await expect(sheet).toContainText('둘의 자산을 합쳐 비교했어요');
+  await expect(sheet).toContainText('전체 가구 기준이에요');
+  await axe(page);
+});
+
+test('F-08 직접 열기: 자산이 하나도 없으면 순위 없이 F-01과 같은 안내 + 자산 입력하기', async ({
+  page,
+}) => {
+  const db = await start(page, { withAssets: false });
+  db.rank = { pair: true, topPct: 97, views: [], requests: [] };
+  await page.goto('/assets/rank');
+  await expect(page.getByText('자산을 적으면 상위 몇 %인지 알려 드려요')).toBeVisible();
+  await expect(page.getByText(/상위 \d+%/)).toHaveCount(0);
+  expect(db.rpc).not.toContain('record_rank_view');
+  await axe(page);
+  await page.locator('.hg-stickybar').getByRole('button', { name: '자산 입력하기' }).click();
+  await expect(page).toHaveURL(/\/assets\/new/);
+});
+
+test('F-08 다시 동의한 뒤(저장 순위 없음): 줄 글자는 F-01과 같은 “확인하기”', async ({ page }) => {
+  const db = await start(page);
+  db.rank = { pair: true, topPct: 38, views: [{ paid_by_ad: false }], requests: [] };
+  Object.assign(db.me, { rank_month: null, rank_pct: null, rank_net: null });
+  await page.goto('/assets/rank');
+  const b = page.getByRole('button', { name: /아직 확인하지 않았어요/ });
+  await expect(b).toContainText('확인하기');
+  await expect(b).not.toContainText('새로 확인하기');
 });
