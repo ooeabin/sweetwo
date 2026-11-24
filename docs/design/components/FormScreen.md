@@ -6,6 +6,7 @@
 - 앱 틀(탭, 사이드바) 없이 `hg-qmain` 한 열(최대 480px)에 `hg-form`. 안전 영역은 `hg-qmain`이 처리.
 - 머리: `PageHeader`(‹ 왼쪽 + 가운데 제목 17px 700, 넓은 창은 ‘‹ 이전’ + 제목). 제목은 “저축·투자 추가”처럼 하는 일. Esc = ‹(시트가 열려 있으면 시트만 닫음).
 - 요약 문장(`FormHero`, `hg-form__hero`): `title-1` 22px 700, 줄마다 `hg-form__heroline`. 이름 자리는 `ink`(오렌지 아님, 사용자 결정), 금액 자리만 `accent-app-text`(`hg-form__val`, 대비 예외: 14px 이상 700 짧은 말). 아직 안 고른 자리는 자리표시 문장. `aria-live="polite"`.
+- 날짜(2026-11-24): 폼에는 연·월·일 휠을 펼쳐 두지 않고 한 줄 `DateField`(회색 판 “2026년 11월 26일 (목)” + ›) → 누르면 달력 시트 `DateSheet`(`DateSheet.md`). 접힌 줄(FormFold)의 만기일 시트도 같은 달력 시트.
 - 질문 섹션(`FormSection`): 제목 15px 700 + 오른쪽 보조 글자(`body-sm` `slate`, 예 “미계획 금액 90만 원”) + 칩 묶음(`hg-form__chips`, 작은 칩 `Chip small`, 고르면 옅은 오렌지 판) 또는 입력. 섹션 사이 32px, 제목과 내용 사이 12px(2026-11-24 ‘영역 간격’, DESIGN.md).
 - 금액(`FormAmount`): 좁은 창(768px 미만)은 칸(`hg-form__amountbtn`, 32px 700 + 원)을 누르면 기존 키패드(AmountInput)가 `BottomSheet`로 올라오고 ‘확인’으로 반영(화면 안에 키패드를 두면 요약 문장과 주 버튼이 가려지고, 한 화면에 입력이 여럿이라 OS 자판도 같은 문제라서 시트). 첫 숫자가 미리 채운 값을 덮어쓰고 999억 상한 흔들림은 AmountInput 규칙 그대로. 넓은 창은 칸에 바로 입력(`AmountInput embedded`). 빠른 칩은 두 경우 모두 칸 아래(고른 표시 없이 늘 회색).
 - 글자 칸(`ShortText`, 2026-11-24 사용자 결정): FormScreen 안에서는 테두리 상자 없이 금액 칸처럼 아래 2px `ink` 밑줄 한 줄(`.hg-form input.hg-input`, 높이 48, 오류는 `danger` 밑줄). 이름 칸(F-03, Y-07, W-14a 등) 모두 같음.
