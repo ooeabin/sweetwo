@@ -1816,7 +1816,7 @@ div.hg-admin__alert { cursor: default; }  /* 2026-11-12 그 메뉴를 볼 수 �
 .hg-chart--bleed .hg-chart__kpi > :not(.hg-chart__label):not(.hg-chart__value):not(.hg-chart__delta) { grid-column: 1 / -1; grid-row: 3; }
 .hg-chart__plot { position: relative; height: 200px; cursor: crosshair; }
 /* 흰 바탕 화면용(`flat`, 2026-11-24 F-04 바탕 기준): 상자·그림자 없이 본문 폭, 이름표·범례·말풍선 글자 모두 13 이상 */
-.hg-chart--flat { box-shadow: none; border: 0; border-radius: 0; background: none; }
+.hg-chart.hg-chart--flat { padding: 0; box-shadow: none; border: 0; border-radius: 0; background: none; }
 .hg-chart--flat .hg-chart__kpi, .hg-chart--flat .hg-chart__foot { padding-left: 0; padding-right: 0; }
 .hg-chart--flat .hg-chart__kpi { padding-top: var(--space-6); }
 .hg-chart--flat .hg-chart__label { font: var(--text-amount); }
@@ -1965,7 +1965,7 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   .hg-today__stats .hg-stat { flex: none; width: 150px; }
   .hg-body { padding: var(--space-4) var(--space-4) calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); gap: var(--space-4); }  /* 2026-11-09 하단 탭 막대가 없어 아래 여백은 space-8 + 안전 영역 */
   .hg-body__col { gap: var(--space-4); }
-  .hg-frame :is(.hg-card, .hg-checklist, .hg-chart):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { padding-inline: var(--space-5); }
+  .hg-frame :is(.hg-card, .hg-checklist, .hg-chart):not(.hg-chart--flat):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { padding-inline: var(--space-5); }
   .hg-frame__mhead { display: flex; align-items: center; gap: var(--space-1); min-height: 56px; box-sizing: border-box; padding: var(--space-3) var(--space-2) 0 var(--space-4); }
   /* 2026-11-09 머리 왼쪽은 지금 자리: 홈은 워드마크 24px(사이드바와 같은 그림), 다른 메뉴는 메뉴 이름 22px 700 ink(h1). 두 사람 아바타·이름은 뺌 */
   .hg-mhead__place { flex: 1; min-width: 0; display: flex; align-items: center; }
