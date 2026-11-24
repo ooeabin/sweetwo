@@ -538,6 +538,18 @@ test('쉬운 첫 입력: 처음 적는 사람은 금액 뒤 F-03e를 한 번(미
   ]);
 });
 
+test('F-01 묶음 타일은 그 묶음을 고른 채로 추가 화면을 엶(?grp=)', async ({ page }) => {
+  await start(page, { withAssets: false });
+  await page.goto('/assets/new?side=asset&grp=deposit');
+  await heading(page, '자산 추가');
+  await expect(page.getByRole('button', { name: '예금·적금', pressed: true })).toBeVisible();
+  await expect(page.getByRole('group', { name: '예금·적금', exact: true })).toBeVisible();
+  // 자산·부채 탭을 바꾸면 종류 고름이 비워짐
+  await page.getByRole('tab', { name: '부채', exact: true }).click();
+  await expect(page.getByRole('button', { pressed: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '추가하기', exact: true })).toBeDisabled();
+});
+
 test('직접 고르기 칩은 전체 추가 흐름(종류 고르기부터)을 연다', async ({ page }) => {
   await start(page, { withAssets: false });
   await page.goto('/assets/items');

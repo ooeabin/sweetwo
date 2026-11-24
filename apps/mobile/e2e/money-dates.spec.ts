@@ -176,6 +176,34 @@ test('F-04 투자: 전부 팔았어요 → 받은 통장 → 결과(F-04d)가 �
   await expect(page.getByRole('button', { name: /찬우 주식/ })).toHaveCount(0);
 });
 
+test('F-04b 팔았어요: 통장 “안 적을게요” → 통장 금액은 그대로, 판 항목만 정리(2026-11-24)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  seedAssets(db);
+  const bank = db.assets.find((a) => a.id === 'a-bank') as Record<string, unknown>;
+  db.assets.push({
+    ...bank,
+    id: 'a-stock',
+    grp: 'invest',
+    kind: 'stock',
+    name: '찬우 주식',
+    amount: 10_000_000,
+    principal: 8_000_000,
+    created_at: '2026-01-10T00:00:00Z',
+  });
+  await page.goto('/assets/a-stock/sold');
+  await fillAmount(page, '받은 금액', 11_000_000);
+  await page.getByRole('button', { name: '안 적을게요', exact: true }).click();
+  await expect(page.getByText(/입출금 통장 .* > /)).toHaveCount(0);
+  await page.getByRole('button', { name: '적기', exact: true }).click();
+  await expect(page.getByText('판 수익 +300만 원')).toBeVisible();
+  expect(db.assets.find((a) => a.id === 'a-stock')?.status).toBe('sold');
+  expect(db.assets.find((a) => a.id === 'a-bank')?.amount).toBe(3_000_000);
+});
+
 test('만기일 + 31일째: 홈 띠는 내려가고, 상세 “만기일이 지났어요” + ‘정리하기’ → F-04a(2026-11-11)', async ({
   page,
 }) => {
