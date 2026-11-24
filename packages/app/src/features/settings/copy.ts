@@ -591,6 +591,8 @@ export const copy = {
   salaryScheduledToast: (y: number, m: number) => `${y}년 ${m}월부터 바꿀게요`, // [확인 필요]
 
   // S-11f 관리 형태(O-30·30b·30c와 같은 세 질문, 17·08 2장) [확인 필요]
+  doneLiving: '같이 쓰는 생활비', // [확인 필요] 스테퍼 앞 답 줄 이름
+  doneSaving: '같이 모으는 저축·투자', // [확인 필요]
   livingQ: '같이 쓰는 생활비가 있어요?',
   livingHelp: '월세, 장보기, 데이트비처럼 둘이 같이 내는 생활비예요',
   savingQ: '같이 모으는 저축·투자가 있어요?',

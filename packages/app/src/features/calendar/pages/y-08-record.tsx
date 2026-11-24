@@ -8,11 +8,13 @@ import {
 } from '@sweetwo/api';
 import { amountBand, formatMonthDay, giftRepeated, quickChips, TERMS_VERSION } from '@sweetwo/core';
 import {
-  AmountInput,
   Chip,
   ConsentCard,
   FileAttach,
-  QuestionLayout,
+  FormAmount,
+  FormHero,
+  FormScreen,
+  FormSection,
   ShortText,
   QuestionSkeleton,
 } from '@sweetwo/ui';
@@ -27,7 +29,7 @@ import { track } from '../../../shared/analytics';
 import { careEventType, useCalendarData, vsBudget } from '../data';
 import { onSessionReset } from '../../../shared/session-reset';
 
-// Y-08 다녀온 뒤 기록(24 Y-08, 재기획): a 쓴 돈(금액 메모 채움, 건너뛰기) (2026-11-08 ‘목표에서 꺼내 쓰기’ 없앰, ADR 0007)
+// Y-08 다녀온 뒤 기록(24 Y-08, 재기획). 2026-11-24 한 화면 입력(FormScreen): 아래 a·b·c는 한 화면 안 세 질문 섹션이 됨. a 쓴 돈(금액 메모 채움, 건너뛰기) (2026-11-08 ‘목표에서 꺼내 쓰기’ 없앰, ADR 0007)
 // → b 무엇을 드렸어요(현금 / 선물 / 식사, 같은 경조사에 2년 안 같은 선물이면 “작년에도 드렸어요”) → c 기억(메모) → 저장.
 // → c 기억(메모 + 사진, JPG·PNG·HEIC·WebP, 장당 10MB 이하, 10장까지, 긴 변 1600px로 줄여 저장. 처음 사진을 넣을 때 사진 동의) → 저장.
 // 기록만, 저금 항목·월급 계획·자산 변화 없음. 낸 곳은 묻지 않음.
@@ -66,12 +68,11 @@ const useDraft = create<{ d: Draft; set: (p: Partial<Draft>) => void }>((set, ge
 }));
 // 로그아웃하면 입력 중이던 기록(금액·선물·메모·사진)을 비움(2026-11-12 QA 11구간 S11-08)
 onSessionReset(() => useDraft.setState({ d: blank('', null) }));
-const STEPS = ['a', 'b', 'c'];
 
 export function Y08Record() {
   const nav = useNavigate();
   const qc = useQueryClient();
-  const { id = '', step = 'a' } = useParams();
+  const { id = '' } = useParams();
   const [params] = useSearchParams();
   const c = useCalendarData();
   const { d, set } = useDraft();
@@ -92,12 +93,6 @@ export function Y08Record() {
   if (!care || !on) return <Navigate to="/calendar" replace />;
   if (d.key !== key) return null;
 
-  const i = Math.max(STEPS.indexOf(step), 0);
-  const progress = { total: STEPS.length, now: i };
-  const base = `/calendar/day/${care.id}/record`;
-  const q = params.get('on') ? `?on=${on}` : '';
-  const go = (n: number) => nav(`${base}/${STEPS[n] ?? 'a'}${q}`);
-  const back = () => (i > 0 ? go(i - 1) : nav(-1));
   const help = `${care.name}, ${formatMonthDay(on)}`;
 
   const setPhoto = (k: string, state: Photo['state']) =>
@@ -213,67 +208,39 @@ export function Y08Record() {
     set({ photos: d.photos.filter((y) => y.key !== k) });
   };
 
-  if (step === 'a')
-    return (
-      <QuestionLayout
-        steps={progress}
-        title={copy.spentQ}
-        help={help}
-        onBack={back}
-        later={{
-          label: copy.skip,
-          onClick: () => {
-            set({ amount: null });
-            go(1);
-          },
-        }}
-        primary={{ label: copy.nextStep, disabled: d.amount === null }}
-        onSubmit={() => d.amount !== null && go(1)}
-      >
-        <AmountInput
+  const name = d.giftName.trim();
+  // 같은 경조사에 2년 안 같은 선물
+  const again = giftRepeated(c.records, {
+    care_day_id: care.id,
+    gift_name: name,
+    occurs_on: on,
+  });
+  const toggle = (g: Gift) =>
+    set({ gifts: d.gifts.includes(g) ? d.gifts.filter((x) => x !== g) : [...d.gifts, g] });
+  const partner = c.couple?.joined || c.space?.couple_state === 'not_joined';
+  const notice = partner ? copy.photoNotice(c.couple?.partnerName ?? '') : copy.photoNoticeSolo;
+  return (
+    <FormScreen
+      title={copy.formTitleRecord}
+      onBack={() => nav(-1)}
+      hero={<FormHero lines={[[{ text: help }]]} />}
+      primary={{ label: copy.save, loading: saving }}
+      onSubmit={() => void save()}
+    >
+      <FormSection title={copy.spentQ}>
+        <FormAmount
           label={copy.spentQ}
+          sheetTitle={copy.spentQ}
           value={d.amount}
           onChange={(amount) => set({ amount })}
           quick={quickChips.small}
-          allowZero
+          monthly={false}
         />
-      </QuestionLayout>
-    );
-
-  if (step === 'b') {
-    const name = d.giftName.trim();
-    // 같은 경조사에 2년 안 같은 선물
-    const again = giftRepeated(c.records, {
-      care_day_id: care.id,
-      gift_name: name,
-      occurs_on: on,
-    });
-    const toggle = (g: Gift) =>
-      set({ gifts: d.gifts.includes(g) ? d.gifts.filter((x) => x !== g) : [...d.gifts, g] });
-    return (
-      <QuestionLayout
-        steps={progress}
-        title={copy.giftQ}
-        help={help}
-        onBack={back}
-        later={{
-          label: copy.skip,
-          onClick: () => {
-            set({ gifts: [], giftName: '' });
-            go(2);
-          },
-        }}
-        primary={{ label: copy.nextStep }}
-        onSubmit={() => go(2)}
-      >
-        <div
-          className="hg-row"
-          role="group"
-          aria-label={copy.giftQ}
-          style={{ gap: 'var(--space-2)' }}
-        >
+      </FormSection>
+      <FormSection title={copy.giftQ}>
+        <div className="hg-form__chips" role="group" aria-label={copy.giftQ}>
           {(['cash', 'gift', 'meal'] as const).map((g) => (
-            <Chip key={g} selected={d.gifts.includes(g)} onClick={() => toggle(g)}>
+            <Chip key={g} small selected={d.gifts.includes(g)} onClick={() => toggle(g)}>
               {copy.gifts[g]}
             </Chip>
           ))}
@@ -284,6 +251,7 @@ export function Y08Record() {
             value={d.giftName}
             onChange={(giftName) => set({ giftName })}
             max={30}
+            autoFocus={false}
           />
         )}
         {again && (
@@ -291,74 +259,60 @@ export function Y08Record() {
             {copy.giftAgain}
           </p>
         )}
-      </QuestionLayout>
-    );
-  }
-
-  const partner = c.couple?.joined || c.space?.couple_state === 'not_joined';
-  const notice = partner ? copy.photoNotice(c.couple?.partnerName ?? '') : copy.photoNoticeSolo;
-  return (
-    <QuestionLayout
-      steps={progress}
-      title={copy.rememberQ}
-      help={help}
-      onBack={back}
-      later={
-        d.recordId
-          ? undefined
-          : { label: copy.skip, onClick: () => void save({ memo: '', photos: [] }) }
-      }
-      primary={{ label: copy.save, loading: saving }}
-      onSubmit={() => void save()}
-    >
-      <ShortText
-        label={copy.memo}
-        value={d.memo}
-        onChange={(memo) => set({ memo })}
-        max={200}
-        placeholder={copy.memoPlaceholder}
-      />
-      {pending ? (
-        <ConsentCard
-          icon="image"
-          title={copy.photoConsentTitle}
-          body={copy.photoConsentBody}
-          items={[notice, copy.photoGoesWith]}
-          laterLabel={copy.photoConsentLater}
-          okLabel={copy.photoConsentOk}
-          busy={agreeing}
-          onLater={() => setPending(null)}
-          onOk={() => void agree()}
+      </FormSection>
+      <FormSection title={copy.rememberQ}>
+        <ShortText
+          label={copy.memo}
+          value={d.memo}
+          onChange={(memo) => set({ memo })}
+          max={200}
+          placeholder={copy.memoPlaceholder}
+          autoFocus={false}
         />
-      ) : (
-        <FileAttach
-          label={copy.photos}
-          drop={copy.photoDrop}
-          pick={copy.photoPick}
-          help={copy.photoHelp}
-          accept=".jpg,.jpeg,.png,.heic,.heif,.webp,image/jpeg,image/png,image/heic,image/heif,image/webp"
-          multiple
-          full={d.photos.length >= MAX_PHOTOS}
-          fullText={copy.photoTooMany}
-          error={photoError}
-          files={d.photos.map((p, n) => ({
-            key: p.key,
-            name: p.file.name || copy.photoAlt(n + 1),
-            sub: `${(Math.max(p.file.size, 1) / 1048576).toFixed(1)}MB`,
-            thumb: p.url,
-            ...(p.state === 'up' ? { progress: 0.5 } : {}),
-            ...(p.state === 'error' ? { error: copy.photoFailed, onRetry: () => void save() } : {}),
-          }))}
-          onFiles={pickFiles}
-          onRemove={removePhoto}
-          removeLabel={copy.photoRemove}
-          retryLabel={copy.photoRetry}
-          uploadingLabel={copy.photoUploading}
-          grid
-          addLabel={copy.photoAdd}
-          count={`${d.photos.length}/${MAX_PHOTOS}`}
-        />
-      )}
-    </QuestionLayout>
+        {pending ? (
+          <ConsentCard
+            icon="image"
+            title={copy.photoConsentTitle}
+            body={copy.photoConsentBody}
+            items={[notice, copy.photoGoesWith]}
+            laterLabel={copy.photoConsentLater}
+            okLabel={copy.photoConsentOk}
+            busy={agreeing}
+            onLater={() => setPending(null)}
+            onOk={() => void agree()}
+          />
+        ) : (
+          <FileAttach
+            label={copy.photos}
+            drop={copy.photoDrop}
+            pick={copy.photoPick}
+            help={copy.photoHelp}
+            accept=".jpg,.jpeg,.png,.heic,.heif,.webp,image/jpeg,image/png,image/heic,image/heif,image/webp"
+            multiple
+            full={d.photos.length >= MAX_PHOTOS}
+            fullText={copy.photoTooMany}
+            error={photoError}
+            files={d.photos.map((p, n) => ({
+              key: p.key,
+              name: p.file.name || copy.photoAlt(n + 1),
+              sub: `${(Math.max(p.file.size, 1) / 1048576).toFixed(1)}MB`,
+              thumb: p.url,
+              ...(p.state === 'up' ? { progress: 0.5 } : {}),
+              ...(p.state === 'error'
+                ? { error: copy.photoFailed, onRetry: () => void save() }
+                : {}),
+            }))}
+            onFiles={pickFiles}
+            onRemove={removePhoto}
+            removeLabel={copy.photoRemove}
+            retryLabel={copy.photoRetry}
+            uploadingLabel={copy.photoUploading}
+            grid
+            addLabel={copy.photoAdd}
+            count={`${d.photos.length}/${MAX_PHOTOS}`}
+          />
+        )}
+      </FormSection>
+    </FormScreen>
   );
 }

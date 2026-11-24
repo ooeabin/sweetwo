@@ -17,6 +17,8 @@ export function FormScreen({
   backTo,
   onBack,
   hero,
+  step,
+  later,
   children,
   primary,
   onSubmit,
@@ -29,6 +31,10 @@ export function FormScreen({
   onBack: () => void;
   /** 맨 위 요약 문장. FormHero로 만든 것 */
   hero?: ReactNode;
+  /** 스테퍼(2026-11-24): “1/3” 글자 + 앞에서 답한 줄. 뒤 질문이 앞 답에 달렸거나 확인·동의 단계라 한 화면으로 못 합칠 때만 */
+  step?: { index: number; total: number; label?: string; done?: StepDone[] };
+  /** 건너뛰기 같은 조용한 글자 버튼(주 버튼 위) */
+  later?: { label: string; onClick: () => void; loading?: boolean };
   children: ReactNode;
   primary: { label: string; disabled?: boolean; loading?: boolean };
   onSubmit: () => void;
@@ -51,9 +57,20 @@ export function FormScreen({
         }}
       >
         <PageHeader title={title} backLabel={backLabel} backTo={backTo} onBack={onBack} />
+        {step && <FormStepHead {...step} />}
         {hero}
         {children}
         <StickyBar>
+          {later && (
+            <button
+              type="button"
+              className="hg-btn hg-btn--link hg-btn--quiet"
+              disabled={later.loading || primary.loading}
+              onClick={later.onClick}
+            >
+              {later.label}
+            </button>
+          )}
           <Button
             type="submit"
             variant="primary"
@@ -66,6 +83,53 @@ export function FormScreen({
         </StickyBar>
       </form>
     </main>
+  );
+}
+
+/** 앞에서 답한 줄(스테퍼): 질문 이름 + 답. onClick이 있으면 그 단계로 돌아가는 줄 */
+export interface StepDone {
+  label: string;
+  value: string;
+  onClick?: () => void;
+}
+
+/** 스테퍼 머리: “1/3” + 앞에서 답한 줄들(위에 쌓임). 진행 막대는 없음(온보딩·합류만 막대) */
+export function FormStepHead({
+  index,
+  total,
+  label,
+  done,
+}: {
+  index: number;
+  total: number;
+  label?: string;
+  done?: StepDone[];
+}) {
+  return (
+    <div className="hg-form__stephead">
+      <p className="hg-form__step" aria-label={label ?? `${total}단계 중 ${index}단계`}>
+        {index}/{total}
+      </p>
+      {done && done.length > 0 && (
+        <dl className="hg-form__done">
+          {done.map((x) => (
+            <div key={x.label} className="hg-form__donerow">
+              {x.onClick ? (
+                <button type="button" className="hg-form__donebtn" onClick={x.onClick}>
+                  <dt>{x.label}</dt>
+                  <dd>{x.value}</dd>
+                </button>
+              ) : (
+                <>
+                  <dt>{x.label}</dt>
+                  <dd>{x.value}</dd>
+                </>
+              )}
+            </div>
+          ))}
+        </dl>
+      )}
+    </div>
   );
 }
 

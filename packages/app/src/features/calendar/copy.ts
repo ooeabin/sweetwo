@@ -87,6 +87,8 @@ export const copy = {
   recordNow: '기록하기',
 
   // Y-07 경조사 추가
+  formTitle: '경조사 추가', // [확인 필요] 한 화면 머리 제목
+  formTitleEdit: '경조사 고치기', // [확인 필요]
   nameQ: '어떤 날이에요?',
   namePlaceholder: '예: 어머니 생신', // [확인 필요]
   chips: {
@@ -141,6 +143,7 @@ export const copy = {
   back: '뒤로',
 
   // Y-08 다녀온 뒤 기록
+  formTitleRecord: '기록하기', // [확인 필요] 한 화면 머리 제목
   spentQ: '얼마 썼어요?', // [확인 필요] 기획서 Y-08a 질문 문구 없음
   giftQ: '무엇을 드렸어요?',
   gifts: { cash: '현금', gift: '선물', meal: '식사' },

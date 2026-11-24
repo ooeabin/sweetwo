@@ -1,6 +1,6 @@
 import { qk, requestUnlink } from '@sweetwo/api';
 import { todayKst } from '@sweetwo/core';
-import { Field, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
+import { Field, FormScreen, FormSection, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useOnline } from '../../../shared/online';
@@ -20,7 +20,7 @@ function monthsSince(at: string | undefined): number {
   return Math.max(0, (y1 - y0) * 12 + (m1 - m0));
 }
 
-// S-12c 해제 확인 입력(Q5): “연결 해제”라고 적어야 ‘연결 해제 요청하기’ 활성. 보내면 해제 대기 → S-12, 상대 알림(서버)
+// S-12c 해제 확인 입력(Q5, 2026-11-24 스테퍼 2/2): “연결 해제”라고 적어야 ‘연결 해제 요청하기’ 활성. 보내면 해제 대기 → S-12, 상대 알림(서버)
 export function S12cUnlinkConfirm() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -51,21 +51,23 @@ export function S12cUnlinkConfirm() {
     }
   };
   return (
-    <QuestionLayout
-      steps={{ total: 2, now: 1 }}
-      title={copy.confirmQ}
+    <FormScreen
+      title={copy.unlink}
       onBack={() => nav('/settings/couple/unlink')}
+      step={{ index: 2, total: 2 }}
       primary={{ label: copy.send, disabled: !ok || !online, loading: busy }}
-      note={online ? undefined : copy.needOnline}
       onSubmit={() => void send()}
     >
-      <Field
-        label={copy.confirmWord}
-        value={text}
-        placeholder={copy.confirmWord}
-        autoComplete="off"
-        onChange={(e) => setText(e.target.value)}
-      />
-    </QuestionLayout>
+      <FormSection title={copy.confirmQ}>
+        <Field
+          label={copy.confirmWord}
+          value={text}
+          placeholder={copy.confirmWord}
+          autoComplete="off"
+          onChange={(e) => setText(e.target.value)}
+        />
+        {!online && <p className="hg-help is-error">{copy.needOnline}</p>}
+      </FormSection>
+    </FormScreen>
   );
 }
