@@ -101,3 +101,44 @@ export function formatKstMonthDayTime(iso: string): string {
 /** 두 시각 사이 시간(시간 단위 내림) */
 export const hoursBetween = (fromIso: string, to: Date = new Date()) =>
   Math.max(0, Math.floor((to.getTime() - new Date(fromIso).getTime()) / 3_600_000));
+
+const WEEKDAY_SHORT = ['일', '월', '화', '수', '목', '금', '토'];
+
+/** 요일 0(일)~6(토) */
+export function weekdayIndex(s: string): number {
+  const { y, m, d } = ymd(s);
+  return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+}
+
+/** '2026-11-26' → "2026년 11월 26일 (목)"(폼 날짜 한 줄, 달력 시트 2026-11-24) */
+export function formatDateDow(s: string): string {
+  const { y, m, d } = ymd(s);
+  return `${y}년 ${m}월 ${d}일 (${WEEKDAY_SHORT[weekdayIndex(s)]})`;
+}
+
+/** '2026-11-26' → "11월 26일 (목)"(달력 시트 아래 버튼) */
+export function formatMonthDayDow(s: string): string {
+  const { m, d } = ymd(s);
+  return `${m}월 ${d}일 (${WEEKDAY_SHORT[weekdayIndex(s)]})`;
+}
+
+/** '2026-11-26' → "2026년 11월 26일 목요일"(달력 날짜 화면 읽기 이름) */
+export function formatDateReadout(s: string): string {
+  const { y, m, d } = ymd(s);
+  return `${y}년 ${m}월 ${d}일 ${WEEKDAYS[weekdayIndex(s)]}`;
+}
+
+/** 그 달 일 수 */
+export const daysInMonth = (y: number, m: number): number => new Date(Date.UTC(y, m, 0)).getUTCDate();
+
+/**
+ * 그 달 달력 칸(일요일 시작): 앞 빈 칸은 null, 그 뒤 1~말일. 줄 수는 부르는 쪽이 7칸씩 끊음.
+ * 달력 시트의 격자 계산(2026-11-24)
+ */
+export function monthCells(y: number, m: number): (number | null)[] {
+  const lead = new Date(Date.UTC(y, m - 1, 1)).getUTCDay();
+  return [
+    ...Array.from({ length: lead }, () => null),
+    ...Array.from({ length: daysInMonth(y, m) }, (_, i) => i + 1),
+  ];
+}
