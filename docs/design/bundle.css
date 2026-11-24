@@ -1815,6 +1815,13 @@ div.hg-admin__alert { cursor: default; }  /* 2026-11-12 그 메뉴를 볼 수 �
 .hg-chart--bleed .hg-chart__delta { grid-column: 2; grid-row: 2; justify-self: end; }
 .hg-chart--bleed .hg-chart__kpi > :not(.hg-chart__label):not(.hg-chart__value):not(.hg-chart__delta) { grid-column: 1 / -1; grid-row: 3; }
 .hg-chart__plot { position: relative; height: 200px; cursor: crosshair; }
+/* 흰 바탕 화면용(`flat`, 2026-11-24 F-04 바탕 기준): 상자·그림자 없이 본문 폭, 이름표·범례·말풍선 글자 모두 13 이상 */
+.hg-chart--flat { box-shadow: none; border: 0; border-radius: 0; background: none; }
+.hg-chart--flat .hg-chart__kpi, .hg-chart--flat .hg-chart__foot { padding-left: 0; padding-right: 0; }
+.hg-chart--flat .hg-chart__kpi { padding-top: var(--space-6); }
+.hg-chart--flat .hg-chart__label { font: var(--text-amount); }
+.hg-chart--flat .hg-chart__bubble i { font: var(--text-note); }
+.hg-chart--flat .hg-chart__bubble b { font: var(--text-value); font-weight: 700; }
 .hg-chart__plot svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .hg-chart--bleed .line, .hg-chart--bleed .line--expected, .hg-chart--bleed .line--lead, .hg-chart--bleed .xhair { vector-effect: non-scaling-stroke; }
 .hg-chart--bleed .line--lead { fill: none; stroke: var(--ink); stroke-width: 2.5; opacity: .25; }

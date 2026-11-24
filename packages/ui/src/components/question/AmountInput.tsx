@@ -17,6 +17,7 @@ const typedDigits = (s: string) => digitsOnly(s.split('.')[0] ?? '');
 /** 입력 자리 수 한도: 직접 친(물리 키보드) 999억(11자리) 넘는 값은 한 자리까지만 받아 오류를 보여 주고 그 뒤는 멈춤(12자리).
  * 앱 키패드는 999억(MAX_WON)을 넘는 숫자를 아예 받지 않고 짧게 흔들림(2026-11-19) */
 const MAX_DIGITS = 12;
+const CAP_TEXT = '999억 원까지 넣을 수 있어요';
 
 /** 붙여넣기 “320만”, “1억 2천만” 단위 환산. 해석 못 하면 null */
 export function parseKoreanAmount(text: string): number | null {
@@ -59,6 +60,8 @@ function AmountBox({
   idle,
   shake,
   error: outerError,
+  capHit,
+  onBlocked,
   inputRef,
   onFocus,
 }: {
@@ -76,6 +79,9 @@ function AmountBox({
   /** 키패드가 상한을 넘는 숫자를 막았을 때 짧게 흔들림(‘동작 줄이기’면 CSS가 없앰) */
   shake?: boolean;
   error?: string;
+  /** 상한을 넘기려다 막힘(키패드·13째 자리): 칸 아래 안내(2026-11-24) */
+  capHit?: boolean;
+  onBlocked?: () => void;
   inputRef?: Ref<HTMLInputElement>;
   onFocus?: () => void;
 }) {
@@ -86,7 +92,7 @@ function AmountBox({
   const zero = value === 0 && !allowZero;
   const error =
     pasteError ??
-    (over ? '999억 원까지 넣을 수 있어요' : zero ? '0원보다 큰 금액을 넣어 주세요' : outerError);
+    (over || capHit ? CAP_TEXT : zero ? '0원보다 큰 금액을 넣어 주세요' : outerError);
   const put = (v: number | null) => {
     setPasteError(undefined);
     set(v);
@@ -115,14 +121,14 @@ function AmountBox({
           onFocus={onFocus}
           onChange={(e) => {
             const d = typedDigits(e.target.value);
-            if (d.length > MAX_DIGITS) return;
+            if (d.length > MAX_DIGITS) return onBlocked?.();
             put(d === '' ? null : Number(d));
           }}
           onPaste={(e) => {
             e.preventDefault();
             const v = parseKoreanAmount(e.clipboardData.getData('text'));
             if (v === null) setPasteError('숫자만 붙여넣을 수 있어요');
-            else if (String(v).length > MAX_DIGITS) setPasteError('999억 원까지 넣을 수 있어요');
+            else if (String(v).length > MAX_DIGITS) setPasteError(CAP_TEXT);
             else put(v);
           }}
         />
@@ -215,7 +221,15 @@ export function AmountInput({
   const [shaking, setShaking] = useState(false);
   const shakeTimer = useRef<number>();
   useEffect(() => () => window.clearTimeout(shakeTimer.current), []);
+  // 상한을 넘기려 하면 흔들림 + 칸 아래 안내(2026-11-24). 다음에 값이 바뀌거나 3초 뒤 사라짐
+  const [capHit, setCapHit] = useState(false);
+  const capTimer = useRef<number>();
+  useEffect(() => () => window.clearTimeout(capTimer.current), []);
+  useEffect(() => setCapHit(false), [value, second?.value]);
   const shake = () => {
+    setCapHit(true);
+    window.clearTimeout(capTimer.current);
+    capTimer.current = window.setTimeout(() => setCapHit(false), 3000);
     setShaking(false);
     window.requestAnimationFrame(() => setShaking(true));
     window.clearTimeout(shakeTimer.current);
@@ -261,6 +275,8 @@ export function AmountInput({
         placeholder={placeholder}
         idle={hasSecond && active !== 0}
         shake={shaking && active === 0}
+        capHit={capHit && active === 0}
+        onBlocked={shake}
         inputRef={ref}
         onFocus={() => setActive(0)}
       />
@@ -327,6 +343,8 @@ export function AmountInput({
           placeholder={placeholder}
           idle={active !== 1}
           shake={shaking && active === 1}
+          capHit={capHit && active === 1}
+          onBlocked={shake}
           error={second.error}
           inputRef={secondRef}
           onFocus={() => setActive(1)}

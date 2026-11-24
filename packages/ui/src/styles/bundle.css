@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (58695d7c). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (f2c00805). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1816,6 +1816,13 @@ div.hg-admin__alert { cursor: default; }  /* 2026-11-12 그 메뉴를 볼 수 �
 .hg-chart--bleed .hg-chart__delta { grid-column: 2; grid-row: 2; justify-self: end; }
 .hg-chart--bleed .hg-chart__kpi > :not(.hg-chart__label):not(.hg-chart__value):not(.hg-chart__delta) { grid-column: 1 / -1; grid-row: 3; }
 .hg-chart__plot { position: relative; height: 200px; cursor: crosshair; }
+/* 흰 바탕 화면용(`flat`, 2026-11-24 F-04 바탕 기준): 상자·그림자 없이 본문 폭, 이름표·범례·말풍선 글자 모두 13 이상 */
+.hg-chart--flat { box-shadow: none; border: 0; border-radius: 0; background: none; }
+.hg-chart--flat .hg-chart__kpi, .hg-chart--flat .hg-chart__foot { padding-left: 0; padding-right: 0; }
+.hg-chart--flat .hg-chart__kpi { padding-top: var(--space-6); }
+.hg-chart--flat .hg-chart__label { font: var(--text-amount); }
+.hg-chart--flat .hg-chart__bubble i { font: var(--text-note); }
+.hg-chart--flat .hg-chart__bubble b { font: var(--text-value); font-weight: 700; }
 .hg-chart__plot svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .hg-chart--bleed .line, .hg-chart--bleed .line--expected, .hg-chart--bleed .line--lead, .hg-chart--bleed .xhair { vector-effect: non-scaling-stroke; }
 .hg-chart--bleed .line--lead { fill: none; stroke: var(--ink); stroke-width: 2.5; opacity: .25; }
@@ -2257,11 +2264,11 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
 .hg-rankrow { box-sizing: border-box; display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 64px; margin: 0; padding: var(--space-2) 0; border: 0; background: none; color: var(--ink); text-align: left; font: inherit; }
 button.hg-rankrow { cursor: pointer; border-radius: var(--radius-lg); }
 button.hg-rankrow:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-.hg-rankrow__badge { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border-radius: var(--radius-full); background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1px var(--hairline); font: 800 13px/1 var(--font-sans); }  /* 2026-11-16 4차 검토: 초록(invest) 원에서 중립 원으로(파랑·초록은 사용자 앱 포인트가 아님) */
-.hg-rankrow__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.hg-rankrow__title { font: var(--text-body-strong); word-break: keep-all; }
-.hg-rankrow__action { display: inline-flex; align-items: center; gap: var(--space-1); font: var(--text-label); color: var(--link-sub, var(--ink-2)); }  /* 2026-11-09 글자 버튼은 모두 회색 ink-2 600(hg-btn--link와 같음), 어드민·웹사이트는 focus */
-.hg-rankrow__ad { display: inline-flex; align-items: center; height: 18px; padding: 0 6px; border-radius: var(--radius-sm); background: var(--surface-alt); color: var(--slate); font: var(--weight-semibold) 11px/1 var(--font-sans); }
+.hg-rankrow__text { display: flex; flex: 1; flex-direction: column; gap: 2px; min-width: 0; }
+.hg-rankrow__title { font: var(--text-amount); word-break: keep-all; }  /* 2026-11-24 원 그래픽(“?%”·“중간”)을 없애고 글자만: 17/700 한 줄 + 오른쪽 › */
+.hg-rankrow__action { display: inline-flex; align-items: center; gap: var(--space-2); font: var(--text-note); color: var(--slate); }  /* 보조 줄 13/400(바탕 기준) */
+.hg-rankrow__ad { display: inline-flex; align-items: center; height: 20px; padding: 0 var(--space-2); border-radius: var(--radius-sm); background: var(--surface-alt); color: var(--slate); font: var(--text-note); }
+.hg-rankrow > .hg-chevron { flex: none; }
 
 /* Distribution 히어로(2026-11-04 F-08 대형 금융 앱형): 카드 없이 가운데, 두 줄 문장 + 변화 한 줄 + 곡선 + 기준 */
 .hg-dist--hero { align-items: center; text-align: center; gap: var(--space-2); padding-top: var(--space-3); }

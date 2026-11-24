@@ -23,7 +23,10 @@ export interface LineChartPoint {
 
 export interface LineChartProps {
   label: string;
-  value: ReactNode;
+  /** 큰 값(없으면 그리지 않음) */
+  value?: ReactNode;
+  /** 흰 바탕 화면용(2026-11-24 바탕 기준): 상자·그림자 없이 본문 폭 그대로, 말풍선 13px */
+  flat?: boolean;
   /** 큰 값 아래 회색 줄 */
   sub?: ReactNode;
   /** 변화 알약: 늘면 초록, 줄면 살구(빨강 없음) */
@@ -186,10 +189,15 @@ export function LineChart(p: LineChartProps) {
     : '';
 
   return (
-    <section className="hg-chart hg-chart--bleed" aria-label={p.label}>
+    <section
+      className={cx('hg-chart hg-chart--bleed', p.flat && 'hg-chart--flat')}
+      aria-label={p.label}
+    >
       <div className="hg-chart__kpi">
         <span className="hg-chart__label">{p.label}</span>
-        <span className="hg-chart__value hg-chart__value--lg">{p.value}</span>
+        {p.value !== undefined && p.value !== null && (
+          <span className="hg-chart__value hg-chart__value--lg">{p.value}</span>
+        )}
         {p.sub}
         {p.delta && (
           <span className="hg-chart__delta">
