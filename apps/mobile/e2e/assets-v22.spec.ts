@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { fakeBridge, fb } from './fake-bridge';
 import { type MemDb, mockOnboarding, YEBIN } from './mocks';
+import { fillAmount, pickAssetKind } from './form';
 
 // 자산 관리 v2.2(23 ‘자산 관리 v2.2’, 06 7-8, ADR 0009 결정 11·13): F-01 평가금액 + 원금으로 보기, F-03q 빠르게 적기,
 // F-03e 첫 공개 선택(미리 고른 값 없음, ‘총액만 보여 주기’), F-08 두 상태(pair / 또래 중간값), 첫 결과 광고 없음,
@@ -215,15 +216,15 @@ test('F-03e: 기본값을 이미 골랐으면 그 값이 골라진 채로, 이�
   const db = await start(page);
   db.me.asset_share_default = 'private';
   await page.goto('/assets/new?side=asset');
-  await page.getByRole('button', { name: /현금성/ }).click();
-  await page.getByRole('button', { name: '입출금 통장' }).click();
-  await page.getByRole('button', { name: '다음', exact: true }).click();
-  await page.getByLabel('현재 금액은 얼마예요?').fill('1000000');
-  await page.getByRole('button', { name: '다음', exact: true }).click();
+  await pickAssetKind(page, '현금성', '입출금 통장');
+  await fillAmount(page, '지금 금액', 1_000_000);
   await page.getByRole('radio', { name: /^나/ }).click();
-  await expect(page.getByRole('heading', { name: '파트너에게 어떻게 보여 줄까요?' })).toBeVisible();
-  await expect(page.getByRole('radio', { name: /숨기기/ })).toHaveAttribute('aria-checked', 'true');
-  await expect(page.getByRole('radio', { name: /총액만 보여 주기/ })).toBeVisible();
+  // 이미 고른 기본값은 접힌 줄에 그 이름으로(2026-11-24 한 화면)
+  await expect(page.getByRole('button', { name: /파트너에게 보이기.*숨기기/ })).toBeVisible();
+  await page.getByRole('button', { name: /파트너에게 보이기/ }).click();
+  const dlg = page.getByRole('dialog');
+  await expect(dlg.getByRole('radio', { name: /숨기기/ })).toHaveAttribute('aria-checked', 'true');
+  await expect(dlg.getByRole('radio', { name: /총액만 보여 주기/ })).toBeVisible();
 });
 
 test('F-03e 연결할 때(2026-11-16 B5): 숨겨 둔 내 자산이 있으면 홈 띠 → 한 번 고르기 → 고른 값으로', async ({
@@ -476,10 +477,11 @@ test('H-04 빈 타일(둘): “우리 둘 순자산, 또래 중 어디쯤일까�
   await shot(page, '2-f02-empty-chips');
   await axe(page);
   await chips.getByRole('button', { name: '통장' }).click();
-  await expect(page).toHaveURL(/\/assets\/new\/amount$/);
-  await heading(page, '현재 금액은 얼마예요?');
+  await expect(page).toHaveURL(/\/assets\/new\?chip=/);
+  await heading(page, '자산 추가');
+  await expect(page.getByLabel('이름', { exact: true })).toHaveValue('통장');
   await expect(page.getByRole('button', { name: '추가하기', exact: true })).toBeDisabled();
-  await page.getByLabel('현재 금액은 얼마예요?').fill('23000000');
+  await fillAmount(page, '지금 금액', 23_000_000);
   await page.getByRole('button', { name: '추가하기', exact: true }).click();
   await expect(page).toHaveURL(/\/assets\/items\?side=asset$/);
   const nw = page.getByRole('region', { name: '순자산', exact: true });
@@ -507,7 +509,7 @@ test('첫 자산 직후 링크는 F-08 자산 순위로 간다', async ({ page }
   db.me.asset_share_default = 'sum';
   await page.goto('/assets/items');
   await page.getByRole('button', { name: '자동차' }).click();
-  await page.getByLabel('현재 금액은 얼마예요?').fill('8000000');
+  await fillAmount(page, '지금 금액', 8_000_000);
   await page.getByRole('button', { name: '추가하기', exact: true }).click();
   await page.getByRole('button', { name: '또래 중 어디쯤인지 보기' }).click();
   await expect(page).toHaveURL(/\/assets\/rank$/);
@@ -520,10 +522,10 @@ test('쉬운 첫 입력: 처음 적는 사람은 금액 뒤 F-03e를 한 번(미
   const db = await start(page, { withAssets: false });
   await page.goto('/assets/items?side=debt');
   await page.getByRole('button', { name: '신용대출' }).click();
-  await heading(page, '남은 대출금은 얼마예요?');
-  await page.getByLabel('남은 대출금은 얼마예요?').fill('5000000');
-  await page.getByRole('button', { name: '다음', exact: true }).click();
-  await heading(page, '파트너에게 어떻게 보여 줄까요?');
+  await heading(page, '부채 추가');
+  await fillAmount(page, '남은 금액', 5_000_000);
+  // 처음 적는 사람은 공개 범위를 한 번 직접 고름(미리 고른 값 없음)
+  await expect(page.getByRole('radiogroup', { name: '파트너에게 어떻게 보여 줄까요?' })).toBeVisible();
   const save = page.getByRole('button', { name: '추가하기', exact: true });
   await expect(save).toBeDisabled();
   await page.getByRole('radio', { name: /총액만 보여 주기/ }).click();
@@ -541,7 +543,7 @@ test('직접 고르기 칩은 전체 추가 흐름(종류 고르기부터)을 �
   await page.goto('/assets/items');
   await page.getByRole('button', { name: '직접 고르기' }).click();
   await expect(page).toHaveURL(/\/assets\/new/);
-  await expect(page).not.toHaveURL(/\/amount$/);
+  await expect(page).not.toHaveURL(/chip=/);
 });
 
 test('H-04 파트너 소식: 내 자산 0개 + 예빈님이 적음(모두 / 총액만) → 이름만 알림(금액 없음), F-02 맨 위 한 줄, 우선순위는 궁금함보다 위', async ({
