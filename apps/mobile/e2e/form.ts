@@ -31,3 +31,28 @@ export async function pickName(page: Page, name: string, chip = false) {
   await page.getByRole('button', { name: '직접 정하기', exact: true }).click();
   await page.getByLabel('이름', { exact: true }).fill(name);
 }
+
+/** F-03 자산·부채 추가 한 화면: 묶음 칩 → 종류 칩(2026-11-24). 이름은 종류 칩이 채움 */
+export async function pickAssetKind(page: Page, grp: string, kind: string) {
+  await page.getByRole('group', { name: '묶음', exact: true }).getByRole('button', { name: grp, exact: true }).click();
+  await page.getByRole('group', { name: grp, exact: true }).getByRole('button', { name: kind, exact: true }).click();
+}
+
+/** 이름 칸 */
+export async function fillAssetName(page: Page, name: string) {
+  await page.getByLabel('이름', { exact: true }).fill(name);
+}
+
+/** 접힌 줄 눌러 시트 열기 */
+export async function openFold(page: Page, label: string) {
+  await page.getByRole('button', { name: new RegExp(`^${label}`) }).click();
+  return page.getByRole('dialog', { name: label });
+}
+
+/** 글자 칸 시트(납입 회차, 금리) */
+export async function foldText(page: Page, label: string, value: string) {
+  const dlg = await openFold(page, label);
+  await dlg.getByLabel(label, { exact: true }).fill(value);
+  await dlg.getByRole('button', { name: '확인' }).click();
+  await expect(dlg).toHaveCount(0);
+}
