@@ -134,5 +134,5 @@ export function S10Settings() {
       </div>
     </div>
   );
-  return <MainFrame current={null} tone="alt" page={{ title: copy.title }} columns={[body]} />;
+  return <MainFrame current={null} page={{ title: copy.title }} columns={[body]} />;
 }

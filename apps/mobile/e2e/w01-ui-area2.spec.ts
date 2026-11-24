@@ -158,7 +158,7 @@ test('편집 모드 지우기는 회색 아이콘 버튼(44px, “{이름} 지�
   expect(r.color).toBe(r.g);
   expect(r.hasIcon).toBe(true);
   expect(Math.abs(r.cy - r.ay)).toBeLessThanOrEqual(2);
-  expect(r.right).toBeLessThan(r.cardRight);
+  expect(r.right).toBeLessThanOrEqual(r.cardRight);
 });
 
 test('금액 시트의 빨간 버튼은 “항목 지우기”', async ({ page }) => {

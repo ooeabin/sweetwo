@@ -30,7 +30,7 @@ export function AssetsFrame({
   return (
     <MainFrame
       current="assets"
-      tone="alt"
+     
       page={{
         // 제목 = 서랍 줄 이름(2026-11-18): F-02는 ‘자산·부채’, 서랍에 없는 F-01은 탭 이름 ‘자산 관리’
         title: tab === 'items' ? copy.tabs.items : copy.title,

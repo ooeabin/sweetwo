@@ -67,15 +67,40 @@ test('W-02: hero 아래 32, 밑줄 탭 아래 24, 수입 줄 앞 32', async ({ p
   expect(await gap(page, '.hg-checklist__list', '.hg-incomeline')).toBe(32);
 });
 
-test('홈·W-01(회색 바탕): 상자 사이 16, 상자 안 위 24', async ({ page }) => {
+test('W-01(흰 바탕): 영역 사이 32 + 8px 회색 띠 + 아래 12, 영역 안 위 여백 없음', async ({ page }) => {
   await open(page, '/salary/plan');
   await expect(page.locator('.hg-plancard').first()).toBeVisible();
-  expect(await gap(page, '.hg-plancard:nth-of-type(1)', '.hg-plancard:nth-of-type(2)')).toBe(16);
-  const inner = await page.evaluate(() => {
-    const c = document.querySelector('.hg-plancard') as HTMLElement;
-    return parseFloat(getComputedStyle(c).paddingTop);
+  // 영역 사이 = 위 32 + 띠 8 + 아래 12(띠는 ::before)
+  expect(await gap(page, '.hg-plancard:nth-of-type(1)', '.hg-plancard:nth-of-type(2)')).toBe(52);
+  const band = await page.evaluate(() => {
+    const c = document.querySelectorAll('.hg-plancard')[1] as HTMLElement;
+    const b = getComputedStyle(c, '::before');
+    return { h: b.height, bg: b.backgroundColor, pad: getComputedStyle(c).paddingTop };
   });
-  expect(inner).toBe(24);
+  expect(band.h).toBe('8px');
+  expect(band.bg).not.toBe('rgba(0, 0, 0, 0)');
+  expect(band.pad).toBe('0px');
+});
+
+test('바탕: 홈만 회색(surface-alt) + 흰 상자, 그 밖은 흰 바탕(surface)', async ({ page }) => {
+  await open(page, '/');
+  await expect(page.locator('.hg-frame')).toHaveClass(/hg-frame--alt/);
+  const color = (sel: string) =>
+    page.evaluate((s) => {
+      const el = document.querySelector(s) as HTMLElement;
+      return getComputedStyle(el).backgroundColor;
+    }, sel);
+  const homeBg = await color('.hg-frame');
+  await page.goto('/salary'); // 흰 바탕 기준(W-02, 다크는 canvas)
+  await expect(page.locator('.hg-frame')).toBeVisible();
+  const white = await color('.hg-frame');
+  for (const path of ['/salary/plan', '/assets', '/assets/items', '/settings', '/settings/me']) {
+    await page.goto(path);
+    await expect(page.locator('.hg-frame')).toBeVisible();
+    await expect(page.locator('.hg-frame')).not.toHaveClass(/hg-frame--alt/);
+    expect(await color('.hg-frame')).toBe(white);
+  }
+  expect(homeBg).not.toBe(white);
 });
 
 test('시트: 제목 아래 24, 영역 사이 24', async ({ page }) => {

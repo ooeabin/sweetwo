@@ -282,6 +282,6 @@ export function S18Data() {
     />
   );
   return (
-    <MainFrame sub="settings" current={null} tone="alt" columns={[step === 'busy' ? busy : body]} />
+    <MainFrame sub="settings" current={null} columns={[step === 'busy' ? busy : body]} />
   );
 }

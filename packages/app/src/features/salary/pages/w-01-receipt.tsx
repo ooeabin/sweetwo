@@ -1409,7 +1409,6 @@ export function W01Receipt() {
       <MainFrame
         current="salary"
         page={{ title: copy.planTitle }}
-        tone="alt" // 2026-11-19 W-01은 회색 바탕 + 둥근 흰 카드(월급 탭 나머지 화면은 흰색)
         // W-02 링크로 열었으면 ‹ = W-02(2026-11-18), 서랍·홈에서 열었으면 홈
         onBack={fromMonth ? () => nav(-1) : undefined}
         columns={[column]}
