@@ -126,7 +126,7 @@ for (const [label, patch, invite] of [
     { me: '찬우', partner: '예빈' },
     { me: '김찬우', partner: '윤예빈' },
   ]) {
-    test(`우리 둘(S-12) ${label}, ${names.me} ${names.partner}: 두 원 −12 겹침, 뒤 원이 다 보이고 글자가 안 잘림`, async ({
+    test(`우리 둘(S-12) ${label}, ${names.me} ${names.partner}: 두 원 −12 겹침, 뒤 원이 다 보이고 글자는 두 원 모두 가운데·같은 크기`, async ({
       page,
     }) => {
       await page.clock.setFixedTime(NOW);
@@ -176,8 +176,9 @@ for (const [label, patch, invite] of [
           overlap: ra.right - rb.left,
           topIsSecond: document.elementFromPoint(rb.left + 3, rb.top + rb.height / 2) === b,
           ring: getComputedStyle(b).boxShadow,
-          // 앞 원 글자: 뒤 원 고리(2px) 왼쪽까지만, 뒤 원 글자: 자기 원 안
-          aVisible: ta.left >= ra.left && ta.right <= rb.left - 2,
+          // 두 원 모두 글자는 원 가운데, 크기는 Avatar 기본 규칙 그대로(앞 원은 겹친 쪽이 뒤 원에 가려져도 됨)
+          aCenter: Math.abs(ta.left + ta.width / 2 - (ra.left + ra.width / 2)),
+          bCenter: Math.abs(tb.left + tb.width / 2 - (rb.left + rb.width / 2)),
           bInside: tb.left >= rb.left && tb.right <= rb.right,
           fonts: [px(a), px(b)],
         };
@@ -187,9 +188,12 @@ for (const [label, patch, invite] of [
       expect(m?.overlap).toBeCloseTo(12, 0);
       expect(m?.topIsSecond).toBe(true);
       expect(m?.ring).toMatch(/0px 0px 0px 2px/);
-      expect(m?.aVisible).toBe(true);
+      expect(m?.aCenter).toBeLessThan(1.5);
+      expect(m?.bCenter).toBeLessThan(1.5);
       expect(m?.bInside).toBe(true);
-      for (const f of m?.fonts ?? []) expect(f).toBeGreaterThanOrEqual(8);
+      // 글자 수별 기본 크기: 2글자 38%, 3글자 28%(40px 원: 15.2, 11.2). 앞 원과 뒤 원이 같음
+      const px = names.me.length === 2 ? 15.2 : 11.2;
+      for (const f of m?.fonts ?? []) expect(f).toBeCloseTo(px, 1);
       await axe(page);
     });
   }
