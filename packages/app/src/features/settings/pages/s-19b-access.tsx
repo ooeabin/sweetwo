@@ -45,7 +45,7 @@ export function S19bAccess() {
         onBack={() => nav(`/settings/help/inquiries/${q.id}`)}
       />
       <div className="hg-page hg-stack">
-        <p className="hg-copy hg-copy--strong">{copy.access24}</p>
+        <p className="hg-text hg-text--strong">{copy.access24}</p>
         <section className="hg-stack" style={{ gap: 'var(--space-2)' }}>
           <SectionHeader title={copy.accessCan} />
           <ul className="hg-bullets hg-bullets--body">

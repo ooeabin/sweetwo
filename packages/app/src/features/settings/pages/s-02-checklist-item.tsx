@@ -63,11 +63,11 @@ export function S02ChecklistItem() {
         onBack={back}
       />
       <div className="hg-page hg-stack">
-        <p className="hg-copy">{item.desc}</p>
+        <p className="hg-text">{item.desc}</p>
         {item.steps.length > 0 && (
           <section className="hg-stack">
             <SectionHeader title={copy.steps} />
-            <ol className="hg-copy hg-steps">
+            <ol className="hg-text hg-steps">
               {item.steps.map((s) => (
                 <li key={s}>{s}</li>
               ))}
@@ -78,7 +78,7 @@ export function S02ChecklistItem() {
           <section className="hg-stack">
             <SectionHeader title={copy.sources} />
             {item.sources.map((s) => (
-              <p key={s.url} className="hg-copy hg-copy--sub">
+              <p key={s.url} className="hg-text hg-text--sub">
                 <button
                   type="button"
                   className="hg-btn hg-btn--link"
@@ -98,7 +98,7 @@ export function S02ChecklistItem() {
         )}
         {/* 두 사람 공유 완료(25 S-02): 완료하면 체크 + 완료한 사람 이름, 둘 다 같은 상태를 봄 */}
         {who && (
-          <p className="hg-copy hg-done" role="status">
+          <p className="hg-text hg-done" role="status">
             <span className="hg-check is-on" aria-hidden="true" />
             {copy.doneBy(who)}
           </p>

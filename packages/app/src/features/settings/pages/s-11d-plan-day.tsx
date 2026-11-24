@@ -62,7 +62,7 @@ export function S11dPlanDay() {
     >
       {options.length === 1 && options[0] ? (
         // 2026-11-24 구역 5: 고를 게 하나면 카드 줄 + 체크 원 대신 글자 한 줄(두 사람 월급날이 같을 때)
-        <p className="hg-copy">{copy.paydayOf(options[0].name, label(options[0].day))}</p>
+        <p className="hg-text">{copy.paydayOf(options[0].name, label(options[0].day))}</p>
       ) : (
         <ChoiceCards<string>
           label={copy.planDayQ}

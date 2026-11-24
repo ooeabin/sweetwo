@@ -102,7 +102,7 @@ export function S19aInquiries() {
       />
       {on && (
         <div className="hg-card hg-stack" style={{ gap: 'var(--space-2)' }} role="status">
-          <strong className="hg-copy hg-copy--strong">{copy.accessOn}</strong>
+          <strong className="hg-text hg-text--strong">{copy.accessOn}</strong>
           <span>{scopeText(on.scope)}</span>
           <span className="hg-q__help">{copy.accessLeft(hoursLeft(on.expires_at))}</span>
           <div className="hg-row">

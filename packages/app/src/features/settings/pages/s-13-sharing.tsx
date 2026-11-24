@@ -194,7 +194,7 @@ export function S13Sharing() {
         )}
         {ask && (
           <div className="hg-stack" role="alertdialog" aria-label={copy.visApplyAll(differ(ask))}>
-            <p className="hg-copy hg-copy--strong">{copy.visApplyAll(differ(ask))}</p>
+            <p className="hg-text hg-text--strong">{copy.visApplyAll(differ(ask))}</p>
             <div className="hg-row" style={{ gap: 'var(--space-2)' }}>
               <Button
                 variant="primary"

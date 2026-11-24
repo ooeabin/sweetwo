@@ -161,7 +161,7 @@ export function S14Notifications() {
       />
       <section className="hg-card hg-stack" aria-label={copy.push} style={{ gap: 0 }}>
         <Toggle
-          label={<span className="hg-copy--strong">{copy.push}</span>}
+          label={<span className="hg-text--strong">{copy.push}</span>}
           help={pushOn ? undefined : copy.pushOffHelp}
           checked={pushOn}
           onChange={(on) => setPush(on)}

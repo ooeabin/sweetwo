@@ -177,7 +177,7 @@ export function S12Couple() {
     state !== 'not_joined' ? null : reserved ? (
       // 합류하는 중(코드를 잡아 둠, 24시간): 보기만 + ‘초대 취소’
       <div className="hg-card hg-stack" style={{ gap: 'var(--space-3)' }} role="status">
-        <p className="hg-copy hg-copy--strong">{copy.joiningTitle}</p>
+        <p className="hg-text hg-text--strong">{copy.joiningTitle}</p>
         <p className="hg-q__help">{copy.joiningHelp}</p>
         <div className="hg-row">
           <Button variant="secondary" size="sm" onClick={() => setAskCancel(true)}>
@@ -216,7 +216,7 @@ export function S12Couple() {
       </div>
     ) : (
       <div className="hg-card hg-stack" style={{ gap: 'var(--space-4)' }}>
-        <p className="hg-copy">{copy.inviteFirstAny}</p>
+        <p className="hg-text">{copy.inviteFirstAny}</p>
         <div className="hg-row">
           <Button loading={busy} onClick={() => void make(false)}>
             {copy.inviteMake}
@@ -231,7 +231,7 @@ export function S12Couple() {
     <div className="hg-stack">
       <div className="hg-card hg-stack" style={{ gap: 'var(--space-3)' }}>
         {/* 2026-11-24 구역 5: 위 줄 값이 이미 “연결 해제 대기 중”이라 카드 제목은 한 번 더 쓰지 않고 요청한 사람은 기다리는 말 */}
-        <p className="hg-copy hg-copy--strong">
+        <p className="hg-text hg-text--strong">
           {mine ? copy.pendingWait(c.partnerName) : copy.pendingReceived(c.partnerName)}
         </p>
         <p className="hg-q__help">
@@ -299,7 +299,7 @@ export function S12Couple() {
     <div className="hg-card hg-stack" style={{ gap: 'var(--space-3)' }}>
       {received ? (
         <>
-          <p className="hg-copy hg-copy--strong">{copy.reconnectAsked(ex)}</p>
+          <p className="hg-text hg-text--strong">{copy.reconnectAsked(ex)}</p>
           <div className="hg-row">
             <Button size="sm" onClick={() => nav('/settings/couple/reconnect')}>
               {copy.seeRequest}
@@ -307,7 +307,7 @@ export function S12Couple() {
           </div>
         </>
       ) : sent ? (
-        <p className="hg-copy hg-copy--strong">{copy.pendingWait(ex)}</p>
+        <p className="hg-text hg-text--strong">{copy.pendingWait(ex)}</p>
       ) : (
         <div className="hg-row">
           <Button variant="secondary" size="sm" loading={busy} onClick={() => void reconnectAsk()}>

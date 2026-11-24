@@ -109,7 +109,7 @@ export function S11jStyleRequest() {
         style={{ gap: 'var(--space-2)' }}
         aria-label={copy.styleChangesTitle}
       >
-        <h2 className="hg-copy hg-copy--strong">{copy.styleChangesTitle}</h2>
+        <h2 className="hg-text hg-text--strong">{copy.styleChangesTitle}</h2>
         <ul className="hg-bullets hg-bullets--body">
           {lines.map((x) => (
             <li key={x}>{x}</li>
