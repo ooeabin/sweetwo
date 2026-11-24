@@ -24,6 +24,7 @@ import {
   FormHero,
   FormScreen,
   FormSection,
+  Icon,
   LineTabs,
   QuestionSkeleton,
   SegChoice,
@@ -265,6 +266,15 @@ export function F03AssetAdd() {
             { value: 'debt', label: copy.debtsLabel },
           ]}
         />
+        {/* 2026-11-13 F-03q 입구: “큰 항목만 빠르게 적기 ›” */}
+        <button
+          type="button"
+          className="hg-btn hg-btn--link hg-form__quick"
+          onClick={() => nav('/assets/quick')}
+        >
+          {copy.quickEntry}
+          <Icon name="chevron-right" size={16} />
+        </button>
         <FormSection title={copy.formKindQ}>
           <div className="hg-form__chips" role="group" aria-label={copy.groupLabel}>
             {groups.map((x) => (

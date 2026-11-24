@@ -3026,3 +3026,4 @@ button.hg-datepill { cursor: pointer; }
 .hg-choice__dot { flex: none; box-sizing: border-box; width: 24px; height: 24px; border: 2px solid var(--border-control); border-radius: var(--radius-full); background: var(--surface); }
 .hg-choice__item.is-on .hg-choice__dot { border-color: var(--accent-app); background: var(--accent-app); box-shadow: inset 0 0 0 5px var(--surface); }  /* 고른 원: 오렌지 채움 + 안쪽 흰 점(고른 선택지 원) */
 @media (prefers-reduced-motion: no-preference) { .hg-choice__item { transition: border-color var(--dur-fast) var(--ease-out); } }
+.hg-form__quick { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--space-1); }  /* F-03 ‘큰 항목만 빠르게 적기 ›’ 글자 버튼 */
