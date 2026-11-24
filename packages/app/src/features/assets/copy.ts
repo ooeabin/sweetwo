@@ -65,6 +65,14 @@ export const copy = {
   updated: (date: string) => `${date} 수정`, // [확인 필요]
   sortLabel: '정렬', // [확인 필요] 화면 읽기용
   sorts: { name: '이름', owner: '명의', amount: '금액', updated: '수정일' },
+  // 정렬 버튼·시트(2026-11-24) [확인 필요]. 고른 것을 다시 고르면 반대로(시트에서 방향을 보조 줄로)
+  sortName: { name: '이름순', owner: '명의순', amount: '금액순', updated: '수정일순' },
+  sortHow: {
+    name: { asc: '가나다순', desc: '가나다 거꾸로' },
+    owner: { asc: '가나다순', desc: '가나다 거꾸로' },
+    amount: { asc: '작은 금액부터', desc: '큰 금액부터' },
+    updated: { asc: '오래된 순', desc: '최근 순' },
+  },
   sortDir: (name: string, asc: boolean) => `${name}, ${asc ? '오름차순' : '내림차순'}`, // [확인 필요] 화면 읽기용
   investGainLabel: '안 판 수익', // 23 F-02 9번 투자 묶음 줄 이름(2026-11-04, 투자 비중 줄 없앰. F-04 7번과 같은 말)
   investGain: (amount: string, pct: number | null) =>

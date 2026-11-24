@@ -91,8 +91,7 @@ function AmountBox({
   const over = value !== null && value > MAX_WON;
   const zero = value === 0 && !allowZero;
   const error =
-    pasteError ??
-    (over || capHit ? CAP_TEXT : zero ? '0원보다 큰 금액을 넣어 주세요' : outerError);
+    pasteError ?? (over || capHit ? CAP_TEXT : zero ? '0원보다 큰 금액을 넣어 주세요' : outerError);
   const put = (v: number | null) => {
     setPasteError(undefined);
     set(v);

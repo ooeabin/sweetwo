@@ -9,7 +9,13 @@ import {
   qk,
   type Asset,
 } from '@sweetwo/api';
-import { assetGroupsOf, coupleOf, partnerLabel, withKindNames, type AssetSide } from '@sweetwo/core';
+import {
+  assetGroupsOf,
+  coupleOf,
+  partnerLabel,
+  withKindNames,
+  type AssetSide,
+} from '@sweetwo/core';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { netWorthOf, useAssetRealtime } from '../frame';
 import { copy } from './copy';

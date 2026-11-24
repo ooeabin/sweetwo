@@ -102,7 +102,8 @@ export function S21Trash() {
       setBusy(false);
     }
   };
-  const who = (id: string | null) => (id === d.me?.id ? c.myName : id ? partnerLabel(c.partnerName) : '');
+  const who = (id: string | null) =>
+    id === d.me?.id ? c.myName : id ? partnerLabel(c.partnerName) : '';
   const kindLabel = (r: TrashRow) =>
     copy.trashKinds[r.kind === 'asset' ? (r.sub ?? 'asset') : r.kind];
 
