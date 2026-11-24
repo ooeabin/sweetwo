@@ -1,4 +1,4 @@
-import { MAX_WON, readWon } from '@sweetwo/core';
+import { addQuickAmount, MAX_WON, readWon } from '@sweetwo/core';
 import { useEffect, useId, useRef, useState, type ReactNode, type Ref } from 'react';
 import { Chip } from '../Chip';
 import { Icon } from '../Icon';
@@ -291,7 +291,7 @@ export function AmountInput({
               key={q.label}
               small
               aria-pressed={undefined}
-              onClick={() => set(quickSet ? q.value : Math.min((value ?? 0) + q.value, MAX_WON))}
+              onClick={() => set(quickSet ? q.value : addQuickAmount(value, q.value))}
             >
               {q.label}
             </Chip>

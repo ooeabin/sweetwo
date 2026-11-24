@@ -14,12 +14,12 @@ import {
   renewInvite,
 } from '@sweetwo/api';
 import { daysBetween, formatDateFull, formatMonthDay, todayKst } from '@sweetwo/core';
-import { Avatar, Badge, Button, ListRow, Modal, PageHeader } from '@sweetwo/ui';
+import { Avatar, Badge, Button, ListRow, Modal, PageHeader, StickyBar } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { track } from '../../../shared/analytics';
-import { InviteButtons, InviteCodeBox, inviteActions } from '../../../shared/invite-share';
+import { InviteCodeBox, inviteActions, inviteCopy } from '../../../shared/invite-share';
 import { toast } from '../../../shared/toast';
 import { paths } from '../../auth';
 import { LoadingFrame, MainFrame } from '../../frame';
@@ -177,9 +177,7 @@ export function S12Couple() {
     state !== 'not_joined' ? null : reserved ? (
       // 합류하는 중(코드를 잡아 둠, 24시간): 보기만 + ‘초대 취소’
       <div className="hg-card hg-stack" style={{ gap: 'var(--space-3)' }} role="status">
-        <p>
-          <strong>{copy.joiningTitle}</strong>
-        </p>
+        <p className="hg-text hg-text--strong">{copy.joiningTitle}</p>
         <p className="hg-q__help">{copy.joiningHelp}</p>
         <div className="hg-row">
           <Button variant="secondary" size="sm" onClick={() => setAskCancel(true)}>
@@ -193,7 +191,10 @@ export function S12Couple() {
         <p className="hg-q__help" style={{ textAlign: 'center' }}>
           {copy.inviteUntil(formatMonthDay(todayKst(new Date(live.expiresAt))))}
         </p>
-        <InviteButtons onLink={() => void act.copyLink()} onShare={() => void act.share()} />
+        {/* 2026-11-24 구역 5: ‘카톡으로 보내기’(주)는 화면 아래 고정, 링크 복사는 카드 안 보조 */}
+        <Button variant="secondary" block onClick={() => void act.copyLink()}>
+          {inviteCopy.copyLink}
+        </Button>
         <div className="hg-row" style={{ justifyContent: 'center' }}>
           <Button
             variant="ghost"
@@ -215,7 +216,7 @@ export function S12Couple() {
       </div>
     ) : (
       <div className="hg-card hg-stack" style={{ gap: 'var(--space-4)' }}>
-        <p>{copy.inviteFirstAny}</p>
+        <p className="hg-text">{copy.inviteFirstAny}</p>
         <div className="hg-row">
           <Button loading={busy} onClick={() => void make(false)}>
             {copy.inviteMake}
@@ -229,11 +230,9 @@ export function S12Couple() {
   const pendingBlock = req ? (
     <div className="hg-stack">
       <div className="hg-card hg-stack" style={{ gap: 'var(--space-3)' }}>
-        <p>
-          <strong>
-            {/* 요청한 사람은 “연결 해제 대기 중”(25 ‘연결 해제, 대기와 혼자 쓰기’ 1번, 2026-11-12 QA 11구간 D3) */}
-            {mine ? copy.state.unlink_pending : copy.pendingReceived(c.partnerName)}
-          </strong>
+        {/* 2026-11-24 구역 5: 위 줄 값이 이미 “연결 해제 대기 중”이라 카드 제목은 한 번 더 쓰지 않고 요청한 사람은 기다리는 말 */}
+        <p className="hg-text hg-text--strong">
+          {mine ? copy.pendingWait(c.partnerName) : copy.pendingReceived(c.partnerName)}
         </p>
         <p className="hg-q__help">
           {mine
@@ -300,9 +299,7 @@ export function S12Couple() {
     <div className="hg-card hg-stack" style={{ gap: 'var(--space-3)' }}>
       {received ? (
         <>
-          <p>
-            <strong>{copy.reconnectAsked(ex)}</strong>
-          </p>
+          <p className="hg-text hg-text--strong">{copy.reconnectAsked(ex)}</p>
           <div className="hg-row">
             <Button size="sm" onClick={() => nav('/settings/couple/reconnect')}>
               {copy.seeRequest}
@@ -310,9 +307,7 @@ export function S12Couple() {
           </div>
         </>
       ) : sent ? (
-        <p>
-          <strong>{copy.pendingWait(ex)}</strong>
-        </p>
+        <p className="hg-text hg-text--strong">{copy.pendingWait(ex)}</p>
       ) : (
         <div className="hg-row">
           <Button variant="secondary" size="sm" loading={busy} onClick={() => void reconnectAsk()}>
@@ -337,48 +332,57 @@ export function S12Couple() {
         backTo={copy.title}
         onBack={() => nav('/settings')}
       />
-      <div className="hg-list">
-        <ListRow
-          lead={
-            <span className="hg-avatars" aria-hidden="true">
-              {people.map((p, i) => (
-                <Avatar key={p.name + i} name={p.name} no={p.starter ? 1 : 2} />
-              ))}
-            </span>
-          }
-          label={names.join(' ')}
-          value={stateText}
-          chevron={false}
-        />
-        {wedding && (engaged || sp.marriage_status === 'married') && (
+      <div className="hg-page hg-stack">
+        <div className="hg-list">
           <ListRow
-            label={engaged ? copy.weddingPlanned : copy.weddingDone}
-            value={
-              <>
-                {formatDateFull(wedding)}
-                {engaged && (
-                  <>
-                    {' '}
-                    <Badge kind="together">{copy.dday(daysBetween(today, wedding))}</Badge>
-                  </>
-                )}
-              </>
+            lead={
+              <span className="hg-avatars hg-avatars--apart" aria-hidden="true">
+                {people.map((p, i) => (
+                  <Avatar key={p.name + i} name={p.name} no={p.starter ? 1 : 2} />
+                ))}
+              </span>
             }
+            label={names.join(' ')}
+            value={stateText}
             chevron={false}
           />
+          {wedding && (engaged || sp.marriage_status === 'married') && (
+            <ListRow
+              label={engaged ? copy.weddingPlanned : copy.weddingDone}
+              value={
+                <>
+                  {formatDateFull(wedding)}
+                  {engaged && (
+                    <>
+                      {' '}
+                      <Badge kind="together">{copy.dday(daysBetween(today, wedding))}</Badge>
+                    </>
+                  )}
+                </>
+              }
+              chevron={false}
+            />
+          )}
+        </div>
+        {inviteBlock}
+        {pendingBlock}
+        {soloBlock}
+        {newInviteBlock}
+        {(state === 'not_joined' && !reserved) || state === 'solo' ? haveCode : null}
+        {state === 'connected' && (
+          <div className="hg-list">
+            <ListRow label={copy.activityLog} onClick={() => nav('/notifications')} />
+            <ListRow label={copy.unlink} onClick={() => nav('/settings/couple/unlink')} />
+          </div>
+        )}
+        {live && (
+          <StickyBar>
+            <Button variant="primary" block onClick={() => void act.share()}>
+              {inviteCopy.sendKakao}
+            </Button>
+          </StickyBar>
         )}
       </div>
-      {inviteBlock}
-      {pendingBlock}
-      {soloBlock}
-      {newInviteBlock}
-      {(state === 'not_joined' && !reserved) || state === 'solo' ? haveCode : null}
-      {state === 'connected' && (
-        <div className="hg-list">
-          <ListRow label={copy.activityLog} onClick={() => nav('/notifications')} />
-          <ListRow label={copy.unlink} onClick={() => nav('/settings/couple/unlink')} />
-        </div>
-      )}
     </div>
   );
   return (

@@ -19,6 +19,7 @@ export function S12aUnlinkIntro() {
       primary={{ label: copy.next }}
       onSubmit={() => nav('/settings/couple/unlink/confirm')}
       later={{
+        secondary: true,
         label: copy.exportFirst,
         onClick: () =>
           nav('/settings/data', {

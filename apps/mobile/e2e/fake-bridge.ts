@@ -23,6 +23,8 @@ export type FakeState = {
   pushRequests: number;
   /** 홈 화면 위젯에 넘긴 값(widget.update, 26 v2.2). 마지막 것이 끝 */
   widget: unknown[];
+  /** 위젯 설정(S-22)으로 저장한 값 */
+  widgetSettings: { showAmounts: boolean };
   /** 분석 브리지로 받은 것(o.ga일 때만, ADR 0010) */
   ga: { kind: 'log' | 'screen' | 'user' | 'enabled'; v: unknown }[];
 };
@@ -57,6 +59,8 @@ export interface FakeOptions {
   inviteCode?: { code: string; source: 'clipboard' | 'referrer' };
   /** 홈 화면에 놓인 위젯(widget.installed, widget_added 분석, 2026-11-13 PR 14) */
   widgets?: { widget: 'wg01' | 'wg04'; size: 'small' | 'medium' }[];
+  /** 위젯 설정(S-22)을 브리지에 둠. 기기마다 저장(금액 보이기, 기본 꺼짐) */
+  widgetSettings?: boolean;
   /** 분석 브리지(analytics, ADR 0010)를 둠. 없으면 앱은 지금처럼 콘솔(‘[analytics]’)에만 남김 */
   ga?: boolean;
 }
@@ -80,6 +84,7 @@ export async function fakeBridge(page: Page, o: FakeOptions = {}) {
       ads: 0,
       pushRequests: 0,
       widget: [],
+      widgetSettings: { showAmounts: false },
       ga: [],
     };
     const cbs: {
@@ -136,6 +141,16 @@ export async function fakeBridge(page: Page, o: FakeOptions = {}) {
         widget: {
           update: async (d: unknown) => void f.widget.push(d),
           installed: async () => o.widgets ?? [],
+          ...(o.widgetSettings
+            ? {
+                settings: {
+                  get: async () => ({ showAmounts: f.widgetSettings.showAmounts }),
+                  set: async (v: { showAmounts: boolean }) => {
+                    f.widgetSettings.showAmounts = v.showAmounts;
+                  },
+                },
+              }
+            : {}),
         },
         ...(o.inviteCode ? { inviteCode: { firstRun: async () => o.inviteCode } } : {}),
         ...(o.ga

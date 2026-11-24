@@ -68,7 +68,11 @@ public class SaveTogetherWidget extends AppWidgetProvider {
             v.setViewVisibility(R.id.widget_bar, View.GONE);
         }
         String line = WidgetStore.str(s, "line");
-        if (medium && line != null) {
+        // S-22 ‘위젯에 금액 보이기’를 켰으면 모은 금액 글을 먼저(작은 크기도), 눈 끔 아이콘은 숨김
+        String amount = WidgetStore.str(s, "amount");
+        v.setViewVisibility(R.id.widget_eye, amount != null ? View.GONE : View.VISIBLE);
+        if (amount != null) line = (medium && line != null) ? amount + ", " + line : amount;
+        if ((medium || amount != null) && line != null) {
             v.setTextViewText(R.id.widget_line, line);
             v.setViewVisibility(R.id.widget_line, View.VISIBLE);
         } else {

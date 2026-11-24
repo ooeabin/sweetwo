@@ -17,6 +17,7 @@ export { S19aInquiries } from './pages/s-19a-inquiries';
 export { S19bAccess } from './pages/s-19b-access';
 export { S20Help } from './pages/s-20-help';
 export { S21Trash } from './pages/s-21-trash';
+export { S22WidgetSettings } from './pages/s-22-widget-settings';
 export { S12hUnlinked } from './pages/s-12h-unlinked';
 export { S11aNickname } from './pages/s-11a-nickname';
 export { S11bNotifyEmail } from './pages/s-11b-notify-email';

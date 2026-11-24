@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   cancelSalaryChange,
   fetchAvatars,
+  fetchOpenModeRequest,
   fetchLoginEmail,
   fetchSalaryChanges,
   qk,
@@ -48,6 +49,8 @@ export function S11Me() {
   const d = useSettingsData();
   const avatars = useQuery({ queryKey: qk.avatars, queryFn: fetchAvatars });
   const loginEmail = useQuery({ queryKey: qk.loginEmail, queryFn: fetchLoginEmail });
+  // 2026-11-24 구역 5: 내가 보낸 관리 형태 요청이 열려 있으면 ‘월급 관리 방식’ 줄 값에 “{이름}님 답을 기다려요”
+  const modeReq = useQuery({ queryKey: qk.modeRequests, queryFn: fetchOpenModeRequest });
   const changes = useQuery({ queryKey: qk.salaryChanges, queryFn: fetchSalaryChanges });
   const [clearing, setClearing] = useState(false);
   const [cancelling, setCancelling] = useState(false);
@@ -68,7 +71,9 @@ export function S11Me() {
           Number(sp.wedding_month.slice(0, 4)),
           Number(sp.wedding_month.slice(5, 7)),
         )
-      : copy.undecidedValue;
+      : married
+        ? copy.weddingDateNone
+        : copy.undecidedValue;
 
   // 예약한(아직 적용 안 한) 내 월급 변경 중 가장 가까운 것
   const scheduled = (changes.data ?? [])
@@ -263,15 +268,21 @@ export function S11Me() {
             <ListRow
               label={copy.salaryMode}
               sub={locked ? copy.unlinkPendingLocked : undefined}
-              value={copy.styleRowValue(
-                sp.salary_mode,
-                sp.salary_mode === 'joint' && sp.manager_user_id
-                  ? sp.manager_user_id === me.id
-                    ? c.myName
-                    : c.partnerName
-                  : undefined,
-                sp.salary_mode === 'joint' && !!sp.manager_user_id && sp.manager_user_id === me.id,
-              )}
+              value={
+                modeReq.data && modeReq.data.status === 'open' && modeReq.data.from_user === me.id
+                  ? copy.styleWaiting(c.partnerName)
+                  : copy.styleRowValue(
+                      sp.salary_mode,
+                      sp.salary_mode === 'joint' && sp.manager_user_id
+                        ? sp.manager_user_id === me.id
+                          ? c.myName
+                          : c.partnerName
+                        : undefined,
+                      sp.salary_mode === 'joint' &&
+                        !!sp.manager_user_id &&
+                        sp.manager_user_id === me.id,
+                    )
+              }
               onClick={locked ? undefined : () => nav('/settings/couple/style')}
             />
           )}

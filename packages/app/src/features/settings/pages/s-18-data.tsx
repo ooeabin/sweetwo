@@ -9,13 +9,13 @@ import {
 import { makeZip, partnerLabel, todayKst } from '@sweetwo/core';
 import {
   Button,
-  ChoiceCards,
   Field,
   Illustration,
   ListRow,
   PageHeader,
   ProcessingState,
-  SectionHeader,
+  SegChoice,
+  StickyBar,
   Toggle,
 } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -172,103 +172,104 @@ export function S18Data() {
         backTo={from?.backLabel ?? copy.title}
         onBack={() => nav(from?.back ?? '/settings', { replace: !!from })}
       />
-      <section className="hg-stack" style={{ gap: 'var(--space-3)' }}>
-        <SectionHeader title={copy.exportTitle} />
-        {/* 2026-11-03 범위와 형식이 한 묶음처럼 보여서 이름을 붙이고, 내보내기는 가득 너비 버튼 */}
-        <p className="hg-field__label">{copy.scopeLabel}</p>
-        <ChoiceCards<Scope>
-          label={copy.scopeLabel}
-          value={scope}
-          onChange={setScope}
-          autoAdvance={false}
-          options={[
-            { value: 'mine', label: copy.scope.mine ?? '', icon: 'choice-export-mine' },
-            { value: 'joint', label: copy.scope.joint ?? '', icon: 'choice-export-joint' },
-          ]}
-        />
-        <p className="hg-field__label">{copy.formatLabel}</p>
-        <ChoiceCards<Format>
-          label={copy.formatLabel}
-          autoFocus={false}
-          shortcuts={false}
-          value={format}
-          onChange={setFormat}
-          autoAdvance={false}
-          options={[
-            { value: 'csv', label: copy.formatCsv, icon: 'choice-export-csv' },
-            { value: 'pdf', label: copy.formatPdf, icon: 'choice-export-pdf' },
-          ]}
-        />
-        <p className="hg-q__help">{copy.noPhotos}</p>
-        {step === 'pin' && (
-          <form
-            className="hg-row"
-            style={{ gap: 'var(--space-2)', alignItems: 'flex-end' }}
-            onSubmit={(e) => {
-              e.preventDefault();
-              void checkPin();
-            }}
-          >
-            <div style={{ flex: 1 }}>
-              <Field
-                label={copy.pinQ}
-                type="password"
-                inputMode="numeric"
-                autoComplete="off"
-                value={pin}
-                error={pinError ? copy.pinWrong : undefined}
-                onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              />
-            </div>
-            <Button variant="primary" type="submit" disabled={pin.length < 4}>
-              {copy.confirmMe}
-            </Button>
-          </form>
-        )}
-        {step === 'failed' ? (
-          <div className="hg-banner hg-banner--info" role="alert">
-            <span>{copy.exportFailed}</span>
-            <Button variant="secondary" size="sm" onClick={() => void start()}>
-              {copy.retry}
-            </Button>
-          </div>
-        ) : (
-          step !== 'pin' && (
-            <div className="hg-row">
-              <Button
-                variant="primary"
-                block
-                disabled={step === 'busy'}
-                aria-busy={step === 'busy'}
-                onClick={() => void start()}
-              >
-                {step === 'busy' ? copy.exporting : copy.doExport}
+      <div className="hg-page hg-stack">
+        {/* 2026-11-24 구역 5: 섹션 제목 “내보내기”는 아래 주 버튼 “내보내기”와 같아 없앰(읽기 이름만 남김). 범위·형식은 짧은 둘이라 SegChoice */}
+        <section
+          className="hg-stack"
+          style={{ gap: 'var(--space-3)' }}
+          aria-label={copy.exportTitle}
+        >
+          <p className="hg-field__label">{copy.scopeLabel}</p>
+          <SegChoice<Scope>
+            label={copy.scopeLabel}
+            value={scope}
+            onChange={setScope}
+            items={[
+              { value: 'mine', label: copy.scope.mine ?? '' },
+              { value: 'joint', label: copy.scope.joint ?? '' },
+            ]}
+          />
+          <p className="hg-field__label">{copy.formatLabel}</p>
+          <SegChoice<Format>
+            label={copy.formatLabel}
+            value={format}
+            onChange={setFormat}
+            items={[
+              { value: 'csv', label: copy.formatCsv },
+              { value: 'pdf', label: copy.formatPdf },
+            ]}
+          />
+          <p className="hg-q__help">{copy.noPhotos}</p>
+          {step === 'pin' && (
+            <form
+              className="hg-row"
+              style={{ gap: 'var(--space-2)', alignItems: 'flex-end' }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                void checkPin();
+              }}
+            >
+              <div style={{ flex: 1 }}>
+                <Field
+                  label={copy.pinQ}
+                  type="password"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  value={pin}
+                  error={pinError ? copy.pinWrong : undefined}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                />
+              </div>
+              <Button variant="primary" type="submit" disabled={pin.length < 4}>
+                {copy.confirmMe}
+              </Button>
+            </form>
+          )}
+          {step === 'failed' ? (
+            <div className="hg-banner hg-banner--info" role="alert">
+              <span>{copy.exportFailed}</span>
+              <Button variant="secondary" size="sm" onClick={() => void start()}>
+                {copy.retry}
               </Button>
             </div>
-          )
+          ) : null}
+        </section>
+        <div className="hg-list">
+          <ListRow
+            label={copy.trash}
+            value={copy.trashCount(trash.data?.length ?? 0)}
+            onClick={() => nav('/settings/trash')}
+          />
+        </div>
+        <section className="hg-stack" style={{ gap: 'var(--space-2)' }}>
+          <Toggle
+            label={copy.analytics}
+            help={copy.analyticsSub}
+            checked={!me.analytics_off}
+            onChange={(on) =>
+              updateMe({ analytics_off: !on })
+                .then(() => qc.invalidateQueries({ queryKey: qk.me }))
+                .catch(() => toast(copy.failed))
+            }
+          />
+        </section>
+        <div className="hg-list">
+          <ListRow label={copy.deleteAccount} onClick={() => nav('/settings/data/delete')} />
+        </div>
+        {/* 2026-11-24 구역 5: 본문 중간 오렌지 채움 대신 아래 고정 주 버튼(본인 확인 입력 중·실패 안내 중에는 숨김) */}
+        {step !== 'pin' && step !== 'failed' && (
+          <StickyBar>
+            <Button
+              variant="primary"
+              block
+              disabled={step === 'busy'}
+              aria-busy={step === 'busy'}
+              onClick={() => void start()}
+            >
+              {copy.doExport}
+            </Button>
+          </StickyBar>
         )}
-      </section>
-      <div className="hg-list">
-        <ListRow
-          label={copy.trash}
-          value={copy.trashCount(trash.data?.length ?? 0)}
-          onClick={() => nav('/settings/trash')}
-        />
-      </div>
-      <section className="hg-stack" style={{ gap: 'var(--space-2)' }}>
-        <Toggle
-          label={copy.analytics}
-          help={copy.analyticsSub}
-          checked={!me.analytics_off}
-          onChange={(on) =>
-            updateMe({ analytics_off: !on })
-              .then(() => qc.invalidateQueries({ queryKey: qk.me }))
-              .catch(() => toast(copy.failed))
-          }
-        />
-      </section>
-      <div className="hg-list">
-        <ListRow label={copy.deleteAccount} onClick={() => nav('/settings/data/delete')} />
       </div>
     </div>
   );
@@ -281,7 +282,5 @@ export function S18Data() {
       sub={copy.exportingSub}
     />
   );
-  return (
-    <MainFrame sub="settings" current={null} columns={[step === 'busy' ? busy : body]} />
-  );
+  return <MainFrame sub="settings" current={null} columns={[step === 'busy' ? busy : body]} />;
 }

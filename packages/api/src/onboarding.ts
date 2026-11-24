@@ -6,6 +6,7 @@ import { supabase } from './client';
 export type Me = Pick<
   Tables<'app_user'>,
   | 'id'
+  | 'widget_goal_id'
   | 'provider'
   | 'nickname'
   | 'side'
@@ -53,7 +54,7 @@ export async function fetchMe(): Promise<Me | null> {
   const { data, error } = await supabase()
     .from('app_user')
     .select(
-      'id, provider, nickname, side, birth_year, birth_month, birth_day, employment, space_id, onboarding_step, onboarding_done_at, monthly_income, income_variable, payday, payday_last, allowance, card_main, other_income, notify_email, noti_prefs, quiet_start, quiet_end, default_visibility, analytics_off, rank_month, rank_pct, rank_net, payday_none, push_kinds, plan_share, asset_share_default, rank_consent, rank_badge_home, last_reconciled_at',
+      'id, provider, nickname, side, birth_year, birth_month, birth_day, employment, space_id, onboarding_step, onboarding_done_at, monthly_income, income_variable, payday, payday_last, allowance, card_main, other_income, notify_email, noti_prefs, quiet_start, quiet_end, default_visibility, analytics_off, rank_month, rank_pct, rank_net, payday_none, push_kinds, plan_share, asset_share_default, rank_consent, rank_badge_home, last_reconciled_at, widget_goal_id',
     )
     .maybeSingle();
   fail(error);
@@ -91,6 +92,7 @@ export async function updateMe(
     | 'plan_share'
     | 'asset_share_default'
     | 'rank_badge_home'
+    | 'widget_goal_id'
   >,
 ) {
   const me = await fetchMe();

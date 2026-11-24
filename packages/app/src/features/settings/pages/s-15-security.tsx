@@ -92,28 +92,12 @@ export function S15Security() {
         backTo={copy.title}
         onBack={() => nav('/settings')}
       />
-      {/* v2.2(R1): 앱 잠금은 권장, 꺼져 있으면 맨 위 권장 한 줄 + ‘켜기’(25 S-15) */}
-      {bridge && lock && !lock.hasPin && (
-        <div
-          className="hg-row"
-          style={{ gap: 'var(--space-2)', alignItems: 'center', justifyContent: 'space-between' }}
-        >
-          <p className="hg-help" style={{ margin: 0 }}>
-            {copy.lockRecommend}
-          </p>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => nav(`${paths.pinSetup}?next=/settings/security`)}
-          >
-            {copy.lockTurnOn}
-          </Button>
-        </div>
-      )}
       {bridge && lock && (
         <section className="hg-stack" style={{ gap: 'var(--space-3)' }}>
           <Toggle
             label={copy.appLock}
+            // 2026-11-24 구역 5: 꺼져 있을 때 맨 위 권장 줄 + ‘켜기’ 대신 스위치 아래 보조 줄 하나(같은 일을 두 번 하던 것)
+            help={lock.hasPin ? undefined : copy.lockRecommend}
             checked={lock.hasPin}
             onChange={(on) => {
               if (on) nav(`${paths.pinSetup}?next=/settings/security`);

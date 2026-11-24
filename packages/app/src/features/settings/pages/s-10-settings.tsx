@@ -9,6 +9,7 @@ import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useSettingsData } from '../data';
 import { useChecklist } from '../guides';
+import { widgetSettingsAvailable } from '../../../shared/widget-settings';
 import { inviteStateOf } from '../invite-state';
 import { usePushPermission } from '../push-status';
 import { PersonDot } from '../../../shared/person';
@@ -96,7 +97,7 @@ export function S10Settings() {
         />
         <ListRow
           label={copy.rows.guide}
-          value={ck.stage ? copy.checklistProgress(ck.count, ck.total) : undefined}
+          value={ck.stage ? copy.checklistCount(ck.count, ck.total) : undefined}
           onClick={() => nav('/settings/guides')}
         />
         <ListRow label={copy.rows.screen} value={copy.rows.screenValue} />
@@ -111,6 +112,10 @@ export function S10Settings() {
         </div>
       </div>
       <div className="hg-list">
+        {/* 위젯(S-22): 모바일 앱(위젯 브리지)에서만 */}
+        {widgetSettingsAvailable() && (
+          <ListRow label={copy.rows.widgets} onClick={() => nav('/settings/widgets')} />
+        )}
         <ListRow label={copy.rows.help} onClick={() => nav('/settings/help')} />
         <ListRow
           label={copy.rows.data}

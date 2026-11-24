@@ -416,6 +416,7 @@ export type Database = {
           status: Database["public"]["Enums"]["account_status"]
           updated_at: string
           version: number
+          widget_goal_id: string | null
         }
         ComputedFields: never
         Insert: {
@@ -468,6 +469,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["account_status"]
           updated_at?: string
           version?: number
+          widget_goal_id?: string | null
         }
         Update: {
           adult_confirmed_at?: string | null
@@ -519,6 +521,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["account_status"]
           updated_at?: string
           version?: number
+          widget_goal_id?: string | null
         }
         Relationships: [
           {
@@ -533,6 +536,13 @@ export type Database = {
             columns: ["space_id"]
             isOneToOne: false
             referencedRelation: "couple_space"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "app_user_widget_goal_id_fkey"
+            columns: ["widget_goal_id"]
+            isOneToOne: false
+            referencedRelation: "goal"
             referencedColumns: ["id"]
           },
         ]
@@ -3969,6 +3979,7 @@ export type Database = {
           status: Database["public"]["Enums"]["account_status"]
           updated_at: string
           version: number
+          widget_goal_id: string | null
         }
         SetofOptions: {
           from: "*"
@@ -4034,6 +4045,7 @@ export type Database = {
           status: Database["public"]["Enums"]["account_status"]
           updated_at: string
           version: number
+          widget_goal_id: string | null
         }
         SetofOptions: {
           from: "*"

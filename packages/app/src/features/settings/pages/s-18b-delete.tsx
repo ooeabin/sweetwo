@@ -98,7 +98,7 @@ export function S18bDelete() {
           {copy.exportFirst}
         </Button>
       </div>
-      <ul className="hg-stack" style={{ gap: 'var(--space-2)', paddingLeft: 'var(--space-5)' }}>
+      <ul className="hg-bullets hg-bullets--body">
         {lines.map((l) => (
           <li key={l}>{l}</li>
         ))}

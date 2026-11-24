@@ -60,17 +60,22 @@ export function S11dPlanDay() {
         }
       }}
     >
-      <ChoiceCards<string>
-        label={copy.planDayQ}
-        value={cur}
-        onChange={setV}
-        autoAdvance={false}
-        options={options.map((x) => ({
-          value: key(x.day),
-          label: copy.paydayOf(x.name, label(x.day)),
-          disabled: locked,
-        }))}
-      />
+      {options.length === 1 && options[0] ? (
+        // 2026-11-24 구역 5: 고를 게 하나면 카드 줄 + 체크 원 대신 글자 한 줄(두 사람 월급날이 같을 때)
+        <p className="hg-text">{copy.paydayOf(options[0].name, label(options[0].day))}</p>
+      ) : (
+        <ChoiceCards<string>
+          label={copy.planDayQ}
+          value={cur}
+          onChange={setV}
+          autoAdvance={false}
+          options={options.map((x) => ({
+            value: key(x.day),
+            label: copy.paydayOf(x.name, label(x.day)),
+            disabled: locked,
+          }))}
+        />
+      )}
     </QuestionLayout>
   );
 }

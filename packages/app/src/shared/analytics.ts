@@ -599,9 +599,15 @@ export type AnalyticsEvent =
   | { name: 'partner_change_reverted'; props: { hours_since_change: number } }
   // ── v2.2 PR 14(32 4-7, 26 위젯 v2.2) 위젯 ──
   | {
-      // 홈 화면에 처음 놓은 위젯(이 기기에서 처음 본 종류·크기). amounts_shown: 금액은 아직 늘 가림(S-22 전)
+      // 홈 화면에 처음 놓은 위젯(이 기기에서 처음 본 종류·크기). amounts_shown: S-22 ‘위젯에 금액 보이기’ 켬 여부(기본 끔)
       name: 'widget_added';
       props: { widget: 'wg01' | 'wg04'; size: 'small' | 'medium'; amounts_shown: boolean };
+    }
+  | {
+      // S-22 위젯 설정을 바꿈. setting = amounts(위젯에 금액 보이기, on) / goal(위젯에 보일 저축·투자, 고른 것 또는 기본으로 되돌림 default)
+      name: 'widget_setting_changed';
+      props:
+        { setting: 'amounts'; on: boolean } | { setting: 'goal'; choice: 'picked' | 'default' };
     }
   | {
       // 위젯을 눌러 들어옴. element: 위젯 전체가 누르는 곳 하나라 card. landing_screen = 간 화면 ID

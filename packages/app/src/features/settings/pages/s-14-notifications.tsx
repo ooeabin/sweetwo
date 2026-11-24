@@ -161,7 +161,7 @@ export function S14Notifications() {
       />
       <section className="hg-card hg-stack" aria-label={copy.push} style={{ gap: 0 }}>
         <Toggle
-          label={<b>{copy.push}</b>}
+          label={<span className="hg-text--strong">{copy.push}</span>}
           help={pushOn ? undefined : copy.pushOffHelp}
           checked={pushOn}
           onChange={(on) => setPush(on)}
@@ -183,7 +183,9 @@ export function S14Notifications() {
         )}
       </section>
       <section className="hg-card hg-stack" aria-label={copy.notiTopics} style={{ gap: 0 }}>
-        <span className="hg-card__label">{copy.notiTopics}</span>
+        <span className="hg-card__label" style={{ marginBottom: 'var(--space-3)' }}>
+          {copy.notiTopics}
+        </span>
         {kindRow('care', copy.kinds.care, copy.kindsHelp.care)}
         {manual && kindRow('payday', copy.kinds.payday)}
         {kindRow('achieved', copy.kinds.achieved)}
@@ -200,12 +202,18 @@ export function S14Notifications() {
         <p className="hg-help" style={{ margin: 0 }}>
           {copy.lockScreenNote}
         </p>
-        <span className="hg-card__label" style={{ marginTop: 'var(--space-4)' }}>
+        <span
+          className="hg-card__label"
+          style={{ marginTop: 'var(--space-4)', marginBottom: 'var(--space-3)' }}
+        >
           {copy.otherAlerts}
         </span>
         {topicRow('money', copy.groups.money)}
         {topicRow('invite', copy.groups.invite)}
-        <span className="hg-card__label" style={{ marginTop: 'var(--space-4)' }}>
+        <span
+          className="hg-card__label"
+          style={{ marginTop: 'var(--space-4)', marginBottom: 'var(--space-3)' }}
+        >
           {copy.careAlerts}
         </span>
         {/* 경조사는 시점 체크 목록(Y-05 미리 알림과 같은 모양) */}

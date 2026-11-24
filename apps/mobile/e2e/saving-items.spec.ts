@@ -458,7 +458,7 @@ test('각자 모드 파트너 저금 항목: 보기만, ‘금액만 보여 주�
 
   // 2026-11-13 v2.2: 저금마다 공개는 없앰(S-13 ① 내 월급 계획 한 곳)
   await page.goto('/settings/visibility');
-  await expect(page.getByRole('button', { name: /^내 월급 계획/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /^보이는 범위/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /찬우 자전거/ })).toHaveCount(0);
   await axe(page);
 });

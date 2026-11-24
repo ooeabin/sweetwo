@@ -1,7 +1,9 @@
 import {
   addDays,
+  readWon,
   savingPct,
   type BundleViewResponse,
+  type HeroGoal,
   type HeroItem,
   type HomeUpcoming,
   type SavingNoteRow,
@@ -14,17 +16,22 @@ import { savingPaths, togetherPaths } from '../salary';
 import { copy } from './copy';
 
 // 홈 화면 위젯(26 ‘위젯 v2.2’ WG-01 같이 모으기, WG-04 다가오는 날). 홈이 받은 값으로 위젯 글을 만들어 브리지에 넘김.
-// 금액은 넣지 않음(26 ‘금액 표시’ 기본 가림, S-22 ‘위젯에 금액 보이기’는 아직 없음). 묶음 ‘퍼센트만’도 같은 %.
+// 금액은 기본 넣지 않음(26 ‘금액 표시’ 기본 가림). S-22 ‘위젯에 금액 보이기’(기기마다)를 켰고 앱 금액 가리기가 꺼져 있을 때만 모은 금액 한 줄. 묶음 ‘퍼센트만’은 켜도 %만.
 // 이름은 H-10·H-08과 같은 것(보는 사람이 앱에서 볼 수 있는 값만, 공개 필터는 서버가 이미 적용).
 
-type SaveIn = { hero: HeroItem | undefined; savedOf: (id: string) => number };
+type SaveIn = {
+  hero: HeroItem | undefined;
+  savedOf: (id: string) => number;
+  /** S-22 ‘위젯에 금액 보이기’(기기마다)를 켰고 앱 금액 가리기가 꺼져 있을 때만 true */
+  amounts?: boolean;
+};
 type NextIn = { today: string; care: HomeUpcoming | undefined; note: SavingNoteRow | undefined };
 
 const bundleDone = (b: BundleViewResponse) =>
   b.status === 'achieved' || (b.pct !== null && b.pct >= 100);
 
 /** WG-01: 대표 저금(H-10 첫 칸) → 이름 + 큰 % (목표 금액이 없으면 “모으는 중”) + 기한 달 */
-export function widgetSave({ hero, savedOf }: SaveIn): WidgetData['save'] {
+export function widgetSave({ hero, savedOf, amounts = false }: SaveIn): WidgetData['save'] {
   if (!hero) return null;
   if (hero.kind === 'bundle') {
     const b = hero.bundle as BundleViewResponse;
@@ -37,6 +44,11 @@ export function widgetSave({ hero, savedOf }: SaveIn): WidgetData['save'] {
       pct: pct === null ? null : Math.min(pct, 100),
       line: b.deadline && !done ? copy.remainPercent(b.deadline) : null,
       done: done ? copy.doneBadge : null,
+      // 묶음은 합계만, ‘퍼센트만 보여 주기’면 금액을 켜도 %만(26 WG-01)
+      amount:
+        amounts && !b.percent_only && !b.paused && b.total !== null
+          ? copy.widgetAmount(readWon(b.total))
+          : null,
       to: goal ? savingPaths.item(goal.id) : '/',
     };
   }
@@ -49,8 +61,34 @@ export function widgetSave({ hero, savedOf }: SaveIn): WidgetData['save'] {
     pct: pct === null ? null : Math.min(pct, 100),
     line: g.deadline && !done ? copy.remainPercent(g.deadline) : null,
     done: done ? copy.doneBadge : null,
+    amount: amounts ? copy.widgetAmount(readWon(Math.max(savedOf(g.id), 0))) : null,
     to: savingPaths.item(g.id),
   };
+}
+
+/**
+ * WG-01에 보일 저축·투자(S-22 ‘위젯에 보일 저축·투자’, 계정마다 고른 항목 하나).
+ * 고른 항목이 없거나(기본) 휴지통·그만 모음·묶음에 들어감·목표 금액 없음이면 대표 저금(H-10 첫 칸)으로 돌아감.
+ */
+export function widgetHero({
+  first,
+  goals,
+  chosenId,
+}: {
+  first: HeroItem | undefined;
+  goals: readonly HeroGoal[];
+  chosenId: string | null | undefined;
+}): HeroItem | undefined {
+  if (!chosenId) return first;
+  const g = goals.find((x) => x.id === chosenId);
+  const ok =
+    !!g &&
+    !g.deleted_at &&
+    !g.closed_at &&
+    !g.bundle_id &&
+    g.target_amount !== null &&
+    g.target_amount > 0;
+  return ok ? { kind: 'goal', goal: g } : first;
 }
 
 /** WG-04: 가장 가까운 경조사 또는 쓸 곳 메모(H-08과 같은 고르기). 금액 없음. 경조사 → Y-05, 메모 → W-14 */
@@ -110,7 +148,7 @@ export function trackWidgetTap(path: string, from: NavigateFrom) {
 }
 
 // widget_added(32 4-7): 홈 화면에 놓인 위젯 중 이 기기에서 처음 본 종류·크기만 한 번. 개수·위치는 보내지 않음.
-// 금액은 위젯에 넘기지 않아(S-22 화면 전) amounts_shown 늘 false
+// 금액은 위젯에 넘기지 않아(S-22 화면 전) amounts_shown은 S-22 설정
 const SEEN = 'sw.widgets.seen';
 const readSeen = (): string[] | null => {
   try {
@@ -127,12 +165,13 @@ export async function trackPlacedWidgets(): Promise<void> {
   checked = true;
   const placed = await w.installed().catch(() => null);
   if (!placed) return;
+  const amounts = (await w.settings?.get().catch(() => null))?.showAmounts ?? false;
   const seen = new Set(readSeen() ?? []);
   for (const p of placed) {
     const key = `${p.widget}:${p.size}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    track('widget_added', { widget: p.widget, size: p.size, amounts_shown: false });
+    track('widget_added', { widget: p.widget, size: p.size, amounts_shown: amounts });
   }
   try {
     localStorage.setItem(SEEN, JSON.stringify([...seen]));

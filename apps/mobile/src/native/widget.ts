@@ -24,6 +24,7 @@ export async function writeWidget(d: WidgetData): Promise<void> {
     pct: d.save.pct === null ? null : Math.max(0, Math.min(100, Math.round(d.save.pct))),
     line: d.save.line && cut(d.save.line),
     done: d.save.done && cut(d.save.done),
+    amount: d.save.amount ? cut(d.save.amount) : null,
     to: path(d.save.to),
   };
   const next =
@@ -52,4 +53,18 @@ export async function placedWidgets(): Promise<WidgetPlaced[]> {
       ? [{ widget: x.widget, size: x.size }]
       : [],
   );
+}
+
+// S-22 ‘위젯에 금액 보이기’(기기마다, 기본 끔): 이 기기 WebView 저장소에만 둠(서버·다른 기기와 안 나눔, 비밀 값 아님).
+const SETTINGS_KEY = 'sweetwo.widget.settings';
+export async function readWidgetSettings(): Promise<{ showAmounts: boolean }> {
+  try {
+    const v = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? '{}') as { showAmounts?: unknown };
+    return { showAmounts: v.showAmounts === true };
+  } catch {
+    return { showAmounts: false };
+  }
+}
+export async function saveWidgetSettings(s: { showAmounts: boolean }): Promise<void> {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify({ showAmounts: s.showAmounts === true }));
 }

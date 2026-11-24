@@ -314,6 +314,7 @@ export function W11SavingAdd() {
             value={monthly}
             onChange={(x) => setDraft({ ...draft, monthly: x })}
             quick={quickChips.monthly}
+            quickSet
             invalid={unit}
             below={
               <>

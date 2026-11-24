@@ -355,14 +355,16 @@ test('알림 종류(S-14): 한 사람 관리형 관리하지 않는 쪽은 ‘�
   await axe(page);
 });
 
-test('보안(S-15): PIN을 건너뛰었으면 맨 위 권장 한 줄 + 켜기 → A-06', async ({ page }) => {
+test('보안(S-15): 꺼져 있으면 ‘앱 잠금’ 스위치 + 아래 보조 한 줄, 켜면 A-06', async ({ page }) => {
   await connected(page);
   await fakeBridge(page, { signedIn: true, pin: null });
   await page.addInitScript(() => localStorage.setItem('sweetwo.pin-asked', '1'));
   await page.goto('/settings/security');
-  await expect(page.getByText('열 때 PIN 6자리를 물어요')).toBeVisible();
+  await expect(page.getByText('열 때 PIN 6자리를 물어요')).toHaveCount(1);
+  // 맨 위 권장 줄과 ‘켜기’ 버튼은 없음(2026-11-24 구역 5)
+  await expect(page.getByRole('button', { name: '켜기', exact: true })).toHaveCount(0);
   await axe(page);
-  await page.getByRole('button', { name: '켜기', exact: true }).click();
+  await page.getByRole('switch', { name: '앱 잠금' }).click();
   await expect(page).toHaveURL(/next=\/settings\/security/);
 });
 
@@ -430,4 +432,71 @@ test('S-11 월급 관리 방식 값: 관리자가 나면 “내가 관리해요�
   await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText(
     '예빈님이 관리해요',
   );
+});
+
+test('빠른 금액 칩(S-11c): 3,500,000에서 +100만은 4,500,000(지금 값에 더함, 2026-11-24)', async ({
+  page,
+}) => {
+  await connected(page);
+  await page.goto('/settings/me/salary');
+  const label = '한 달 실수령액은 얼마예요?';
+  const narrow = (page.viewportSize()?.width ?? 1280) < 768;
+  await fillAmount(page, label, 3_500_000);
+  const chip = page.getByRole('button', { name: '+100만', exact: true });
+  // 좁은 창은 칩이 금액 버튼 아래에 있고 이름에 지금 금액이 들어감, 넓은 창은 입력 칸 값
+  const value = () =>
+    narrow
+      ? page.getByRole('button', { name: new RegExp(`^${label.replace('?', '\\?')},`) })
+      : page.getByLabel(label, { exact: true });
+  const has = async (text: RegExp) =>
+    narrow ? expect(value()).toHaveAccessibleName(text) : expect(value()).toHaveValue(text);
+  await has(/3,?500,?000/);
+  await chip.click();
+  await has(/4,?500,?000/);
+  await chip.click();
+  await has(/5,?500,?000/);
+});
+
+test('위젯 설정(S-22): 금액 보이기는 기기에 저장(기본 꺼짐), 저축·투자는 대표 또는 고른 항목, 브리지가 없으면 줄이 없음', async ({
+  page,
+}, info) => {
+  const { db } = await connected(page);
+  await fakeBridge(page, { signedIn: true, widgetSettings: true });
+  await page.goto('/settings');
+  await page.getByRole('button', { name: /^위젯/ }).click();
+  await expect(page).toHaveURL(/\/settings\/widgets$/);
+  const sw = page.getByRole('switch', { name: '위젯에 금액 보이기' });
+  await expect(sw).toHaveAttribute('aria-checked', 'false');
+  await axe(page);
+  await sw.click();
+  await expect(sw).toHaveAttribute('aria-checked', 'true');
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (window as unknown as { __fb: { widgetSettings: { showAmounts: boolean } } }).__fb
+            .widgetSettings.showAmounts,
+      ),
+    )
+    .toBe(true);
+  // 저축·투자: 기본은 대표
+  await expect(page.getByRole('radio', { name: /대표 저축·투자/ })).toBeChecked();
+  const target = db.goals.find((g) => g.target_amount && !g.bundle_id);
+  if (target) {
+    await page.getByRole('radio', { name: new RegExp(String(target.name)) }).click();
+    await expect.poll(() => db.me.widget_goal_id).toBe(target.id);
+    await page.getByRole('radio', { name: /대표 저축·투자/ }).click();
+    await expect.poll(() => db.me.widget_goal_id).toBeNull();
+  }
+  if (info.project.name === 'light') await axe(page);
+});
+
+test('위젯 설정(S-22): 브리지가 없으면 S-10에 위젯 줄이 없고 주소로 들어가도 설정으로 돌아감', async ({
+  page,
+}) => {
+  await connected(page);
+  await page.goto('/settings');
+  await expect(page.getByRole('button', { name: /^위젯/ })).toHaveCount(0);
+  await page.goto('/settings/widgets');
+  await expect(page).toHaveURL(/\/settings$/);
 });
