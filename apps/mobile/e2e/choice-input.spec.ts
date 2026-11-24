@@ -14,24 +14,25 @@ test('W-11: 고르기는 F 떠 있는 흰 알약, 글자 칸은 밑줄, 빠른 �
   await expect(choice).toBeVisible();
   await expect(page.locator('.hg-seg')).toHaveCount(0);
   const m = await page.evaluate(() => {
-    const box = document.querySelector('.hg-choice:not(.hg-choice--rows)') as HTMLElement;
-    const els = [...box.querySelectorAll('.hg-choice__item')] as HTMLElement[];
-    const css = (e: HTMLElement) => getComputedStyle(e);
-    const sel = els.find((e) => e.classList.contains('is-on')) ?? els[0];
-    const off = els.find((e) => !e.classList.contains('is-on')) ?? els[1];
+    const css = (e: Element | null) => getComputedStyle(e as HTMLElement);
+    const box = document.querySelector('.hg-choice:not(.hg-choice--rows)');
+    const sel = document.querySelector('.hg-choice:not(.hg-choice--rows) .hg-choice__item.is-on');
+    const off = document.querySelector('.hg-choice:not(.hg-choice--rows) .hg-choice__item:not(.is-on)');
+    const r0 = sel?.getBoundingClientRect();
+    const r1 = off?.getBoundingClientRect();
     return {
       plateRadius: css(box).borderTopLeftRadius,
       platePad: css(box).paddingTop,
       plateBg: css(box).backgroundColor,
-      gap: els[1].getBoundingClientRect().left - els[0].getBoundingClientRect().right,
-      h: Math.round(off.getBoundingClientRect().height),
+      gap: r0 && r1 ? Math.abs(r1.left - r0.right) : -1,
+      h: Math.round(r1?.height ?? 0),
       radius: css(off).borderTopLeftRadius,
       offBorder: css(off).borderTopWidth,
       offBg: css(off).backgroundColor,
       onBg: css(sel).backgroundColor,
       onShadow: css(sel).boxShadow !== 'none',
-      onWeight: css(sel.querySelector('.hg-choice__label') as HTMLElement).fontWeight,
-      offWeight: css(off.querySelector('.hg-choice__label') as HTMLElement).fontWeight,
+      onWeight: css(sel?.querySelector('.hg-choice__label') ?? null).fontWeight,
+      offWeight: css(off?.querySelector('.hg-choice__label') ?? null).fontWeight,
     };
   });
   // F 떠 있는 흰 알약: 판 radius 16·안쪽 4·칸 사이 4·칸 높이 44 radius 12, 테두리 없음, 고른 칸 흰 바탕 + 그림자 + 700

@@ -94,10 +94,9 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   // 빠른 칩은 그 금액으로 바꿈(더하지 않음)
   await page.getByRole('button', { name: '30만 원' }).click();
   await page.getByRole('button', { name: '10만 원' }).click();
-  await expect(page.getByRole('button', { name: '10만 원' })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
+  // 2026-11-24: 빠른 금액 칩은 고른 표시·aria-pressed 없음(눌러서 값을 바꾸기만 하는 버튼)
+  await expect(page.getByRole('button', { name: '10만 원' })).not.toHaveAttribute('aria-pressed', /.*/);
+  await expect(page.locator('.hg-quick .is-selected')).toHaveCount(0);
   await fillAmount(page, '매달 얼마씩?', 200000);
   await expect(hero).toHaveText('제주 여행에 매달 20만 원씩 모을까요?');
   await expect(page.getByRole('button', { name: '추가하기' })).toBeEnabled();
@@ -229,7 +228,7 @@ test('W-11c 이미 모은 금액(2026-11-09): 만들 때만, 목표 금액보다
   await expect(page.getByText('2,030만 원', { exact: true }).first()).toBeVisible();
 });
 
-test('W-11 바꾸기 칩 고른 표시, 좁은 창은 금액 칸을 누르면 키패드 시트(2026-11-23)', async ({
+test('W-11 바꾸기 칩은 고른 표시 없음, 좁은 창은 금액 칸을 누르면 키패드 시트(2026-11-23)', async ({
   page,
 }, info) => {
   await page.clock.setFixedTime(NOW);
@@ -239,14 +238,9 @@ test('W-11 바꾸기 칩 고른 표시, 좁은 창은 금액 칸을 누르면 �
   await page.getByRole('button', { name: '여행', exact: true }).click();
   const chip = page.getByRole('button', { name: '30만 원' });
   await chip.click();
-  await expect(chip).toHaveAttribute('aria-pressed', 'true');
-  // 고른 칩은 오렌지 테두리(안쪽 그림자)로 보임. 고르지 않은 칩은 없음
-  expect(await chip.evaluate((e) => getComputedStyle(e).boxShadow)).not.toBe('none');
-  expect(
-    await page
-      .getByRole('button', { name: '10만 원' })
-      .evaluate((e) => getComputedStyle(e).boxShadow),
-  ).toBe('none');
+  // 2026-11-24: 눌러도 고른 표시(오렌지 테두리·aria-pressed) 없이 늘 회색
+  await expect(chip).not.toHaveAttribute('aria-pressed', /.*/);
+  expect(await chip.evaluate((e) => getComputedStyle(e).boxShadow)).toBe('none');
   if (info.project.name !== 'narrow') return;
   // 좁은 창: 화면 안에는 키패드가 없고, 금액 칸을 누르면 시트로 올라옴. 첫 숫자가 미리 채운 값을 덮어씀
   await expect(page.getByLabel('숫자 키패드')).toHaveCount(0);
