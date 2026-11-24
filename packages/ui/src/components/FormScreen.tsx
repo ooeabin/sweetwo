@@ -291,7 +291,7 @@ export function FormAmount({
             <Chip
               key={q.label}
               small
-              selected={value === q.value}
+              aria-pressed={undefined}
               onClick={() => onChange(q.value)}
             >
               {q.label}

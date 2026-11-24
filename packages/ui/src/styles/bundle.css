@@ -1088,7 +1088,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-amountin > .hg-quick { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: var(--space-2); }
 .hg-amountin > .hg-quick > .hg-chip { justify-content: center; height: 40px; border-color: transparent; background: var(--surface-alt); color: var(--ink); font: var(--text-label); border-radius: var(--radius-md); }
 .hg-amountin > .hg-quick > .hg-chip:hover { background: var(--hairline-soft); }
-.hg-amountin > .hg-quick > .hg-chip.is-selected, .hg-amountin > .hg-quick > .hg-chip.is-selected:hover { border-color: var(--accent-app); box-shadow: inset 0 0 0 1px var(--accent-app); background: var(--surface); color: var(--accent-app-text); }  /* 2026-11-09 바꾸기 칩(quickSet) 고른 표시: 오렌지 테두리 + 오렌지 글자 600(브랜드 색 규칙 2026-11-09) */
+/* 2026-11-24 빠른 금액 칩(+10만, 10만 원)은 누르면 값을 더하거나 바꾸는 버튼이라 고른 표시(is-selected)를 두지 않고 늘 회색 */
 .hg-amountin .hg-amount.is-idle { border-bottom-color: var(--border-control); }  /* 2026-11-09 round 3 두 칸(second)일 때 키패드가 쓰지 않는 칸은 밑줄을 옅게 */
 /* 2026-11-10 QA 2구간 S2-21: 금액 칸 인라인 스타일을 클래스로. 입력 칸 자체는 틀 없이, 오류면 밑줄 danger, 링크 줄은 왼쪽 정렬 */
 input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 100%; min-width: 0; color: var(--ink); padding: 0; }
@@ -2111,7 +2111,6 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   .hg-q > .hg-q__head { margin-bottom: var(--space-4); }  /* 제목 묶음과 입력 사이 32 + 16 = 48px */
   .hg-q:not(.hg-q--center) > .hg-q__head { margin-top: clamp(var(--space-6), 10vh, var(--space-16) + var(--space-14)); }
   .hg-q .hg-input { height: 56px; font-size: 17px; line-height: 26px; }
-  .hg-q .hg-option--card { min-height: 72px; padding: var(--space-5); }
   .hg-q .hg-amountin { max-width: none; }
   .hg-q .hg-amountin > .hg-quick > .hg-chip { height: 48px; }
   .hg-q .hg-wheel__item { font-size: 17px; }  /* 휠 줄 높이(44px)는 그대로(DateWheel 굴리기 셈과 같음) */
@@ -2941,10 +2940,13 @@ button.hg-datepill { cursor: pointer; }
 /* ── 월급 탭 정리(2026-11-23 ‘바탕 정리 2’ B) ──
    선택지 카드(`hg-option--card`, 질문·W-10b·W-12·W-15 등): 고르기 전엔 회색 판(`surface-alt`)에 테두리 없음, 고르면 흰 판 + ink 테두리. 회색 바탕 화면은 흰 판.
    W-10 묶음 카드·달성 질문 상자(`hg-goalbox`): 흰 바탕 화면에서는 테두리·그림자·옆 여백 없이 본문 그대로. */
-.hg-option--card { border-color: transparent; background: var(--surface-alt); }
+.hg-option--card { border-color: transparent; background: var(--choice-plate); }
 .hg-option--card:hover { border-color: transparent; background: var(--hairline-soft); }
-.hg-option--card.is-on, .hg-option--card.is-on:hover { border-color: var(--ink); background: var(--surface); }
-.hg-frame--alt .hg-option--card { background: var(--surface); }
+.hg-option--card.is-on, .hg-option--card.is-on:hover { border-color: transparent; background: var(--choice-on); box-shadow: var(--choice-on-shadow); }  /* 2026-11-24 F: 고른 카드는 테두리 대신 떠 있는 흰 판 + 그림자 */
+.hg-option--card { min-height: 56px; padding: var(--space-3) var(--space-4); border-radius: 16px; font: 400 15px/20px var(--font-sans); color: var(--ink-2); }
+.hg-option--card .hg-option__label { font-weight: 400; }
+.hg-option--card.is-on { color: var(--ink); }
+.hg-option--card.is-on .hg-option__label { font-weight: 700; }
 .hg-frame:not(.hg-frame--alt) .hg-goalbox { padding-inline: 0; border-radius: 0; background: none; box-shadow: none; }
 
 /* ── 영역 간격(2026-11-24 사용자 결정 “영역 간 구분되는 패딩이 너무 적다”, DESIGN.md ‘영역 간격’) ──
@@ -3011,22 +3013,35 @@ button.hg-datepill { cursor: pointer; }
 .hg-sheet__actions { margin-top: 0; }
 @media (max-height: 700px) { .hg-sheet { gap: var(--space-4); } }
 
-/* ── 고르기 SegChoice(2026-11-24 사용자 결정): A 테두리 버튼(짧은 2~3개), C 라디오 줄(4개 이상·긴 글자·설명). 회색 판 + 흰 알약은 입력 고르기에 쓰지 않음 ── */
-.hg-choice { display: flex; gap: var(--space-2); width: 100%; align-self: stretch; }
+/* ── 고르기 SegChoice·선택지 카드 F ‘떠 있는 흰 알약’(2026-11-24 사용자 결정, 시안 work/w02-design/comp3.html F열): 테두리 없음 ──
+   버튼(짧은 2~3개, `hg-choice`): 회색 판(`choice-plate`, radius 16, 안쪽 4, 칸 사이 4) 안에 칸(높이 44, radius 12). 안 고른 칸은 판 그대로 + 15/400 slate, 고른 칸은 `choice-on` + `choice-on-shadow` + 15/700 ink.
+   카드 줄(`hg-choice--rows`와 ChoiceCards `hg-option--card`): 높이 56 이상, radius 16, 칸 사이 8, 안 고른 카드는 판 색 + 15/400 ink-2 + 오른쪽 빈 원, 고른 카드는 `choice-on` + 그림자 + 15/700 ink + 오른쪽 오렌지 체크 원. 설명은 이름 아래 13 stone.
+   회색 바탕 화면(`hg-frame--alt`)은 판이 안 보이니 한 단계 진한 `hairline-soft` 판. */
+.hg-choice { display: flex; gap: var(--space-1); box-sizing: border-box; width: 100%; align-self: stretch; padding: var(--space-1); border-radius: 16px; background: var(--choice-plate); }
 .hg-choice__item { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .hg-choice__item:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-.hg-choice__label { font: var(--text-value); color: var(--ink-2); }
+.hg-choice__label { font: 400 15px/20px var(--font-sans); color: var(--slate); }
 .hg-choice__sub { font: var(--text-note); color: var(--stone); }
-.hg-choice:not(.hg-choice--rows) .hg-choice__item { flex: 1 1 0; display: flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 var(--space-2); border: 1px solid var(--hairline); border-radius: var(--radius-lg); background: var(--surface); text-align: center; }
-.hg-choice:not(.hg-choice--rows) .hg-choice__item.is-on { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
-.hg-choice:not(.hg-choice--rows) .hg-choice__item.is-on .hg-choice__label { color: var(--ink); font-weight: 700; }
-.hg-choice--rows { flex-direction: column; gap: 0; }
-.hg-choice--rows .hg-choice__item { display: flex; align-items: center; gap: var(--space-3); min-height: 56px; padding: var(--space-3) 0; }
+.hg-choice:not(.hg-choice--rows) .hg-choice__item { flex: 1 1 0; display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 var(--space-2); border-radius: var(--radius-lg); text-align: center; }
+.hg-choice:not(.hg-choice--rows) .hg-choice__item.is-on, .hg-choice--rows .hg-choice__item.is-on { background: var(--choice-on); box-shadow: var(--choice-on-shadow); }
+.hg-choice .hg-choice__item.is-on .hg-choice__label { color: var(--ink); font-weight: 700; }
+.hg-choice--rows { flex-direction: column; gap: var(--space-2); padding: 0; border-radius: 0; background: none; }
+.hg-choice--rows .hg-choice__item { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 56px; padding: var(--space-3) var(--space-4); border-radius: 16px; background: var(--choice-plate); }
 .hg-choice--rows .hg-choice__text { display: flex; flex-direction: column; min-width: 0; }
-.hg-choice--rows .hg-choice__label { font: var(--text-name); color: var(--ink); }
-.hg-choice__dot { flex: none; box-sizing: border-box; width: 24px; height: 24px; border: 2px solid var(--border-control); border-radius: var(--radius-full); background: var(--surface); }
-.hg-choice__item.is-on .hg-choice__dot { border-color: var(--accent-app); background: var(--accent-app); box-shadow: inset 0 0 0 5px var(--surface); }  /* 고른 원: 오렌지 채움 + 안쪽 흰 점(고른 선택지 원) */
-@media (prefers-reduced-motion: no-preference) { .hg-choice__item { transition: border-color var(--dur-fast) var(--ease-out); } }
+.hg-choice--rows .hg-choice__label { color: var(--ink-2); }
+.hg-choice__dot { flex: none; display: inline-grid; place-items: center; box-sizing: border-box; width: 24px; height: 24px; border: 2px solid var(--border-control); border-radius: var(--radius-full); color: transparent; }
+.hg-choice__item.is-on .hg-choice__dot { border-color: var(--accent-app); background: var(--accent-app); color: var(--on-accent-app); }  /* 고른 선택지 원: 오렌지 채움 + 체크 */
+/* 고른 카드의 설명은 slate(다크에서 떠 있는 판(#3a3a3d) 위 stone은 대비 4.5:1 아래) */
+.hg-choice__item.is-on .hg-choice__sub, .hg-option--card.is-on .hg-help { color: var(--slate); }
+.hg-frame--alt .hg-choice { --choice-plate: var(--hairline-soft); }
+.hg-frame--alt .hg-option--card { background: var(--hairline-soft); }
+.hg-frame--alt .hg-option--card.is-on { background: var(--choice-on); }
+/* 한 화면 입력(FormScreen) 글자 칸은 금액 칸과 같은 밑줄 입력(2026-11-24 사용자 결정): 테두리 상자 없음, 아래 2px ink 한 줄 */
+.hg-form input.hg-input { height: 48px; padding: 0; border: 0; border-bottom: 2px solid var(--ink); border-radius: 0; background: none; }
+.hg-form input.hg-input.is-error { border-bottom-color: var(--danger); }
+.hg-form input.hg-input:focus { outline: none; border-bottom-color: var(--ink); }
+.hg-form input.hg-input:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) { .hg-choice__item { transition: background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out); } }
 .hg-form__quick { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--space-1); }  /* F-03 ‘큰 항목만 빠르게 적기 ›’ 글자 버튼 */
 
 /* ── 스테퍼(2026-11-24 사용자 결정 “온보딩 밖은 되도록 한 화면, 힘들면 스텝퍼”): 한 화면 한 질문 + “1/3” 글자 + 앞 답이 위에 줄로 쌓임. 진행 막대 없음 ── */

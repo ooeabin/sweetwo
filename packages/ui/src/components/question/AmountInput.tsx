@@ -290,7 +290,7 @@ export function AmountInput({
             <Chip
               key={q.label}
               small
-              selected={quickSet && value === q.value}
+              aria-pressed={undefined}
               onClick={() => set(quickSet ? q.value : Math.min((value ?? 0) + q.value, MAX_WON))}
             >
               {q.label}
