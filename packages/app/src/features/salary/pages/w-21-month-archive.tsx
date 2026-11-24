@@ -78,7 +78,7 @@ export function W21MonthArchive() {
   );
 
   const body = (
-    <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div key="l" className="hg-stack">
       <PageHeader
         title={copy.archiveTitle}
         backLabel={copy.back}

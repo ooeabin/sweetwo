@@ -47,7 +47,7 @@ export function S19aInquiries() {
   };
 
   const listBody = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader
         title={copy.myInquiries}
         backLabel={copy.back}
@@ -101,7 +101,7 @@ export function S19aInquiries() {
     q.status === 'done' && !!q.done_at && Date.parse(q.done_at) < Date.now() - 7 * 86_400_000;
   const msgs = [...q.inquiry_message].sort((a, b) => a.created_at.localeCompare(b.created_at));
   const detail = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader
         title={copy.inquiryNo(q.no)}
         backLabel={copy.back}

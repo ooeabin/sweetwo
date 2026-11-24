@@ -165,7 +165,7 @@ export function S18Data() {
   };
 
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader
         title={copy.data}
         backLabel={copy.back}

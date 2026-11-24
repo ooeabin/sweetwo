@@ -64,7 +64,7 @@ export function W10cReconcile() {
       }
       onSubmit={() => (items.length ? void save() : nav(savingPaths.add))}
     >
-      <div className="hg-stack" style={{ gap: 'var(--space-4)' }}>
+      <div className="hg-stack">
         {items.map((i) => (
           <MoneyField
             key={i.goal.id}

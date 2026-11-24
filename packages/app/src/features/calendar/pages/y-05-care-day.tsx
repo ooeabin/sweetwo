@@ -91,7 +91,7 @@ export function Y05CareDay() {
   };
 
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader
         title={care.name}
         backLabel={copy.back}
@@ -291,7 +291,7 @@ function CareDayError({ onBack, onRetry }: { onBack: () => void; onRetry: () => 
       sub="detail"
       current="calendar"
       columns={[
-        <div key="e" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+        <div key="e" className="hg-stack">
           <PageHeader title={copy.title} backLabel={copy.back} onBack={onBack} />
           <CalendarLoadError onRetry={onRetry} />
         </div>,

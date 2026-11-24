@@ -15,7 +15,7 @@ export function S19About() {
   const bridge = typeof window !== 'undefined' ? window.sweetwo : undefined;
   const version = isApp(detectPlatform()) ? (bridge?.appVersion ?? '') : 'web';
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader
         title={copy.about}
         backLabel={copy.back}

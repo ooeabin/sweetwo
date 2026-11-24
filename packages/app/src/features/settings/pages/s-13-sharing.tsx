@@ -95,7 +95,7 @@ export function S13Sharing() {
   const share = me.plan_share as PlanShare;
 
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader
         title={copy.visTitle}
         backLabel={copy.back}

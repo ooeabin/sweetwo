@@ -30,7 +30,7 @@ export function S20Help() {
   const toItems = (xs: { n: number; q: string; a: string }[]) =>
     xs.map((i) => ({ id: String(i.n), q: i.q, a: i.a }));
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader title={copy.help} backLabel={copy.back} backTo={copy.title} onBack={goBack} />
       <Search label={copy.faqSearch} placeholder={copy.faqSearch} value={q} onChange={setQ} />
       {found ? (

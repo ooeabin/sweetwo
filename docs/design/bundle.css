@@ -2948,3 +2948,67 @@ button.hg-datepill { cursor: pointer; }
 .hg-option--card.is-on, .hg-option--card.is-on:hover { border-color: var(--ink); background: var(--surface); }
 .hg-frame--alt .hg-option--card { background: var(--surface); }
 .hg-frame:not(.hg-frame--alt) .hg-goalbox { padding-inline: 0; border-radius: 0; background: none; box-shadow: none; }
+
+/* ── 영역 간격(2026-11-24 사용자 결정 “영역 간 구분되는 패딩이 너무 적다”, DESIGN.md ‘영역 간격’) ──
+   영역(질문 섹션, 묶음, 상자 안 덩어리) 사이 32, 영역 제목과 내용 12, 큰 금액·요약 문장 아래 첫 영역 32, 8px 회색 띠(위는 앞 영역의 32, 아래 첫 줄까지 12),
+   회색 바탕 + 흰 상자 화면은 상자 사이 16·상자 안 위아래 24·상자 안 영역 사이 24, 밑줄 탭·머리 아래 24, 시트 안 24. 줄 사이(56 줄)는 그대로.
+   토큰은 tokens.css `--gap-*`. 사용자 앱(`.hg-frame`, 시트, FormScreen)만, 어드민·웹사이트는 그대로. 화면마다 따로 두지 않고 이 블록 하나가 정한다. */
+
+/* 흰 바탕 화면: 열(스택) 안 영역 사이 32. 머리(‹ 제목) 아래 24 */
+.hg-frame:not(.hg-frame--alt) .hg-body__col > .hg-stack { gap: var(--gap-area); }
+.hg-frame .hg-body__col > .hg-stack > .hg-pagehead { margin-bottom: calc(var(--gap-head) - var(--gap-area)); }
+.hg-frame .hg-body__col > .hg-stack > .hg-pagehead + .hg-page { margin-top: 0; }
+/* 영역 안(제목 + 내용)은 12 */
+.hg-frame section.hg-stack:has(> .hg-sechead) { gap: var(--gap-title); }
+.hg-frame .hg-sechead { padding-top: 0; }
+/* 밑줄 탭 아래 첫 영역까지 24(탭 줄 아래 hairline 기준) */
+.hg-linetabs { margin-bottom: 0; }
+.hg-frame:not(.hg-frame--alt) .hg-stack > .hg-linetabs { margin-bottom: calc(var(--gap-head) - var(--gap-area)); }
+.hg-frame .hg-page > .hg-linetabs { margin-bottom: var(--gap-head); }
+.hg-frame--alt .hg-stack > .hg-linetabs { margin-bottom: calc(var(--gap-head) - var(--gap-box)); }
+/* 큰 금액 머리(W-02, W-10, W-20b) 아래 첫 영역 32 */
+.hg-fdhero, .hg-w02hero { padding-bottom: var(--gap-area); }
+/* 8px 회색 띠: 위는 앞 영역의 32, 아래 첫 줄까지 12 */
+.hg-page__band { margin: var(--gap-area) calc(var(--space-6) * -1) var(--gap-title); }
+.hg-page--w10 > .hg-page__section { padding-top: 0; }
+.hg-page--w10 > .hg-goalbox + .hg-page__band, .hg-page--w10 > .hg-page__section + .hg-page__band { margin-top: var(--gap-area); }
+.hg-band { margin-block: var(--gap-area) var(--gap-title); }
+.hg-stack > .hg-band { margin-block: 0; }
+/* 흰 화면 목록 영역 사이: W-02 수입 한 줄, W-20b 수입 목록 */
+.hg-incomeline { margin-top: var(--gap-area); padding-top: var(--gap-title); }
+.hg-page > .hg-fdhero + .hg-list { margin-top: 0; }
+
+/* 회색 바탕 + 흰 상자 화면: 상자 사이 16, 상자 안 위아래 24, 상자 안 영역 사이 24 */
+.hg-frame--alt .hg-body__col > .hg-stack { gap: var(--gap-box); }
+.hg-frame--alt .hg-body__col > .hg-stack > section.hg-stack:has(> .hg-sechead):not(:first-child) { margin-top: calc(var(--gap-area) - var(--gap-box)); }  /* 상자 밖 묶음 머리 위 32 */
+.hg-frame--alt .hg-body__col > .hg-stack > .hg-pagehead { margin-bottom: calc(var(--gap-head) - var(--gap-box)); }
+.hg-hub { gap: var(--gap-box); }
+.hg-planstage { gap: var(--gap-box); }
+.hg-frame--alt .hg-body__banners { gap: var(--gap-box); }
+.hg-plancard, .hg-frame--alt :is(.hg-card, .hg-checklist):not(.hg-card--tint, .hg-card--fill):not(:is(.hg-card, .hg-list, .hg-checklist, .hg-cal, .hg-chart, .hg-sheet, .hg-modal, .hg-noti) *) { padding-block: var(--gap-box-in); }
+.hg-together { padding-block: var(--gap-box-in); }
+.hg-together__dots { margin-top: var(--space-3); }
+:is(.hg-hubbox__title, .hg-hubup__title) { padding-top: var(--gap-box-in); padding-bottom: 0; }
+.hg-hubbox, .hg-hubup { padding-bottom: var(--space-3); }
+.hg-hubtile { padding: var(--space-5); }
+.hg-plancard__head { padding-bottom: 0; }
+.hg-plancard > * + .hg-plan__block, .hg-plan__block--soft { margin-top: var(--space-3); }
+.hg-plancard .hg-goallist { margin-top: 0; }
+/* 상자 안 영역 사이 24: 요약 → 막대 → 범례 */
+.hg-plansum__bar { margin: var(--gap-box-in) 0 var(--space-3); }
+
+/* 질문 섹션·영역이 쌓이는 FormScreen: 섹션 사이 32, 제목 아래 12, 띠(8) 아래 첫 줄 12, 옆 여백 24 */
+.hg-form { gap: var(--gap-area); padding-inline: var(--space-2); }
+.hg-form__hero { margin-block: var(--space-2) 0; }
+.hg-form__sec { gap: var(--gap-title); }
+.hg-form__folds { margin-top: 0; padding-top: calc(var(--space-2) + var(--gap-title)); }
+.hg-form__folds::before { height: var(--space-2); }
+.hg-form > .hg-pagehead { margin-bottom: calc(var(--gap-head) - var(--gap-area) - var(--space-2)); }
+
+/* 온보딩·합류(QuestionLayout)는 영역 사이만 */
+.hg-q__cols { gap: var(--gap-area) var(--space-6); }
+
+/* 시트 안: 제목 아래 24, 영역 사이 24(시트는 좁아서 한 단계 작게) */
+.hg-sheet { gap: var(--gap-sheet); }
+.hg-sheet__actions { margin-top: 0; }
+@media (max-height: 700px) { .hg-sheet { gap: var(--space-4); } }

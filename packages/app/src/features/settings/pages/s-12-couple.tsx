@@ -227,7 +227,7 @@ export function S12Couple() {
   const req = state === 'unlink_pending' ? (unlink.data ?? null) : null;
   const mine = req?.requested_by === d.me.id;
   const pendingBlock = req ? (
-    <div className="hg-stack" style={{ gap: 'var(--space-4)' }}>
+    <div className="hg-stack">
       <div className="hg-card hg-stack" style={{ gap: 'var(--space-3)' }}>
         <p>
           <strong>
@@ -330,7 +330,7 @@ export function S12Couple() {
     ) : null;
 
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader
         title={copy.coupleTitle}
         backLabel={copy.back}

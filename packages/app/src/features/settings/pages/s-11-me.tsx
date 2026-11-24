@@ -111,7 +111,7 @@ export function S11Me() {
   };
 
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader
         title={copy.me}
         backLabel={copy.back}

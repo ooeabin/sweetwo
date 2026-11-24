@@ -216,7 +216,7 @@ export function F08Rank() {
   if (!shownNow) {
     // 다시 동의한 뒤(저장 순위 없음, 본 적은 있음): 광고 뒤 확인
     const body = (
-      <div key="r" className="hg-stack hg-detail" style={{ gap: 'var(--space-6)' }}>
+      <div key="r" className="hg-stack hg-detail">
         {header}
         {adRow}
       </div>
@@ -230,7 +230,7 @@ export function F08Rank() {
   const prevMonth = r.view.prev ? Number(r.view.prev.month.slice(5, 7)) : null;
   const next = rankNextStep(v.net);
   const body = (
-    <div key="r" className="hg-stack hg-detail" style={{ gap: 'var(--space-6)' }}>
+    <div key="r" className="hg-stack hg-detail">
       {header}
       {stale && adRow}
       <section aria-label={copy.rankTitle}>

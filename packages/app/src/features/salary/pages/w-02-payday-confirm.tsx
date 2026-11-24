@@ -221,7 +221,7 @@ export function W02PaydayConfirm() {
       sub={fromArchive ? 'detail' : undefined}
       page={fromArchive ? undefined : page}
       columns={[
-        <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+        <div key="l" className="hg-stack">
           {fromArchive ? (
             <PageHeader
               title={copy.archiveTitle}

@@ -78,7 +78,7 @@ export function S13pPreview() {
       sub="settings"
       current={null}
       columns={[
-        <div key="p" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+        <div key="p" className="hg-stack">
           {header}
           {children}
         </div>,

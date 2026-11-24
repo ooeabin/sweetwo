@@ -42,7 +42,7 @@ export function N04Notices() {
     a: <span style={{ whiteSpace: 'pre-wrap' }}>{n.body || copy.noticesNoBody}</span>,
   }));
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader title={copy.noticesTitle} backLabel={copy.back} onBack={goBack} />
       {q.isLoading ? (
         slow ? (

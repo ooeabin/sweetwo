@@ -60,7 +60,7 @@ export function Y09GiftLog() {
     else push(r.care_day_id, careOf(r.care_day_id)?.name ?? '', r);
 
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader title={copy.gifted} backLabel={copy.back} onBack={() => nav(-1)} />
       <LineTabs<View>
         label={copy.giftedViewsLabel}

@@ -55,7 +55,7 @@ export function SalaryLoading({ value }: { value: 'month' | 'plan' }) {
       page={{ title }}
       tone={value === 'plan' ? 'alt' : undefined}
       columns={[
-        <div key="l" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
+        <div key="l" className="hg-stack">
           <SkelBody shape="cards" />
         </div>,
       ]}
@@ -81,7 +81,7 @@ export function SalaryLoadError({
       page={{ title }}
       tone={value === 'plan' ? 'alt' : undefined}
       columns={[
-        <div key="l" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
+        <div key="l" className="hg-stack">
           <section className="hg-card hg-card--fill hg-stack" role="status">
             <p className="hg-card__title">{sharedCopy.errorTitle}</p>
             <p className="hg-card__meta">{sharedCopy.errorBody}</p>
