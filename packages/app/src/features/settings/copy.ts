@@ -422,7 +422,7 @@ export const copy = {
   // S-22 위젯 설정(26 S-22, 2026-11-24) [확인 필요] 아래 문구 모두 기획서에 이름만 있어 새로 씀
   widgetsTitle: '위젯',
   widgetAmounts: '위젯에 금액 보이기',
-  widgetAmountsHelp: '이 기기에서만 바뀌어요. 금액 가리기가 켜져 있으면 가려요',
+  widgetAmountsHelp: '이 기기에만 적용돼요. 금액 가리기 중에는 가려요',
   widgetGoal: '위젯에 보일 저축·투자',
   widgetGoalDefault: '대표 저축·투자',
   widgetGoalDefaultSub: '홈 같이 모으기의 첫 칸을 보여 줘요',
