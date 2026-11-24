@@ -1495,6 +1495,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-doc__meta { font: var(--text-caption); color: var(--slate); }
 .hg-consent-card { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-4); width: 100%; max-width: 440px; padding: var(--space-6); border: 0; border-radius: var(--radius-xl); background: var(--surface-alt); }  /* 2026-11-24 구역 4: 테두리 없음, 회색 판 */
 .hg-consent-card > * { margin: 0; }
+.hg-consent-card .hg-btn--secondary { background: var(--surface); }  /* 2026-11-24 구역 4: 회색 판 위 보조 버튼은 흰 바탕으로 보이게 */
 .hg-consent-card__head { display: flex; align-items: flex-start; gap: var(--space-3); }
 .hg-consent-card__head > .hg-ico { margin-top: 3px; color: var(--slate); }
 .hg-consent-card__title { margin: 0; font: var(--text-title-3); }

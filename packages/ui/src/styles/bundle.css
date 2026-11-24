@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (07798829). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (451c926f). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -1496,6 +1496,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-doc__meta { font: var(--text-caption); color: var(--slate); }
 .hg-consent-card { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-4); width: 100%; max-width: 440px; padding: var(--space-6); border: 0; border-radius: var(--radius-xl); background: var(--surface-alt); }  /* 2026-11-24 구역 4: 테두리 없음, 회색 판 */
 .hg-consent-card > * { margin: 0; }
+.hg-consent-card .hg-btn--secondary { background: var(--surface); }  /* 2026-11-24 구역 4: 회색 판 위 보조 버튼은 흰 바탕으로 보이게 */
 .hg-consent-card__head { display: flex; align-items: flex-start; gap: var(--space-3); }
 .hg-consent-card__head > .hg-ico { margin-top: 3px; color: var(--slate); }
 .hg-consent-card__title { margin: 0; font: var(--text-title-3); }
