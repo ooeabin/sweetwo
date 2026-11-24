@@ -3018,16 +3018,17 @@ button.hg-datepill { cursor: pointer; }
 @media (max-height: 700px) { .hg-sheet { gap: var(--space-4); } }
 
 /* ── 고르기 SegChoice·선택지 카드 F ‘떠 있는 흰 알약’(2026-11-24 사용자 결정, 시안 work/w02-design/comp3.html F열): 테두리 없음 ──
-   버튼(짧은 2~3개, `hg-choice`): 회색 판(`choice-plate`, radius 16, 안쪽 4, 칸 사이 4) 안에 칸(높이 44, radius 12). 안 고른 칸은 판 그대로 + 15/400 slate, 고른 칸은 `choice-on` + `choice-on-shadow` + 15/700 ink.
+   버튼(짧은 2~3개, `hg-choice`, 2026-11-24 14:40 사용자 결정 “토글 버튼은 이전 버전이 낫다”로 #419 A 테두리 버튼으로 되돌림): 칸마다 떨어진 버튼(칸 사이 8, 높이 48, radius 12, 흰 바탕). 안 고른 칸은 `hairline` 1px 테두리 + 15/400 ink-2, 고른 칸은 ink 1.5px 테두리 + 15/700 ink, 그림자·오렌지 없음.
    카드 줄(`hg-choice--rows`와 ChoiceCards `hg-option--card`): 높이 56 이상, radius 16, 칸 사이 8, 안 고른 카드는 판 색 + 15/400 ink-2 + 오른쪽 빈 원, 고른 카드는 `choice-on` + 그림자 + 15/700 ink + 오른쪽 오렌지 체크 원. 설명은 이름 아래 13 stone.
-   회색 바탕 화면(`hg-frame--alt`)은 판이 안 보이니 한 단계 진한 `hairline-soft` 판. */
-.hg-choice { display: flex; gap: var(--space-1); box-sizing: border-box; width: 100%; align-self: stretch; padding: var(--space-1); border-radius: 16px; background: var(--choice-plate); }
+   회색 바탕 화면(홈, `hg-frame--alt`)의 카드 줄은 한 단계 진한 `hairline-soft` 판. */
+.hg-choice { display: flex; gap: var(--space-2); box-sizing: border-box; width: 100%; align-self: stretch; }
 .hg-choice__item { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .hg-choice__item:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-.hg-choice__label { font: 400 15px/20px var(--font-sans); color: var(--slate); }
+.hg-choice__label { font: 400 15px/20px var(--font-sans); color: var(--ink-2); }
 .hg-choice__sub { font: var(--text-note); color: var(--stone); }
-.hg-choice:not(.hg-choice--rows) .hg-choice__item { flex: 1 1 0; display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 var(--space-2); border-radius: var(--radius-lg); text-align: center; }
-.hg-choice:not(.hg-choice--rows) .hg-choice__item.is-on, .hg-choice--rows .hg-choice__item.is-on { background: var(--choice-on); box-shadow: var(--choice-on-shadow); }
+.hg-choice:not(.hg-choice--rows) .hg-choice__item { flex: 1 1 0; display: flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 var(--space-2); border: 1px solid var(--hairline); border-radius: var(--radius-lg); background: var(--surface); text-align: center; }
+.hg-choice:not(.hg-choice--rows) .hg-choice__item.is-on { border-color: var(--ink); box-shadow: inset 0 0 0 0.5px var(--ink); }  /* 고른 칸 ink 1.5px(테두리 1 + 안쪽 0.5), 그림자·오렌지 없음 */
+.hg-choice--rows .hg-choice__item.is-on { background: var(--choice-on); box-shadow: var(--choice-on-shadow); }
 .hg-choice .hg-choice__item.is-on .hg-choice__label { color: var(--ink); font-weight: 700; }
 .hg-choice--rows { flex-direction: column; gap: var(--space-2); padding: 0; border-radius: 0; background: none; }
 .hg-choice--rows .hg-choice__item { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 56px; padding: var(--space-3) var(--space-4); border-radius: 16px; background: var(--choice-plate); }
@@ -3037,7 +3038,6 @@ button.hg-datepill { cursor: pointer; }
 .hg-choice__item.is-on .hg-choice__dot { border-color: var(--accent-app); background: var(--accent-app); color: var(--on-accent-app); }  /* 고른 선택지 원: 오렌지 채움 + 체크 */
 /* 고른 카드의 설명은 slate(다크에서 떠 있는 판(#3a3a3d) 위 stone은 대비 4.5:1 아래) */
 .hg-choice__item.is-on .hg-choice__sub, .hg-option--card.is-on .hg-help { color: var(--slate); }
-.hg-frame--alt .hg-choice { --choice-plate: var(--hairline-soft); }
 .hg-frame--alt .hg-option--card { background: var(--hairline-soft); }
 .hg-frame--alt .hg-option--card.is-on { background: var(--choice-on); }
 /* 한 화면 입력(FormScreen) 글자 칸은 금액 칸과 같은 밑줄 입력(2026-11-24 사용자 결정): 테두리 상자 없음, 아래 2px ink 한 줄 */
