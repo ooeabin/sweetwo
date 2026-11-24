@@ -16,7 +16,7 @@ import {
   subscribeNotifications,
   type Notification,
 } from '@sweetwo/api';
-import { coupleOf, notiCursor, type NotiCursor } from '@sweetwo/core';
+import { coupleOf, notiCursor, partnerLabel, type NotiCursor } from '@sweetwo/core';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -58,7 +58,7 @@ export function useNotiPeople() {
   const starterId = c ? (c.starter ? me.data?.id : partner.data?.id) : undefined;
   return (actor: string | null) => {
     if (!actor || !c) return undefined;
-    const name = actor === me.data?.id ? c.myName : c.partnerName;
+    const name = actor === me.data?.id ? c.myName : partnerLabel(c.partnerName);
     return { name, no: actor === starterId ? (1 as const) : (2 as const) };
   };
 }

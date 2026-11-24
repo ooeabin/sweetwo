@@ -1009,6 +1009,13 @@ test('보안(S-15, 웹): 로그인된 기기, 기기별 로그아웃, 모든 기
   await expect(page.getByText('그 기기에서 로그아웃했어요')).toBeVisible();
   await expect(page.getByText('Chrome(Windows)')).toHaveCount(0);
   await page.getByRole('button', { name: '모든 기기에서 로그아웃' }).click();
+  // 2026-11-24 확인 대화상자: 취소하면 그대로, ‘로그아웃할게요’면 로그아웃
+  const ask = page.getByRole('alertdialog', { name: '모든 기기에서 로그아웃할까요?' });
+  await expect(ask).toBeVisible();
+  await ask.getByRole('button', { name: '취소' }).click();
+  await expect(page).toHaveURL(/\/settings\/security/);
+  await page.getByRole('button', { name: '모든 기기에서 로그아웃' }).click();
+  await page.getByRole('button', { name: '로그아웃할게요' }).click();
   await expect(page).toHaveURL(/\/login$/);
 });
 

@@ -8,7 +8,7 @@ import {
   trashGoals,
   type TrashRow,
 } from '@sweetwo/api';
-import { daysBetween, formatMonthDay, todayKst } from '@sweetwo/core';
+import { daysBetween, formatMonthDay, partnerLabel, todayKst } from '@sweetwo/core';
 import {
   Avatar,
   Badge,
@@ -102,7 +102,7 @@ export function S21Trash() {
       setBusy(false);
     }
   };
-  const who = (id: string | null) => (id === d.me?.id ? c.myName : id ? c.partnerName : '');
+  const who = (id: string | null) => (id === d.me?.id ? c.myName : id ? partnerLabel(c.partnerName) : '');
   const kindLabel = (r: TrashRow) =>
     copy.trashKinds[r.kind === 'asset' ? (r.sub ?? 'asset') : r.kind];
 

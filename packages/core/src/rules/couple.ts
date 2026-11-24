@@ -38,6 +38,13 @@ export interface Couple {
   partnerPayday: BaseDay | null;
 }
 
+/** 애칭이 없을 때 사람 이름 자리에 보이는 말(2026-11-24). 글자로 이름을 보이는 곳은 늘 `partnerLabel`로 */
+export const PARTNER_FALLBACK = '파트너';
+
+/** 파트너 이름 한 곳: 애칭이 비었으면(혼자 쓰기, 합류 전 애칭 안 적음) ‘파트너’. “{이름}님” 문장은 비었는지로 따로 갈라 쓰는 곳이 있어 `Couple.partnerName`은 그대로 둠 */
+export const partnerLabel = (name: string | null | undefined): string =>
+  name && name.trim() ? name : PARTNER_FALLBACK;
+
 /** 월 수입 = 월급(실수령) + 다른 수입(09 6-1 부업·월세·지원금). 월급을 모르면 다른 수입만, 둘 다 없으면 null */
 const incomeOf = (u: Pick<CoupleUser, 'monthly_income' | 'other_income'>): Won | null => {
   const other = u.other_income ?? 0;
