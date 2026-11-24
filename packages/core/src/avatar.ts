@@ -20,3 +20,16 @@ export function avatarInitials(name: string | null | undefined): string {
 export function avatarInitialCount(name: string | null | undefined): number {
   return [...segmenter.segment(avatarInitials(name))].length;
 }
+
+/**
+ * 사진으로 보여 줄 주소(2026-11-24): 빈 값·공백이거나 파트너 빈 자리거나 이미 불러오기 실패한 주소면 없음(→ 글자 원).
+ * 사진이 안 열려 브라우저 깨진 그림이 보이는 일을 막는다. 화면은 `Avatar`가 한 곳에서 처리
+ */
+export function avatarPhotoSrc(
+  src: string | null | undefined,
+  opts: { empty?: boolean; failed?: string | null } = {},
+): string | undefined {
+  const s = src?.trim();
+  if (!s || opts.empty || opts.failed === s) return undefined;
+  return s;
+}

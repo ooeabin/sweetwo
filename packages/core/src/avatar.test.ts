@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { avatarInitialCount, avatarInitials } from './avatar';
+import { avatarInitialCount, avatarInitials, avatarPhotoSrc } from './avatar';
 
 describe('avatarInitials', () => {
   it('두 글자 이름은 그대로', () => {
@@ -42,4 +42,22 @@ it('avatarInitialCount는 1~3, 없으면 0', () => {
   expect(avatarInitialCount('김철수바보')).toBe(3);
   expect(avatarInitialCount('🐰🐻🦊🐼')).toBe(3);
   expect(avatarInitialCount('')).toBe(0);
+});
+
+describe('avatarPhotoSrc (사진이 안 열리면 글자 원으로)', () => {
+  const url = 'https://x.supabase.co/storage/v1/object/sign/avatars/s/u.jpg?token=t';
+  it('주소가 있으면 사진', () => {
+    expect(avatarPhotoSrc(url)).toBe(url);
+  });
+  it('빈 값, 공백, 없음이면 사진 없음', () => {
+    expect(avatarPhotoSrc('')).toBeUndefined();
+    expect(avatarPhotoSrc('   ')).toBeUndefined();
+    expect(avatarPhotoSrc(null)).toBeUndefined();
+    expect(avatarPhotoSrc(undefined)).toBeUndefined();
+  });
+  it('불러오기에 실패한 주소와 파트너 빈 자리는 사진 없음, 다른 주소는 다시 사진', () => {
+    expect(avatarPhotoSrc(url, { failed: url })).toBeUndefined();
+    expect(avatarPhotoSrc(url, { failed: 'https://other/a.jpg' })).toBe(url);
+    expect(avatarPhotoSrc(url, { empty: true })).toBeUndefined();
+  });
 });

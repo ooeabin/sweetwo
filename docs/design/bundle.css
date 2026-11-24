@@ -582,9 +582,10 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-avatars { display: inline-flex; }
 .hg-avatar--empty { background: var(--surface-alt); color: var(--muted); }  /* 파트너 빈 자리: 사람 아이콘 */
 .hg-avatars .hg-avatar + .hg-avatar { margin-left: -8px; box-shadow: 0 0 0 2px var(--surface); }
-/* 2026-11-24 구역 5: 줄 앞 칸 두 사람은 겹치지 않고 8px 띄움(겹치면 앞 원의 글자 끝이 가려졌음). 이름이 있는 줄(S-12), 겹침은 이름 없는 작은 묶음 */
-.hg-avatars.hg-avatars--apart { gap: var(--space-2); }
-.hg-avatars.hg-avatars--apart .hg-avatar + .hg-avatar { margin-left: 0; box-shadow: none; }
+/* 2026-11-24 두 사람 겹침(S-12 연결됨·해제 대기·초대 중 모두 같은 규칙, 구역 5의 ‘떨어뜨림’을 되돌림): 원 40(lg), 겹침 −12(space-3), 뒤 원이 위(다 보임)·2px surface 고리.
+   두 원 모두 글자는 원 가운데, 크기는 Avatar 기본 이니셜 규칙 그대로(사용자 결정 ‘이름이 밀리는 것보단 가려서 안 보이는 게 나음’). 앞 원의 겹친 쪽 글자는 뒤 원에 가려져도 됨 */
+.hg-avatars.hg-avatars--lap { --lap: var(--space-3); }
+.hg-avatars--lap .hg-avatar + .hg-avatar { margin-left: calc(var(--lap) * -1); }
 
 /* Slider */
 .hg-slider { display: flex; flex-direction: column; gap: var(--space-3); max-width: 480px; }

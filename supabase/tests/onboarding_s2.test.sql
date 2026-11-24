@@ -19,7 +19,10 @@ select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
-update public.app_user set monthly_income = 3500000, payday = 25 where id = auth.uid();
+-- 월급날이 오늘(KST)과 겹치면 첫 목록을 오늘 바로 만들어서(checklist_from = 오늘) 아래 ‘만들지 않음’ 검사가 날짜에 따라 깨짐(2026-11-25 25일에 실패).
+-- 앞당기기를 줄 수 있는 며칠 차이를 두려고 오늘이 20일 이후면 5일, 아니면 25일로 잡는다
+update public.app_user set monthly_income = 3500000,
+  payday = case when extract(day from public.kst_today()) >= 20 then 5 else 25 end where id = auth.uid();
 
 -- 1) 온보딩 중 다시 만들기: 지우고 새로 저장 → 체크리스트도 새 월급날로
 select public.save_split('[{"kind":"fixed","amount":880000},{"kind":"living","amount":880000}]'::jsonb, auth.uid());

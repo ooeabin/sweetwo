@@ -336,9 +336,9 @@ export function S12Couple() {
         <div className="hg-list">
           <ListRow
             lead={
-              <span className="hg-avatars hg-avatars--apart" aria-hidden="true">
+              <span className="hg-avatars hg-avatars--lap" aria-hidden="true">
                 {people.map((p, i) => (
-                  <Avatar key={p.name + i} name={p.name} no={p.starter ? 1 : 2} />
+                  <Avatar key={p.name + i} name={p.name} no={p.starter ? 1 : 2} size="lg" />
                 ))}
               </span>
             }
