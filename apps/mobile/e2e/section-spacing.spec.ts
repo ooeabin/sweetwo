@@ -67,7 +67,9 @@ test('W-02: hero 아래 32, 밑줄 탭 아래 24, 수입 줄 앞 32', async ({ p
   expect(await gap(page, '.hg-checklist__list', '.hg-incomeline')).toBe(32);
 });
 
-test('W-01(흰 바탕): 영역 사이 32 + 8px 회색 띠 + 아래 12, 영역 안 위 여백 없음', async ({ page }) => {
+test('W-01(흰 바탕): 영역 사이 32 + 8px 회색 띠 + 아래 12, 영역 안 위 여백 없음', async ({
+  page,
+}) => {
   await open(page, '/salary/plan');
   await expect(page.locator('.hg-plancard').first()).toBeVisible();
   // 영역 사이 = 위 32 + 띠 8 + 아래 12(띠는 ::before)
@@ -114,4 +116,31 @@ test('시트: 제목 아래 24, 영역 사이 24', async ({ page }) => {
     return g;
   });
   expect(sheetGap).toBe('24px');
+});
+
+test('FormScreen 아래 고정 주 버튼: 윗변 위 32는 바탕으로 채우고, 스크롤 중에도 내용이 그 안에 안 보임', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 700 });
+  await open(page, '/assets/new?side=asset');
+  const bar = page.locator('.hg-stickybar');
+  await expect(bar).toBeVisible();
+  const r = await page.evaluate(() => {
+    const b = document.querySelector('.hg-stickybar') as HTMLElement;
+    const btn = b.querySelector('button') as HTMLElement;
+    window.scrollTo(0, (document.documentElement.scrollHeight - innerHeight) / 2);
+    const bt = btn.getBoundingClientRect().top;
+    const x = btn.getBoundingClientRect().left + 20;
+    const probe = (dy: number) => !!document.elementFromPoint(x, bt - dy)?.closest('.hg-stickybar');
+    return {
+      pad: parseFloat(getComputedStyle(b).paddingTop),
+      bg: getComputedStyle(b).backgroundColor,
+      fade: getComputedStyle(b, '::before').height,
+      solid: [4, 16, 31].every(probe),
+    };
+  });
+  expect(r.pad).toBe(32);
+  expect(r.bg).not.toBe('rgba(0, 0, 0, 0)');
+  expect(r.fade).toBe('16px');
+  expect(r.solid).toBe(true);
 });
