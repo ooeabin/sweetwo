@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { type MemDb, mockOnboarding, mockRealtime } from './mocks';
 import { setWheel } from './wheel';
+import { fillAmount, fillAssetName, foldAmount, foldText, openFold, pickAssetKind } from './form';
 
 /** 추가 입구: 넓은 창은 제목 줄 버튼, 좁은 창은 화면 안 회색 ‘+ … 추가’ 줄(AddRow, 2026-11-09 + 버튼 대신) */
 const addEntry = (page: Page, name: string) =>
@@ -421,37 +422,24 @@ test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적�
 
   await page.goto('/assets/items');
   await addEntry(page, '+ 추가').click();
-  await heading(page, '무엇을 추가할까요?');
-  await page.getByRole('button', { name: '예금·적금' }).click();
-  await axe(page);
-  await page.getByRole('button', { name: '적금', exact: true }).click();
-  await heading(page, '이름을 정해주세요');
-  await expect(page.getByLabel('이름을 정해주세요')).toHaveValue('적금');
-  await page.getByLabel('이름을 정해주세요').fill('여행 적금');
-  await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '현재 금액은 얼마예요?');
-  await page.getByLabel('현재 금액은 얼마예요?').fill('1200000');
-  await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '누구 명의예요?');
+  await heading(page, '자산 추가');
+  await pickAssetKind(page, '예금·적금', '적금');
+  await expect(page.getByLabel('이름', { exact: true })).toHaveValue('적금');
+  await fillAssetName(page, '여행 적금');
+  await fillAmount(page, '지금 금액', 1_200_000);
   // 합류 뒤에는 파트너 명의 새로 만들기 없음
   await expect(page.getByRole('radio', { name: /예빈/ })).toHaveCount(0);
   await page.getByRole('radio', { name: /^나/ }).click();
-  // 이미 고른 내 기본값(asset_share_default)이 골라진 채로(2026-11-13)
-  await heading(page, '파트너에게 어떻게 보여 줄까요?');
-  await expect(page.getByRole('radio', { name: /총액만 보여 주기/ })).toHaveAttribute(
-    'aria-checked',
-    'true',
-  );
+  // 이미 고른 내 기본값(asset_share_default)은 접힌 줄에 ‘총액만 보여 주기’
+  await expect(page.getByRole('button', { name: /파트너에게 보이기.*총액만/ })).toBeVisible();
   await axe(page);
-  await page.getByRole('button', { name: '다음' }).click();
-  // 적금 유형별 질문(F-03f): 만기일 → 월 납입액 → 끝
-  await heading(page, '만기일은 언제예요?');
-  // 2026-11-04 날짜 휠(처음 값 1년 뒤 오늘 2027-10-07): 월 ↑ 한 번(9월), 일 End(30일)
-  await page.getByRole('spinbutton', { name: '월' }).press('ArrowUp');
-  await page.getByRole('spinbutton', { name: '일' }).press('End');
-  await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '매달 얼마씩 넣어요?');
-  await page.getByLabel('매달 얼마씩 넣어요?').fill('300000');
+  // 적금 접힌 줄(F-03f): 만기일, 월 납입액
+  const m = await openFold(page, '만기일');
+  // 날짜 휠(처음 값 1년 뒤 오늘 2027-10-07): 월 ↑ 한 번(9월), 일 End(30일)
+  await m.getByRole('spinbutton', { name: '월' }).press('ArrowUp');
+  await m.getByRole('spinbutton', { name: '일' }).press('End');
+  await m.getByRole('button', { name: '확인' }).click();
+  await foldAmount(page, '월 납입액', 300_000);
   await page.getByRole('button', { name: '추가하기' }).click();
 
   await expect(page).toHaveURL(/\/assets\/items\?side=asset/);
@@ -498,8 +486,8 @@ test('추가: 어드민 항목 이름 목록(AD-19)을 칩에 입힘(숨긴 기�
   ];
   await page.goto('/assets/items');
   await addEntry(page, '+ 추가').click();
-  await page.getByRole('button', { name: '예금·적금' }).click();
-  const chips = page.getByRole('group', { name: '예금·적금' });
+  await page.getByRole('group', { name: '묶음', exact: true }).getByRole('button', { name: '예금·적금' }).click();
+  const chips = page.getByRole('group', { name: '예금·적금', exact: true });
   await expect(chips.getByRole('button')).toHaveText([
     '적금',
     '정책형 적금',
@@ -507,7 +495,7 @@ test('추가: 어드민 항목 이름 목록(AD-19)을 칩에 입힘(숨긴 기�
     '기타(직접 입력)',
   ]);
   await chips.getByRole('button', { name: '청년도약계좌' }).click();
-  await expect(page.getByLabel('이름을 정해주세요')).toHaveValue('청년도약계좌');
+  await expect(page.getByLabel('이름', { exact: true })).toHaveValue('청년도약계좌');
 });
 
 test('추가(합류 전): 파트너 명의는 대신 입력(모두 보여 주기), 부채는 남은 대출금', async ({
@@ -518,19 +506,12 @@ test('추가(합류 전): 파트너 명의는 대신 입력(모두 보여 주기
   seed(db, false);
 
   await page.goto('/assets/new?side=debt');
-  await page.getByRole('button', { name: '할부' }).click();
-  await page.getByRole('button', { name: '자동차 할부' }).click();
-  await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '남은 대출금은 얼마예요?');
-  await page.getByLabel('남은 대출금은 얼마예요?').fill('8000000');
-  await page.getByRole('button', { name: '다음' }).click();
+  await pickAssetKind(page, '할부', '자동차 할부');
+  await fillAmount(page, '남은 금액', 8_000_000);
   await page.getByRole('radio', { name: /예빈/ }).click();
-  // 부채 유형별 질문(F-03g): 금리 → 월 상환액, 나중에 해도 됨
-  await heading(page, '금리는 몇 %예요?');
-  await page.getByLabel('금리는 몇 %예요?').fill('4.5');
-  await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '매달 얼마씩 갚아요?');
-  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  // 부채 접힌 줄(F-03g): 금리, 월 상환액은 나중에 해도 됨
+  await foldText(page, '금리', '4.5');
+  await page.getByRole('button', { name: '추가하기' }).click();
 
   await expect(page.getByText('추가했어요. 순자산이 800만 원 줄었어요')).toBeVisible();
   await expect(page.getByRole('button', { name: /자동차 할부/ })).toContainText('대신 입력');
@@ -560,20 +541,11 @@ test('추가: 잘 모르겠어요 → 구간 칩 → ‘추정’으로 저장, 
   seed(db);
   await page.goto('/assets/items');
   await addEntry(page, '+ 추가').click();
-  await page.getByRole('button', { name: '예금·적금' }).click();
-  await page.getByRole('button', { name: '적금', exact: true }).click();
-  await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '현재 금액은 얼마예요?');
+  await pickAssetKind(page, '예금·적금', '적금');
   await page.getByRole('button', { name: '잘 모르겠어요' }).click();
   await page.getByRole('button', { name: '1~3천' }).click();
-  await heading(page, '누구 명의예요?');
   await page.getByRole('radio', { name: /^나/ }).click();
-  await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '만기일은 언제예요?');
-  // 유형별 질문은 나중에(F-03f)
-  await page.getByRole('button', { name: '나중에 할게요' }).click();
-  await heading(page, '매달 얼마씩 넣어요?');
-  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/assets\/items\?side=asset/);
   expect(db.assets.at(-1)).toMatchObject({ amount: 20_000_000, estimated: true });
   const row = page.getByRole('button', { name: /^적금/ });
@@ -586,18 +558,11 @@ test('주택 대출(F-03g): 월 상환액을 먼저 묻고 금리는 다음, 목
   seed(db, false);
 
   await page.goto('/assets/new?side=debt');
-  await page.getByRole('button', { name: '주택' }).click();
-  await page.getByRole('button', { name: '주택담보대출' }).click();
-  await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '남은 대출금은 얼마예요?');
-  await page.getByLabel('남은 대출금은 얼마예요?').fill('200000000');
-  await page.getByRole('button', { name: '다음' }).click();
+  await pickAssetKind(page, '주택', '주택담보대출');
+  await fillAmount(page, '남은 금액', 200_000_000);
   await page.getByRole('radio', { name: /예빈/ }).click();
-  await heading(page, '매달 얼마씩 갚아요?');
-  await page.getByLabel('매달 얼마씩 갚아요?').fill('1200000');
-  await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '금리는 몇 %예요?');
-  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  await foldAmount(page, '매달 갚는 금액', 1_200_000);
+  await page.getByRole('button', { name: '추가하기' }).click();
 
   await expect(page.getByRole('button', { name: /주택담보대출/ })).toContainText('매달 120만 원');
   expect(db.assets.at(-1)).toMatchObject({ monthly_payment: 1_200_000, interest_rate: null });
@@ -648,7 +613,7 @@ test('자산 관리 빈 상태(F-01): 순위 줄 + 묶음 타일로 항목별 �
     .getByRole('group', { name: '무엇부터 적어 볼까요?' })
     .getByRole('button', { name: '예금·적금' })
     .click();
-  await heading(page, '무엇을 추가할까요?');
+  await heading(page, '자산 추가');
   await expect(page.getByRole('button', { name: '예금·적금', pressed: true })).toBeVisible();
   await expect(page.getByRole('button', { name: '적금', exact: true })).toBeVisible();
 });
@@ -869,22 +834,19 @@ test('금리는 0~30% 소수 1자리(D5, F-03g와 F-04 같음), 보증금은 팔
   await expect(page).toHaveURL(/\/assets$/);
 
   await page.goto('/assets/new?side=debt');
-  await page.getByRole('button', { name: '신용' }).click();
-  await page.getByRole('button', { name: '신용대출' }).click();
-  await page.getByLabel('이름을 정해주세요').fill('카드 대출');
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByLabel('남은 대출금은 얼마예요?').fill('5000000');
-  await page.getByRole('button', { name: '다음' }).click();
+  await pickAssetKind(page, '신용', '신용대출');
+  await fillAssetName(page, '카드 대출');
+  await fillAmount(page, '남은 금액', 5_000_000);
   await page.getByRole('radio', { name: '나' }).click();
-  await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '금리는 몇 %예요?');
-  await page.getByLabel('금리는 몇 %예요?').fill('30.5');
-  await expect(page.getByText('0~30% 사이로 적어 주세요')).toBeVisible();
-  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
-  await page.getByLabel('금리는 몇 %예요?').fill('4.25');
-  await expect(page.getByText('0~30% 사이로 적어 주세요')).toBeVisible();
-  await page.getByLabel('금리는 몇 %예요?').fill('4.5');
-  await expect(page.getByText('0~30% 사이로 적어 주세요')).toHaveCount(0);
+  const dlg = await openFold(page, '금리');
+  const rate = dlg.getByLabel('금리', { exact: true });
+  await rate.fill('30.5');
+  await expect(dlg.getByText('0~30% 사이로 적어 주세요')).toBeVisible();
+  await expect(dlg.getByRole('button', { name: '확인' })).toBeDisabled();
+  await rate.fill('4.25');
+  await expect(dlg.getByText('0~30% 사이로 적어 주세요')).toBeVisible();
+  await rate.fill('4.5');
+  await expect(dlg.getByText('0~30% 사이로 적어 주세요')).toHaveCount(0);
 });
 
 test('F-04 맨 위는 W-10 모양(오렌지 채움 버튼 없음), 값 고치기는 시트, 만기일은 날짜 휠(type=date 없음)', async ({
@@ -938,19 +900,12 @@ test('추가(합류 전, 애칭 없음): 명의 선택지와 목록 보조는 �
   seed(db, false);
   Object.assign(db.space ?? {}, { partner_nickname: null });
   await page.goto('/assets/new?side=debt');
-  await page.getByRole('button', { name: '할부' }).click();
-  await page.getByRole('button', { name: '자동차 할부' }).click();
-  await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '남은 대출금은 얼마예요?');
-  await page.getByLabel('남은 대출금은 얼마예요?').fill('8000000');
-  await page.getByRole('button', { name: '다음' }).click();
+  await pickAssetKind(page, '할부', '자동차 할부');
+  await fillAmount(page, '남은 금액', 8_000_000);
   await expect(page.getByRole('radio', { name: '파트너', exact: true })).toBeVisible();
   await page.getByRole('radio', { name: '파트너', exact: true }).click();
-  await heading(page, '금리는 몇 %예요?');
-  await page.getByLabel('금리는 몇 %예요?').fill('4.5');
-  await page.getByRole('button', { name: '다음' }).click();
-  await heading(page, '매달 얼마씩 갚아요?');
-  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  await foldText(page, '금리', '4.5');
+  await page.getByRole('button', { name: '추가하기' }).click();
   const row = page.getByRole('button', { name: /자동차 할부/ });
   await expect(row).toContainText('파트너');
   await expect(row).toContainText('대신 입력');

@@ -100,6 +100,29 @@ export const copy = {
 
   estimatedTag: '추정', // F-03 6번 ‘잘 모르겠어요’ 알약
 
+  // F-03 한 화면(FormScreen, 2026-11-24) [확인 필요]
+  formTitle: { asset: '자산 추가', debt: '부채 추가' },
+  formWhat: '무엇을',
+  formAsk: '얼마 적을까요?',
+  formVerb: '적을까요?',
+  formKindQ: '종류',
+  formNameQ: '이름',
+  formAmountQ: { asset: '지금 금액', debt: '남은 금액' },
+  formAmountKeypad: { asset: '지금 금액', debt: '남은 금액' },
+  formOwnerQ: '누구 명의예요?',
+  formVisFold: '파트너에게 보이기',
+  formVisQ: '파트너에게 어떻게 보여 줄까요?',
+  foldPick: '정하기',
+  foldMaturity: '만기일',
+  foldContract: '계약 만기일',
+  foldCount: '납입 회차',
+  foldPayment: '월 납입액',
+  foldRepay: '매달 갚는 금액',
+  foldRate: '금리',
+  foldClear: (name: string) => `${name} 지우기`,
+  close: '닫기',
+  ok: '확인',
+
   // F-03f~i
   later: '나중에 할게요',
   maturity: '만기일은 언제예요?',
@@ -109,6 +132,25 @@ export const copy = {
   payment: '매달 얼마씩 넣어요?',
   repayment: '매달 얼마씩 갚아요?',
   rate: '금리는 몇 %예요?',
+
+  // F-04b 팔았어요 한 화면(FormScreen, 2026-11-24) [확인 필요]
+  soldHeroTail: '팔고',
+  soldHeroVerb: '받았어요',
+  soldHeroAsk: '얼마 받았어요?',
+  soldHowQ: '얼마나 팔았어요?',
+  soldAllShort: '전부',
+  soldPartShort: '일부',
+  soldReceivedQ: '받은 금액',
+  soldNow: (n: string) => `지금 금액 ${n}`,
+  soldRemainQ: '남은 평가금액',
+  soldToQ: '어느 통장에 들어왔어요?',
+  soldNoTo: '안 적을게요',
+  soldToLine: (name: string, from: string, to: string) => `${name} ${from} > ${to}`,
+  soldDo: '적기',
+  // F-04a 만기 정리 한 화면 [확인 필요]
+  maturedHero: '정리할까요?',
+  maturedDateQ: '새 만기일',
+  maturedDo: '정리하기',
 
   // F-04a 만기 금액 정리
   maturedTitle: '만기 금액은 어디로 옮겼어요?',

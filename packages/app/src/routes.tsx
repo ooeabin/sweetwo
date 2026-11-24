@@ -16,7 +16,7 @@ import {
   paths,
 } from './features/auth';
 import {
-  AssetAddRoute,
+  F03AssetAdd,
   F01Summary,
   F02Items,
   F03qQuick,
@@ -668,11 +668,11 @@ export const routes: RouteObject[] = [
         ),
       }, // Y-07 경조사 추가
       {
-        path: '/assets/new/:step?',
+        path: '/assets/new',
         element: (
           <RequireAccount>
             <OnboardingGate>
-              <AssetAddRoute />
+              <F03AssetAdd />
             </OnboardingGate>
           </RequireAccount>
         ),

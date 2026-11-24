@@ -30,7 +30,6 @@ import { money, useMask } from '../../../shared/mask';
 import { SkelBody } from '../../frame';
 import { AssetsFrame } from '../assets-frame';
 import { copy } from '../copy';
-import { useAssetDraft } from '../add/draft';
 import { ownerOf, useAssetsData } from '../data';
 
 const STALE_DAYS = 92; // 3개월 넘게 안 고친 줄 → “금액이 맞나요?”
@@ -76,7 +75,6 @@ export function F02Items() {
   const [params] = useSearchParams();
   const side: AssetSide = params.get('side') === 'debt' ? 'debt' : 'asset';
   const d = useAssetsData();
-  const { reset: resetDraft, set: setDraft } = useAssetDraft();
   const loc = useLocation();
   const { masked } = useMask();
   const m = (v: number) => money(v, masked);
@@ -125,16 +123,9 @@ export function F02Items() {
     if (afterFirst) nav(`${loc.pathname}${loc.search}`, { replace: true, state: null });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const justFirst = ready && own.mine > 0 && afterFirst;
+  // 종류 칩: 한 화면 추가(F-03)를 그 종류로 미리 고른 채 엶(2026-11-24, 분석 entry chip)
   const startChip = (c: ReturnType<typeof firstAssetChipsOf>[number]) => {
-    resetDraft(c.side, d.me?.asset_share_default ?? null);
-    setDraft({
-      grp: c.grp,
-      kind: c.kind,
-      name: copy.firstChips[c.key as keyof typeof copy.firstChips],
-      owner: 'me',
-      quick: true,
-    });
-    nav('/assets/new/amount');
+    nav(`/assets/new?chip=${c.key}`);
   };
   const sideName = side === 'asset' ? copy.assetsLabel : copy.debtsLabel;
 

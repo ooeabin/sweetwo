@@ -312,7 +312,7 @@ test('경조사 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건너
   await page.getByLabel('어떤 날이에요?').fill('어머니 생신');
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.getByRole('heading', { name: '언제예요?' })).toBeVisible();
-  await page.getByRole('tab', { name: '음력' }).click();
+  await page.getByRole('radio', { name: '음력' }).click();
   await setWheel(page, '언제예요?', 2026, 8, 3);
   await expect(page.getByRole('switch', { name: '매년 돌아와요' })).toBeChecked();
   await axe(page);
