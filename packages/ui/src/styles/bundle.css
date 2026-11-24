@@ -1088,7 +1088,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-amountin > .hg-quick { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: var(--space-2); }
 .hg-amountin > .hg-quick > .hg-chip { justify-content: center; height: 40px; border-color: transparent; background: var(--surface-alt); color: var(--ink); font: var(--text-label); border-radius: var(--radius-md); }
 .hg-amountin > .hg-quick > .hg-chip:hover { background: var(--hairline-soft); }
-.hg-amountin > .hg-quick > .hg-chip.is-selected, .hg-amountin > .hg-quick > .hg-chip.is-selected:hover { border-color: var(--accent-app); box-shadow: inset 0 0 0 1px var(--accent-app); background: var(--surface); color: var(--accent-app-text); }  /* 2026-11-09 바꾸기 칩(quickSet) 고른 표시: 오렌지 테두리 + 오렌지 글자 600(브랜드 색 규칙 2026-11-09) */
+/* 2026-11-24 빠른 금액 칩(+10만, 10만 원)은 누르면 값을 더하거나 바꾸는 버튼이라 고른 표시(is-selected)를 두지 않고 늘 회색 */
 .hg-amountin .hg-amount.is-idle { border-bottom-color: var(--border-control); }  /* 2026-11-09 round 3 두 칸(second)일 때 키패드가 쓰지 않는 칸은 밑줄을 옅게 */
 /* 2026-11-10 QA 2구간 S2-21: 금액 칸 인라인 스타일을 클래스로. 입력 칸 자체는 틀 없이, 오류면 밑줄 danger, 링크 줄은 왼쪽 정렬 */
 input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 100%; min-width: 0; color: var(--ink); padding: 0; }
@@ -3017,8 +3017,8 @@ button.hg-datepill { cursor: pointer; }
 .hg-choice__item:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .hg-choice__label { font: var(--text-value); color: var(--ink-2); }
 .hg-choice__sub { font: var(--text-note); color: var(--stone); }
-.hg-choice:not(.hg-choice--rows) .hg-choice__item { flex: 1 1 0; display: flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 var(--space-2); border: 1px solid var(--hairline); border-radius: var(--radius-lg); background: var(--surface); text-align: center; }
-.hg-choice:not(.hg-choice--rows) .hg-choice__item.is-on { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.hg-choice:not(.hg-choice--rows) .hg-choice__item { flex: 1 1 0; display: flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 var(--space-2); border: 1px solid var(--hairline); border-radius: var(--radius-lg); background: var(--surface); text-align: center; }
+.hg-choice:not(.hg-choice--rows) .hg-choice__item.is-on { border-color: var(--ink); box-shadow: 0 0 0 0.5px var(--ink); }  /* 1.5px 테두리(Chrome은 border-width 1.5를 1로 맞추므로 1px + 0.5px 그림자). 시안 A: 높이 48, 칸 사이 8, radius 12, 안 고름 hairline 1px + 15/400 ink-2, 고름 ink 1.5px + 15/700 ink */
 .hg-choice:not(.hg-choice--rows) .hg-choice__item.is-on .hg-choice__label { color: var(--ink); font-weight: 700; }
 .hg-choice--rows { flex-direction: column; gap: 0; }
 .hg-choice--rows .hg-choice__item { display: flex; align-items: center; gap: var(--space-3); min-height: 56px; padding: var(--space-3) 0; }
@@ -3026,6 +3026,11 @@ button.hg-datepill { cursor: pointer; }
 .hg-choice--rows .hg-choice__label { font: var(--text-name); color: var(--ink); }
 .hg-choice__dot { flex: none; box-sizing: border-box; width: 24px; height: 24px; border: 2px solid var(--border-control); border-radius: var(--radius-full); background: var(--surface); }
 .hg-choice__item.is-on .hg-choice__dot { border-color: var(--accent-app); background: var(--accent-app); box-shadow: inset 0 0 0 5px var(--surface); }  /* 고른 원: 오렌지 채움 + 안쪽 흰 점(고른 선택지 원) */
+/* 한 화면 입력(FormScreen) 글자 칸은 금액 칸과 같은 밑줄 입력(2026-11-24 사용자 결정): 테두리 상자 없음, 아래 2px ink 한 줄 */
+.hg-form input.hg-input { height: 48px; padding: 0; border: 0; border-bottom: 2px solid var(--ink); border-radius: 0; background: none; }
+.hg-form input.hg-input.is-error { border-bottom-color: var(--danger); }
+.hg-form input.hg-input:focus { outline: none; border-bottom-color: var(--ink); }
+.hg-form input.hg-input:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 @media (prefers-reduced-motion: no-preference) { .hg-choice__item { transition: border-color var(--dur-fast) var(--ease-out); } }
 .hg-form__quick { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--space-1); }  /* F-03 ‘큰 항목만 빠르게 적기 ›’ 글자 버튼 */
 

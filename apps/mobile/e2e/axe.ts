@@ -11,7 +11,6 @@ const BRAND_FILL = /hg-badge--achieved/;
 // 이 선택자에 걸리는 요소(또는 그 안의 글자)만 color-contrast에서 뺌. 나머지 규칙과 요소는 그대로 검사함.
 const ORANGE_TEXT = [
   '.hg-sechead__count b', // “저축·투자 1/2”의 한 개수
-  '.hg-amountin > .hg-quick > .hg-chip.is-selected', // 고른 바꾸기 칩(W-11b)
   ':is(.hg-card, .hg-list, .hg-checklist) .hg-btn--secondary', // 카드 안 보조 버튼의 오렌지 글자(‘초대 취소’, ‘링크 복사’ 등, 2026-11-11 사용자 결정, 14px 이상 700)
   '.hg-plan__block--soft', // 옅은 오렌지 판 위 버튼의 오렌지 글자(W-01 ‘월급 적기’, 2026-11-19 사용자 결정, 14px 이상 700)
   '.hg-form__val', // 한 화면 입력 요약 문장의 금액(22px 700, 2026-11-23 사용자 결정: 이름은 ink, 금액 자리만 오렌지)
