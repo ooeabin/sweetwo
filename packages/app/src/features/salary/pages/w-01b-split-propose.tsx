@@ -17,11 +17,12 @@ import {
   type SplitRule,
 } from '@sweetwo/core';
 import {
-  AmountInput,
-  ChoiceCards,
   Chip,
-  QuestionLayout,
+  FormAmount,
+  FormScreen,
+  FormSection,
   QuestionSkeleton,
+  SegChoice,
   ShortText,
 } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -32,11 +33,10 @@ import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { useMe, usePartner, useSpace, useSplits } from '../data';
 
-type Step = 'name' | 'total' | 'rule' | 'custom';
 const t = copy.splitShare;
 const NAME_CHIPS = ['living', 'date'] as const;
 
-// W-01b 분담 도우미(제안하는 쪽, 20 ‘W-01b’, 06 3-7, 08 4-1 (나)): 통장 이름(칩 ‘생활비 통장’ ‘데이트 통장’ + ‘직접 쓸게요’, 20자)
+// W-01b 분담 도우미(제안하는 쪽, 20 ‘W-01b’, 06 3-7, 08 4-1 (나)). 2026-11-24 한 화면 입력(FormScreen): 아래 순서 질문이 한 화면 섹션이 되고(‘직접’일 때만 내 몫 섹션이 붙음) 결과 한 줄이 아래에 뜸. 통장 이름(칩 ‘생활비 통장’ ‘데이트 통장’ + ‘직접 쓸게요’, 20자)
 // → 한 달에 얼마(1만 원 단위) → 나누는 법 ‘반반’ / ‘월급 비율’ / ‘직접’ → 결과 “{나} 60만 원, {이름} 40만 원 (6 : 4)”
 // → ‘{이름}님에게 제안하기’(propose_split, 상대 푸시·인앱 + 홈 띠 4번). 어느 관리 형태에서든.
 // ‘월급 비율’은 두 사람 모두 월급이 있고 둘 다 공개 ‘모두 보여 주기’일 때만 고를 수 있고, 아니면 이유 문구 없이 흐린 선택지.
@@ -55,7 +55,6 @@ export function W01bSplitPropose() {
     queryFn: () => fetchPartnerPlanView(),
     enabled: connected,
   });
-  const [step, setStep] = useState<Step>('name');
   const [chip, setChip] = useState<(typeof NAME_CHIPS)[number] | 'self' | null>(null);
   const [own, setOwn] = useState('');
   const [total, setTotal] = useState<number | null>(null);
@@ -132,16 +131,36 @@ export function W01bSplitPropose() {
     }
   };
 
-  if (step === 'name') {
-    const tooLong = [...own.trim()].length > 20;
-    return (
-      <QuestionLayout
-        title={t.nameQ}
-        onBack={back}
-        primary={{ label: t.next, disabled: !name || tooLong }}
-        onSubmit={() => name && !tooLong && setStep('total')}
-      >
-        <div className="hg-quick" role="radiogroup" aria-label={t.nameQ}>
+  const tooLong = [...own.trim()].length > 20;
+  const mineOk =
+    rule !== 'custom' ||
+    (mine !== null && mine >= 0 && mine % 10_000 === 0 && total !== null && mine <= total);
+  const ready = connected
+    ? !!name && !tooLong && unitOk(total) && !!rule && mineOk && !!shares
+    : !!name && !tooLong && unitOk(total);
+  const resultLine = shares
+    ? t.result(
+        c.myName,
+        readWon(shares.mine),
+        c.partnerName,
+        readWon(shares.partner),
+        shares.ratioTen[0],
+        shares.ratioTen[1],
+      )
+    : undefined;
+  return (
+    <FormScreen
+      title={t.formTitle}
+      onBack={back}
+      primary={{
+        label: connected ? t.propose(c.partnerName) : t.addMine,
+        disabled: !ready,
+        loading: busy,
+      }}
+      onSubmit={() => void (connected ? propose() : addMine())}
+    >
+      <FormSection title={t.nameQ}>
+        <div className="hg-form__chips" role="radiogroup" aria-label={t.nameQ}>
           {NAME_CHIPS.map((k) => (
             <Chip
               key={k}
@@ -173,101 +192,58 @@ export function W01bSplitPropose() {
             onChange={setOwn}
             max={20}
             error={tooLong ? t.tooLong : undefined}
+            autoFocus={false}
           />
         )}
-      </QuestionLayout>
-    );
-  }
-  if (step === 'total')
-    return (
-      <QuestionLayout
-        title={connected ? t.totalQ : t.mineQ}
-        help={total !== null && !unitOk(total) ? t.unit : undefined}
-        onBack={() => setStep('name')}
-        primary={{
-          label: connected ? t.next : t.addMine,
-          disabled: !unitOk(total),
-          loading: busy,
-        }}
-        onSubmit={() => (connected ? setStep('rule') : void addMine())}
-      >
-        <AmountInput
+      </FormSection>
+      <FormSection title={connected ? t.totalQ : t.mineQ}>
+        <FormAmount
           label={connected ? t.totalQ : t.mineQ}
+          sheetTitle={connected ? t.totalQ : t.mineQ}
           value={total}
           onChange={setTotal}
           quick={quickChips.small.slice(1)}
-          monthly
-          embedded
+          below={total !== null && !unitOk(total) ? <p className="hg-help">{t.unit}</p> : undefined}
         />
-      </QuestionLayout>
-    );
-  if (step === 'custom') {
-    const ok = mine !== null && mine >= 0 && mine % 10_000 === 0 && total !== null && mine <= total;
-    return (
-      <QuestionLayout
-        title={t.customQ}
-        help={
-          mine !== null && total !== null && mine > total
-            ? t.overTotal
-            : mine !== null && mine % 10_000 !== 0
-              ? t.unit
-              : undefined
-        }
-        onBack={() => setStep('rule')}
-        primary={{ label: t.propose(c.partnerName), disabled: !ok || !shares, loading: busy }}
-        summary={
-          shares
-            ? t.result(
-                c.myName,
-                readWon(shares.mine),
-                c.partnerName,
-                readWon(shares.partner),
-                shares.ratioTen[0],
-                shares.ratioTen[1],
-              )
-            : undefined
-        }
-        onSubmit={() => void propose()}
-      >
-        <AmountInput label={t.customQ} value={mine} onChange={setMine} monthly embedded allowZero />
-      </QuestionLayout>
-    );
-  }
-  return (
-    <QuestionLayout
-      title={t.ruleQ}
-      onBack={() => setStep('total')}
-      primary={{
-        label: rule === 'custom' ? t.next : t.propose(c.partnerName),
-        disabled: !rule || (rule !== 'custom' && !shares),
-        loading: busy,
-      }}
-      summary={
-        shares && rule !== 'custom'
-          ? t.result(
-              c.myName,
-              readWon(shares.mine),
-              c.partnerName,
-              readWon(shares.partner),
-              shares.ratioTen[0],
-              shares.ratioTen[1],
-            )
-          : undefined
-      }
-      onSubmit={() => (rule === 'custom' ? setStep('custom') : void propose())}
-    >
-      <ChoiceCards<SplitRule>
-        label={t.ruleQ}
-        value={rule}
-        onChange={setRule}
-        autoAdvance={false}
-        options={(['half', 'income_ratio', 'custom'] as const).map((r) => ({
-          value: r,
-          label: t.rules[r] ?? r,
-          // 이유 문구 없이 흐린 선택지(R3)
-          disabled: r === 'income_ratio' && !ratioOk,
-        }))}
-      />
-    </QuestionLayout>
+      </FormSection>
+      {connected && (
+        <FormSection title={t.ruleQ}>
+          <SegChoice<SplitRule>
+            label={t.ruleQ}
+            value={rule}
+            onChange={setRule}
+            variant="rows"
+            items={(['half', 'income_ratio', 'custom'] as const).map((r) => ({
+              value: r,
+              label: t.rules[r] ?? r,
+              // 이유 문구 없이 흐린 선택지(R3)
+              disabled: r === 'income_ratio' && !ratioOk,
+            }))}
+          />
+        </FormSection>
+      )}
+      {connected && rule === 'custom' && (
+        <FormSection title={t.customQ}>
+          <FormAmount
+            label={t.customQ}
+            sheetTitle={t.customQ}
+            value={mine}
+            onChange={setMine}
+            below={
+              mine !== null && total !== null && mine > total ? (
+                <p className="hg-help is-error">{t.overTotal}</p>
+              ) : mine !== null && mine % 10_000 !== 0 ? (
+                <p className="hg-help">{t.unit}</p>
+              ) : undefined
+            }
+          />
+        </FormSection>
+      )}
+      {resultLine && (
+        <p className="hg-form__hint" aria-live="polite">
+          {resultLine}
+        </p>
+      )}
+    </FormScreen>
   );
 }

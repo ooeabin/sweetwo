@@ -18,13 +18,15 @@ import {
   type YearMonth,
 } from '@sweetwo/core';
 import {
-  AmountInput,
   Checkbox,
-  ChoiceCards,
-  QuestionLayout,
+  FormAmount,
+  FormScreen,
+  FormSection,
   QuestionSkeleton,
+  SegChoice,
   ShortText,
   YearMonthInput,
+  type StepDone,
 } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -37,8 +39,7 @@ import { useSavingItems, type SavingItem } from '../saving';
 import { SavingQuestionError } from '../saving-parts';
 import { refreshBundles, refreshSaving, useBundles } from '../together';
 
-type Step =
-  'exist' | 'partner' | 'mine' | 'newName' | 'newMonthly' | 'target' | 'deadline' | 'notice';
+type Step = 'exist' | 'partner' | 'mine' | 'newName' | 'target' | 'notice';
 const NEW = '__new';
 const MINE_ONLY = '__mine';
 const JOIN = '__join';
@@ -75,6 +76,7 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
   const [pctOnly, setPctOnly] = useState(false);
   const [separate, setSeparate] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [existPick, setExistPick] = useState<string | null>(null);
 
   const ready = d.ready && !bundles.isLoading;
   const given = d.ready ? d.byId(params.get('goal') ?? '') : undefined;
@@ -221,225 +223,288 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
     }
   };
 
+  // 스테퍼(2026-11-24, FormScreen step): 앞 답이 뒤 질문을 정하는 분기 흐름이라 한 화면으로 못 합침. 새 저금의 이름·매달 금액, 목표 금액·기한은 각각 한 화면
+  const flow: Step[] = join
+    ? [
+        ...(d.live.some((i) => i.owner === 'mine' && free(i)) && !given ? (['mine'] as Step[]) : []),
+        ...(mineGoal === NEW ? (['newName'] as Step[]) : []),
+        'notice',
+      ]
+    : [
+        ...(given?.owner === 'partner' || given?.owner === 'mine' ? [] : (['partner'] as Step[])),
+        ...(given?.owner === 'mine' ? [] : (['mine'] as Step[])),
+        ...(mineGoal === NEW ? (['newName'] as Step[]) : []),
+        'target',
+        'notice',
+      ];
+  const stepHead = (cur: Step) => {
+    const at = flow.indexOf(cur);
+    if (at < 0) return undefined;
+    const done: StepDone[] = [];
+    if (pg && flow.indexOf('partner') >= 0 && at > flow.indexOf('partner'))
+      done.push({ label: copy.doneBundlePartner, value: pg.goal.name });
+    if (flow.indexOf('mine') >= 0 && at > flow.indexOf('mine') && mineGoal)
+      done.push({
+        label: copy.doneBundleMine,
+        value: mineGoal === NEW ? copy.bundleNewSaving : (mg?.goal.name ?? ''),
+      });
+    if (mineGoal === NEW && at > flow.indexOf('newName'))
+      done.push({ label: copy.doneBundleNew, value: newName.trim() });
+    return { index: at + 1, total: flow.length, done };
+  };
+  const heading = join ? copy.bundleJoinTitle : copy.bundleTitle;
+
   // 들어갈 묶음(상대가 만듦) → ‘같이 모을게요’ = 들어가기(이 저금을 고른 채로), 기다리는 묶음(내가 만듦) → 따로 하나 더 또는 나중에
-  if (step === 'exist' && open)
+  if (step === 'exist' && open) {
+    const q = openJoin
+      ? copy.bundleJoinQ(d.partnerName, bundleShownName(open.name))
+      : copy.bundleWaitingQ(d.partnerName, bundleShownName(open.name));
+    const pick = (v: string) => {
+      track('bundle_open_answered', {
+        choice: v === JOIN ? 'join' : v === SEPARATE ? 'separate' : 'later',
+      });
+      if (v === JOIN) {
+        const qs = new URLSearchParams();
+        if (given?.owner === 'mine' && !given.goal.bundle_id) qs.set('goal', given.goal.id);
+        const str = qs.toString();
+        return nav(`${togetherPaths.bundleJoin(open.id)}${str ? `?${str}` : ''}`, {
+          replace: true,
+        });
+      }
+      if (v === SEPARATE) {
+        setSeparate(true);
+        setTrail((t) => [...t, 'exist']);
+        return firstStep(true);
+      }
+      back();
+    };
     return (
-      <QuestionLayout
-        title={
-          openJoin
-            ? copy.bundleJoinQ(d.partnerName, bundleShownName(open.name))
-            : copy.bundleWaitingQ(d.partnerName, bundleShownName(open.name))
-        }
-        help={openJoin ? copy.bundleJoinHelp : copy.bundleWaitingHelp}
+      <FormScreen
+        title={heading}
         onBack={back}
+        primary={{ label: copy.next, disabled: !existPick }}
+        onSubmit={() => existPick && pick(existPick)}
       >
-        <ChoiceCards<string>
-          label={
-            openJoin
-              ? copy.bundleJoinQ(d.partnerName, bundleShownName(open.name))
-              : copy.bundleWaitingQ(d.partnerName, bundleShownName(open.name))
-          }
-          value={null}
-          onChange={() => undefined}
-          onPick={(v) => {
-            track('bundle_open_answered', {
-              choice: v === JOIN ? 'join' : v === SEPARATE ? 'separate' : 'later',
-            });
-            if (v === JOIN) {
-              const q = new URLSearchParams();
-              if (given?.owner === 'mine' && !given.goal.bundle_id) q.set('goal', given.goal.id);
-              const s = q.toString();
-              return nav(`${togetherPaths.bundleJoin(open.id)}${s ? `?${s}` : ''}`, {
-                replace: true,
-              });
+        <FormSection title={q} aside={undefined}>
+          <p className="hg-form__hint">{openJoin ? copy.bundleJoinHelp : copy.bundleWaitingHelp}</p>
+          <SegChoice<string>
+            label={q}
+            value={existPick}
+            onChange={setExistPick}
+            variant="rows"
+            items={
+              openJoin
+                ? [
+                    { value: JOIN, label: copy.bundleAskYes },
+                    { value: SEPARATE, label: copy.bundleSeparate },
+                  ]
+                : [
+                    { value: SEPARATE, label: copy.bundleSeparate },
+                    { value: '__later', label: copy.laterAnswer },
+                  ]
             }
-            if (v === SEPARATE) {
-              setSeparate(true);
-              setTrail((t) => [...t, 'exist']);
-              return firstStep(true);
-            }
-            back();
-          }}
-          options={
-            openJoin
-              ? [
-                  { value: JOIN, label: copy.bundleAskYes },
-                  { value: SEPARATE, label: copy.bundleSeparate },
-                ]
-              : [
-                  { value: SEPARATE, label: copy.bundleSeparate },
-                  { value: '__later', label: copy.laterAnswer },
-                ]
-          }
-        />
-      </QuestionLayout>
+          />
+        </FormSection>
+      </FormScreen>
     );
+  }
   if (step === 'partner')
     return (
-      <QuestionLayout title={copy.bundlePartnerQ(d.partnerName)} onBack={prev}>
-        <ChoiceCards<string>
-          label={copy.bundlePartnerQ(d.partnerName)}
-          value={partnerGoal}
-          onChange={setPartnerGoal}
-          onPick={(v) => {
-            if (v === MINE_ONLY) setPartnerGoal(null);
-            go('mine');
-          }}
-          options={[
-            ...partnerList.map((i) => ({ value: i.goal.id, label: i.goal.name })),
-            { value: MINE_ONLY, label: copy.bundleFromMine },
-          ]}
-        />
-      </QuestionLayout>
+      <FormScreen
+        title={heading}
+        onBack={prev}
+        step={stepHead('partner')}
+        primary={{ label: copy.next, disabled: partnerGoal === null }}
+        onSubmit={() => {
+          if (partnerGoal === MINE_ONLY) setPartnerGoal(null);
+          go('mine');
+        }}
+      >
+        <FormSection title={copy.bundlePartnerQ(d.partnerName)}>
+          <SegChoice<string>
+            label={copy.bundlePartnerQ(d.partnerName)}
+            value={partnerGoal}
+            onChange={setPartnerGoal}
+            variant="rows"
+            items={[
+              ...partnerList.map((i) => ({ value: i.goal.id, label: i.goal.name })),
+              { value: MINE_ONLY, label: copy.bundleFromMine },
+            ]}
+          />
+        </FormSection>
+      </FormScreen>
     );
   if (step === 'mine')
     return (
-      <QuestionLayout
-        title={
-          join && bundle
-            ? copy.bundleJoinQ(d.partnerName, bundleShownName(bundle.name))
-            : copy.bundleMineQ
-        }
-        help={join ? copy.bundleMineQ : undefined}
+      <FormScreen
+        title={heading}
         onBack={prev}
-      >
-        <ChoiceCards<string>
-          label={copy.bundleMineQ}
-          value={mineGoal}
-          onChange={setMineGoal}
-          onPick={(v) => {
-            if (v !== NEW) return afterMine();
-            // 새 저금 이름 처음 값: 고른 상대 저금(또는 들어가는 묶음) 이름
-            setNewName(pg?.goal.name ?? bundleShownName(bundle?.name ?? ''));
-            if (newMonthly === null)
-              setNewMonthly(partnerMonthly(pg?.goal.id ?? joinPartnerGoal()));
-            go('newName');
-          }}
-          options={[
-            ...mineList.map((i) => ({ value: i.goal.id, label: i.goal.name })),
-            { value: NEW, label: copy.bundleNewSaving },
-          ]}
-        />
-      </QuestionLayout>
-    );
-  if (step === 'newName')
-    return (
-      <QuestionLayout
-        title={copy.addNameQ}
-        onBack={prev}
-        primary={{ label: copy.next, disabled: !newName.trim() }}
-        onSubmit={() => go('newMonthly')}
-      >
-        <ShortText
-          label={copy.addNameQ}
-          value={newName}
-          onChange={setNewName}
-          max={20}
-          placeholder={copy.addNamePlaceholder}
-        />
-      </QuestionLayout>
-    );
-  if (step === 'newMonthly')
-    return (
-      <QuestionLayout
-        title={copy.addMonthlyQ}
-        onBack={prev}
-        primary={{
-          label: copy.next,
-          disabled: newMonthly === null || newMonthly % 10_000 !== 0,
+        step={stepHead('mine')}
+        primary={{ label: copy.next, disabled: mineGoal === null }}
+        onSubmit={() => {
+          if (mineGoal !== NEW) return afterMine();
+          // 새 저금 이름 처음 값: 고른 상대 저금(또는 들어가는 묶음) 이름
+          setNewName(pg?.goal.name ?? bundleShownName(bundle?.name ?? ''));
+          if (newMonthly === null) setNewMonthly(partnerMonthly(pg?.goal.id ?? joinPartnerGoal()));
+          go('newName');
         }}
+      >
+        <FormSection
+          title={
+            join && bundle
+              ? copy.bundleJoinQ(d.partnerName, bundleShownName(bundle.name))
+              : copy.bundleMineQ
+          }
+        >
+          {join && <p className="hg-form__hint">{copy.bundleMineQ}</p>}
+          <SegChoice<string>
+            label={copy.bundleMineQ}
+            value={mineGoal}
+            onChange={setMineGoal}
+            variant="rows"
+            items={[
+              ...mineList.map((i) => ({ value: i.goal.id, label: i.goal.name })),
+              { value: NEW, label: copy.bundleNewSaving },
+            ]}
+          />
+        </FormSection>
+      </FormScreen>
+    );
+  // 새 저금: 이름 + 매달 금액을 한 화면에
+  if (step === 'newName') {
+    const monthlyBad = newMonthly === null || newMonthly % 10_000 !== 0;
+    return (
+      <FormScreen
+        title={heading}
+        onBack={prev}
+        step={stepHead('newName')}
+        primary={{ label: copy.next, disabled: !newName.trim() || monthlyBad }}
         onSubmit={afterMine}
       >
-        <AmountInput
-          label={copy.addMonthlyQ}
-          value={newMonthly}
-          onChange={setNewMonthly}
-          quick={quickChips.monthly}
-          quickSet
-          monthly
-          allowZero
-        />
-        {newMonthly !== null && newMonthly % 10_000 !== 0 && (
-          <p className="hg-help">{copy.tenThousandUnit}</p>
-        )}
-      </QuestionLayout>
+        <FormSection title={copy.addNameQ}>
+          <ShortText
+            label={copy.addNameQ}
+            value={newName}
+            onChange={setNewName}
+            max={20}
+            placeholder={copy.addNamePlaceholder}
+            autoFocus={false}
+          />
+        </FormSection>
+        <FormSection title={copy.addMonthlyQ}>
+          <FormAmount
+            label={copy.addMonthlyQ}
+            sheetTitle={copy.addMonthlyQ}
+            value={newMonthly}
+            onChange={setNewMonthly}
+            quick={quickChips.monthly}
+            below={
+              newMonthly !== null && newMonthly % 10_000 !== 0 ? (
+                <p className="hg-help">{copy.tenThousandUnit}</p>
+              ) : undefined
+            }
+          />
+        </FormSection>
+      </FormScreen>
     );
-  if (step === 'target')
+  }
+  // 목표 금액 + 기한을 한 화면에(기한은 목표 금액을 적었을 때만)
+  if (step === 'target') {
+    const ym = dv ?? defaultDeadline();
+    const err = tv && ym < thisMonth() ? copy.notBeforeThisMonth : undefined;
     return (
-      <QuestionLayout
-        title={copy.bundleTargetQ}
-        help={targetDefault !== null && pg ? copy.bundleTargetHelp : undefined}
+      <FormScreen
+        title={heading}
         onBack={prev}
-        primary={{ label: copy.next, disabled: !tv }}
-        onSubmit={() => go('deadline')}
+        step={stepHead('target')}
         later={{
           label: copy.bundleNoTarget,
           onClick: () => {
             setTarget(null);
+            setDeadline(null);
             setPctOnly(false);
             go('notice');
           },
         }}
-      >
-        <AmountInput
-          label={copy.bundleTargetQ}
-          value={tv}
-          onChange={(x) => setTarget(x && x > 0 ? x : null)}
-        />
-      </QuestionLayout>
-    );
-  if (step === 'deadline') {
-    const ym = dv ?? defaultDeadline();
-    const err = ym < thisMonth() ? copy.notBeforeThisMonth : undefined;
-    return (
-      <QuestionLayout
-        title={copy.bundleDeadlineQ}
-        onBack={prev}
-        primary={{ label: copy.next, disabled: !!err }}
+        primary={{ label: copy.next, disabled: !tv || !!err }}
         onSubmit={() => {
-          setDeadline(ym);
+          setDeadline(deadline === null ? null : ym);
           go('notice');
         }}
-        later={{
-          label: copy.bundleNoDeadline,
-          onClick: () => {
-            setDeadline(null);
-            go('notice');
-          },
-        }}
       >
-        <YearMonthInput
-          label={copy.bundleDeadlineQ}
-          value={ym}
-          onChange={(x) => setDeadline(x as YearMonth | null)}
-          error={err}
-        />
-      </QuestionLayout>
+        <FormSection title={copy.bundleTargetQ}>
+          <FormAmount
+            label={copy.bundleTargetQ}
+            sheetTitle={copy.bundleTargetQ}
+            value={tv}
+            onChange={(x) => setTarget(x && x > 0 ? x : null)}
+            allowZero={false}
+            monthly={false}
+            below={
+              targetDefault !== null && pg ? (
+                <p className="hg-form__hint">{copy.bundleTargetHelp}</p>
+              ) : undefined
+            }
+          />
+        </FormSection>
+        {tv && (
+          <FormSection
+            title={copy.bundleDeadlineQ}
+            aside={
+              dv !== null || deadline === undefined ? (
+                <button
+                  type="button"
+                  className="hg-btn hg-btn--link"
+                  onClick={() => setDeadline(null)}
+                >
+                  {copy.bundleNoDeadline}
+                </button>
+              ) : undefined
+            }
+          >
+            {deadline === null ? (
+              <button
+                type="button"
+                className="hg-btn hg-btn--link hg-form__quick"
+                onClick={() => setDeadline(ym)}
+              >
+                {copy.bundleDeadlineQ}
+              </button>
+            ) : (
+              <YearMonthInput
+                label={copy.bundleDeadlineQ}
+                value={ym}
+                onChange={(x) => setDeadline(x as YearMonth | null)}
+                error={err}
+              />
+            )}
+          </FormSection>
+        )}
+      </FormScreen>
     );
   }
   // 고지(G1): 숨겨 주지 못하는 것은 숨겨 준다고 말하지 않음. 퍼센트만은 목표 금액이 있을 때만
   const canPct = join ? bundle?.pct !== null : canPercentOnly(tv ?? null);
   return (
-    <QuestionLayout
-      title={copy.bundleNoticeQ}
-      help={copy.bundleNotice}
+    <FormScreen
+      title={heading}
       onBack={prev}
+      step={stepHead('notice')}
       primary={{ label: join ? copy.bundleJoin : copy.bundleStart, loading: busy }}
       onSubmit={() => void submit()}
     >
-      {canPct ? (
-        <div className="hg-stack" style={{ gap: 'var(--space-1)' }}>
-          <Checkbox label={copy.percentOnly} checked={pctOnly} onChange={setPctOnly} />
-          <p className="hg-help" style={{ margin: 0 }}>
-            {copy.percentOnlyHelp}
-          </p>
-        </div>
-      ) : (
-        <p className="hg-help" style={{ margin: 0 }}>
-          {copy.percentOnlyNoTarget}
-        </p>
-      )}
-    </QuestionLayout>
+      <FormSection title={copy.bundleNoticeQ}>
+        <p className="hg-form__hint">{copy.bundleNotice}</p>
+        {canPct ? (
+          <>
+            <Checkbox label={copy.percentOnly} checked={pctOnly} onChange={setPctOnly} />
+            <p className="hg-form__hint">{copy.percentOnlyHelp}</p>
+          </>
+        ) : (
+          <p className="hg-form__hint">{copy.percentOnlyNoTarget}</p>
+        )}
+      </FormSection>
+    </FormScreen>
   );
 }
 

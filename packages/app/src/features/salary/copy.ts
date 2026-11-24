@@ -12,6 +12,7 @@ export const copy = {
   privateSaving: '개인 저축·투자', // [확인 필요]
   // W-01b·W-01c 분담 도우미(20 ‘월급 탭 v2.2’, 06 3-7, 2026-11-13) [확인 필요]
   splitShare: {
+    formTitle: '낼 몫 정하기', // 분담 도우미 이름(2026-11-15), 한 화면 머리 제목
     // 첫 단계는 통장 이름을 물음(2026-11-16 문구 리뷰 결정). ‘낼 몫 정하기’는 도우미 전체 이름
     nameQ: '같이 쓰는 통장 이름이 뭐예요?', // [확인 필요]
     nameChips: { living: '생활비 통장', date: '데이트 통장' } as Record<string, string>,
@@ -531,6 +532,7 @@ export const copy = {
     [`같이 모으기`, name, amount, rest].filter(Boolean).join(', '), // 화면 읽기 한 문장
   partnerBundleItem: (name: string) => `${name}님이 모으고 있어요. 같이 모으기 합계만 보여요`, // [확인 필요] 각자 금액을 안 켰을 때
   // W-10b 모은 금액 바로잡기
+  adjustSignQ: '더할까요, 뺄까요?', // [확인 필요] 한 화면 첫 섹션 제목
   adjustQ: '모은 금액 바로잡기', // [확인 필요]
   adjustAdd: '더할게요', // [확인 필요]
   adjustSub: '뺄게요', // [확인 필요]
@@ -615,6 +617,9 @@ export const copy = {
   noteNamePlaceholder: '예: 예식장 잔금', // [확인 필요]
   noteAmountQ: '얼마쯤 들어요?', // [확인 필요] 예상 금액(선택)
   noteNoAmount: '금액 없이 적을게요', // [확인 필요]
+  noteTitleNew: '쓸 곳 메모 추가', // [확인 필요] 한 화면 머리 제목
+  noteTitleEdit: '쓸 곳 메모 고치기', // [확인 필요]
+  noteOptional: '안 적어도 돼요', // [확인 필요]
   noteDateQ: '언제 내요?', // [확인 필요]
   noteNoDate: '날짜 없이 적을게요', // [확인 필요]
   noteSave: '저장',
@@ -624,6 +629,11 @@ export const copy = {
   noteDue: (date: string) => date,
   notBeforeToday: '오늘부터 고를 수 있어요', // [확인 필요]
   // W-15 같이 모으기로 묶기
+  bundleTitle: '같이 모으기', // [확인 필요] 스테퍼 머리 제목
+  bundleJoinTitle: '같이 모으기에 들어가기', // [확인 필요]
+  doneBundlePartner: '같이 모을 저축·투자', // [확인 필요] 스테퍼 앞 답 줄 이름
+  doneBundleMine: '내 저축·투자', // [확인 필요]
+  doneBundleNew: '새 저축·투자', // [확인 필요]
   bundlePartnerQ: (name: string) => `${name}님 저축·투자 중 같이 모을 걸 골라 주세요`, // [확인 필요]
   bundleFromMine: '내 저축·투자에서 시작할게요', // [확인 필요]
   bundleMineQ: '어떤 저축·투자로 같이 모을까요?', // [확인 필요]

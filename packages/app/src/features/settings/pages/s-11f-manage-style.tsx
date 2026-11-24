@@ -14,7 +14,7 @@ import {
   resolveManageStyle,
   type ManagerAnswer,
 } from '@sweetwo/core';
-import { Button, ChoiceCards, QuestionLayout, QuestionSkeleton, type ChoiceArt } from '@sweetwo/ui';
+import { Button, FormScreen, FormSection, QuestionSkeleton, SegChoice } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -28,7 +28,7 @@ import { useSettingsData } from '../data';
 type Step = 'living' | 'saving' | 'manager';
 type YesNo = 'yes' | 'no';
 
-// S-11f 관리 형태(25 ‘설정 v2.2’, 08 2장): O-30·30b·30c와 같은 세 질문(같이 쓰는 생활비 → 같이 모으는 저금 → 누가 관리,
+// S-11f 관리 형태(25 ‘설정 v2.2’, 08 2장). 2026-11-24 스테퍼(FormScreen step: “1/3” + 앞 답 줄, 진행 막대 없음): O-30·30b·30c와 같은 세 질문(같이 쓰는 생활비 → 같이 모으는 저금 → 누가 관리,
 // 생활비 ‘아니요’면 세 번째는 묻지 않음). 처음 값은 지금 답. 저장 = request_mode_change:
 // 수락이 필요 없으면 바로 적용(+ 상대 알림은 서버) → Toast ‘되돌리기’ → 새 월급 계획 확인(W-01),
 // 각자 계열 → 같이 계열이나 관리하는 사람을 상대로 넘기면 상대 ‘좋아요’ 요청(S-11j, 7일) → S-11.
@@ -223,88 +223,92 @@ export function S11fManageStyle() {
       )}
     </>
   );
-  const yesNo = (k: 'living' | 'saving'): { value: YesNo; label: string; icon: ChoiceArt }[] => [
-    {
-      value: 'yes',
-      label: copy.yes,
-      icon: k === 'living' ? 'choice-living-shared' : 'choice-saving-shared',
-    },
-    {
-      value: 'no',
-      label: k === 'living' ? copy.no : copy.notYet,
-      icon: k === 'living' ? 'choice-living-own' : 'choice-saving-own',
-    },
+  const yesNo = (k: 'living' | 'saving'): { value: YesNo; label: string }[] => [
+    { value: 'yes', label: copy.yes },
+    { value: 'no', label: k === 'living' ? copy.no : copy.notYet },
   ];
+  const options: { value: ManagerAnswer; label: string }[] = [
+    { value: 'me', label: copy.managerMe },
+    { value: 'partner', label: copy.managerPartner(c.joined ? partnerName : '') },
+    { value: 'together', label: copy.managerTogether },
+    { value: 'each', label: copy.managerEach },
+  ];
+  const total = L ? 3 : 2;
+  const livingDone = {
+    label: copy.doneLiving,
+    value: L ? copy.yes : copy.no,
+    onClick: () => setStep('living'),
+  };
+  const savingDone = {
+    label: copy.doneSaving,
+    value: S ? copy.yes : copy.notYet,
+    onClick: () => setStep('saving'),
+  };
 
+  // 스테퍼(2026-11-24): 세 번째 질문은 첫 답이 ‘네’일 때만 있어서 한 화면으로 못 합침. 앞에서 답한 줄이 위에 쌓임
   if (step === 'living')
     return (
-      <QuestionLayout
-        steps={{ total: 3, now: 0 }}
-        title={copy.livingQ}
-        help={locked ? copy.unlinkPendingLocked : copy.livingHelp}
+      <FormScreen
+        title={copy.salaryMode}
         onBack={goBack}
+        step={{ index: 1, total }}
         primary={{ label: copy.next, disabled: locked }}
         onSubmit={() => !locked && setStep('saving')}
       >
         {top}
-        <ChoiceCards<YesNo>
-          label={copy.livingQ}
-          value={L ? 'yes' : 'no'}
-          onChange={setLiving}
-          autoAdvance={false}
-          options={yesNo('living').map((o) => ({ ...o, disabled: locked }))}
-        />
-      </QuestionLayout>
+        <FormSection title={copy.livingQ} aside={locked ? copy.unlinkPendingLocked : undefined}>
+          <SegChoice<YesNo>
+            label={copy.livingQ}
+            value={L ? 'yes' : 'no'}
+            onChange={setLiving}
+            items={yesNo('living')}
+          />
+          {!locked && <p className="hg-form__hint">{copy.livingHelp}</p>}
+        </FormSection>
+      </FormScreen>
     );
   if (step === 'saving')
     return (
-      <QuestionLayout
-        steps={{ total: L ? 3 : 2, now: 1 }}
-        title={copy.savingQ}
+      <FormScreen
+        title={copy.salaryMode}
         onBack={() => setStep('living')}
+        step={{ index: 2, total, done: [livingDone] }}
         primary={{
           label: L ? copy.next : copy.save,
           disabled: locked || (!L && same),
           loading: busy,
         }}
-        note={!L ? note : undefined}
         onSubmit={() => (L ? setStep('manager') : void finish())}
       >
-        <ChoiceCards<YesNo>
-          label={copy.savingQ}
-          value={S ? 'yes' : 'no'}
-          onChange={setSaving}
-          autoAdvance={false}
-          options={yesNo('saving')}
-        />
-      </QuestionLayout>
+        <FormSection title={copy.savingQ}>
+          <SegChoice<YesNo>
+            label={copy.savingQ}
+            value={S ? 'yes' : 'no'}
+            onChange={setSaving}
+            items={yesNo('saving')}
+          />
+          {!L && note && <p className="hg-form__hint">{note}</p>}
+        </FormSection>
+      </FormScreen>
     );
-  const options: { value: ManagerAnswer; label: string; icon: ChoiceArt }[] = [
-    { value: 'me', label: copy.managerMe, icon: 'choice-manager-me' },
-    {
-      value: 'partner',
-      label: copy.managerPartner(c.joined ? partnerName : ''),
-      icon: 'choice-manager-partner',
-    },
-    { value: 'together', label: copy.managerTogether, icon: 'choice-manager-together' },
-    { value: 'each', label: copy.managerEach, icon: 'choice-manager-each' },
-  ];
   return (
-    <QuestionLayout
-      steps={{ total: 3, now: 2 }}
-      title={copy.managerQ}
+    <FormScreen
+      title={copy.salaryMode}
       onBack={() => setStep('saving')}
+      step={{ index: 3, total, done: [livingDone, savingDone] }}
       primary={{ label: copy.save, disabled: locked || !M || same, loading: busy }}
-      note={note}
       onSubmit={() => void finish()}
     >
-      <ChoiceCards<ManagerAnswer>
-        label={copy.managerQ}
-        value={M}
-        onChange={setManager}
-        autoAdvance={false}
-        options={options}
-      />
-    </QuestionLayout>
+      <FormSection title={copy.managerQ}>
+        <SegChoice<ManagerAnswer>
+          label={copy.managerQ}
+          value={M}
+          onChange={setManager}
+          variant="rows"
+          items={options}
+        />
+        {note && <p className="hg-form__hint">{note}</p>}
+      </FormSection>
+    </FormScreen>
   );
 }

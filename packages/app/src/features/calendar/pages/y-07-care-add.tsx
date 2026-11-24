@@ -1,10 +1,11 @@
 import { insertCareDays, qk, updateCareDay, type CareDay } from '@sweetwo/api';
 import { lunarToSolar, nextCareDate, quickChips, todayKst } from '@sweetwo/core';
 import {
-  AmountInput,
   Chip,
   DateWheel,
-  QuestionLayout,
+  FormAmount,
+  FormScreen,
+  FormSection,
   ShortText,
   SegChoice,
   Toggle,
@@ -12,14 +13,14 @@ import {
 } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { create } from 'zustand';
 import { carryToast, toast } from '../../../shared/toast';
 import { copy } from '../copy';
 import { careUndo, trackCareShared, useCalendarData } from '../data';
 import { onSessionReset } from '../../../shared/session-reset';
 
-// Y-07 경조사 추가(24 Y-07, 화면별 정의, 재기획): 모든 경조사를 같은 3화면으로.
+// Y-07 경조사 추가(24 Y-07, 화면별 정의, 재기획): 2026-11-24 한 화면 입력(FormScreen). 아래 a·c·d는 한 화면 안 세 질문 섹션(이름, 날짜, 금액 메모)이 됨.
 // a “어떤 날이에요?” 이름(최대 20자) + 이름 칩(이름·날짜·반복 기본값만 채움, 종류를 나누지 않음)
 // → c “언제예요?” 날짜 + 양력/음력 + “매년 돌아와요”(설날·추석·어버이날은 날짜를 채우고 건너뜀)
 // → d “쓸 금액을 메모해 둘까요?” 금액 메모(0원·빈 값, 건너뛰기) → ‘추가하기’ 바로 저장(미리 알림 D-30 + D-7) → Y-04.
@@ -104,7 +105,6 @@ const KIND: Record<ChipKey, string> = {
 export function Y07CareAdd() {
   const nav = useNavigate();
   const qc = useQueryClient();
-  const step = useParams().step ?? 'a';
   const c = useCalendarData();
   const { d, set } = useDraft();
   const [saving, setSaving] = useState(false);
@@ -113,12 +113,7 @@ export function Y07CareAdd() {
   if (c.loading) return <QuestionSkeleton />;
   const editing = d.editId ? c.cares.find((x) => x.id === d.editId) : null;
   const fixed = d.chip ? FIXED[d.chip] : undefined;
-  const steps = editing ? ['a', 'c'] : ['a', ...(fixed ? [] : ['c']), 'd'];
-  const i = Math.max(steps.indexOf(step), 0);
-  const progress = { total: steps.length, now: i };
-  const go = (n: number) => nav(`/calendar/add/${steps[n] ?? 'a'}`);
-  const back = () => (i > 0 ? go(i - 1) : nav(-1));
-  if (step !== 'a' && !d.name.trim()) return <Navigate to="/calendar/add/a" replace />;
+  if (editing === undefined && d.editId) return <Navigate to="/calendar" replace />;
 
   // 날짜 규칙과 월·일(매년이면 연도는 처음 날짜로만 씀)
   const rule = (() => {
@@ -205,154 +200,112 @@ export function Y07CareAdd() {
     }
   };
 
-  if (step === 'a') {
-    const ok = !!name;
-    return (
-      <QuestionLayout
-        steps={progress}
-        title={copy.nameQ}
-        onBack={back}
-        primary={{ label: copy.nextStep, disabled: !ok }}
-        onSubmit={() => ok && go(1)}
-      >
+  const ok = !!name && (fixed ? true : !!rule && !!solar && !past);
+  const submit = () => {
+    if (!ok) return;
+    if (dup && !asked) return setAsked(true);
+    void save(editing ? 0 : (d.amount ?? 0));
+  };
+
+  return (
+    <FormScreen
+      title={editing ? copy.formTitleEdit : copy.formTitle}
+      onBack={() => nav(-1)}
+      later={
+        past && solar && !editing && name
+          ? { label: copy.recordPast, onClick: () => void save(0, true), loading: saving }
+          : undefined
+      }
+      primary={{ label: editing ? copy.save : copy.addOk, disabled: !ok, loading: saving }}
+      onSubmit={submit}
+    >
+      <FormSection title={copy.nameQ}>
         <ShortText
           label={copy.nameQ}
           value={d.name}
           onChange={(v) => set({ name: v })}
           max={20}
           placeholder={copy.namePlaceholder}
+          autoFocus={false}
         />
         {!editing && (
-          <div
-            className="hg-row"
-            role="group"
-            aria-label={copy.chipsLabel}
-            style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}
-          >
+          <div className="hg-form__chips" role="group" aria-label={copy.chipsLabel}>
             {CHIPS.map((k) => (
               <Chip
                 key={k}
                 small
                 selected={d.chip === k}
-                onClick={() =>
+                onClick={() => {
+                  setAsked(false);
                   set({
                     chip: k,
                     name: k === 'custom' ? d.name : copy.chips[k],
                     yearly: k !== 'event',
                     lunar: FIXED[k]?.lunar ?? false,
                     leap: false,
-                  })
-                }
+                  });
+                }}
               >
                 {copy.chips[k]}
               </Chip>
             ))}
           </div>
         )}
-      </QuestionLayout>
-    );
-  }
-
-  if (step === 'c') {
-    const ok = !!rule && !!solar && !past;
-    return (
-      <QuestionLayout
-        steps={progress}
-        title={copy.dateQ}
-        help={name}
-        onBack={back}
-        later={
-          past && solar && !editing
-            ? { label: copy.recordPast, onClick: () => void save(0, true) }
-            : undefined
-        }
-        primary={{
-          label: editing ? copy.save : copy.nextStep,
-          disabled: !ok,
-          loading: saving,
-        }}
-        onSubmit={() => {
-          if (!ok) return;
-          if (dup && !asked) return setAsked(true);
-          if (editing) void save(0);
-          else go(i + 1);
-        }}
-      >
-        <SegChoice<'solar' | 'lunar'>
-          label={copy.dateQ}
-          value={d.lunar ? 'lunar' : 'solar'}
-          onChange={(v) => set({ lunar: v === 'lunar', leap: false })}
-          items={[
-            { value: 'solar', label: copy.solar },
-            { value: 'lunar', label: copy.lunar },
-          ]}
-        />
-        {/* 2026-11-04 다른 날짜 질문(만기일, 목표 기한)과 같은 휠. 처음 값은 달력에서 고른 날 또는 오늘. 음력은 어느 달이든 30일까지 */}
-        <DateWheel
-          label={copy.dateQ}
-          lunar={d.lunar}
-          value={d.date ? wheelOf(d.date) : null}
-          initial={wheelOf(todayKst())}
-          minYear={1940}
-          maxYear={Number(todayKst().slice(0, 4)) + 10}
-          onChange={(v) => {
-            setAsked(false);
-            set({ date: `${v.y}-${pad2(v.m)}-${pad2(v.d)}` });
-          }}
-        />
-        {(past || (d.date && !solar)) && (
-          <p className="hg-help is-error" role="alert">
-            {past ? copy.pastDate : copy.dateError}
-          </p>
-        )}
-        {d.lunar && (
-          <Chip small selected={d.leap} onClick={() => set({ leap: !d.leap })}>
-            {copy.leapMonth}
-          </Chip>
-        )}
-        <Toggle label={copy.yearly} checked={d.yearly} onChange={(yearly) => set({ yearly })} />
-        {dup && asked && (
-          <p className="hg-help" role="status">
-            {copy.sameDay}
-          </p>
-        )}
-      </QuestionLayout>
-    );
-  }
-
-  // d: 금액 메모 + 추가하기
-  return (
-    <QuestionLayout
-      steps={progress}
-      title={copy.amountQ}
-      help={name}
-      onBack={back}
-      // 건너뛰기도 같은 날 확인을 한 번(2026-11-12 S9-09)
-      later={{
-        label: copy.skip,
-        onClick: () => {
-          if (dup && !asked) return setAsked(true);
-          void save(0);
-        },
-      }}
-      primary={{ label: copy.addOk, loading: saving }}
-      onSubmit={() => {
-        if (dup && !asked) return setAsked(true);
-        void save(d.amount ?? 0);
-      }}
-    >
-      <AmountInput
-        label={copy.amountQ}
-        value={d.amount}
-        onChange={(amount) => set({ amount })}
-        quick={quickChips.small}
-        allowZero
-      />
+      </FormSection>
+      {!fixed && (
+        <FormSection title={copy.dateQ}>
+          <SegChoice<'solar' | 'lunar'>
+            label={copy.dateQ}
+            value={d.lunar ? 'lunar' : 'solar'}
+            onChange={(v) => set({ lunar: v === 'lunar', leap: false })}
+            items={[
+              { value: 'solar', label: copy.solar },
+              { value: 'lunar', label: copy.lunar },
+            ]}
+          />
+          {/* 2026-11-04 다른 날짜 질문(만기일, 목표 기한)과 같은 휠. 처음 값은 달력에서 고른 날 또는 오늘. 음력은 어느 달이든 30일까지 */}
+          <DateWheel
+            label={copy.dateQ}
+            lunar={d.lunar}
+            value={d.date ? wheelOf(d.date) : null}
+            initial={wheelOf(todayKst())}
+            minYear={1940}
+            maxYear={Number(todayKst().slice(0, 4)) + 10}
+            onChange={(v) => {
+              setAsked(false);
+              set({ date: `${v.y}-${pad2(v.m)}-${pad2(v.d)}` });
+            }}
+          />
+          {(past || (d.date && !solar)) && (
+            <p className="hg-help is-error" role="alert">
+              {past ? copy.pastDate : copy.dateError}
+            </p>
+          )}
+          {d.lunar && (
+            <Chip small selected={d.leap} onClick={() => set({ leap: !d.leap })}>
+              {copy.leapMonth}
+            </Chip>
+          )}
+          <Toggle label={copy.yearly} checked={d.yearly} onChange={(yearly) => set({ yearly })} />
+        </FormSection>
+      )}
+      {!editing && (
+        <FormSection title={copy.amountQ}>
+          <FormAmount
+            label={copy.amountQ}
+            sheetTitle={copy.amountQ}
+            value={d.amount}
+            onChange={(amount) => set({ amount })}
+            quick={quickChips.small}
+            monthly={false}
+          />
+        </FormSection>
+      )}
       {dup && asked && (
         <p className="hg-help" role="status">
           {copy.sameDay}
         </p>
       )}
-    </QuestionLayout>
+    </FormScreen>
   );
 }

@@ -1,9 +1,10 @@
 import { addSavingNote, updateSavingNote } from '@sweetwo/api';
 import { todayKst } from '@sweetwo/core';
 import {
-  AmountInput,
   DateWheelInput,
-  QuestionLayout,
+  FormAmount,
+  FormScreen,
+  FormSection,
   QuestionSkeleton,
   ShortText,
 } from '@sweetwo/ui';
@@ -16,11 +17,8 @@ import { copy } from '../copy';
 import { useNoteTarget } from './w-14-notes';
 import { useSavingNotes } from '../together';
 
-type Step = 'name' | 'amount' | 'date';
-const STEPS: Step[] = ['name', 'amount', 'date'];
-
 /**
- * W-14a 쓸 곳 메모 추가·고치기(20 v2.2): 이름(Q5, 20자) → 예상 금액(Q3, 선택 “금액 없이 적을게요”) → 날짜(Q4, 선택 “날짜 없이 적을게요”).
+ * W-14a 쓸 곳 메모 추가·고치기(20 v2.2): 2026-11-24 한 화면 입력(FormScreen) 이름(Q5, 20자) + 예상 금액(Q3, 선택) + 날짜(Q4, 선택 “날짜 없이 적을게요”).
  * 저장 = saving_note 넣기·고치기(고칠 수 있는 사람만, 열 권한). 고칠 때는 날짜 화면 아래 ‘메모 지우기’(Toast ‘되돌리기’)
  */
 export function W14aNoteEdit({ kind }: { kind: 'goal' | 'bundle' }) {
@@ -30,7 +28,6 @@ export function W14aNoteEdit({ kind }: { kind: 'goal' | 'bundle' }) {
   const t = useNoteTarget(kind, id);
   const notes = useSavingNotes(kind === 'goal' ? { goalId: id } : { bundleId: id });
   const old = notes.data?.find((n) => n.id === note);
-  const [step, setStep] = useState<Step>('name');
   const [name, setName] = useState<string | null>(null);
   const [amount, setAmount] = useState<number | null | undefined>(undefined);
   const [date, setDate] = useState<string | null | undefined>(undefined);
@@ -43,9 +40,6 @@ export function W14aNoteEdit({ kind }: { kind: 'goal' | 'bundle' }) {
     amount: amount === undefined ? (old?.amount ?? null) : amount,
     date: date === undefined ? (old?.due_on ?? null) : date,
   };
-  const now = STEPS.indexOf(step);
-  const steps = { total: STEPS.length, now };
-  const back = () => (now > 0 ? setStep(STEPS[now - 1] ?? 'name') : nav(-1));
   const done = () => {
     void qc.invalidateQueries({ queryKey: ['saving_note'] });
     nav(listPath(kind, id), { replace: true });
@@ -74,88 +68,80 @@ export function W14aNoteEdit({ kind }: { kind: 'goal' | 'bundle' }) {
       setBusy(false);
     }
   };
-  if (step === 'name')
-    return (
-      <QuestionLayout
-        steps={steps}
-        title={copy.noteNameQ}
-        onBack={back}
-        primary={{ label: copy.next, disabled: !v.name.trim() }}
-        onSubmit={() => setStep('amount')}
-      >
+  const err = v.date !== null && v.date < todayKst() && !old ? copy.notBeforeToday : undefined;
+  const remove = () =>
+    old &&
+    void updateSavingNote(old.id, { deleted: true })
+      .then(() => {
+        carryToast(copy.noteDeleted, {
+          label: copy.undo,
+          onClick: () =>
+            quietly(
+              updateSavingNote(old.id, { deleted: false }).then(() =>
+                qc.invalidateQueries({ queryKey: ['saving_note'] }),
+              ),
+            ),
+        });
+        done();
+      })
+      .catch(() => toast(copy.failed));
+  return (
+    <FormScreen
+      title={old ? copy.noteTitleEdit : copy.noteTitleNew}
+      onBack={() => nav(-1)}
+      primary={{ label: copy.noteSave, disabled: !v.name.trim() || !!err, loading: busy }}
+      onSubmit={() => void save({ amount: v.amount || null, date: v.date })}
+    >
+      <FormSection title={copy.noteNameQ}>
         <ShortText
           label={copy.noteNameQ}
           value={v.name}
           onChange={setName}
           max={20}
           placeholder={copy.noteNamePlaceholder}
+          autoFocus={false}
         />
-      </QuestionLayout>
-    );
-  if (step === 'amount')
-    return (
-      <QuestionLayout
-        steps={steps}
-        title={copy.noteAmountQ}
-        onBack={back}
-        primary={{ label: copy.next, disabled: !v.amount }}
-        onSubmit={() => setStep('date')}
-        later={{
-          label: copy.noteNoAmount,
-          onClick: () => {
-            setAmount(null);
-            setStep('date');
-          },
-        }}
+      </FormSection>
+      <FormSection title={copy.noteAmountQ} aside={copy.noteOptional}>
+        <FormAmount
+          label={copy.noteAmountQ}
+          sheetTitle={copy.noteAmountQ}
+          value={v.amount}
+          onChange={setAmount}
+          monthly={false}
+        />
+      </FormSection>
+      <FormSection
+        title={copy.noteDateQ}
+        aside={
+          v.date ? (
+            <button type="button" className="hg-btn hg-btn--link" onClick={() => setDate(null)}>
+              {copy.noteNoDate}
+            </button>
+          ) : (
+            copy.noteOptional
+          )
+        }
       >
-        <AmountInput label={copy.noteAmountQ} value={v.amount} onChange={setAmount} />
-      </QuestionLayout>
-    );
-  const err = v.date !== null && v.date < todayKst() && !old ? copy.notBeforeToday : undefined;
-  return (
-    <QuestionLayout
-      steps={steps}
-      title={copy.noteDateQ}
-      onBack={back}
-      primary={{ label: copy.noteSave, disabled: !v.date || !!err, loading: busy }}
-      onSubmit={() => void save({ amount: v.amount, date: v.date })}
-      later={{
-        label: copy.noteNoDate,
-        loading: busy,
-        onClick: () => void save({ amount: v.amount, date: null }),
-      }}
-      secondary={
-        old
-          ? {
-              label: copy.noteDelete,
-              onClick: () =>
-                void updateSavingNote(old.id, { deleted: true })
-                  .then(() => {
-                    carryToast(copy.noteDeleted, {
-                      label: copy.undo,
-                      onClick: () =>
-                        quietly(
-                          updateSavingNote(old.id, { deleted: false }).then(() =>
-                            qc.invalidateQueries({ queryKey: ['saving_note'] }),
-                          ),
-                        ),
-                    });
-                    done();
-                  })
-                  .catch(() => toast(copy.failed)),
-            }
-          : undefined
-      }
-    >
-      <DateWheelInput
-        label={copy.noteDateQ}
-        value={v.date}
-        onChange={(x) => setDate(x)}
-        error={err}
-        today={todayKst()}
-        minYear={Number(todayKst().slice(0, 4)) - 1}
-      />
-    </QuestionLayout>
+        <DateWheelInput
+          label={copy.noteDateQ}
+          value={v.date}
+          onChange={(x) => setDate(x)}
+          error={err}
+          today={todayKst()}
+          minYear={Number(todayKst().slice(0, 4)) - 1}
+        />
+      </FormSection>
+      {old && (
+        <button
+          type="button"
+          className="hg-btn hg-btn--link hg-form__quick"
+          onClick={remove}
+        >
+          {copy.noteDelete}
+        </button>
+      )}
+    </FormScreen>
   );
 }
 

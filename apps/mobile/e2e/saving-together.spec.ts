@@ -11,6 +11,7 @@ import {
   seed,
   YEBIN,
 } from './mocks';
+import { expectAmount } from './form';
 
 // v2.2 같이 모으기(20 W-15·W-15a·W-10 0번·W-13·W-12(묶음)·W-12b, ADR 0009 결정 5, G1·G4). 찬우(시작한 사람)와 예빈(합류한 사람) 두 계정.
 // 각자 계열 연결, 찬우 ‘내 집 마련’(목표 1억 5,000만), 예빈 ‘결혼 비용’(목표 3,000만, 이미 모은 500만)
@@ -106,11 +107,14 @@ test('W-15 묶기(찬우) → 들어가기(예빈): 합계만, 상대 줄은 이
   await expect(c.getByRole('heading', { name: '어떤 저축·투자로 같이 모을까요?' })).toBeVisible();
   await axe(c);
   await c.getByRole('radio', { name: '내 집 마련' }).click();
-  await expect(c.getByRole('heading', { name: '같이 모을 목표 금액이 있나요?' })).toBeVisible();
-  // 처음 값 = 두 목표 금액 합(Q11)
-  await expect(c.getByLabel('같이 모을 목표 금액이 있나요?')).toHaveValue('180,000,000');
   await c.getByRole('button', { name: '다음' }).click();
+  await expect(c.getByRole('heading', { name: '같이 모을 목표 금액이 있나요?' })).toBeVisible();
+  // 스테퍼: 머리 아래 “n/m”과 앞에서 답한 줄(2026-11-24)
+  await expect(c.getByText('2/3', { exact: true })).toBeVisible();
+  // 처음 값 = 두 목표 금액 합(Q11)
+  await expectAmount(c, '같이 모을 목표 금액이 있나요?', '180,000,000');
   await c.getByRole('button', { name: '기한 없이 모을게요' }).click();
+  await c.getByRole('button', { name: '다음' }).click();
   await expect(c.getByRole('heading', { name: '같이 모으기 전에 알려 드려요' })).toBeVisible();
   // 고지(G1): 합계로 짐작할 수 있음을 숨기지 않음
   await expect(c.getByText(/서로 얼마 넣었는지 짐작할 수 있어요/)).toBeVisible();
@@ -129,6 +133,7 @@ test('W-15 묶기(찬우) → 들어가기(예빈): 합계만, 상대 줄은 이
   await y.goto('/salary/bundles/bundle-1');
   await expect(y).toHaveURL(/\/salary\/bundles\/bundle-1\/join$/);
   await y.getByRole('radio', { name: '결혼 비용' }).click();
+  await y.getByRole('button', { name: '다음' }).click();
   await expect(y.getByRole('heading', { name: '같이 모으기 전에 알려 드려요' })).toBeVisible();
   await y.getByRole('button', { name: '같이 모으기 시작하기' }).click();
   await expect(y).toHaveURL(/\/salary\/items\/goal-y$/);
@@ -314,6 +319,7 @@ test('묶음 하나씩(H1): 찬우가 묶은 뒤 예빈이 자기 저금에서 �
   ).toBeVisible();
   await axe(y);
   await y.getByRole('radio', { name: '같이 모을게요' }).click();
+  await y.getByRole('button', { name: '다음' }).click();
   await expect(y).toHaveURL(/\/salary\/bundles\/bundle-1\/join\?goal=goal-y$/);
   await expect(y.getByRole('heading', { name: '같이 모으기 전에 알려 드려요' })).toBeVisible();
   await y.getByRole('button', { name: '같이 모으기 시작하기' }).click();
@@ -349,6 +355,7 @@ test('묶음 하나씩(H1): 기다리는 묶음이 있으면 ‘따로 새로 �
     c.getByRole('heading', { name: '예빈님이 아직 ‘내 집 마련’에 들어오지 않았어요' }),
   ).toBeVisible();
   await c.getByRole('radio', { name: '따로 새로 모을게요' }).click();
+  await c.getByRole('button', { name: '다음' }).click();
   await expect(c.getByRole('heading', { name: '같이 모을 목표 금액이 있나요?' })).toBeVisible();
   await c.getByRole('button', { name: '목표 금액 없이 모을게요' }).click();
   await c.getByRole('button', { name: '같이 모으기 시작하기' }).click();

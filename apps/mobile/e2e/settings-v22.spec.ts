@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { fakeBridge } from './fake-bridge';
 import { type MemDb, mockOnboarding, mockV22Settings, seed, YEBIN } from './mocks';
+import { fillAmount } from './form';
 
 // v2.2 PR 11 공개·관계·설정(25 ‘설정 v2.2’, 20 W-01b·W-01c, 08 2·4·6장). 찬우(시작한 사람, 이 기기)와 합류한 예빈.
 // 예빈이 보낸 요청·제안은 흉내 서버에 넣어 두고 찬우가 답함.
@@ -138,9 +139,7 @@ test('분담 도우미(W-01b): 생활비 통장 → 100만 원 → 반반 → �
   await expect(page.getByRole('heading', { name: '같이 쓰는 통장 이름이 뭐예요?' })).toBeVisible();
   await page.getByRole('radio', { name: '생활비 통장' }).click();
   await axe(page);
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByLabel('둘이 한 달에 얼마 넣을까요?').fill('1000000');
-  await page.getByRole('button', { name: '다음' }).click();
+  await fillAmount(page, '둘이 한 달에 얼마 넣을까요?', 1_000_000);
   await expect(page.getByRole('heading', { name: '어떻게 나눌까요?' })).toBeVisible();
   // 두 사람 모두 ‘모두 보여 주기’가 아니라 월급 비율은 이유 문구 없이 흐림
   await expect(page.getByRole('radio', { name: '월급 비율' })).toBeDisabled();
@@ -172,9 +171,7 @@ test('분담 도우미(W-01b): 두 사람 모두 ‘모두 보여 주기’면 �
   v.partnerShare = 'all';
   await page.goto('/salary/split/new');
   await page.getByRole('radio', { name: '데이트 통장' }).click();
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByLabel('둘이 한 달에 얼마 넣을까요?').fill('600000');
-  await page.getByRole('button', { name: '다음' }).click();
+  await fillAmount(page, '둘이 한 달에 얼마 넣을까요?', 600_000);
   await page.getByRole('radio', { name: '월급 비율' }).click();
   // 350만 : 250만 → 60만 × 350/600 = 35만
   await expect(page.getByText('찬우 35만 원, 예빈 25만 원 (6 : 4)')).toBeVisible();
@@ -305,8 +302,7 @@ test('내 월급(S-11c): 다음 달부터 + 언제까지 → 예약 표시(S-11)
   await page.goto('/settings/me/salary');
   // 공개 고지 한 줄(O-31과 같음)
   await expect(page.getByText('파트너에게는 저축·투자만 보여요')).toBeVisible();
-  await page.getByLabel('한 달 실수령액은 얼마예요?').fill('1600000');
-  await page.getByRole('button', { name: '다음' }).click();
+  await fillAmount(page, '한 달 실수령액은 얼마예요?', 1_600_000);
   await page.getByRole('button', { name: '다음 달부터' }).click();
   await page.getByRole('switch', { name: '언제까지예요?' }).click();
   await axe(page);
@@ -325,8 +321,7 @@ test('내 월급(S-11c): 이번 달부터면 월급날(25일) 전이어도 바�
 }) => {
   const { db, v } = await connected(page);
   await page.goto('/settings/me/salary');
-  await page.getByLabel('한 달 실수령액은 얼마예요?').fill('3000000');
-  await page.getByRole('button', { name: '다음' }).click();
+  await fillAmount(page, '한 달 실수령액은 얼마예요?', 3_000_000);
   await page.getByRole('button', { name: '이번 달부터' }).click();
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('월급을 바꿨어요')).toBeVisible();

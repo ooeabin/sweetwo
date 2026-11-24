@@ -3,6 +3,7 @@ import { axe as runAxe } from './axe';
 import { type MemDb, mockOnboarding, mockV22Settings } from './mocks';
 import { setWheel } from './wheel';
 import { homeTaskTexts } from './home-tasks';
+import { fillAmount } from './form';
 
 // 설정(docs/spec/25-settings.md S-10, S-11, S-11a, S-14, S-14a). 찬우(시작, 25일)와 합류한 예빈(10일), 웹
 
@@ -262,11 +263,11 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
   // 내 월급
   await page.getByRole('button', { name: /내 월급/ }).click();
   await expect(page.getByRole('heading', { name: '한 달 실수령액은 얼마예요?' })).toBeVisible();
-  await page.getByLabel('한 달 실수령액은 얼마예요?').fill('3800000');
+  await fillAmount(page, '한 달 실수령액은 얼마예요?', 3_800_000);
   await axe(page);
   // 금액이 바뀌면 “언제부터 이 금액이에요?”(v2.2 S-11c). 이번 달(10월)부터면 월급날(25일) 전이어도 바로 적용
   // (2026-11-13 P2 = A, 07 5장)
-  await page.getByRole('button', { name: '다음' }).click();
+  // 한 화면(2026-11-24): 금액을 바꾸면 같은 화면에 “언제부터” 섹션이 붙음
   await expect(page.getByRole('heading', { name: '언제부터 이 금액이에요?' })).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '저장' }).click();
@@ -286,6 +287,11 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
   await page.getByRole('radio', { name: '네' }).click();
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
+  // 스테퍼(2026-11-24): “2/3” + 앞에서 답한 줄이 위에 쌓임, 진행 막대 없음
+  await expect(page.getByText('2/3', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /같이 쓰는 생활비\s*네/ })).toBeVisible();
+  await expect(page.locator('.hg-steps')).toHaveCount(0);
+  await axe(page);
   await expect(
     page.getByRole('heading', { name: '같이 모으는 저축·투자가 있어요?' }),
   ).toBeVisible();

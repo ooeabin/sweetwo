@@ -60,6 +60,8 @@ export interface ChoiceItem<T extends string> {
   label: string;
   /** 설명(보조 줄). 있으면 라디오 줄 */
   sub?: string;
+  /** 흐린 선택지(이유 문구 없이, 못 고름) */
+  disabled?: boolean;
 }
 
 /** 버튼(A)인지 라디오 줄(C)인지: 4개 이상, 설명 있음, 긴 글자(2개는 9자, 3개는 5자 넘음)면 줄 */
@@ -95,6 +97,7 @@ export function SegChoice<T extends string>({
           type="button"
           role="radio"
           aria-checked={it.value === value}
+          disabled={it.disabled}
           className={cx('hg-choice__item', it.value === value && 'is-on')}
           onClick={() => onChange(it.value)}
         >

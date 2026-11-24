@@ -14,13 +14,13 @@ import {
   todayKst,
 } from '@sweetwo/core';
 import {
-  AmountInput,
   Button,
   Chip,
   DayWheel,
-  QuestionLayout,
+  FormAmount,
+  FormScreen,
+  FormSection,
   QuestionSkeleton,
-  SectionHeader,
   Toggle,
   YearMonthInput,
 } from '@sweetwo/ui';
@@ -55,7 +55,6 @@ export function S11cSalary() {
   const [amount, setAmount] = useState<number | null | undefined>(undefined);
   const [variable, setVariable] = useState<boolean | undefined>(undefined);
   const [day, setDay] = useState<Day | null | undefined>(undefined);
-  const [step, setStep] = useState<'amount' | 'when'>('amount');
   const thisMonth = todayKst().slice(0, 7);
   const [from, setFrom] = useState(thisMonth);
   const [hasUntil, setHasUntil] = useState(false);
@@ -126,7 +125,6 @@ export function S11cSalary() {
 
   const save = async () => {
     if (saving || !valid || value === null) return;
-    if (amountChanged && step === 'amount') return setStep('when');
     if (amountChanged && !checked.success) return;
     setSaving(true);
     try {
@@ -184,96 +182,101 @@ export function S11cSalary() {
     }
   };
 
-  if (step === 'when')
-    return (
-      <QuestionLayout
-        title={copy.fromQ}
-        onBack={() => setStep('amount')}
-        primary={{ label: copy.save, disabled: !checked.success, loading: saving }}
-        onSubmit={() => void save()}
-        note={nonManager ? copy.sendRecalc : undefined}
-      >
-        <div className="hg-quick" role="group" aria-label={copy.fromLabel}>
-          <Chip small selected={from === thisMonth} onClick={() => setFrom(thisMonth)}>
-            {copy.fromThis}
-          </Chip>
-          <Chip
-            small
-            selected={from === nextMonth(thisMonth)}
-            onClick={() => setFrom(nextMonth(thisMonth))}
-          >
-            {copy.fromNext}
-          </Chip>
-        </div>
-        {/* key를 두지 않음: 값이 바뀔 때마다 휠을 새로 만들어 키보드 포커스를 잃었음(2026-11-14 R7). 칩으로 바꾼 값은 휠이 그 칸으로 굴림 */}
-        <YearMonthInput
-          label={copy.fromLabel}
-          value={from}
-          onChange={(v) => v && setFrom(v)}
-          minYear={Number(thisMonth.slice(0, 4))}
-          maxYear={Number(thisMonth.slice(0, 4)) + 5}
-          error={fromErr}
-        />
-        <Toggle
-          label={copy.untilQ}
-          checked={hasUntil}
-          onChange={(on) => {
-            setHasUntil(on);
-            if (on && !until) setUntil(from);
-          }}
-        />
-        {hasUntil && (
-          <YearMonthInput
-            label={copy.untilLabel}
-            value={until ?? from}
-            onChange={setUntil}
-            minYear={Number(thisMonth.slice(0, 4))}
-            maxYear={Number(thisMonth.slice(0, 4)) + 5}
-            error={untilErr}
-          />
-        )}
-      </QuestionLayout>
-    );
-
   return (
     <>
-      <QuestionLayout
-        title={copy.salaryQ}
-        help={isVariable ? copy.salaryVariableHelp : copy.salaryHelp}
+      <FormScreen
+        title={copy.mySalary}
         onBack={back}
         primary={{
-          label: amountChanged ? copy.next : copy.save,
-          disabled: !valid,
+          label: copy.save,
+          disabled: !valid || (amountChanged && !checked.success),
           loading: saving,
         }}
         onSubmit={() => void save()}
-        note={nonManager ? copy.sendRecalc : undefined}
       >
-        <AmountInput
-          label={copy.salaryQ}
-          value={value}
-          onChange={setAmount}
-          quick={quickChips.small.slice(1)}
-          monthly
-          embedded
-          zeroLink={{ label: copy.noSalary, onClick: () => setAmount(0) }}
-        />
-        <button
-          type="button"
-          role="checkbox"
-          aria-checked={isVariable}
-          className="hg-consent__check"
-          onClick={() => setVariable(!isVariable)}
+        <FormSection
+          title={copy.salaryQ}
+          aside={
+            <button type="button" className="hg-btn hg-btn--link" onClick={() => setAmount(0)}>
+              {copy.noSalary}
+            </button>
+          }
         >
-          <span className={isVariable ? 'hg-checkbox is-on' : 'hg-checkbox'} aria-hidden="true" />
-          <span className="hg-consent__label">{copy.variable}</span>
-        </button>
-        <SectionHeader title={copy.payday} />
-        <DayWheel label={copy.payday} value={payday} onChange={setDay} lastLabel={copy.lastDay} />
+          <FormAmount
+            label={copy.salaryQ}
+            sheetTitle={copy.salaryQ}
+            value={value}
+            onChange={setAmount}
+            quick={quickChips.small.slice(1)}
+            below={
+              <p className="hg-form__hint">
+                {isVariable ? copy.salaryVariableHelp : copy.salaryHelp}
+              </p>
+            }
+          />
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={isVariable}
+            className="hg-consent__check"
+            onClick={() => setVariable(!isVariable)}
+          >
+            <span className={isVariable ? 'hg-checkbox is-on' : 'hg-checkbox'} aria-hidden="true" />
+            <span className="hg-consent__label">{copy.variable}</span>
+          </button>
+        </FormSection>
+        <FormSection title={copy.payday}>
+          <DayWheel label={copy.payday} value={payday} onChange={setDay} lastLabel={copy.lastDay} />
+        </FormSection>
+        {/* 금액을 바꿨을 때만: 언제부터(2026-11-24 한 화면, 예전 두 번째 질문) */}
+        {amountChanged && (
+          <FormSection title={copy.fromQ}>
+            <div className="hg-form__chips" role="group" aria-label={copy.fromLabel}>
+              <Chip small selected={from === thisMonth} onClick={() => setFrom(thisMonth)}>
+                {copy.fromThis}
+              </Chip>
+              <Chip
+                small
+                selected={from === nextMonth(thisMonth)}
+                onClick={() => setFrom(nextMonth(thisMonth))}
+              >
+                {copy.fromNext}
+              </Chip>
+            </div>
+            {/* key를 두지 않음: 값이 바뀔 때마다 휠을 새로 만들어 키보드 포커스를 잃었음(2026-11-14 R7). 칩으로 바꾼 값은 휠이 그 칸으로 굴림 */}
+            <YearMonthInput
+              label={copy.fromLabel}
+              value={from}
+              onChange={(v) => v && setFrom(v)}
+              minYear={Number(thisMonth.slice(0, 4))}
+              maxYear={Number(thisMonth.slice(0, 4)) + 5}
+              error={fromErr}
+            />
+            <Toggle
+              label={copy.untilQ}
+              checked={hasUntil}
+              onChange={(on) => {
+                setHasUntil(on);
+                if (on && !until) setUntil(from);
+              }}
+            />
+            {hasUntil && (
+              <YearMonthInput
+                label={copy.untilLabel}
+                value={until ?? from}
+                onChange={setUntil}
+                minYear={Number(thisMonth.slice(0, 4))}
+                maxYear={Number(thisMonth.slice(0, 4)) + 5}
+                error={untilErr}
+              />
+            )}
+          </FormSection>
+        )}
+        {nonManager && <p className="hg-form__hint">{copy.sendRecalc}</p>}
         {/* 1번 공개 고지(O-31과 같음). 합류 전이면 볼 사람이 없어 숨김 */}
         {joined && (
           <div className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>
-            <p className="hg-help" style={{ margin: 0, flex: 1 }}>
+            <p className="hg-form__hint" style={{ flex: 1 }}>
               {shareNoteOf(joint, me.plan_share)}
             </p>
             {!joint && (
@@ -288,7 +291,7 @@ export function S11cSalary() {
             )}
           </div>
         )}
-      </QuestionLayout>
+      </FormScreen>
       {sheet && <PlanShareSheet me={me} screenId="S-11c" onClose={() => setSheet(false)} />}
     </>
   );
