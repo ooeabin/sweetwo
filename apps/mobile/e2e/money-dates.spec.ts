@@ -166,7 +166,7 @@ test('F-04 투자: 전부 팔았어요 → 받은 통장 → 결과(F-04d)가 �
   await fillAmount(page, '받은 금액', 11_000_000);
   await page.getByRole('group', { name: '어느 통장에 들어왔어요?' }).getByRole('button', { name: /입출금 통장/ }).click();
   await page.getByRole('button', { name: '적기', exact: true }).click();
-  await expect(page.getByRole('heading', { name: '팔았어요' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '팔았어요' }).first()).toBeVisible();
   await expect(page.getByText('입출금 통장 +1,100만 원')).toBeVisible();
   await expect(page.getByText('판 수익 +300만 원')).toBeVisible();
   await axe(page);
