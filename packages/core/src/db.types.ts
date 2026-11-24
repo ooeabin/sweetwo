@@ -3979,6 +3979,7 @@ export type Database = {
           status: Database["public"]["Enums"]["account_status"]
           updated_at: string
           version: number
+          widget_goal_id: string | null
         }
         SetofOptions: {
           from: "*"
@@ -4044,6 +4045,7 @@ export type Database = {
           status: Database["public"]["Enums"]["account_status"]
           updated_at: string
           version: number
+          widget_goal_id: string | null
         }
         SetofOptions: {
           from: "*"
