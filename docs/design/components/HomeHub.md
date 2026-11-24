@@ -51,3 +51,4 @@
 - React 래퍼 `HubBox`(`title`, `rows[{ key, name, value, sub, alert, label, onClick }]`). 줄의 `label`은 “이름, 값 보조” 화면 읽기 이름. 앱 `h-15-salary-box.tsx`가 값과 이동을 만듦. 맨 아래 “자세히 보기 ›”는 없앰.
 - 반 칸 타일 둘: H-04 자산 관리가 포인트 상자(`hg-hubtile--point`), H-08 캘린더는 흰색. 둘 다 그림 자리 없음, 높이는 내용에 맞춤(같은 줄은 격자가 같은 높이로).
 - H-14 이번 달 우리 둘 카드(`hg-card` + `hg-monthus`)는 홈에서 없앰(2026-11-17). `.hg-monthus` 규칙도 지움.
+- 상자 사이 16, 상자 안 위아래 24(2026-11-24 ‘영역 간격’, DESIGN.md).
