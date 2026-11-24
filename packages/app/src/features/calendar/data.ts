@@ -24,6 +24,7 @@ import {
   nextCareDate,
   overdueDate,
   pickMyChecklist,
+  partnerLabel,
   recordDate,
   todayKst,
   type BaseDay,
@@ -106,7 +107,7 @@ export function useCalendarData() {
           ...(c.joined
             ? [
                 {
-                  name: c.partnerName,
+                  name: partnerLabel(c.partnerName),
                   day: c.partnerPayday,
                   ...(partner.data?.id ? { who: partner.data.id } : {}),
                 },

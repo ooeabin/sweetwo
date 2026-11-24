@@ -65,6 +65,14 @@ export const copy = {
   updated: (date: string) => `${date} 수정`, // [확인 필요]
   sortLabel: '정렬', // [확인 필요] 화면 읽기용
   sorts: { name: '이름', owner: '명의', amount: '금액', updated: '수정일' },
+  // 정렬 버튼·시트(2026-11-24) [확인 필요]. 고른 것을 다시 고르면 반대로(시트에서 방향을 보조 줄로)
+  sortName: { name: '이름순', owner: '명의순', amount: '금액순', updated: '수정일순' },
+  sortHow: {
+    name: { asc: '가나다순', desc: '가나다 거꾸로' },
+    owner: { asc: '가나다순', desc: '가나다 거꾸로' },
+    amount: { asc: '작은 금액부터', desc: '큰 금액부터' },
+    updated: { asc: '오래된 순', desc: '최근 순' },
+  },
   sortDir: (name: string, asc: boolean) => `${name}, ${asc ? '오름차순' : '내림차순'}`, // [확인 필요] 화면 읽기용
   investGainLabel: '안 판 수익', // 23 F-02 9번 투자 묶음 줄 이름(2026-11-04, 투자 비중 줄 없앰. F-04 7번과 같은 말)
   investGain: (amount: string, pct: number | null) =>
@@ -231,6 +239,12 @@ export const copy = {
   rankStaleNote: (month: number) => `${month}월에 본 결과예요`, // [확인 필요]
   rankNotYet: '아직 확인하지 않았어요', // [확인 필요] 다시 동의한 뒤 저장 순위가 없을 때
   rankAd: '광고',
+  rankSource: (label: string) => `${label} 기준`, // [확인 필요] 2026-11-24 그래프 아래 한 줄(예전 세 줄)
+  rankCheck: '확인하기', // [확인 필요] F-01 순위 줄과 같은 말(다시 동의한 뒤 광고 앞)
+  rankEmptyLine: '자산을 적으면 상위 몇 %인지 알려 드려요', // [확인 필요] F-01 순위 줄과 같은 말
+  rankMore: '자세히', // [확인 필요] 설명 시트 열기
+  rankMoreTitle: '순위는 이렇게 봐요', // [확인 필요]
+  rankEmptyCta: '자산 입력하기', // [확인 필요] F-08 자산이 없을 때 주 버튼(홈 H-04 줄 이름과 같음)
   // F-08 v2.2 (나) 순위 없음
   rankPeerLine: (amount: string) => `또래 가구 중간값은 ${amount}이에요`, // [확인 필요]
   /** (나) 보조 “2025년 가계금융복지조사(2025년 3월 말), 30대 가구 기준”(23 F-08 v2.2) */

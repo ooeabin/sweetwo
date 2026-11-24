@@ -1,6 +1,6 @@
 import { endSessions, fetchSessions, qk } from '@sweetwo/api';
 import { deviceLabel, formatMonthDay, todayKst } from '@sweetwo/core';
-import { Button, Field, ListRow, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
+import { Button, Field, ListRow, Modal, PageHeader, SectionHeader, Toggle } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +28,7 @@ export function S15Security() {
   // 처리 중인 버튼(기기 id 또는 'all'), 2026-11-06 버튼 안 로딩
   const [busy, setBusy] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
+  const [askAll, setAskAll] = useState(false);
   const refreshLock = () => bridge?.lock.status().then(setLock);
   useEffect(() => {
     void refreshLock();
@@ -70,6 +71,7 @@ export function S15Security() {
   };
   const logoutAll = async () => {
     if (busy) return;
+    setAskAll(false);
     setBusy('all');
     try {
       await endSessions();
@@ -222,13 +224,22 @@ export function S15Security() {
               variant="link"
               className="hg-btn--danger-plain"
               loading={busy === 'all'}
-              onClick={() => void logoutAll()}
+              onClick={() => setAskAll(true)}
             >
               {copy.logoutAll}
             </Button>
           </div>
         </div>
       </section>
+      {askAll && (
+        <Modal
+          title={copy.logoutAllQ}
+          confirmLabel={copy.logoutAllOk}
+          cancelLabel={copy.cancel}
+          onConfirm={() => void logoutAll()}
+          onCancel={() => setAskAll(false)}
+        />
+      )}
     </div>
   );
   return <MainFrame sub="settings" current={null} tone="alt" columns={[body]} />;

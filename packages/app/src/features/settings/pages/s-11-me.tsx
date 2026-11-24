@@ -270,6 +270,7 @@ export function S11Me() {
                     ? c.myName
                     : c.partnerName
                   : undefined,
+                sp.salary_mode === 'joint' && !!sp.manager_user_id && sp.manager_user_id === me.id,
               )}
               onClick={locked ? undefined : () => nav('/settings/couple/style')}
             />

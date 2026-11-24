@@ -416,3 +416,23 @@ test('W-01 파트너 탭(3b): 예빈이 ‘저금만’이면 저금 줄만, ‘
   await expect(page.getByText('30만 원', { exact: true })).toHaveCount(0);
   await axe(page);
 });
+
+test('S-11 월급 관리 방식 값: 관리자가 나면 “내가 관리해요”, 상대면 “{이름}님이 관리해요”(2026-11-24)', async ({
+  page,
+}) => {
+  const { db } = await connected(page);
+  Object.assign(db.space ?? {}, {
+    salary_mode: 'joint',
+    shared_living: true,
+    manager_user_id: db.me.id,
+  });
+  await page.goto('/settings/me');
+  const row = page.getByRole('button', { name: /월급 관리 방식/ });
+  await expect(row).toContainText('내가 관리해요');
+  await expect(row).not.toContainText('찬우님이 관리해요');
+  Object.assign(db.space ?? {}, { manager_user_id: YEBIN });
+  await page.reload();
+  await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText(
+    '예빈님이 관리해요',
+  );
+});

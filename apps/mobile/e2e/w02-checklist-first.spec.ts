@@ -116,7 +116,9 @@ test('수입 한 줄 기록 없음 상태: 월급 기본값 350만 원 ›, 누�
   await expect(page).toHaveURL(/\/salary\/money-in$/);
 });
 
-test('수입 한 줄 있음 상태: 합계 130만 원 ›, 누르면 W-20b에 기록(최근 것부터)', async ({ page }) => {
+test('수입 한 줄 있음 상태: 합계 130만 원 ›, 누르면 W-20b에 기록(최근 것부터)', async ({
+  page,
+}) => {
   await open(page, new Date('2026-10-07T10:00:00+09:00'), (d, sv) => {
     const row = (id: string, amount: number, on: string, kind: string) => ({
       id,

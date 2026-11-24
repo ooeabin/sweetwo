@@ -1,5 +1,5 @@
 import { qk, setJointCycleDay } from '@sweetwo/api';
-import { coupleBaseDay, type BaseDay } from '@sweetwo/core';
+import { coupleBaseDay, partnerLabel, type BaseDay } from '@sweetwo/core';
 import { ChoiceCards, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -29,7 +29,7 @@ export function S11dPlanDay() {
         : sp.joint_cycle_day;
   const days = [
     c.myPayday !== null ? { day: c.myPayday, name: c.myName } : null,
-    c.partnerPayday !== null ? { day: c.partnerPayday, name: c.partnerName } : null,
+    c.partnerPayday !== null ? { day: c.partnerPayday, name: partnerLabel(c.partnerName) } : null,
   ].filter((x): x is { day: BaseDay; name: string } => !!x);
   const options = days.filter((x, i) => days.findIndex((y) => key(y.day) === key(x.day)) === i);
   const cur = v ?? (current === null ? null : key(current));

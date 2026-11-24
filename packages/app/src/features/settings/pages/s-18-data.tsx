@@ -6,7 +6,7 @@ import {
   qk,
   updateMe,
 } from '@sweetwo/api';
-import { makeZip, todayKst } from '@sweetwo/core';
+import { makeZip, partnerLabel, todayKst } from '@sweetwo/core';
 import {
   Button,
   ChoiceCards,
@@ -82,7 +82,7 @@ export function S18Data() {
   const run = async (s: Scope, f: Format = format): Promise<'left' | undefined> => {
     if (!d.me || !d.c) return;
     setStep('busy');
-    const names = { myId: d.me.id, myName: d.c.myName, partnerName: d.c.partnerName };
+    const names = { myId: d.me.id, myName: d.c.myName, partnerName: partnerLabel(d.c.partnerName) };
     const today = todayKst();
     const date = today.replace(/-/g, '');
     try {

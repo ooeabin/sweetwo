@@ -438,6 +438,8 @@ export const copy = {
   lastUsed: (md: string) => `${md}에 마지막으로 썼어요`, // [확인 필요]
   logoutDevice: '로그아웃',
   logoutAll: '모든 기기에서 로그아웃',
+  logoutAllQ: '모든 기기에서 로그아웃할까요?', // [확인 필요] 확인 Modal(2026-11-24)
+  logoutAllOk: '로그아웃할게요', // [확인 필요]
   loggedOutDevice: '그 기기에서 로그아웃했어요', // [확인 필요]
 
   // S-14 알림(2026-11-04 이메일은 자동 예비로만: 이메일 설정 없음)
@@ -548,14 +550,21 @@ export const copy = {
     separate: '월급은 각자 써요',
   } as Record<string, string>,
   // S-11 ‘월급 관리 방식’ 줄 값(짧게, 2026-11-23 사용자 결정, 엔진 값만 봄) [확인 필요]
-  styleRowValue: (mode: 'joint' | 'separate', managerName: string | null | undefined) =>
+  // 관리자가 나면 “내가 관리해요”(2026-11-24 사용자 결정, 예전 내 이름 + ‘님이’) [확인 필요]
+  styleRowValue: (
+    mode: 'joint' | 'separate',
+    managerName: string | null | undefined,
+    managerIsMe = false,
+  ) =>
     mode === 'separate'
       ? '각자 써요'
-      : managerName === undefined
-        ? '같이 써요'
-        : managerName
-          ? `${managerName}님이 관리해요`
-          : '파트너가 관리해요',
+      : managerIsMe
+        ? '내가 관리해요'
+        : managerName === undefined
+          ? '같이 써요'
+          : managerName
+            ? `${managerName}님이 관리해요`
+            : '파트너가 관리해요',
   // S-11c 예약 표시(S-11 월급 줄 아래 회색) [확인 필요]
   salaryScheduled: (y: number, m: number, amount: string) => `${y}년 ${m}월부터 ${amount}`,
   salaryScheduledUntil: (y: number, m: number) => `${y}년 ${m}월까지`,

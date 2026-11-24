@@ -66,7 +66,10 @@ test('확인 버튼(2026-11-19): 누르면 줄이 아래(완료)로 가고 보�
   await expect(page.locator('.hg-w02hero__amt')).toHaveText('350만 원');
   await expect(page.getByText('5개 중 0개 확인')).toHaveCount(0); // 2026-11-23 없앰
   // 밑줄 탭 숫자
-  await expect(page.getByRole('tab', { name: /^전체 5$/ })).toHaveAttribute('aria-selected', 'true');
+  await expect(page.getByRole('tab', { name: /^전체 5$/ })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
   await expect(page.getByRole('tab', { name: /^남음 5$/ })).toBeVisible();
   await expect(page.getByRole('tab', { name: /^완료 0$/ })).toBeVisible();
   // 체크 원은 이 화면에서 쓰지 않음
@@ -75,7 +78,9 @@ test('확인 버튼(2026-11-19): 누르면 줄이 아래(완료)로 가고 보�
   await expect(page.locator('.hg-transfer--act.is-go')).toHaveCount(5);
   await expect(goRow(page, '청약')).toBeVisible();
   // 줄 = 이름 + 금액, 종류 보조 줄 없음(2026-11-23), 목표 금액 진행·묶음 머리 없음
-  await expect(page.locator('.hg-transfer', { hasText: '내 집 마련' })).not.toContainText('저축·투자');
+  await expect(page.locator('.hg-transfer', { hasText: '내 집 마련' })).not.toContainText(
+    '저축·투자',
+  );
   await expect(page.locator('.hg-transfer', { hasText: '내 집 마련' })).not.toContainText('1억');
   await expect(page.locator('.hg-checkgroup')).toHaveCount(0);
   // 청약을 확인하면 완료 쪽으로

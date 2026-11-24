@@ -15,20 +15,24 @@ import {
   hasPrincipal,
   parsePaidCount,
   parseRate,
+  partnerLabel,
   todayKst,
 } from '@sweetwo/core';
 import {
   AmountInput,
   Field,
   Badge,
+  BottomSheet,
   Button,
   ChoiceCards,
   ConflictChoice,
+  DateWheel,
   LineChart,
   ListRow,
   Menu,
   PageHeader,
   SectionHeader,
+  StickyBar,
 } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -198,7 +202,7 @@ export function F04Item() {
   const market =
     editable && a.side === 'asset' && hasPrincipal(a.grp) && a.kind !== 'deposit_money';
   const nameOf = (uid: string | null) =>
-    uid === d.me?.id ? (d.me?.nickname ?? '') : (d.partnerProfile?.nickname ?? '');
+    uid === d.me?.id ? (d.me?.nickname ?? '') : partnerLabel(d.partnerProfile?.nickname);
   // 금액 그래프: 달마다 마지막 기록(등록 이후)
   const byMonth = new Map<string, number>();
   for (const h of [...(history.data ?? [])].sort((x, y) =>
@@ -249,48 +253,63 @@ export function F04Item() {
           : a.side === 'debt'
             ? copy.repaymentLabel
             : copy.paymentLabel;
-  const editor = (
-    <div
-      className="hg-stack"
-      style={{ padding: 'var(--space-3) var(--space-4)' }}
-      onKeyDown={(e) => {
-        if (e.key === 'Escape') setField(null);
-        if (e.key === 'Enter') saveValue();
-      }}
-    >
-      {field === 'monthly_payment' ? (
-        <AmountInput
-          label={fieldLabel}
-          value={draftAmount}
-          onChange={setDraftAmount}
-          allowZero
-          embedded
-        />
-      ) : (
-        <Field
-          label={fieldLabel}
-          type={field === 'maturity_date' ? 'date' : 'text'}
-          inputMode={
-            field === 'interest_rate' ? 'decimal' : field === 'paid_count' ? 'numeric' : undefined
-          }
-          value={draft}
-          onChange={(e) => setDraft(e.target.value.trim())}
-          error={valueError}
-          autoFocus
-        />
-      )}
-      <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-        <Button variant="primary" size="sm" disabled={!valueOk} loading={busy} onClick={saveValue}>
+  // 값 고치기 시트(2026-11-24): 만기일은 날짜 휠, 금액은 금액 칸, 회차·금리는 글자 칸. 맨 아래 주 버튼 ‘저장’(Esc·닫기 = 취소)
+  const today = todayKst();
+  const ymd = (v: string) => {
+    const [y = 0, mo = 1, dd = 1] = v.split('-').map(Number);
+    return { y, m: mo, d: dd };
+  };
+  const pad2 = (n: number) => String(n).padStart(2, '0');
+  const mat = a.maturity_date ? ymd(a.maturity_date) : null;
+  const editor = field && (
+    <BottomSheet
+      title={fieldLabel}
+      onClose={() => setField(null)}
+      actions={
+        <Button variant="primary" block disabled={!valueOk} loading={busy} onClick={saveValue}>
           {copy.saveEdit}
         </Button>
-        <Button variant="secondary" size="sm" onClick={() => setField(null)}>
-          {copy.cancel}
-        </Button>
-      </span>
-    </div>
+      }
+    >
+      <div
+        className="hg-stack"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && field !== 'maturity_date') saveValue();
+        }}
+      >
+        {field === 'monthly_payment' ? (
+          <AmountInput
+            label={fieldLabel}
+            value={draftAmount}
+            onChange={setDraftAmount}
+            allowZero
+            embedded
+            autoFocus
+          />
+        ) : field === 'maturity_date' ? (
+          <DateWheel
+            label={fieldLabel}
+            value={draft ? ymd(draft) : null}
+            initial={mat ?? ymd(today)}
+            minYear={Math.min(Number(today.slice(0, 4)), mat?.y ?? 9999)}
+            maxYear={Number(today.slice(0, 4)) + 40}
+            onChange={(v) => setDraft(`${v.y}-${pad2(v.m)}-${pad2(v.d)}`)}
+          />
+        ) : (
+          <Field
+            label={fieldLabel}
+            inputMode={field === 'interest_rate' ? 'decimal' : 'numeric'}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value.trim())}
+            error={valueError}
+            autoFocus
+          />
+        )}
+      </div>
+    </BottomSheet>
   );
   const body = (
-    <div className="hg-stack hg-detail" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack hg-detail" style={{ gap: 0 }}>
       {/* 2026-11-04 저금 항목 상세와 같은 머리: ‹ 이름 + ⋯(삭제). 묶음 이름 보조 줄과 아래 회색 삭제 버튼은 없앰 */}
       <PageHeader
         title={a.name}
@@ -305,215 +324,225 @@ export function F04Item() {
           ) : undefined
         }
       />
-      {!editable && (
-        <p className="hg-banner hg-banner--info" style={{ margin: 0 }}>
-          <span>{copy.readOnly(o.name)}</span>
-        </p>
-      )}
-      {maturedOpen && (
-        <div className="hg-banner hg-banner--info" role="status">
-          <span>{copy.maturedPast}</span>
-          <Button variant="link" size="sm" onClick={() => nav(`/assets/${a.id}/matured`)}>
-            {copy.maturedSettle}
-          </Button>
-        </div>
-      )}
-      <section className="hg-card hg-stack" aria-label={copy.amountLabel}>
-        <span className="hg-card__label">
-          {copy.amountLabel} {a.estimated && <Badge kind="temp">{copy.estimatedTag}</Badge>}
-        </span>
-        {editAmount !== undefined ? (
-          <div
-            className="hg-stack"
-            onKeyDown={(e) => {
-              if (e.key === 'Escape') setEditAmount(undefined);
-              if (e.key === 'Enter') saveAmount();
-            }}
-          >
-            <AmountInput
-              label={copy.amountLabel}
-              value={editAmount}
-              onChange={setEditAmount}
-              allowZero
-              embedded
-            />
-            <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-              <Button
-                variant="primary"
-                size="sm"
-                disabled={editAmount === null}
-                loading={busy}
-                onClick={() => saveAmount()}
-              >
-                {copy.saveEdit}
-              </Button>
-              <Button variant="secondary" size="sm" onClick={() => setEditAmount(undefined)}>
-                {copy.cancel}
-              </Button>
-            </span>
-            {conflict && (
-              <ConflictChoice
-                title={copy.conflictQ}
-                body={copy.conflictBody(nameOf(a.updated_by))}
-                mine={{ label: copy.conflictMine, value: m(conflict.mine) }}
-                theirs={{
-                  label: copy.conflictTheirs(nameOf(a.updated_by)),
-                  value: m(conflict.theirs),
-                }}
-                busy={busy}
-                onMine={() => saveAmount(true)}
-                onTheirs={() => setEditAmount(undefined)}
-              />
-            )}
-          </div>
-        ) : (
-          <span className="hg-card__value">{m(a.amount)}</span>
+      {/* 2026-11-24 W-10과 같은 모양: 이름표 13 + 큰 금액 34 + 보조 한 줄 + 항목 줄(금액 고치기·시세 바꾸기·팔았어요). 오렌지 작은 버튼 없음 */}
+      <div className="hg-page">
+        {!editable && (
+          <p className="hg-q__help" style={{ margin: 0 }}>
+            {copy.readOnly(o.name)}
+          </p>
         )}
-        {/* 7번 안 판 수익 “+120만 원(+12%)” / “원금 980만 원”(F-02 투자 묶음 줄과 같은 표기, 2026-11-12 S8-13) */}
-        {gain !== null && a.principal !== null && (
-          <span className="hg-row" style={{ flexWrap: 'wrap', gap: 'var(--space-3)' }}>
-            <span className="hg-card__meta">
+        {maturedOpen && (
+          <div className="hg-banner hg-banner--info" role="status">
+            <span>{copy.maturedPast}</span>
+            <Button variant="link" size="sm" onClick={() => nav(`/assets/${a.id}/matured`)}>
+              {copy.maturedSettle}
+            </Button>
+          </div>
+        )}
+        <section className="hg-fdhero" aria-label={copy.amountLabel}>
+          <span className="hg-fdhero__label">
+            {copy.amountLabel} {a.estimated && <Badge kind="temp">{copy.estimatedTag}</Badge>}
+          </span>
+          {editAmount !== undefined ? (
+            <div
+              className="hg-stack"
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') setEditAmount(undefined);
+                if (e.key === 'Enter') saveAmount();
+              }}
+            >
+              <AmountInput
+                label={copy.amountLabel}
+                value={editAmount}
+                onChange={setEditAmount}
+                allowZero
+                embedded
+              />
+              <div>
+                <Button variant="link" onClick={() => setEditAmount(undefined)}>
+                  {copy.cancel}
+                </Button>
+              </div>
+              {conflict && (
+                <ConflictChoice
+                  title={copy.conflictQ}
+                  body={copy.conflictBody(nameOf(a.updated_by))}
+                  mine={{ label: copy.conflictMine, value: m(conflict.mine) }}
+                  theirs={{
+                    label: copy.conflictTheirs(nameOf(a.updated_by)),
+                    value: m(conflict.theirs),
+                  }}
+                  busy={busy}
+                  onMine={() => saveAmount(true)}
+                  onTheirs={() => setEditAmount(undefined)}
+                />
+              )}
+            </div>
+          ) : (
+            <span className="hg-fdhero__amt">{m(a.amount)}</span>
+          )}
+          {/* 7번 안 판 수익 “+120만 원(+12%)” / “원금 980만 원”(F-02 투자 묶음 줄과 같은 표기, 2026-11-12 S8-13) */}
+          {gain !== null && a.principal !== null && (
+            <p
+              className="hg-fdhero__line"
+              style={{ flexWrap: 'wrap', columnGap: 'var(--space-3)' }}
+            >
               <b>
                 {copy.investGain(
                   `${gain >= 0 ? '+' : '−'}${m(Math.abs(gain))}`,
                   a.principal > 0 ? Math.round((gain * 100) / a.principal) : null,
                 )}
               </b>
-            </span>
-            <span className="hg-card__meta">{copy.principal(m(a.principal))}</span>
-          </span>
-        )}
-        {/* 2026-11-04 작은 ‘수정’ 글자 링크 대신 카드 안 버튼(투자·부동산은 ‘시세 바꾸기’가 같은 일). 2026-11-11 주 버튼(오렌지 채움, 사용자 결정), ‘팔았어요’는 보조 그대로 */}
+              <span>{copy.principal(m(a.principal))}</span>
+            </p>
+          )}
+        </section>
         {editable && editAmount === undefined && (
-          <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-            <Button variant="primary" size="sm" onClick={() => startEdit(a.amount)}>
-              {market ? copy.marketEdit : copy.amountEdit}
-            </Button>
-            {market && (
-              <Button variant="secondary" size="sm" onClick={() => nav(`/assets/${a.id}/sold`)}>
-                {copy.sold}
-              </Button>
-            )}
-          </span>
-        )}
-      </section>
-      {points.length >= 2 && (
-        <LineChart
-          label={copy.graph}
-          value={m(a.amount)}
-          points={points}
-          format={m}
-          name={a.name}
-          plotLabel={copy.graph}
-        />
-      )}
-      <div className="hg-list">
-        <ListRow
-          label={copy.owner}
-          value={
-            <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-              {o.name}
-              {o.proxy && <Badge kind="temp">{copy.proxy}</Badge>}
-            </span>
-          }
-        />
-        <ListRow
-          label={copy.createdLabel}
-          value={formatDateFull(todayKst(new Date(a.created_at)))}
-        />
-        {a.maturity_date !== null && (
-          <ListRow
-            label={copy.maturityLabel}
-            value={formatDateFull(a.maturity_date)}
-            onClick={editable ? () => open('maturity_date', a.maturity_date ?? '') : undefined}
-          />
-        )}
-        {field === 'maturity_date' && editor}
-        {a.paid_count !== null && (
-          <ListRow
-            label={copy.countLabel}
-            value={`${a.paid_count}${copy.paidCountUnit}`}
-            onClick={editable ? () => open('paid_count', String(a.paid_count)) : undefined}
-          />
-        )}
-        {field === 'paid_count' && editor}
-        {/* 매달 내는 돈이 금리보다 먼저(23 F-03g) */}
-        {a.monthly_payment !== null && (
-          <ListRow
-            label={a.side === 'debt' ? copy.repaymentLabel : copy.paymentLabel}
-            value={m(a.monthly_payment)}
-            onClick={
-              editable
-                ? () => {
-                    setDraftAmount(a.monthly_payment);
-                    open('monthly_payment', '');
-                  }
-                : undefined
-            }
-          />
-        )}
-        {field === 'monthly_payment' && editor}
-        {a.interest_rate !== null && (
-          <ListRow
-            label={
-              a.rate_estimated ? (
-                <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-                  {copy.rateLabel}
-                  <Badge kind="temp">{copy.estimatedTag}</Badge>
-                </span>
-              ) : (
-                copy.rateLabel
-              )
-            }
-            value={`${a.interest_rate}%`}
-            onClick={editable ? () => open('interest_rate', String(a.interest_rate)) : undefined}
-          />
-        )}
-        {field === 'interest_rate' && editor}
-        {mine && (
-          <ListRow
-            label={copy.visLabel}
-            value={copy.vis[a.visibility]}
-            onClick={() => setEditVis((x) => !x)}
-          />
-        )}
-      </div>
-      {mine && editVis && (
-        <ChoiceCards<Vis>
-          label={copy.visTitle}
-          value={a.visibility}
-          onChange={(v) => {
-            setEditVis(false);
-            void run(() => updateAsset(a.id, { visibility: v }), copy.saved, {
-              visibility: a.visibility,
-            });
-          }}
-          autoAdvance={false}
-          options={shareOptions()}
-        />
-      )}
-      <section className="hg-stack" aria-label={copy.history}>
-        <SectionHeader title={copy.history} />
-        {manual.length === 0 && <p className="hg-help hg-empty__line">{copy.historyEmpty}</p>}
-        {manual.length > 0 && (
-          <div className="hg-list">
-            {manual.map((h) => (
-              <ListRow
-                key={h.id}
-                label={
-                  <span className="hg-help">
-                    {copy.editedBy(
-                      formatDot(todayKst(new Date(h.recorded_at))),
-                      h.recorded_by ? nameOf(h.recorded_by) : '',
-                    )}
-                  </span>
-                }
-                value={<b>{m(h.amount)}</b>}
-              />
-            ))}
+          <div className="hg-list hg-list--plain">
+            <ListRow
+              label={market ? copy.marketEdit : copy.amountEdit}
+              onClick={() => startEdit(a.amount)}
+            />
+            {market && <ListRow label={copy.sold} onClick={() => nav(`/assets/${a.id}/sold`)} />}
           </div>
         )}
-      </section>
+        {points.length >= 2 && (
+          <>
+            <div className="hg-page__band" aria-hidden="true" />
+            <LineChart
+              flat
+              label={copy.graph}
+              points={points}
+              format={m}
+              name={a.name}
+              plotLabel={copy.graph}
+            />
+          </>
+        )}
+        <div className="hg-page__band" aria-hidden="true" />
+        <div className="hg-list hg-list--plain">
+          <ListRow
+            label={copy.owner}
+            value={
+              <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
+                {o.name}
+                {o.proxy && <Badge kind="temp">{copy.proxy}</Badge>}
+              </span>
+            }
+          />
+          <ListRow
+            label={copy.createdLabel}
+            value={formatDateFull(todayKst(new Date(a.created_at)))}
+          />
+          {a.maturity_date !== null && (
+            <ListRow
+              label={copy.maturityLabel}
+              value={formatDateFull(a.maturity_date)}
+              onClick={editable ? () => open('maturity_date', a.maturity_date ?? '') : undefined}
+            />
+          )}
+          {a.paid_count !== null && (
+            <ListRow
+              label={copy.countLabel}
+              value={`${a.paid_count}${copy.paidCountUnit}`}
+              onClick={editable ? () => open('paid_count', String(a.paid_count)) : undefined}
+            />
+          )}
+          {/* 매달 내는 돈이 금리보다 먼저(23 F-03g) */}
+          {a.monthly_payment !== null && (
+            <ListRow
+              label={a.side === 'debt' ? copy.repaymentLabel : copy.paymentLabel}
+              value={m(a.monthly_payment)}
+              onClick={
+                editable
+                  ? () => {
+                      setDraftAmount(a.monthly_payment);
+                      open('monthly_payment', '');
+                    }
+                  : undefined
+              }
+            />
+          )}
+          {a.interest_rate !== null && (
+            <ListRow
+              label={
+                a.rate_estimated ? (
+                  <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
+                    {copy.rateLabel}
+                    <Badge kind="temp">{copy.estimatedTag}</Badge>
+                  </span>
+                ) : (
+                  copy.rateLabel
+                )
+              }
+              value={`${a.interest_rate}%`}
+              onClick={editable ? () => open('interest_rate', String(a.interest_rate)) : undefined}
+            />
+          )}
+          {mine && (
+            <ListRow
+              label={copy.visLabel}
+              value={copy.vis[a.visibility]}
+              onClick={() => setEditVis((x) => !x)}
+            />
+          )}
+        </div>
+        {mine && editVis && (
+          <ChoiceCards<Vis>
+            label={copy.visTitle}
+            value={a.visibility}
+            onChange={(v) => {
+              setEditVis(false);
+              void run(() => updateAsset(a.id, { visibility: v }), copy.saved, {
+                visibility: a.visibility,
+              });
+            }}
+            autoAdvance={false}
+            options={shareOptions()}
+          />
+        )}
+        <div className="hg-page__band" aria-hidden="true" />
+        <section
+          className="hg-stack"
+          aria-label={copy.history}
+          style={{ paddingTop: 'var(--space-6)' }}
+        >
+          <SectionHeader title={copy.history} />
+          {manual.length === 0 && <p className="hg-help hg-empty__line">{copy.historyEmpty}</p>}
+          {manual.length > 0 && (
+            <div className="hg-list hg-list--plain">
+              {manual.map((h) => (
+                <ListRow
+                  key={h.id}
+                  label={
+                    <span className="hg-help">
+                      {copy.editedBy(
+                        formatDot(todayKst(new Date(h.recorded_at))),
+                        h.recorded_by ? nameOf(h.recorded_by) : '',
+                      )}
+                    </span>
+                  }
+                  value={<b>{m(h.amount)}</b>}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+        {editAmount !== undefined && (
+          <StickyBar>
+            <Button
+              variant="primary"
+              block
+              disabled={editAmount === null}
+              loading={busy}
+              onClick={() => saveAmount()}
+            >
+              {copy.saveEdit}
+            </Button>
+          </StickyBar>
+        )}
+      </div>
+      {editor}
     </div>
   );
   return <MainFrame sub="detail" current="assets" columns={[body]} />;

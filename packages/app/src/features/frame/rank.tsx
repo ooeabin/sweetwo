@@ -122,15 +122,13 @@ export function RankBanner() {
   const [busy, setBusy] = useState(false);
   if (!r) return null;
   const s = r.state;
-  if (s.kind === 'empty') return <RankRow badge="?%" title={copy.rankEmpty} />;
+  if (s.kind === 'empty') return <RankRow title={copy.rankEmpty} />;
   const tap = (kind: 'unseen' | 'seen' | 'stale') =>
     track('rank_banner_tapped', { state: kind, entry: 'assets' });
   if (r.pair.mode === 'peer')
     return (
       <RankRow
-        badge={copy.rankPeerBadge}
         title={copy.rankPeer}
-        action="›"
         onClick={() => {
           tap('unseen');
           nav(RANK_PATH);
@@ -149,7 +147,6 @@ export function RankBanner() {
   if (s.kind === 'seen')
     return (
       <RankRow
-        badge={`${s.pct}%`}
         title={copy.rankSeen(s.pct, r.pair.top_open)}
         action={copy.rankSeenMore(Number(s.month.slice(5, 7)))}
         onClick={() => {
@@ -161,7 +158,6 @@ export function RankBanner() {
   if (s.kind === 'unseen' && !r.viewed)
     return (
       <RankRow
-        badge="?%"
         title={copy.rankQ}
         action={copy.rankCheck}
         onClick={() => {
@@ -172,7 +168,6 @@ export function RankBanner() {
     );
   return (
     <RankRow
-      badge={s.kind === 'stale' ? `${s.pct}%` : '?%'}
       title={s.kind === 'stale' ? copy.rankStale(s.pct) : copy.rankQ}
       action={s.kind === 'stale' ? copy.rankRefresh : copy.rankCheck}
       ad

@@ -9,7 +9,13 @@ import {
   qk,
   type Asset,
 } from '@sweetwo/api';
-import { assetGroupsOf, coupleOf, withKindNames, type AssetSide } from '@sweetwo/core';
+import {
+  assetGroupsOf,
+  coupleOf,
+  partnerLabel,
+  withKindNames,
+  type AssetSide,
+} from '@sweetwo/core';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { netWorthOf, useAssetRealtime } from '../frame';
 import { copy } from './copy';
@@ -72,7 +78,7 @@ export function useRefreshAssets() {
 export function ownerOf(a: Asset, d: Pick<AssetsData, 'me' | 'couple'>) {
   if (a.owner === 'joint') return { name: copy.joint, proxy: false };
   if (a.owner_user_id === d.me?.id) return { name: d.couple?.myName ?? '', proxy: false };
-  return { name: d.couple?.partnerName ?? '', proxy: a.owner_user_id === null };
+  return { name: partnerLabel(d.couple?.partnerName), proxy: a.owner_user_id === null };
 }
 
 /** 내가 고칠 수 있는지(서버 규칙과 같음: 공동, 내 명의, 합류 전 내가 대신 입력한 것) */

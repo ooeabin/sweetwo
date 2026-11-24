@@ -316,21 +316,27 @@ test('자산·부채 목록: 통장 역할 배지 없음, 투자 묶음 줄, 정
   const names = () => cash.getByRole('button').allTextContents();
   // 기본 = 금액 큰 순
   expect((await names())[0]).toContain('생활비 통장');
-  const sorts = page.getByRole('group', { name: '정렬' });
-  await expect(sorts.getByRole('button', { name: '금액, 내림차순' })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
-  await sorts.getByRole('button', { name: '이름' }).click();
-  await expect(sorts.getByRole('button', { name: '이름, 오름차순' })).toBeVisible();
+  // 2026-11-24 정렬 칩 넷 대신 글자 버튼 “금액순” 하나 + 시트(고른 것을 다시 고르면 반대로)
+  await expect(page.getByRole('group', { name: '정렬' })).toHaveCount(0);
+  const sortBtn = (name: string) => page.getByRole('button', { name, exact: true });
+  await expect(sortBtn('금액순, 내림차순')).toBeVisible();
+  await sortBtn('금액순, 내림차순').click();
+  const sheet = page.getByRole('dialog', { name: '정렬' });
+  await expect(sheet.getByRole('radio')).toHaveText([/이름순/, /명의순/, /금액순/, /수정일순/]);
+  await expect(sheet).toContainText('큰 금액부터');
+  await sheet.getByRole('radio', { name: /이름순/ }).click();
+  await expect(sortBtn('이름순, 오름차순')).toBeVisible();
   expect((await names())[0]).toContain('가족 비상금');
-  await sorts.getByRole('button', { name: '이름, 오름차순' }).click();
+  await sortBtn('이름순, 오름차순').click();
+  await page
+    .getByRole('dialog', { name: '정렬' })
+    .getByRole('radio', { name: /이름순/ })
+    .click();
+  await expect(sortBtn('이름순, 내림차순')).toBeVisible();
   expect((await names())[0]).toContain('생활비 통장');
   await axe(page);
   await page.reload();
-  await expect(
-    page.getByRole('group', { name: '정렬' }).getByRole('button', { name: '이름, 내림차순' }),
-  ).toHaveAttribute('aria-pressed', 'true');
+  await expect(sortBtn('이름순, 내림차순')).toBeVisible();
 });
 
 test('자산·부채 목록 → 상세: 묶음, 파트너 합계만, 공개 범위, 금액 수정, 삭제 되돌리기', async ({
@@ -879,4 +885,73 @@ test('금리는 0~30% 소수 1자리(D5, F-03g와 F-04 같음), 보증금은 팔
   await expect(page.getByText('0~30% 사이로 적어 주세요')).toBeVisible();
   await page.getByLabel('금리는 몇 %예요?').fill('4.5');
   await expect(page.getByText('0~30% 사이로 적어 주세요')).toHaveCount(0);
+});
+
+test('F-04 맨 위는 W-10 모양(오렌지 채움 버튼 없음), 값 고치기는 시트, 만기일은 날짜 휠(type=date 없음)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  const me = String(db.me.id);
+  db.assets.push(
+    asset({
+      id: 'sv1',
+      side: 'asset',
+      grp: 'deposit',
+      kind: 'saving',
+      name: '여행 적금',
+      amount: 12_000_000,
+      maturity_date: '2027-05-20',
+      owner_user_id: me,
+      created_by: me,
+    }),
+  );
+  await page.goto('/assets/sv1');
+  await heading(page, '여행 적금');
+  const hero = page.locator('.hg-fdhero');
+  await expect(hero.locator('.hg-fdhero__label')).toHaveText('금액');
+  await expect(hero.locator('.hg-fdhero__amt')).toHaveText('1,200만 원');
+  // 같은 동작은 항목 줄(›), 오렌지 채움 작은 버튼이나 옅은 오렌지 판 없음
+  await expect(page.getByRole('button', { name: '금액 고치기' })).toHaveClass(/hg-listrow/);
+  await expect(page.locator('.hg-btn--primary, .hg-btn--secondary')).toHaveCount(0);
+  await axe(page);
+  await page.getByRole('button', { name: /만기일/ }).click();
+  const sheet = page.getByRole('dialog', { name: '만기일' });
+  await expect(sheet.getByRole('spinbutton')).toHaveCount(3);
+  await expect(page.locator('input[type="date"]')).toHaveCount(0);
+  await sheet.getByRole('button', { name: '저장' }).click();
+  await expect(page.getByText('저장했어요')).toBeVisible();
+  // 금액 고치기: 금액 칸 + 아래 고정 주 버튼 ‘저장’
+  await page.getByRole('button', { name: '금액 고치기' }).click();
+  await expect(page.locator('.hg-stickybar').getByRole('button', { name: '저장' })).toBeVisible();
+  await page.getByRole('textbox', { name: '금액' }).fill('13000000');
+  await page.locator('.hg-stickybar').getByRole('button', { name: '저장' }).click();
+  expect(db.assets.find((a) => a.id === 'sv1')?.amount).toBe(13_000_000);
+});
+
+test('추가(합류 전, 애칭 없음): 명의 선택지와 목록 보조는 “파트너”로(2026-11-24)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db, false);
+  Object.assign(db.space ?? {}, { partner_nickname: null });
+  await page.goto('/assets/new?side=debt');
+  await page.getByRole('button', { name: '할부' }).click();
+  await page.getByRole('button', { name: '자동차 할부' }).click();
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '남은 대출금은 얼마예요?');
+  await page.getByLabel('남은 대출금은 얼마예요?').fill('8000000');
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect(page.getByRole('radio', { name: '파트너', exact: true })).toBeVisible();
+  await page.getByRole('radio', { name: '파트너', exact: true }).click();
+  await heading(page, '금리는 몇 %예요?');
+  await page.getByLabel('금리는 몇 %예요?').fill('4.5');
+  await page.getByRole('button', { name: '다음' }).click();
+  await heading(page, '매달 얼마씩 갚아요?');
+  await page.getByRole('button', { name: '나중에 할게요' }).click();
+  const row = page.getByRole('button', { name: /자동차 할부/ });
+  await expect(row).toContainText('파트너');
+  await expect(row).toContainText('대신 입력');
 });

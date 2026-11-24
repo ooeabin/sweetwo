@@ -6,7 +6,9 @@ const narrow = (page: Page) => (page.viewportSize()?.width ?? 1280) < 768;
 /** 금액 칸(매달 금액) 채우기 */
 export async function fillAmount(page: Page, label: string, value: number | string) {
   if (!narrow(page)) return page.getByLabel(label, { exact: true }).fill(String(value));
-  await page.getByRole('button', { name: new RegExp(`^${label.replace(/[?.*+()]/g, '\\$&')},`) }).click();
+  await page
+    .getByRole('button', { name: new RegExp(`^${label.replace(/[?.*+()]/g, '\\$&')},`) })
+    .click();
   const dlg = page.getByRole('dialog');
   await dlg.getByLabel(label, { exact: true }).fill(String(value));
   await dlg.getByRole('button', { name: '확인' }).click();
@@ -14,7 +16,9 @@ export async function fillAmount(page: Page, label: string, value: number | stri
 
 /** 접힌 줄 금액 시트(목표 금액, 이미 모은 금액) */
 export async function foldAmount(page: Page, label: string, value: number | string) {
-  await page.getByRole('button', { name: new RegExp(`^${label.replace(/[?.*+()]/g, '\\$&')},`) }).click();
+  await page
+    .getByRole('button', { name: new RegExp(`^${label.replace(/[?.*+()]/g, '\\$&')},`) })
+    .click();
   const dlg = page.getByRole('dialog', { name: label });
   await dlg.getByLabel(label, { exact: true }).fill(String(value));
   await dlg.getByRole('button', { name: '확인' }).click();

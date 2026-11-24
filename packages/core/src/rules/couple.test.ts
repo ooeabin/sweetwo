@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { coupleBaseDay, coupleOf, type CoupleSpace, type CoupleUser } from './couple';
+import { coupleBaseDay, coupleOf, partnerLabel, type CoupleSpace, type CoupleUser } from './couple';
 
 const M = 10_000;
 const chanwoo: CoupleUser = {
@@ -82,4 +82,19 @@ it('월 수입 = 월급 + 다른 수입(O-35b), 월급을 모르면 다른 수�
   expect(c.myIncome).toBe(3_800_000);
   expect(c.partnerIncome).toBe(500_000);
   expect(coupleOf(u('c', null), sp, null).myIncome).toBeNull();
+});
+
+describe('partnerLabel(2026-11-24 애칭이 없으면 ‘파트너’)', () => {
+  it('이름이 있으면 그대로, 비었거나 공백이면 파트너', () => {
+    expect(partnerLabel('예빈')).toBe('예빈');
+    expect(partnerLabel('')).toBe('파트너');
+    expect(partnerLabel('  ')).toBe('파트너');
+    expect(partnerLabel(null)).toBe('파트너');
+    expect(partnerLabel(undefined)).toBe('파트너');
+  });
+  it('혼자 쓰기·애칭 없는 합류 전: coupleOf 이름은 비어 있어도 라벨은 파트너', () => {
+    const c = coupleOf(chanwoo, { ...space, couple_state: 'solo', partner_nickname: null }, null);
+    expect(c.partnerName).toBe('');
+    expect(partnerLabel(c.partnerName)).toBe('파트너');
+  });
 });

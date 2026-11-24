@@ -1,5 +1,5 @@
 import { qk, setChecklistDone } from '@sweetwo/api';
-import { formatDateFull } from '@sweetwo/core';
+import { formatDateFull, partnerLabel } from '@sweetwo/core';
 import { Button, PageHeader, SectionHeader } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -35,7 +35,11 @@ export function S02ChecklistItem() {
   if (d.loading || ck.loading || !d.c) return <LoadingFrame sub="settings" current={null} />;
   const fromTodo = params.get('from') === 'todo';
   const done = ck.doneOf(key);
-  const who = done ? (done.done_by === d.me?.id ? d.c.myName : d.c.partnerName) : null;
+  const who = done
+    ? done.done_by === d.me?.id
+      ? d.c.myName
+      : partnerLabel(d.c.partnerName)
+    : null;
   const back = () => nav(fromTodo ? '/' : guidesPath);
   const toggle = async (v: boolean) => {
     if (saving !== null) return;

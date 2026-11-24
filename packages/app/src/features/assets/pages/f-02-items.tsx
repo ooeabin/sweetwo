@@ -6,6 +6,7 @@ import {
   firstAssetChipsOf,
   formatDot,
   investSummary,
+  partnerLabel,
   todayKst,
   type AssetSide,
 } from '@sweetwo/core';
@@ -13,7 +14,9 @@ import {
   AddRow,
   AddText,
   Badge,
+  BottomSheet,
   Button,
+  ChoiceCards,
   Chip,
   EmptyState,
   Icon,
@@ -79,6 +82,7 @@ export function F02Items() {
   const m = (v: number) => money(v, masked);
   const today = todayKst();
   const [sort, setSort] = useState<Sort>(readSort);
+  const [sortOpen, setSortOpen] = useState(false);
   const pickSort = (key: SortKey) => {
     const next = { key, asc: sort.key === key ? !sort.asc : FIRST_ASC[key] };
     setSort(next);
@@ -184,7 +188,7 @@ export function F02Items() {
       )}
       {noneMine && joined && own.partner > 0 && (
         <p className="hg-q__help" style={{ margin: 0 }}>
-          {copy.partnerWrote(d.couple?.partnerName ?? '')}
+          {copy.partnerWrote(partnerLabel(d.couple?.partnerName))}
         </p>
       )}
       {/* 못 불러오면 F-01과 같은 오류 카드 + ‘다시 시도’, 불러오는 동안은 뼈대만(2026-11-12 QA 8구간 S8-04) */}
@@ -233,29 +237,35 @@ export function F02Items() {
           }
         />
       )}
+      {/* 2026-11-24 정렬 칩 넷 대신 오른쪽 위 글자 버튼 “금액순 ⌄” 하나 → 시트에서 고름(고른 것을 다시 고르면 반대로) */}
       {ready && groups.length > 0 && (
-        <div
-          className="hg-row"
-          role="group"
-          aria-label={copy.sortLabel}
-          style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}
-        >
-          {SORTS.map((k) => {
-            const on = sort.key === k;
-            return (
-              <Chip
-                key={k}
-                small
-                selected={on}
-                aria-label={on ? copy.sortDir(copy.sorts[k], sort.asc) : copy.sorts[k]}
-                onClick={() => pickSort(k)}
-              >
-                {copy.sorts[k]}
-                {on && <Icon name={sort.asc ? 'chevron-up' : 'chevron-down'} size={16} />}
-              </Chip>
-            );
-          })}
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button
+            variant="link"
+            aria-haspopup="dialog"
+            aria-label={copy.sortDir(copy.sortName[sort.key], sort.asc)}
+            onClick={() => setSortOpen(true)}
+          >
+            {copy.sortName[sort.key]}
+            <Icon name="chevron-down" size={16} />
+          </Button>
         </div>
+      )}
+      {sortOpen && (
+        <BottomSheet title={copy.sortLabel} onClose={() => setSortOpen(false)}>
+          <ChoiceCards<SortKey>
+            label={copy.sortLabel}
+            value={sort.key}
+            onChange={pickSort}
+            onPick={() => setSortOpen(false)}
+            shortcuts={false}
+            options={SORTS.map((k) => ({
+              value: k,
+              label: copy.sortName[k],
+              sub: k === sort.key ? copy.sortHow[k][sort.asc ? 'asc' : 'desc'] : undefined,
+            }))}
+          />
+        </BottomSheet>
       )}
       {(ready ? groups : []).map(({ g, rows, partner }) => (
         <section key={g.key} className="hg-stack" aria-label={g.name}>
@@ -280,7 +290,7 @@ export function F02Items() {
               <ListRow
                 label={
                   <span className="hg-row" style={{ gap: 'var(--space-2)' }}>
-                    {copy.partnerSum(d.couple?.partnerName ?? '', sideName, partner.n)}
+                    {copy.partnerSum(partnerLabel(d.couple?.partnerName), sideName, partner.n)}
                     <Badge kind="temp">{copy.partnerPill}</Badge>
                   </span>
                 }
