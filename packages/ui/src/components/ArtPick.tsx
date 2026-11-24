@@ -14,6 +14,7 @@ export function ArtPick({
   itemLabel,
   disabled = false,
   lead,
+  columns = 4,
 }: {
   items: { key: string; src?: string; name?: string }[];
   value: string | null;
@@ -25,9 +26,18 @@ export function ArtPick({
   itemLabel?: (index: number) => string;
   disabled?: boolean;
   lead?: ReactNode;
+  /** 한 줄 칸 수(기본 4, 6이면 작은 원 격자: 경조사 그림 12개, 2026-11-24 K안) */
+  columns?: 4 | 6;
 }) {
   return (
-    <ul className={cx('hg-artpick', round && 'hg-artpick--round')} aria-label={label}>
+    <ul
+      className={cx(
+        'hg-artpick',
+        round && 'hg-artpick--round',
+        columns === 6 && 'hg-artpick--cols6',
+      )}
+      aria-label={label}
+    >
       {lead && <li>{lead}</li>}
       {items.map((it, i) => {
         const on = it.key === value;

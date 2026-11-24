@@ -473,3 +473,54 @@ export function DateField({
     </div>
   );
 }
+
+/**
+ * 달력 머리 “12월 ⌄”에서 여는 연·월 시트(Y-04, 2026-11-24 K안): 연·월 휠만. 주 버튼 “2029년 3월 보기”를 누르면 그 달로 이동.
+ * DateSheet의 연·월 휠(DateWheel yearMonth)을 그대로 씀
+ */
+export function MonthSheet({
+  title,
+  year,
+  month,
+  minYear,
+  maxYear,
+  onDone,
+  onClose,
+  closeLabel = '닫기',
+  labels = dateSheetLabels,
+}: {
+  title: string;
+  year: number;
+  month: number;
+  minYear: number;
+  maxYear: number;
+  onDone: (year: number, month: number) => void;
+  onClose: () => void;
+  closeLabel?: string;
+  labels?: Pick<DateSheetLabels, 'wheel' | 'goMonth'>;
+}) {
+  const [view, setView] = useState({ y: Math.min(Math.max(year, minYear), maxYear), m: month });
+  return (
+    <BottomSheet
+      title={title}
+      closeLabel={closeLabel}
+      onClose={onClose}
+      actions={
+        <Button variant="primary" block onClick={() => onDone(view.y, view.m)}>
+          {labels.goMonth(view.y, view.m)}
+        </Button>
+      }
+    >
+      <div className="hg-calsheet__body">
+        <DateWheel
+          label={labels.wheel}
+          yearMonth
+          value={{ y: view.y, m: view.m, d: 1 }}
+          minYear={minYear}
+          maxYear={maxYear}
+          onChange={(v) => setView({ y: v.y, m: v.m })}
+        />
+      </div>
+    </BottomSheet>
+  );
+}

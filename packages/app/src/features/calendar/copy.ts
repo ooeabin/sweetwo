@@ -42,17 +42,6 @@ export const copy = {
     note: '쓸 곳 메모', // [확인 필요] 2026-11-13
     auto: '월급 계획', // [확인 필요] 2026-11-14 R6
   },
-  // 2026-11-04 칸 안 짧은 이름, 확인 목록 안내 띠 이름, 오늘로 [확인 필요]
-  short: {
-    payday: '월급',
-    review: '확인 목록',
-    deadline: '기한',
-    goal: '기한', // 2026-11-16 쓸 곳 메모(note ‘쓸 곳’)와 나눔
-    maturity: '만기',
-    note: '쓸 곳', // 2026-11-13 칸 안 짧은 이름(쓸 곳 메모만, 저금 기한은 ‘기한’)
-    auto: '자동', // [확인 필요] 2026-11-14 R6
-    band: '월급날 확인 목록',
-  },
   today: '오늘',
   // 달력 고른 날 금융 일정 보조 줄: 누르면 어디로 가는지 [확인 필요]
   goSub: {
@@ -71,6 +60,20 @@ export const copy = {
   reviewBand: (month: number) => `${month}월 월급날 확인 목록에 남은 게 있어요`,
   monthLabel: (m: number) => `${m}월`,
   yearLabel: (y: number) => `${y}년`,
+  // 2026-11-24 K안 달 머리 “12월 ⌄”, 다른 해면 “2027년 2월” [확인 필요]
+  monthTextYear: (y: number, m: number) => `${y}년 ${m}월`,
+  monthMenu: (y: number, m: number) => `${y}년 ${m}월, 연·월 고르기`, // 화면 읽기용
+  monthSheetTitle: '연·월 고르기', // [확인 필요] 연·월 휠 시트 제목
+  // 달 머리 아래 요약 한 줄 “경조사 3개(85만 원 예상)”(2026-11-24 사용자 정한 문구, 금액 메모가 없으면 “경조사 3개”, ‘금융 일정’ 필터는 “금융 일정 4개”) [확인 필요]
+  summaryCare: '경조사',
+  summaryMoney: '금융 일정',
+  summaryCount: (n: number) => `${n}개`,
+  summaryBudget: (amount: string) => `(${amount} 예상)`,
+  // 고른 날 머리 보조 “음력 10월 25일”(윤달이면 “음력 윤4월 3일”) [확인 필요]
+  lunarDay: (m: number, d: number, leap: boolean) => `음력 ${leap ? '윤' : ''}${m}월 ${d}일`,
+  // 달력 아래 손잡이(한 주로 접기·펴기) 화면 읽기 이름 [확인 필요]
+  fold: '한 주만 보기',
+  unfold: '한 달 모두 보기',
   prev: '이전 달',
   next: '다음 달',
   dayLabel: (m: number, d: number, n: number, holiday?: string) =>
@@ -102,6 +105,24 @@ export const copy = {
     custom: '직접 쓰기',
   },
   chipsLabel: '이름 고르기', // [확인 필요] 화면 읽기용
+  // 2026-11-24 K안 달력에 보일 그림(그림 파일이 하나도 없으면 이 질문을 안 보임) [확인 필요]
+  artQ: '달력에 어떤 그림으로 보일까요?',
+  artLabel: '그림 고르기',
+  /** 그림 이름(화면 읽기용, Illustrations 10번) */
+  artNames: {
+    cake: '케이크',
+    heart: '하트',
+    diamond: '반지',
+    gift: '선물',
+    'flower-tulip': '꽃',
+    confetti: '폭죽',
+    'users-three': '가족',
+    house: '집',
+    baby: '아기',
+    'graduation-cap': '졸업',
+    'airplane-tilt': '여행',
+    'moon-stars': '보름달',
+  } as Record<string, string>,
   dateQ: '언제예요?', // [확인 필요]
   solar: '양력',
   lunar: '음력',

@@ -757,6 +757,7 @@ export type Database = {
       care_day: {
         Row: {
           alerts: number[]
+          art_key: string | null
           auto: string | null
           auto_moves: boolean
           budget: number
@@ -788,6 +789,7 @@ export type Database = {
         ComputedFields: never
         Insert: {
           alerts?: number[]
+          art_key?: string | null
           auto?: string | null
           auto_moves?: boolean
           budget?: number
@@ -818,6 +820,7 @@ export type Database = {
         }
         Update: {
           alerts?: number[]
+          art_key?: string | null
           auto?: string | null
           auto_moves?: boolean
           budget?: number

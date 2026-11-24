@@ -1,4 +1,4 @@
-import { AddRow, AddText, Button, LineTabs } from '@sweetwo/ui';
+import { AddText, Button, LineTabs } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { sharedCopy } from '../../shared/copy';
@@ -56,7 +56,7 @@ export function FilterChips({
 }
 
 // 캘린더 메뉴 틀(24 Y-04 1~3번, 2026-11-17 첫 화면이 달력 Y-04, 예전 일정 목록 Y-01은 없앰).
-// 제목 “캘린더” + 오른쪽 ‘+ 일정 추가’(넓은 창만) + 보기 필터 밑줄 탭과 그 아래 ‘+ 일정 추가’ 줄(좁은 창만) → Y-07.
+// 제목 “달력” + 오른쪽 ‘+ 일정 추가’(넓은 창만) + 보기 필터 밑줄 탭 → Y-07. 좁은 창 ‘+ 일정 추가’는 ‘다가오는 일정’ 머리 오른쪽(upcoming.tsx, 2026-11-24 K안).
 // 예전 이번 주 띠(WeekStrip)와 ‘달력 ›’ 링크는 없앰(달력이 첫 화면이라 겹침)
 export function CalendarFrame({
   filter,
@@ -89,7 +89,6 @@ export function CalendarFrame({
         <div key="c" className="hg-stack">
           <div className="hg-cal__tools">
             <FilterChips value={filter} onChange={onFilter} />
-            <AddRow className="hg-narrow-only" label={copy.addSchedule} onClick={add} />
           </div>
           {children}
         </div>,
