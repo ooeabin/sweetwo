@@ -53,7 +53,6 @@ export function SalaryLoading({ value }: { value: 'month' | 'plan' }) {
     <MainFrame
       current="salary"
       page={{ title }}
-      tone={value === 'plan' ? 'alt' : undefined}
       columns={[
         <div key="l" className="hg-stack">
           <SkelBody shape="cards" />
@@ -79,7 +78,6 @@ export function SalaryLoadError({
     <MainFrame
       current="salary"
       page={{ title }}
-      tone={value === 'plan' ? 'alt' : undefined}
       columns={[
         <div key="l" className="hg-stack">
           <section className="hg-card hg-card--fill hg-stack" role="status">

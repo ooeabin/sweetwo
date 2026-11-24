@@ -84,5 +84,5 @@ export function S01Guides() {
       </section>
     </div>
   );
-  return <MainFrame sub="settings" current={null} tone="alt" columns={[body]} />;
+  return <MainFrame sub="settings" current={null} columns={[body]} />;
 }

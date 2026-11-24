@@ -191,11 +191,11 @@ test('좁은 창 머리(2026-11-09 홈 허브): 홈은 워드마크 + 알림 + �
     await head.getByRole('button', { name: '홈으로' }).click();
     await expect(page).toHaveURL(/\/$/);
   }
-  // 바탕: 월급·캘린더는 흰색, 자산 관리는 회색
+  // 바탕(2026-11-24): 홈만 회색, 월급·캘린더·자산 관리는 흰색
   await page.goto('/salary');
   await expect(page.locator('.hg-frame')).not.toHaveClass(/hg-frame--alt/);
   await page.goto('/assets');
-  await expect(page.locator('.hg-frame')).toHaveClass(/hg-frame--alt/);
+  await expect(page.locator('.hg-frame')).not.toHaveClass(/hg-frame--alt/);
 });
 
 test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 → 화면(뒤로 = 홈), Esc·✕·막으로 닫힘', async ({

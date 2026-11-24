@@ -121,8 +121,8 @@ export function LoadingFrame({
   shape?: SkelShape;
 }) {
   const s = shape ?? (sub ? 'list' : current === 'month' ? 'home' : 'cards');
-  // 홈·자산 관리 첫 화면은 회색 바탕(2026-11-09)
-  const tone = !sub && (current === 'month' || current === 'assets') ? 'alt' : undefined;
+  // 홈만 회색 바탕(2026-11-24 사용자 결정, 그 밖은 모두 흰 바탕)
+  const tone = !sub && current === 'month' ? 'alt' : undefined;
   return (
     <MainFrame current={current} sub={sub} tone={tone} columns={[<SkelBody key="l" shape={s} />]} />
   );

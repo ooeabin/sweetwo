@@ -86,8 +86,8 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
   await go();
   await expect(page.getByRole('heading', { name: '월급 계획 템플릿', level: 1 })).toBeVisible();
   await expect(page.getByRole('tab', { name: '계획' })).toHaveCount(0); // 구간 탭 없음(2026-11-18)
-  // 2026-11-19: 회색 바탕 + 둥근 흰 카드 셋(요약, 저축·투자, 지출), 예전 영수증 카드·합계 줄·사람 원은 없음
-  await expect(page.locator('.hg-frame--alt')).toHaveCount(1);
+  // 2026-11-24: 흰 바탕 + 영역 셋(요약, 저축·투자, 지출, 사이는 8px 회색 띠), 예전 영수증 카드·합계 줄·사람 원은 없음
+  await expect(page.locator('.hg-frame--alt')).toHaveCount(0);
   await expect(page.locator('.hg-plancard')).toHaveCount(3);
   await expect(page.locator('.hg-receipt, .hg-receipt__row--strong')).toHaveCount(0);
   const sum = page.locator('.hg-plansum');
