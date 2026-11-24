@@ -50,32 +50,59 @@ export function Tabs<T extends string>({
 }
 
 /**
- * 구간 선택(`hg-seg hg-seg--block`, 2026-11-23): 2~3개 중 하나를 꼭 고르는 입력. 너비를 꽉 채움.
- * 탭이 아니라 선택이라 `role="radiogroup"` + `role="radio"`(W-01·W-11 ‘어떻게 챙겨요?’)
+ * 고르기(`SegChoice`, 2026-11-24 사용자 결정 ‘고르기 토글’): 입력에서 꼭 하나를 고름. 회색 판 + 흰 알약은 입력 고르기에 쓰지 않음.
+ * - A 테두리 버튼(`hg-choice`): 짧은 2~3개. 같은 너비 칸, 고른 것은 `ink` 테두리 + 700.
+ * - C 라디오 줄(`hg-choice--rows`): 4개 이상, 긴 글자, 설명(`sub`)이 있을 때. 줄마다 56px 이상, 왼쪽 원(고르면 오렌지 채움).
+ * 어느 쪽인지는 `variant`를 안 주면 위 기준으로 정함(`choiceVariant`). `role="radiogroup"` + `role="radio"`(탭이 아니라 선택)
  */
+export interface ChoiceItem<T extends string> {
+  value: T;
+  label: string;
+  /** 설명(보조 줄). 있으면 라디오 줄 */
+  sub?: string;
+}
+
+/** 버튼(A)인지 라디오 줄(C)인지: 4개 이상, 설명 있음, 긴 글자(2개는 9자, 3개는 5자 넘음)면 줄 */
+export function choiceVariant<T extends string>(items: ChoiceItem<T>[]): 'buttons' | 'rows' {
+  if (items.length >= 4 || items.some((i) => i.sub)) return 'rows';
+  const longest = Math.max(...items.map((i) => [...i.label].length));
+  return longest > (items.length === 3 ? 5 : 9) ? 'rows' : 'buttons';
+}
+
 export function SegChoice<T extends string>({
   items,
   value,
   onChange,
   label,
+  variant,
 }: {
-  items: { value: T; label: string }[];
-  value: T;
+  items: ChoiceItem<T>[];
+  value: T | null;
   onChange: (v: T) => void;
   label: string;
+  variant?: 'buttons' | 'rows';
 }) {
+  const v = variant ?? choiceVariant(items);
   return (
-    <div className="hg-seg hg-seg--block" role="radiogroup" aria-label={label}>
+    <div
+      className={cx('hg-choice', v === 'rows' && 'hg-choice--rows')}
+      role="radiogroup"
+      aria-label={label}
+    >
       {items.map((it) => (
         <button
           key={it.value}
           type="button"
           role="radio"
           aria-checked={it.value === value}
-          className={cx('hg-seg__item', it.value === value && 'is-active')}
+          className={cx('hg-choice__item', it.value === value && 'is-on')}
           onClick={() => onChange(it.value)}
         >
-          {it.label}
+          {v === 'rows' && <span className="hg-choice__dot" aria-hidden="true" />}
+          <span className="hg-choice__text">
+            <span className="hg-choice__label">{it.label}</span>
+            {it.sub && <span className="hg-choice__sub">{it.sub}</span>}
+          </span>
         </button>
       ))}
     </div>

@@ -6,7 +6,7 @@ import {
   DateWheel,
   QuestionLayout,
   ShortText,
-  Tabs,
+  SegChoice,
   Toggle,
   QuestionSkeleton,
 } from '@sweetwo/ui';
@@ -278,8 +278,7 @@ export function Y07CareAdd() {
           else go(i + 1);
         }}
       >
-        <Tabs<'solar' | 'lunar'>
-          variant="seg"
+        <SegChoice<'solar' | 'lunar'>
           label={copy.dateQ}
           value={d.lunar ? 'lunar' : 'solar'}
           onChange={(v) => set({ lunar: v === 'lunar', leap: false })}

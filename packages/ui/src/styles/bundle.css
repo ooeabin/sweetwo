@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (74d48d9d). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (15f04470). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -2731,8 +2731,6 @@ button.hg-datepill { cursor: pointer; }
 .hg-form__amountbtn .hg-amount__value.is-empty { color: var(--stone); }
 .hg-form__amountbtn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .hg-form__amountbtn.is-error { border-bottom-color: var(--danger); }
-.hg-seg--block { box-sizing: border-box; display: flex; width: 100%; align-self: stretch; }
-.hg-seg--block .hg-seg__item { flex: 1 1 0; justify-content: center; padding: 0 var(--space-2); text-align: center; white-space: nowrap; }
 .hg-form__folds { position: relative; display: flex; flex-direction: column; margin-top: var(--space-2); padding-top: var(--space-4); }
 .hg-form__folds::before { content: ""; position: absolute; top: 0; left: 50%; width: 100vw; height: var(--space-4); transform: translateX(-50%); background: var(--surface-alt); }
 .hg-form__fold { box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); width: 100%; min-height: 56px; margin: 0; padding: 0; border: 0; border-bottom: 1px solid var(--hairline-soft); background: none; color: var(--ink); font: var(--text-body); text-align: left; cursor: pointer; }
@@ -2741,7 +2739,6 @@ button.hg-datepill { cursor: pointer; }
 .hg-form__foldval { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--slate); }
 .hg-form__foldval.is-set { color: var(--ink); font-weight: var(--weight-semibold); }
 .hg-form__hint { margin: 0; font: var(--text-body-sm); color: var(--slate); }
-@media (hover: none), (pointer: coarse) { .hg-seg--block .hg-seg__item { min-height: 44px; } }
 @media (prefers-reduced-motion: no-preference) { .hg-form__hero { transition: color var(--dur-fast) var(--ease-out); } }
 .hg-form__below { display: flex; flex-direction: column; gap: var(--space-1); }
 .hg-form__below > * { margin: 0; }
@@ -3013,3 +3010,20 @@ button.hg-datepill { cursor: pointer; }
 .hg-sheet { gap: var(--gap-sheet); }
 .hg-sheet__actions { margin-top: 0; }
 @media (max-height: 700px) { .hg-sheet { gap: var(--space-4); } }
+
+/* ── 고르기 SegChoice(2026-11-24 사용자 결정): A 테두리 버튼(짧은 2~3개), C 라디오 줄(4개 이상·긴 글자·설명). 회색 판 + 흰 알약은 입력 고르기에 쓰지 않음 ── */
+.hg-choice { display: flex; gap: var(--space-2); width: 100%; align-self: stretch; }
+.hg-choice__item { box-sizing: border-box; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.hg-choice__item:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.hg-choice__label { font: var(--text-value); color: var(--ink-2); }
+.hg-choice__sub { font: var(--text-note); color: var(--stone); }
+.hg-choice:not(.hg-choice--rows) .hg-choice__item { flex: 1 1 0; display: flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 var(--space-2); border: 1px solid var(--hairline); border-radius: var(--radius-lg); background: var(--surface); text-align: center; }
+.hg-choice:not(.hg-choice--rows) .hg-choice__item.is-on { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.hg-choice:not(.hg-choice--rows) .hg-choice__item.is-on .hg-choice__label { color: var(--ink); font-weight: 700; }
+.hg-choice--rows { flex-direction: column; gap: 0; }
+.hg-choice--rows .hg-choice__item { display: flex; align-items: center; gap: var(--space-3); min-height: 56px; padding: var(--space-3) 0; }
+.hg-choice--rows .hg-choice__text { display: flex; flex-direction: column; min-width: 0; }
+.hg-choice--rows .hg-choice__label { font: var(--text-name); color: var(--ink); }
+.hg-choice__dot { flex: none; box-sizing: border-box; width: 24px; height: 24px; border: 2px solid var(--border-control); border-radius: var(--radius-full); background: var(--surface); }
+.hg-choice__item.is-on .hg-choice__dot { border-color: var(--accent-app); background: var(--accent-app); box-shadow: inset 0 0 0 5px var(--surface); }  /* 고른 원: 오렌지 채움 + 안쪽 흰 점(고른 선택지 원) */
+@media (prefers-reduced-motion: no-preference) { .hg-choice__item { transition: border-color var(--dur-fast) var(--ease-out); } }
