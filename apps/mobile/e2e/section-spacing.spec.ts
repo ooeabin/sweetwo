@@ -115,3 +115,30 @@ test('시트: 제목 아래 24, 영역 사이 24', async ({ page }) => {
   });
   expect(sheetGap).toBe('24px');
 });
+
+test('FormScreen 아래 고정 주 버튼: 윗변 위 32는 바탕으로 채우고, 스크롤 중에도 내용이 그 안에 안 보임', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 700 });
+  await open(page, '/assets/new?side=asset');
+  const bar = page.locator('.hg-stickybar');
+  await expect(bar).toBeVisible();
+  const r = await page.evaluate(() => {
+    const b = document.querySelector('.hg-stickybar') as HTMLElement;
+    const btn = b.querySelector('button') as HTMLElement;
+    window.scrollTo(0, (document.documentElement.scrollHeight - innerHeight) / 2);
+    const bt = btn.getBoundingClientRect().top;
+    const x = btn.getBoundingClientRect().left + 20;
+    const probe = (dy: number) => !!document.elementFromPoint(x, bt - dy)?.closest('.hg-stickybar');
+    return {
+      pad: parseFloat(getComputedStyle(b).paddingTop),
+      bg: getComputedStyle(b).backgroundColor,
+      fade: getComputedStyle(b, '::before').height,
+      solid: [4, 16, 31].every(probe),
+    };
+  });
+  expect(r.pad).toBe(32);
+  expect(r.bg).not.toBe('rgba(0, 0, 0, 0)');
+  expect(r.fade).toBe('16px');
+  expect(r.solid).toBe(true);
+});
