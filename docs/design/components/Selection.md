@@ -5,6 +5,7 @@
 - 소비자가 주는 것: 라벨, 상태.
 - 켜진 Toggle과 고른 카드 테두리는 `ink`. 체크한 Checkbox(`hg-checkbox`)와 고른 표시 원(`hg-option__mark`)은 브랜드 오렌지 `accent-app` + `on-accent-app` 체크(2026-11-09, 체크리스트 `hg-check`와 같음). 꺼진 상태 테두리는 `border-control`.
 - Toggle 이름(2026-11-15 3차 검토): 스위치(`role="switch"`)는 `aria-labelledby`로 라벨 글자만 이름, 보조 글은 `aria-describedby`(감싼 label만으로는 이름이 안 잡히는 화면 읽기가 있었음).
+- Toggle 글자(`hg-toggle__label`)는 줄 이름과 같은 17/400(2026-11-24 구역 4, 예전 본문 상속 16px).
 - Toggle: 설정 알림처럼 바로 적용되는 것. Checkbox: 약관 동의(ConsentCard), 질문 화면의 켜고 끄는 한 줄. Radio: 한 화면 안 하나 고르기.
 - Checkbox 줄(`Checkbox`, `hg-checkrow`, 2026-11-10): 체크 상자 20px(`hg-checkbox`) + 12px + 글자 15px(`text-body`, `ink`), 줄 전체가 누르는 곳(높이 44px 이상), 포커스 링은 `focus-ring`. O-31 ‘매달 금액이 달라요’. 동의 묶음 안 줄은 그대로 `hg-consent__check`.
   - 2026-11-17 어드민: 브라우저 기본 체크 상자 대신 이 줄(AD-06 동의 요청 ‘금액 원값 요청’, AD-14 ‘재동의 요구’·‘법률 검토 확인’, 항목 이름 표의 ‘숨김’). 어드민 안에서는 상자 18px, 줄 32px, 글자 14px, 체크한 상자는 `ink` 채움 + `on-ink` 체크(오렌지·파랑 아님). 꺼지면(`disabled`) 글자 `muted` + 상자 테두리 `hairline`. 표 칸 안처럼 글자가 따로 보일 필요가 없으면 `hideLabel`(글자는 화면 읽기에만).

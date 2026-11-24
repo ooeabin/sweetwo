@@ -347,9 +347,14 @@ test('경조사 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건너
   await page.getByLabel('어떤 날이에요?').fill('민지 결혼식');
   await expect(page.getByRole('switch', { name: '매년 돌아와요' })).not.toBeChecked();
   await pickDate(page, '언제예요?', '2026-09-01');
-  await expect(page.getByText('이미 지난 날이에요. 기록으로 남길까요?').first()).toBeVisible();
-  await expect(page.getByRole('button', { name: '추가하기' })).toBeDisabled();
+  // 지난 날(한 번): 빨간 오류 대신 회색 안내 + 주 버튼 글자가 ‘기록하기’(2026-11-24 구역 4)
+  await expect(page.getByText('이미 지난 날이에요', { exact: true })).toBeVisible();
+  await expect(page.getByRole('alert')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '기록으로 남기기' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '추가하기' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '기록하기' })).toBeEnabled();
   await pickDate(page, '언제예요?', '2026-11-21');
+  await expect(page.getByText('이미 지난 날이에요', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/calendar$/);
   expect(db.cares.at(-1)).toMatchObject({
@@ -585,8 +590,8 @@ test('2026-11-04 사용성: 달력은 보던 날 기억, Y-05 그날엔 ‘다�
   await expect(page.getByRole('heading', { name: '11월 10일 화요일' })).toBeVisible();
 
   await page.goto('/calendar/day/c-mom');
-  const status = page.getByRole('group', { name: '준비 상황' });
-  await expect(status.getByRole('button')).toHaveCount(2);
+  const status = page.getByRole('radiogroup', { name: '준비 상황' });
+  await expect(status.getByRole('radio')).toHaveCount(2);
   await expect(page.getByRole('button', { name: '다녀왔어요' })).toBeVisible();
   // 미리 알림은 체크 목록
   const alerts = page.getByRole('group', { name: '미리 알림' });
@@ -633,7 +638,7 @@ test('QA 9구간: 고치기 Toast ‘되돌리기’(S9-04), 파트너 월급날
 
   // Y-05 준비 상황 → “고쳤어요” + 되돌리기
   await page.goto('/calendar/day/c-mom');
-  await page.getByRole('button', { name: '준비 중', exact: true }).click();
+  await page.getByRole('radio', { name: '준비 중', exact: true }).click();
   await expect(page.getByText('고쳤어요')).toBeVisible();
   await expect.poll(() => db.cares.find((x) => x.id === 'c-mom')?.status).toBe('preparing');
   await page.getByRole('button', { name: '되돌리기' }).click();
@@ -783,4 +788,99 @@ test('달력 시트(Y-07, 2026-11-24): 날짜는 한 줄 → 시트 → 날 고�
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/calendar$/);
   expect(db.cares.at(-1)).toMatchObject({ date_rule: 'lunar_yearly', month: 8, day: 15 });
+});
+
+test('경조사 추가(Y-07) 이름 칩: 결혼했어요·준비 중이면 ‘결혼기념일’, 아니면 맨 앞 ‘사귄 날’(2026-11-24 구역 4)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/calendar/add/a');
+  const chips = page.getByRole('group', { name: '이름 고르기' });
+  await expect(chips.getByRole('button', { name: '결혼기념일' })).toBeVisible();
+  await expect(chips.getByRole('button', { name: '사귄 날' })).toHaveCount(0);
+  Object.assign(db.space as object, { marriage_status: 'dating' });
+  await page.goto('/calendar/add/a');
+  await expect(chips.getByRole('button', { name: '결혼기념일' })).toHaveCount(0);
+  await expect(chips.getByRole('button').first()).toHaveText('사귄 날');
+  await chips.getByRole('button', { name: '사귄 날' }).click();
+  await expect(page.getByLabel('어떤 날이에요?')).toHaveValue('사귄 날');
+  await expect(page.getByRole('switch', { name: '매년 돌아와요' })).toBeChecked();
+  await axe(page);
+  await page.getByRole('button', { name: '추가하기' }).click();
+  await expect(page).toHaveURL(/\/calendar$/);
+  expect(db.cares.at(-1)).toMatchObject({ name: '사귄 날', kind: 'dating_anniversary' });
+});
+
+test('상세(Y-05): 기록을 마친 회차는 요약 + 기록 고치기, 지남·그날은 아래 고정 주 버튼 하나(2026-11-24 구역 4)', async ({
+  page,
+}) => {
+  const DAY = new Date('2026-10-14T20:00:00+09:00');
+  await page.clock.setFixedTime(DAY);
+  const db = await mockOnboarding(page, { now: DAY });
+  seed(db);
+  db.cares.push(
+    care({
+      id: 'c-wed',
+      kind: 'event',
+      name: '민지 결혼식',
+      date_rule: 'once',
+      month: null,
+      day: null,
+      once_on: '2026-10-05',
+      budget: 100_000,
+    }),
+    care({
+      id: 'c-done',
+      kind: 'event',
+      name: '지후 돌잔치',
+      date_rule: 'once',
+      month: null,
+      day: null,
+      once_on: '2026-10-10',
+      budget: 50_000,
+    }),
+  );
+  db.careRecords.push({
+    id: 'rec-x',
+    care_day_id: 'c-done',
+    member_id: null,
+    occurs_on: '2026-10-10',
+    amount: 50_000,
+    paid_from: 'personal',
+    gifts: ['cash', 'gift'],
+    gift_name: '아기 옷',
+    memo: '케이크 같이 먹었어요',
+    deleted_at: null,
+  });
+
+  // 지남: 화면 중간 버튼 없이 아래 고정 주 버튼 “기록하기” 하나
+  await page.goto('/calendar/day/c-wed');
+  await expect(page.getByText('지남, 10월 5일')).toBeVisible();
+  await expect(page.getByRole('button', { name: '기록하기' })).toHaveCount(1);
+  await expect(
+    page.locator('.hg-stickybar').getByRole('button', { name: '기록하기' }),
+  ).toBeVisible();
+  await axe(page);
+
+  // 기록을 마친 회차: 준비 상황·‘다녀왔어요’ 없음, 기록 요약 + 기록 고치기
+  await page.goto('/calendar/day/c-done');
+  await expect(page.getByRole('radiogroup', { name: '준비 상황' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '다녀왔어요' })).toHaveCount(0);
+  const sum = page.getByRole('region', { name: '기록' });
+  await expect(sum).toContainText('쓴 돈');
+  await expect(sum).toContainText('5만 원');
+  await expect(sum).toContainText('현금, 아기 옷');
+  await expect(sum).toContainText('케이크 같이 먹었어요');
+  await axe(page);
+  await page.getByRole('button', { name: '기록 고치기' }).click();
+  await expect(page.getByRole('heading', { name: '기록 고치기' })).toBeVisible();
+  await expectAmount(page, '얼마 썼어요?', '50,000');
+  await expect(page.getByLabel('어떤 선물이에요?')).toHaveValue('아기 옷');
+  await page.getByLabel('메모', { exact: true }).fill('모두 즐거웠어요');
+  await page.getByRole('button', { name: '저장' }).click();
+  await expect(page).toHaveURL(/\/calendar\/day\/c-done$/);
+  expect(db.careRecords.find((r) => r.id === 'rec-x')).toMatchObject({ memo: '모두 즐거웠어요' });
+  expect(db.careRecords).toHaveLength(1);
 });

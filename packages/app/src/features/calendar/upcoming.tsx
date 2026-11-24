@@ -127,7 +127,7 @@ export function UpcomingSection({ d, filter }: { d: CalData; filter: CalFilter }
             {next.date <= d.today &&
               !(next.care.status === 'done' && next.care.status_on === next.date) && (
                 <Button
-                  variant="ghost"
+                  variant="secondary"
                   size="sm"
                   onClick={() => nav(`/calendar/day/${next.care.id}/record/a?on=${next.date}`)}
                 >

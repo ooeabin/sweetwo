@@ -137,7 +137,7 @@ test('H-04 자산 0개면 기존 동기 문구 그대로(이름표·작은 줄 �
   await expect(tile.locator('.hg-hubtile__foot')).toHaveCount(0);
 });
 
-test('H-16 다가오는 날 상자(최대 2개, D-n) → 달력, H-08 타일 보조 줄은 “다음 일정 D-n”', async ({
+test('H-16 다가오는 날 상자(최대 2개, D-n) → 달력, H-08 타일 보조 줄은 “{이름} D-n”', async ({
   page,
 }) => {
   await open(page, (d) => {
@@ -174,7 +174,7 @@ test('H-16 다가오는 날 상자(최대 2개, D-n) → 달력, H-08 타일 보
       .first()
       .evaluate((el) => el.getBoundingClientRect().top);
   expect(await top('.hg-hubup')).toBeGreaterThan(await top('.hg-hubtile'));
-  await expect(page.getByRole('button', { name: /^캘린더/ })).toContainText('다음 일정 D-7');
+  await expect(page.getByRole('button', { name: /^캘린더/ })).toContainText('어머니 생신 D-7');
   await axe(page);
   await box.click();
   await expect(page).toHaveURL(/\/calendar$/);

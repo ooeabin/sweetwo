@@ -4,6 +4,7 @@ import {
   fetchPhotoConsent,
   qk,
   recordCare,
+  updateCareRecord,
   uploadPhoto,
 } from '@sweetwo/api';
 import { amountBand, formatMonthDay, giftRepeated, quickChips, TERMS_VERSION } from '@sweetwo/core';
@@ -51,6 +52,8 @@ interface Draft {
   photos: Photo[];
   /** 저장한 기록(사진만 남았을 때 다시 저장하지 않게) */
   recordId: string | null;
+  /** 고치는 기록 id(Y-05 ‘기록 고치기’, 2026-11-24 구역 4). 첫 저장은 새 기록이 아니라 고치기 */
+  editOf: string | null;
 }
 const MAX_PHOTOS = 10;
 const blank = (key: string, amount: number | null): Draft => ({
@@ -61,6 +64,7 @@ const blank = (key: string, amount: number | null): Draft => ({
   memo: '',
   photos: [],
   recordId: null,
+  editOf: null,
 });
 const useDraft = create<{ d: Draft; set: (p: Partial<Draft>) => void }>((set, get) => ({
   d: blank('', null),
@@ -83,11 +87,26 @@ export function Y08Record() {
   const consent = useQuery({ queryKey: qk.photoConsent, queryFn: fetchPhotoConsent });
   const care = c.cares.find((x) => x.id === id);
   const on = params.get('on') ?? (care ? c.recordOn(care) : null);
-  const key = `${id}:${on ?? ''}`;
-  // 다른 날을 열면 새로(금액 메모 채움)
+  const existing =
+    params.get('edit') === '1' && on
+      ? c.records.find((r) => r.care_day_id === id && r.occurs_on === on)
+      : undefined;
+  const key = `${id}:${on ?? ''}${existing ? ':edit' : ''}`;
+  // 다른 날을 열면 새로(금액 메모 채움). 고치는 중이면 쓴 기록을 채움
   useEffect(() => {
-    if (care && d.key !== key) set(blank(key, care.budget || null));
-  }, [care, d.key, key, set]);
+    if (!care || d.key === key) return;
+    if (existing)
+      set({
+        ...blank(key, existing.amount),
+        gifts: existing.gifts.filter(
+          (g): g is Gift => g === 'cash' || g === 'gift' || g === 'meal',
+        ),
+        giftName: existing.gift_name ?? '',
+        memo: existing.memo ?? '',
+        editOf: existing.id,
+      });
+    else set(blank(key, care.budget || null));
+  }, [care, d.key, key, existing, set]);
 
   if (c.loading) return <QuestionSkeleton />;
   if (!care || !on) return <Navigate to="/calendar" replace />;
@@ -104,7 +123,20 @@ export function Y08Record() {
     setSaving(true);
     try {
       let recordId = x.recordId;
-      if (!recordId) {
+      if (!recordId && x.editOf) {
+        // 고치기(Y-05 ‘기록 고치기’): 쓴 돈·드린 것·메모만 바꿈
+        recordId = (
+          await updateCareRecord({
+            recordId: x.editOf,
+            amount: x.amount ?? 0,
+            gifts: x.gifts,
+            giftName: x.gifts.includes('gift') ? x.giftName.trim() || null : null,
+            memo: x.memo.trim() || null,
+          })
+        ).record;
+        set({ recordId });
+        await qc.invalidateQueries({ queryKey: qk.careRecords });
+      } else if (!recordId) {
         recordId = (
           await recordCare({
             careId: care.id,
@@ -144,7 +176,7 @@ export function Y08Record() {
       if (failed) return;
       x.photos.forEach((p) => URL.revokeObjectURL(p.url));
       set(blank('', null));
-      carryToast(copy.recorded);
+      carryToast(x.editOf ? copy.edited : copy.recorded);
       nav(`/calendar/day/${care.id}`, { replace: true });
     } catch {
       toast(copy.loadFailed);
@@ -221,7 +253,7 @@ export function Y08Record() {
   const notice = partner ? copy.photoNotice(c.couple?.partnerName ?? '') : copy.photoNoticeSolo;
   return (
     <FormScreen
-      title={copy.formTitleRecord}
+      title={d.editOf ? copy.formTitleRecordEdit : copy.formTitleRecord}
       onBack={() => nav(-1)}
       hero={<FormHero lines={[[{ text: help }]]} />}
       primary={{ label: copy.save, loading: saving }}
@@ -251,6 +283,7 @@ export function Y08Record() {
             value={d.giftName}
             onChange={(giftName) => set({ giftName })}
             max={30}
+            placeholder={copy.giftNamePlaceholder}
             autoFocus={false}
           />
         )}

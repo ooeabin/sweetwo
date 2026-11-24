@@ -6,9 +6,9 @@ describe('홈 보조 줄', () => {
   it('H-04 이름표 “순자산” + 값(2026-11-23 바탕 기준: 자산·부채 줄은 없앰)', () => {
     expect(copy.netLabel).toBe('순자산');
   });
-  it('H-08 다음 일정 기준: “다음 일정 D-8”, 당일, 없음', () => {
-    expect(copy.nextSchedule(8)).toBe('다음 일정 D-8');
-    expect(copy.nextSchedule(0)).toBe('오늘 일정 있어요');
+  it('H-08 다음 일정 기준: “{이름} D-8”, 당일, 없음', () => {
+    expect(copy.nextSchedule({ name: '어머니 생신', days: 8 })).toBe('어머니 생신 D-8');
+    expect(copy.nextSchedule({ name: '어머니 생신', days: 0 })).toBe('어머니 생신 오늘');
     expect(copy.nextSchedule(null)).toBe('다가오는 일정이 없어요');
   });
   it('H-10 보조 한 줄: 목표 금액이 있으면 “10%, 300만 원 중”', () => {

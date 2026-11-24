@@ -341,12 +341,8 @@ export function DateSheet({
               onPointerCancel={() => (swipe.current = null)}
             >
               <div className="hg-calsheet__row" role="row">
-                {DOW.map((d, i) => (
-                  <span
-                    key={d}
-                    role="columnheader"
-                    className={cx('hg-calsheet__dow', i === 0 && 'is-sun')}
-                  >
+                {DOW.map((d) => (
+                  <span key={d} role="columnheader" className="hg-calsheet__dow">
                     {d}
                   </span>
                 ))}
@@ -366,7 +362,6 @@ export function DateSheet({
                         role="gridcell"
                         className={cx(
                           'hg-calsheet__day',
-                          ci === 0 && 'is-sun',
                           d === todayHere && 'is-today',
                           d === selHere && 'is-on',
                         )}

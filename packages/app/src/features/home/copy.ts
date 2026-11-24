@@ -120,13 +120,13 @@ export const copy = {
   leftover: (amount: string) => `미계획 ${amount}`, // 2026-11-13 H-07, 2026-11-17 월급 상자 ‘월급 계획 템플릿’ 줄 보조, 2026-11-23 짧은 자리 규칙 ‘미계획’(예전 “미계획 금액 20만 원”)
   short: (amount: string) => `${amount}이 모자라요`,
   calendarTile: '캘린더',
-  /** H-08 보조 줄(2026-11-20 오후, 다음 일정 기준: H-16과 같은 첫 항목, 당일 0 / 없음 null) [확인 필요] */
-  nextSchedule: (days: number | null) =>
-    days === null
+  /** H-08 보조 줄(2026-11-24 구역 4: 일정 이름 + D-day “{이름} D-2”, H-16과 같은 첫 항목, 당일 “{이름} 오늘”, 없음 null) [확인 필요] */
+  nextSchedule: (next: { name: string; days: number } | null) =>
+    next === null
       ? '다가오는 일정이 없어요'
-      : days === 0
-        ? '오늘 일정 있어요'
-        : `다음 일정 D-${days}`,
+      : next.days === 0
+        ? `${next.name} 오늘`
+        : `${next.name} D-${next.days}`,
   /** H-16 다가오는 날 상자 머리(2026-11-20) [확인 필요] */
   upcomingTitle: '다가오는 날',
   ddayShort: (n: number) => (n === 0 ? 'D-day' : `D-${n}`), // [확인 필요]

@@ -59,6 +59,7 @@ const LEADS = {
   care: {
     birthday: { icon: 'cake', tone: 'together' },
     anniversary: { icon: 'heart', tone: 'together' },
+    dating_anniversary: { icon: 'heart', tone: 'together' },
     seollal: { icon: 'moon-stars', tone: 'together' },
     chuseok: { icon: 'moon-stars', tone: 'together' },
     parents_day: { icon: 'flower-tulip', tone: 'together' },

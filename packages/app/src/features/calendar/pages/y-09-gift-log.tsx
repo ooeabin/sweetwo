@@ -96,23 +96,31 @@ export function Y09GiftLog() {
                 return (
                   <ListRow
                     key={r.id}
-                    lead={
-                      thumb ? (
-                        <span className="hg-thumb" aria-hidden="true">
-                          <img src={thumb} alt="" />
-                        </span>
-                      ) : undefined
+                    label={
+                      // 경조사별 보기는 묶음 머리가 경조사 이름이라 줄은 “2026년, 현금 5만 원”(2026-11-24 구역 4)
+                      view === 'care'
+                        ? copy.giftedYearWhat(Number(r.occurs_on.slice(0, 4)), what(r))
+                        : (care?.name ?? '')
                     }
-                    label={care?.name ?? ''}
                     sub={[
                       formatDateFull(r.occurs_on),
-                      what(r),
+                      view === 'care' ? null : what(r),
                       again ? copy.giftAgain : null,
                       count ? copy.giftedPhotos(count) : null,
                     ]
                       .filter(Boolean)
                       .join(', ')}
-                    value={m(r.amount)}
+                    // 사진은 줄 오른쪽 작은 정사각 칸(40px)로: 사진 있는/없는 줄 이름 시작이 같음(2026-11-24 구역 4)
+                    value={
+                      <span className="hg-giftval">
+                        {m(r.amount)}
+                        {thumb && (
+                          <span className="hg-thumb" aria-hidden="true">
+                            <img src={thumb} alt="" />
+                          </span>
+                        )}
+                      </span>
+                    }
                     onClick={() => nav(`/calendar/day/${r.care_day_id}`)}
                   />
                 );
