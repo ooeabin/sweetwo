@@ -253,7 +253,7 @@ export function W20aDistribute() {
         goals.length ? { label: copy.moneyInSkip, onClick: () => void finish(true) } : undefined
       }
     >
-      <div className="hg-stack" style={{ gap: 'var(--space-4)' }}>
+      <div className="hg-stack">
         {goals.map((i) => {
           const cur = put[i.goal.id] ?? 0;
           return (

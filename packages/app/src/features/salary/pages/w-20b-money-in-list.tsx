@@ -136,7 +136,7 @@ export function W20bMoneyInList() {
     </section>
   );
   const body = (
-    <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div key="l" className="hg-stack">
       <PageHeader
         title={copy.moneyInList}
         backLabel={copy.back}

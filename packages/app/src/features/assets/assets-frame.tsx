@@ -48,7 +48,7 @@ export function AssetsFrame({
         ),
       }}
       columns={[
-        <div key="c" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+        <div key="c" className="hg-stack">
           <LineTabs<ViewTab>
             label={copy.tabsLabel}
             value={tab === 'overview' ? 'overview' : addSide}

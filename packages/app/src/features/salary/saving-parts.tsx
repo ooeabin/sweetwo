@@ -212,7 +212,7 @@ export function SavingLoadError({ onBack, onRetry }: { onBack: () => void; onRet
       sub="detail"
       current="salary"
       columns={[
-        <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+        <div key="l" className="hg-stack">
           <PageHeader
             title={copy.listTitle}
             backLabel={copy.back}

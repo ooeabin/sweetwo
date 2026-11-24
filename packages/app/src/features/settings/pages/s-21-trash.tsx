@@ -108,7 +108,7 @@ export function S21Trash() {
     copy.trashKinds[r.kind === 'asset' ? (r.sub ?? 'asset') : r.kind];
 
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader
         title={copy.trash}
         backLabel={copy.back}

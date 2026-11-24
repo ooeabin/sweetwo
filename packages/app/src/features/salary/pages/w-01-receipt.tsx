@@ -1010,7 +1010,7 @@ export function W01Receipt() {
   const pv = partnerView.data ?? null;
   const limited = theirs && !!pv && !pv.hidden && pv.mode === 'separate' && pv.share !== 'all';
   const column = (
-    <div key="l" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
+    <div key="l" className="hg-stack">
       {edit ? (
         <SectionHeader
           title={copy.editTitle}

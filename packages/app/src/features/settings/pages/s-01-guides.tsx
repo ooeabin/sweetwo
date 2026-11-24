@@ -36,7 +36,7 @@ export function S01Guides() {
   });
   const guide = (key: string) => GUIDES.find((g) => g.key === key);
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader
         title={copy.guidesTitle}
         backLabel={copy.back}

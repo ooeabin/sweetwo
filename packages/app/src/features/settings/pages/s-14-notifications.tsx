@@ -152,7 +152,7 @@ export function S14Notifications() {
   );
 
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader
         title={copy.rows.noti}
         backLabel={copy.back}

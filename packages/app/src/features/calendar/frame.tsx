@@ -86,7 +86,7 @@ export function CalendarFrame({
         ),
       }}
       columns={[
-        <div key="c" className="hg-stack" style={{ gap: 'var(--space-4)' }}>
+        <div key="c" className="hg-stack">
           <div className="hg-cal__tools">
             <FilterChips value={filter} onChange={onFilter} />
             <AddRow className="hg-narrow-only" label={copy.addSchedule} onClick={add} />

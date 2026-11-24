@@ -51,7 +51,7 @@ export function S10Settings() {
   const prefs = notiPrefs(d.me.noti_prefs);
   // 휴대폰에서 알림을 허용했을 때만 ‘켜짐’(건너뛰었거나 거절했으면 꺼짐, R7)
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <div className="hg-list">
         <ListRow
           lead={

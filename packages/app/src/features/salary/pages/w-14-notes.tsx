@@ -121,7 +121,7 @@ export function W14Notes({ kind }: { kind: 'goal' | 'bundle' }) {
   const emptyShown = !notes.isLoading && !(notes.isError && !notes.data) && !list.length;
   const today = todayKst();
   const body = (
-    <div key="l" className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div key="l" className="hg-stack">
       <PageHeader
         title={copy.notesTitle(t.name)}
         backLabel={copy.back}

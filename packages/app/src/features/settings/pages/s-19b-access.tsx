@@ -38,7 +38,7 @@ export function S19bAccess() {
     }
   };
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader
         title={copy.inquiryNo(q.no)}
         backLabel={copy.back}

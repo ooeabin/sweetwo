@@ -85,7 +85,7 @@ export function S15Security() {
 
   if (sessions.isLoading) return <LoadingFrame sub="settings" current={null} />;
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader
         title={copy.security}
         backLabel={copy.back}

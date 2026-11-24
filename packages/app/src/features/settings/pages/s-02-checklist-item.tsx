@@ -55,7 +55,7 @@ export function S02ChecklistItem() {
     }
   };
   const body = (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }}>
+    <div className="hg-stack">
       <PageHeader
         title={item.title}
         backLabel={copy.back}

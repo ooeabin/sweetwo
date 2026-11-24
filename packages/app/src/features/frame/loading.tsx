@@ -101,7 +101,7 @@ function shapeBody(s: SkelShape) {
 export function SkelBody({ shape }: { shape: SkelShape }) {
   const show = useDelayed();
   return (
-    <div className="hg-stack" style={{ gap: 'var(--space-6)' }} aria-busy="true">
+    <div className="hg-stack" aria-busy="true">
       {show && shapeBody(shape)}
     </div>
   );

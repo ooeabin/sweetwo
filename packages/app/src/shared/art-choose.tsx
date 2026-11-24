@@ -98,7 +98,7 @@ export function ArtChoose({
         if (sel && sel !== current && !saving) onPreset(sel);
       }}
     >
-      <div className="hg-stack hg-artchoose" style={{ gap: 'var(--space-6)' }}>
+      <div className="hg-stack hg-artchoose">
         <div
           className={round ? 'hg-artprev hg-artprev--round' : 'hg-artprev'}
           role="img"
