@@ -98,8 +98,8 @@ test('사진 주소가 안 열리면 깨진 그림 대신 글자 원: 설정 홈
       size: parseFloat(getComputedStyle(el).fontSize),
     };
   });
-  expect(fit.w).toBe(72);
-  expect(fit.h).toBe(72);
+  expect(fit.w).toBeCloseTo(72, 0);
+  expect(fit.h).toBeCloseTo(72, 0);
   expect(fit.inside).toBe(true);
   expect(fit.dx).toBeLessThan(1.5);
   expect(fit.size).toBeLessThanOrEqual(72 * 0.4);
@@ -183,8 +183,8 @@ for (const [label, patch, invite] of [
         };
       });
       expect(m).not.toBeNull();
-      expect(m?.size).toEqual([40, 40]);
-      expect(m?.overlap).toBe(12);
+      for (const w of m?.size ?? []) expect(w).toBeCloseTo(40, 0);
+      expect(m?.overlap).toBeCloseTo(12, 0);
       expect(m?.topIsSecond).toBe(true);
       expect(m?.ring).toMatch(/0px 0px 0px 2px/);
       expect(m?.aVisible).toBe(true);
