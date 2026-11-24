@@ -6,6 +6,7 @@ import {
   restoreMoneyIn,
   setPaydayIncome,
 } from '@sweetwo/api';
+import { isOnline } from '@sweetwo/api';
 import { amountBand, formatDateFull, formatDot2, todayKst } from '@sweetwo/core';
 import {
   Button,
@@ -85,8 +86,7 @@ export function W20bMoneyInList() {
       : undefined;
   const saveIncome = async (checklist: string, amount: number) => {
     if (saving) return;
-    if (typeof navigator !== 'undefined' && navigator.onLine === false)
-      return toast(sharedCopy.needOnline);
+    if (!isOnline()) return toast(sharedCopy.needOnline);
     setSaving(true);
     try {
       await setPaydayIncome(checklist, amount);

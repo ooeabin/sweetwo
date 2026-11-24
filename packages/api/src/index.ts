@@ -1,4 +1,5 @@
 export * from './client';
+export * from './connectivity';
 export * from './keys';
 export * from './auth';
 export * from './onboarding';

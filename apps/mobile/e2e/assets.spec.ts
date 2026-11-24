@@ -486,7 +486,10 @@ test('추가: 어드민 항목 이름 목록(AD-19)을 칩에 입힘(숨긴 기�
   ];
   await page.goto('/assets/items');
   await addEntry(page, '+ 추가').click();
-  await page.getByRole('group', { name: '묶음', exact: true }).getByRole('button', { name: '예금·적금' }).click();
+  await page
+    .getByRole('group', { name: '묶음', exact: true })
+    .getByRole('button', { name: '예금·적금' })
+    .click();
   const chips = page.getByRole('group', { name: '예금·적금', exact: true });
   await expect(chips.getByRole('button')).toHaveText([
     '적금',

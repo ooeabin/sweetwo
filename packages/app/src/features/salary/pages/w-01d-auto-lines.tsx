@@ -1,4 +1,5 @@
 import { configureSplitLines, dismissHomeTask, qk, type SplitLine } from '@sweetwo/api';
+import { isOnline } from '@sweetwo/api';
 import { TASK_KEYS } from '@sweetwo/core';
 import { BottomSheet, Button, Checkbox } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
@@ -64,8 +65,7 @@ export function W01dAutoLines() {
   };
   const save = async () => {
     if (busy) return;
-    if (typeof navigator !== 'undefined' && navigator.onLine === false)
-      return toast(sharedCopy.needOnline);
+    if (!isOnline()) return toast(sharedCopy.needOnline);
     setBusy(true);
     try {
       const changed = lines

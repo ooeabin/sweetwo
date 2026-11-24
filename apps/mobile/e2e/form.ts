@@ -34,8 +34,14 @@ export async function pickName(page: Page, name: string, chip = false) {
 
 /** F-03 자산·부채 추가 한 화면: 묶음 칩 → 종류 칩(2026-11-24). 이름은 종류 칩이 채움 */
 export async function pickAssetKind(page: Page, grp: string, kind: string) {
-  await page.getByRole('group', { name: '묶음', exact: true }).getByRole('button', { name: grp, exact: true }).click();
-  await page.getByRole('group', { name: grp, exact: true }).getByRole('button', { name: kind, exact: true }).click();
+  await page
+    .getByRole('group', { name: '묶음', exact: true })
+    .getByRole('button', { name: grp, exact: true })
+    .click();
+  await page
+    .getByRole('group', { name: grp, exact: true })
+    .getByRole('button', { name: kind, exact: true })
+    .click();
 }
 
 /** 이름 칸 */

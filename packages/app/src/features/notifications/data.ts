@@ -16,6 +16,7 @@ import {
   subscribeNotifications,
   type Notification,
 } from '@sweetwo/api';
+import { isOnline, subscribeOnline } from '@sweetwo/api';
 import { coupleOf, notiCursor, partnerLabel, type NotiCursor } from '@sweetwo/core';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
@@ -91,7 +92,7 @@ onSessionReset(() => {
   pendingRead.clear();
   pendingAll = false;
 });
-const isOffline = () => typeof navigator !== 'undefined' && navigator.onLine === false;
+const isOffline = () => !isOnline();
 
 /** 목록 캐시에 바로 읽음 표시(오프라인에서도 줄이 읽음으로 보임) */
 function markLocal(qc: ReturnType<typeof useQueryClient>, ids?: string[]) {
@@ -194,14 +195,13 @@ export function useNotiRealtime(userId: string | undefined) {
         );
     });
     // 연결되면 모아 둔 읽음 보내기(S10-14)
-    const onOnline = () => void flushRead(qc);
-    window.addEventListener('online', onOnline);
+    const offOnline = subscribeOnline(() => void flushRead(qc));
     void flushRead(qc);
     // 앱이 떠 있을 때 온 푸시: OS 알림 대신 앱 안 토스트
     const offPushIn = bridge?.push?.onReceive((p) => p.title && toast(p.title));
     return () => {
       off();
-      window.removeEventListener('online', onOnline);
+      offOnline();
       offPushOpen?.();
       offPushIn?.();
     };

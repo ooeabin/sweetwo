@@ -525,7 +525,9 @@ test('쉬운 첫 입력: 처음 적는 사람은 금액 뒤 F-03e를 한 번(미
   await heading(page, '부채 추가');
   await fillAmount(page, '남은 금액', 5_000_000);
   // 처음 적는 사람은 공개 범위를 한 번 직접 고름(미리 고른 값 없음)
-  await expect(page.getByRole('radiogroup', { name: '파트너에게 어떻게 보여 줄까요?' })).toBeVisible();
+  await expect(
+    page.getByRole('radiogroup', { name: '파트너에게 어떻게 보여 줄까요?' }),
+  ).toBeVisible();
   const save = page.getByRole('button', { name: '추가하기', exact: true });
   await expect(save).toBeDisabled();
   await page.getByRole('radio', { name: /총액만 보여 주기/ }).click();

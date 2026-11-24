@@ -15,6 +15,7 @@ import {
   type SplitLine,
   updateMe,
 } from '@sweetwo/api';
+import { isOnline } from '@sweetwo/api';
 import {
   amountBand,
   coupleOf,
@@ -342,7 +343,7 @@ export function W01Receipt() {
 
   // ── 쓰기(줄마다 바로 저장) ─────────────────────────────────────────────
   const offline = () => {
-    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    if (!isOnline()) {
       toast(sharedCopy.needOnline);
       return true;
     }
