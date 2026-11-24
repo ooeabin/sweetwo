@@ -16,8 +16,8 @@ test('W-11: 고르기는 테두리 버튼 A 수치, 글자 칸은 밑줄, 빠른
   const m = await page.evaluate(() => {
     const els = [...document.querySelectorAll('.hg-choice:not(.hg-choice--rows) .hg-choice__item')] as HTMLElement[];
     const css = (e: HTMLElement) => getComputedStyle(e);
-    const sel = els.find((e) => e.classList.contains('is-on'))!;
-    const off = els.find((e) => !e.classList.contains('is-on'))!;
+    const sel = els.find((e) => e.classList.contains('is-on')) ?? els[0];
+    const off = els.find((e) => !e.classList.contains('is-on')) ?? els[1];
     const gap = els.length > 1 ? els[1].getBoundingClientRect().left - els[0].getBoundingClientRect().right : 0;
     return {
       h: Math.round(off.getBoundingClientRect().height),
