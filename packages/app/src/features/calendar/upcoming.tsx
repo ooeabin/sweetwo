@@ -1,19 +1,29 @@
-import { dday, formatDateWeekday, formatMonthDay, withinDays, type MoneyDate } from '@sweetwo/core';
 import {
+  careArtKey,
+  dday,
+  formatDateWeekday,
+  formatMonthDay,
+  moneyArtKey,
+  withinDays,
+  type MoneyDate,
+} from '@sweetwo/core';
+import {
+  AddRow,
   Button,
   Icon,
+  Illustration,
   Lead,
-  leadOf,
-  type LeadSpec,
   ListRow,
   SectionHeader,
   StatBlock,
+  hasIllustration,
 } from '@sweetwo/ui';
 import { useNavigate } from 'react-router-dom';
 import { money as won, useMask } from '../../shared/mask';
 import { copy } from './copy';
 import { moneyLine, type useCalendarData } from './data';
 import type { CalFilter } from './frame';
+import { startCareAdd } from './pages/y-07-care-add';
 
 // Y-04 달력 아래 ‘다가오는 일정’ 묶음(24 Y-04 11~14번, 2026-11-17): 예전 Y-01 일정 목록 본문을 달력으로 옮김.
 // 기록할 날 띠(→ Y-08), 다음 경조사 카드(D-day, 준비하기 → Y-05), “다가오는 일정” 한 목록(60일 안 경조사 + 금융 일정, 날짜순,
@@ -67,8 +77,8 @@ export function UpcomingSection({ d, filter }: { d: CalData; filter: CalFilter }
     date: string;
     label: string;
     sub: string;
-    /** 줄 앞 칸(2026-11-09 lead-kinds.ts ‘care’·‘money’ 표) */
-    lead: LeadSpec;
+    /** 줄 앞 그림 키(core calendar-view 표, 2026-11-24 K안). 그림 파일이 없으면 앞 칸을 그리지 않음 */
+    art: string | null;
     to: string;
   };
   const rows: Row[] = [
@@ -82,7 +92,7 @@ export function UpcomingSection({ d, filter }: { d: CalData; filter: CalFilter }
             x.care.budget > 0
               ? `${formatDateWeekday(x.date)}, ${m(x.care.budget)}`
               : formatDateWeekday(x.date),
-          lead: leadOf('care', x.care.kind),
+          art: careArtKey(x.care),
           to: `/calendar/day/${x.care.id}`,
         }))),
     ...(filter === 'care'
@@ -94,7 +104,7 @@ export function UpcomingSection({ d, filter }: { d: CalData; filter: CalFilter }
             date: x.date,
             label: l.label,
             sub: l.why ?? formatDateWeekday(x.date),
-            lead: leadOf('money', x.kind),
+            art: moneyArtKey(x.kind),
             to: l.to,
           };
         })),
@@ -138,7 +148,20 @@ export function UpcomingSection({ d, filter }: { d: CalData; filter: CalFilter }
         </section>
       )}
       <section className="hg-stack" aria-label={copy.upcomingList}>
-        <SectionHeader title={copy.upcomingList} />
+        <SectionHeader
+          title={copy.upcomingList}
+          action={
+            // 좁은 창 ‘+ 일정 추가’(넓은 창은 제목 줄, 2026-11-24 K안으로 보기 필터 아래에서 옮김)
+            <AddRow
+              className="hg-narrow-only"
+              label={copy.addSchedule}
+              onClick={() => {
+                startCareAdd();
+                nav('/calendar/add/a');
+              }}
+            />
+          }
+        />
         {!rows.length ? (
           <p className="hg-help hg-empty__line" style={{ margin: 0 }}>
             {filter === 'money' ? copy.noMoney60 : copy.none60}
@@ -159,7 +182,11 @@ export function UpcomingSection({ d, filter }: { d: CalData; filter: CalFilter }
                   return (
                     <ListRow
                       key={r.key}
-                      lead={<Lead icon={r.lead.icon} tone={r.lead.tone} />}
+                      lead={
+                        r.art && hasIllustration(r.art) ? (
+                          <Lead art={<Illustration name={r.art} className="hg-cal__img" />} />
+                        ) : undefined
+                      }
                       label={r.label}
                       sub={r.sub}
                       value={

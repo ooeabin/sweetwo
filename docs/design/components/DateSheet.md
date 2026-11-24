@@ -19,3 +19,7 @@
 - 접근성: 격자 `role="grid"`(행 `row`, 칸 `gridcell`, 요일 `columnheader`), 칸 읽기 이름 “2026년 11월 26일 목요일”(core `formatDateReadout`), 고른 날 `aria-selected`. 키보드: ←→ 하루, ↑↓ 한 주(달 끝을 넘으면 달이 바뀜), PageUp/PageDown 한 달, Home/End 그 달 처음·끝, Enter·Space 고름, Esc 닫기. 칸마다 롤링 `tabindex`.
 - 쓰는 곳: Y-07 경조사 추가(양력/음력), W-14a 쓸 곳 메모 ‘언제 내요?’, W-20 받은 날, F-03 만기일(접힌 줄 시트), F-04 만기일 고치기(고르면 바로 저장), F-04a 새 만기일. 연·월만 고르는 곳(W-11d 기한 등)과 월급날 일 휠, 단계형 화면(S-11h, S-11i)은 `DateWheel` 그대로.
 - 코드: `packages/ui/src/components/DateSheet.tsx`(`DateSheet`, `DateField`, `dateSheetLabels`), 스타일 `bundle.css` ‘폼 날짜 한 줄 + 달력 시트’. 계산은 core `monthCells`, `lunarMonthCells`, `lunarDaySolar`, 표기는 `formatDateDow`, `formatMonthDayDow`, `formatDateReadout`.
+
+## MonthSheet (2026-11-24 K안, 달력 Y-04 머리 “12월 ⌄”)
+
+연·월 휠만 있는 바텀 시트. 제목 “연·월 고르기”, 휠은 DateSheet 연·월 휠(`DateWheel yearMonth`)을 그대로 씀, 아래 주 버튼 “2029년 3월 보기” → 그 달로 이동하고 닫힘. 범위는 올해 기준 앞뒤 10년. 닫기 ✕·Esc·막 누르기로 닫으면 이동하지 않음. React 래퍼 `MonthSheet`(`year`, `month`, `minYear`, `maxYear`, `onDone(year, month)`, `onClose`).

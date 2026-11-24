@@ -208,7 +208,7 @@
 | 저금 항목 `goal` | `bundle_id`. 저금 공개 열은 새 코드에서 읽지 않음(2단계로 지움) |
 | 저금 움직임 `goal_move` | `reason` text(40자, 주인만 읽는 뷰. 상대용은 `goal_move_public`), `reason_code`(enum `goal_move_reason`: fix/used/interest/reconcile/note_paid/custom/auto), `hide_from_summary` bool, `money_in_id`, `note_id`. kind는 기존 in / out만 |
 | 자산 `asset` | `quick` bool(빠르게 적기, 기본 false, 2026-11-13 열 추가). 공개 enum 값은 그대로(화면 이름만 ‘총액만’) |
-| 경조사 `care_day` | kind 값 `dating_anniversary`(사귄 날) |
+| 경조사 `care_day` | kind 값 `dating_anniversary`(사귄 날). `art_key`(달력 그림 키, 글자, 비어 있을 수 있음, 2026-11-24 K안: 값은 `docs/spec/24` ‘경조사 그림 키’ 12개, 기존 행은 kind 기준으로 채움) |
 | 초대 `invite` | `autofill_source`(referrer/clipboard/manual) |
 | 순위 조회 `rank_view` | `paid_by_ad`(첫 조회 무료) |
 

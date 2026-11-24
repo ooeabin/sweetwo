@@ -182,7 +182,8 @@ celebrate(폭죽 터짐), scene-clap(박수), scene-invite(편지가 올라옴),
 | 16 | receipt | 영수증 | 금융 일정: 쓸 곳 메모 날짜(고정) | 예(receipt) |
 
 - 월급날 확인 목록 안내 일정은 그림 없이 띠·줄만(4·6·7번 `calendar-check`와 같은 파일을 쓸지는 뽑을 때 정함).
-- 그림이 들어오기 전 자리: 숨김 규칙(위 2026-11-15)에 따라 그림 칸을 그리지 않음. 달력 칸은 일정 있는 날을 굵은 진한 숫자로만 구분(K안), 줄 앞 칸은 없앰.
+- 그림이 들어오기 전 자리: 숨김 규칙(위 2026-11-15)에 따라 그림 칸을 그리지 않음. 달력 칸은 일정 있는 날을 굵은 진한 숫자로만 구분(K안, 칸 높이는 그대로), 줄 앞 칸은 없앰, Y-07 그림 고르기(12개 원 격자)는 파일이 하나도 없으면 질문째 숨김, 파일이 있는 그림만 격자에 보임.
+- 키 = 파일 이름(`packages/ui/src/assets/illustrations/<키>.webp`). 키 표와 이름 칩 기본값은 core `rules/calendar-view.ts` 한 곳(`CARE_ART_KEYS`, `careArtDefault`, `moneyArtKey`), DB는 `care_day.art_key`(docs/spec/24 ‘경조사 그림 키’). 칸 안 20px, 줄 앞 40px 두 크기에 같은 파일.
 
 ### 합계
 

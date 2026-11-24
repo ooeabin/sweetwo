@@ -27,6 +27,7 @@ export * from './rules/salary-change';
 export * from './rules/share-view';
 export * from './rules/next-saving';
 export * from './rules/calendar';
+export * from './rules/calendar-view';
 export * from './rules/lunar';
 export * from './rules/care';
 export * from './rules/notification';

@@ -7,7 +7,7 @@
 - 보조 줄 둘(2026-11-17 W-21 지난 달 모아보기): 결과와 “계획한 월급 …”을 `hg-listrow__sub` 안에 줄바꿈 두 줄(각 `display: block`)로, 오른쪽 값은 그 달 모은 금액 하나. 줄 높이는 두 줄 규칙(64~68px) 그대로.
 - 누르면 이동하는 줄만 화살표(`hg-chevron`)이고 줄 전체가 `button`(또는 `a`). 토글 줄은 화살표 없음.
 - 여러 줄은 `hg-list`로 묶음: 흰 바탕, 1px `hairline-soft` 테두리, `radius-xl`, 행 사이 구분선 없음, 행 높이 56px 이상(2026-11-09 60px에서). 앱 틀의 맨 바깥 묶음은 옅은 그림자(`shadow-1`)를 더함(AppFrame).
-- 행 앞 아이콘 칸 `Lead`(`hg-lead`, 32px 원, 2026-11-09 밀도로 40px에서): 2D 그림이 들어올 때까지 회색 빈 원(`hg-lead--slot`, `surface-alt` + 안쪽 1px `hairline-soft`, 2026-11-10. 그 전 2026-11-09는 영역 색 원 + Phosphor 아이콘). 종류는 아래 ‘Lead 종류 표’, 나중 그림 이름은 `data-art`(표의 아이콘 이름). UI 아이콘(캘린더 ‘+’ 추가 칸)은 `uiIcon`으로 아이콘 그대로. 목표 금액이 있는 저금 줄은 아이콘 대신 진행 원(`progress`, 아래 ‘진행 원’). 장식이라 `aria-hidden`(줄 이름과 금액이 뜻을 말함). 사진(`photo`, `hg-lead--photo`)은 지금 쓰는 곳 없음. (2026-11-15 3차 검토 사용자 결정: 그림이 들어올 때까지 숨김, 자리도 비우지 않음)
+- 행 앞 아이콘 칸 `Lead`(`hg-lead`, 32px 원, 2026-11-09 밀도로 40px에서): 2D 그림이 들어올 때까지 회색 빈 원(`hg-lead--slot`, `surface-alt` + 안쪽 1px `hairline-soft`, 2026-11-10. 그 전 2026-11-09는 영역 색 원 + Phosphor 아이콘). 종류는 아래 ‘Lead 종류 표’(캘린더 일정은 2026-11-24부터 core 그림 키 표, Calendar.md), 나중 그림 이름은 `data-art`(표의 아이콘 이름). UI 아이콘(캘린더 ‘+’ 추가 칸)은 `uiIcon`으로 아이콘 그대로. 목표 금액이 있는 저금 줄은 아이콘 대신 진행 원(`progress`, 아래 ‘진행 원’). 장식이라 `aria-hidden`(줄 이름과 금액이 뜻을 말함). 사진(`photo`, `hg-lead--photo`)은 지금 쓰는 곳 없음. (2026-11-15 3차 검토 사용자 결정: 그림이 들어올 때까지 숨김, 자리도 비우지 않음)
 - 사진 미리보기 `hg-thumb`(40px, `radius-md`, 잘라 채움): 경조사 선물 기록(Y-09)에서 첫 사진. 장식이라 `aria-hidden`, 사진 수는 보조 줄 “사진 3장”.
 
 ## 설정 줄
@@ -47,18 +47,7 @@
 | 자산 요약 `summary` | 자산(`assets`) | `wallet` | `invest` | F-01 요약 아래 줄 |
 | | 부채(`debts`) | `bank` | 회색 | 〃 |
 | | 예상 순자산(`expected`) | `chart-line-up` | `invest` | 〃 |
-| 금융 일정 `money` | 월급날(`payday`) | `money` | `invest` | Y-04 다가오는 일정·고른 날(영역 색은 홈 H-05 날짜 칸과 같음) |
-| | 월급 전 확인(`review`) | `calendar-check` | `safety` | 〃 |
-| | 저금 기한(`deadline`), 쓸 곳(`goal`) | `target` | `goal` | 〃 |
-| | 만기(`maturity`) | `hourglass` | `family` | 〃 |
-| | 쓸 곳 메모(`note`, 2026-11-13 W-14 날짜) | `piggy-bank` | `goal` | 〃 |
-| | 공휴일(`holiday`, 모를 때) | `flag-pennant` | 회색 | Y-04 고른 날 |
-| 경조사 `care`(한 종류라 모두 `together`) | 생일(`birthday`) | `cake` | `together` | Y-04 |
-| | 기념일(`anniversary`), 사귄 날(`dating_anniversary`, 2026-11-24 연애 중 칩) | `heart` | `together` | 〃 |
-| | 명절(`seollal`, `chuseok`) | `moon-stars` | `together` | 〃 |
-| | 어버이날(`parents_day`) | `flower-tulip` | `together` | 〃 |
-| | 양가 행사(`event`) | `confetti` | `together` | 〃 |
-| | 그 밖의 날(`custom`, 모를 때) | `gift` | `together` | 〃 |
+| 캘린더(금융 일정·경조사, 2026-11-24 K안) | — | 이 표에 없음 | — | 줄 앞 그림은 그림 키(경조사 12개 + 금융 일정 고정 4개)로 그림 파일을 보여 줌. 키 표는 core `rules/calendar-view.ts` 한 곳, 목록은 Illustrations.md 10번. Phosphor 아이콘·영역 색 원은 쓰지 않음(그림이 없으면 앞 칸 없음) |
 | 알림 `noti`(기획서 14 ‘아이콘’ 이름) | `gift`, `heart` | `gift`, `heart` | `together` | N-01, N-02(32px 원 `hg-noti__icon`, 16px 아이콘. 2026-11-20 알림 줄 앞 칸은 사람 원 포함 모두 비움, 종류별 그림이 생기면 이 표로 다시 채움) |
 | | `calendar-check`, `clipboard-text` | `calendar-check` | `safety` | 〃 |
 | | `receipt` | `receipt` | `safety` | 〃 |

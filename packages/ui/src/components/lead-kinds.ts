@@ -2,6 +2,7 @@ import type { IconName } from './Icon';
 
 // 줄 앞 칸(Lead) 종류 → Phosphor 아이콘 + 영역 색(2026-11-09, docs/design/components/ListRow.md ‘Lead 종류 표’).
 // 한 종류 = 아이콘 하나. 표는 여기 하나만 두고, 화면은 leadOf(묶음, 종류)로만 부른다.
+// 캘린더(경조사·금융 일정)는 2026-11-24 K안부터 그림 키 표 하나(core rules/calendar-view.ts)로 옮겼고 이 표에는 없다.
 // 영역 색이 없으면(tone 없음) 회색 원(surface-alt) + ink-2 아이콘. 부채와 앱 안내는 회색.
 
 export type LeadTone = 'together' | 'family' | 'goal' | 'safety' | 'invest';
@@ -42,30 +43,6 @@ const LEADS = {
     debts: { icon: 'bank' },
     expected: { icon: 'chart-line-up', tone: 'invest' },
   },
-  /** 캘린더 금융 일정(core MoneyKind) + 공휴일. 영역 색은 홈 H-05 날짜 칸과 같음 */
-  money: {
-    payday: { icon: 'money', tone: 'invest' },
-    review: { icon: 'calendar-check', tone: 'safety' },
-    deadline: { icon: 'target', tone: 'goal' },
-    goal: { icon: 'target', tone: 'goal' },
-    maturity: { icon: 'hourglass', tone: 'family' },
-    // 쓸 곳 메모 날짜(W-14, 2026-11-13 v2.2)
-    note: { icon: 'piggy-bank', tone: 'goal' },
-    // 날짜 없는 사람의 자동 줄 나가는 날(2026-11-14 R6)
-    auto: { icon: 'arrows-clockwise', tone: 'safety' },
-    holiday: { icon: 'flag-pennant' },
-  },
-  /** 경조사(care_day.kind). 경조사는 한 종류라 영역 색은 모두 together, 아이콘만 이름 칩에 따라 */
-  care: {
-    birthday: { icon: 'cake', tone: 'together' },
-    anniversary: { icon: 'heart', tone: 'together' },
-    dating_anniversary: { icon: 'heart', tone: 'together' },
-    seollal: { icon: 'moon-stars', tone: 'together' },
-    chuseok: { icon: 'moon-stars', tone: 'together' },
-    parents_day: { icon: 'flower-tulip', tone: 'together' },
-    event: { icon: 'confetti', tone: 'together' },
-    custom: { icon: 'gift', tone: 'together' },
-  },
   /** 알림(notification.icon, 기획서 14 ‘센터 표시’ Phosphor 이름) */
   noti: {
     gift: { icon: 'gift', tone: 'together' },
@@ -96,8 +73,6 @@ const FALLBACK: Record<LeadGroup, LeadSpec> = {
   line: LEADS.line.custom,
   asset: LEADS.asset.etc,
   summary: LEADS.summary.assets,
-  money: LEADS.money.holiday,
-  care: LEADS.care.custom,
   noti: LEADS.noti.bell,
 };
 
