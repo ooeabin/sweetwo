@@ -1,5 +1,4 @@
 import {
-  daysInMonth,
   formatDateDow,
   formatDateReadout,
   formatMonthDayDow,
@@ -137,7 +136,10 @@ export function DateSheet({
   const lunar = !!cal?.lunar;
   const leapHere = lunar ? lunarMonthCells(view.y, view.m, true) !== null : false;
   const effCal: DateCal | undefined = cal && { lunar: cal.lunar, leap: cal.leap && leapHere };
-  const cells = cellsOf(view.y, view.m, effCal) ?? cellsOf(view.y, view.m, cal && { ...cal, leap: false }) ?? [];
+  const cells =
+    cellsOf(view.y, view.m, effCal) ??
+    cellsOf(view.y, view.m, cal && { ...cal, leap: false }) ??
+    [];
   const rows: (number | null)[][] = [];
   for (let i = 0; i < cells.length; i += 7) {
     const r = cells.slice(i, i + 7);
@@ -464,10 +466,13 @@ export function DateField({
             if (cal) onCalendarChange?.(cal);
             setOpen(false);
           }}
-          onClear={sheet.onClear && (() => {
-            sheet.onClear?.();
-            setOpen(false);
-          })}
+          onClear={
+            sheet.onClear &&
+            (() => {
+              sheet.onClear?.();
+              setOpen(false);
+            })
+          }
         />
       )}
     </div>

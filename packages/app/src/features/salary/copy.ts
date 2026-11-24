@@ -678,7 +678,6 @@ export const copy = {
   // W-20 수입 적기, W-20a
   moneyInQ: '얼마를 받았어요?',
   moneyInDate: '받은 날', // [확인 필요]
-  moneyInDateToday: '받은 날 오늘', // [확인 필요]
   moneyInFuture: '오늘이나 지난 날만 고를 수 있어요',
   moneyInKinds: {
     salary: '월급',

@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (ed61f552). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (29db4f48). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -3091,3 +3091,5 @@ button.hg-datepill { cursor: pointer; }
 .hg-calsheet__day.is-today .hg-calsheet__num { box-shadow: inset 0 0 0 1px var(--border-control); }
 .hg-calsheet__day.is-on .hg-calsheet__num { background: var(--accent-app); color: var(--on-accent-app-text); font-weight: 700; box-shadow: none; }
 .hg-calsheet__day:disabled { color: var(--stone); cursor: default; }
+.hg-dfield__named { display: flex; flex-direction: column; gap: var(--space-1); }  /* 질문 섹션이 없는 화면(W-20)에서 한 줄 위 이름 */
+.hg-dfield__name { font: var(--text-note); color: var(--slate); }

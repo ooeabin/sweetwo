@@ -12,7 +12,7 @@ import {
   AmountInput,
   Button,
   Chip,
-  DateWheelInput,
+  DateField,
   QuestionLayout,
   QuestionSkeleton,
 } from '@sweetwo/ui';
@@ -53,7 +53,6 @@ export function W20MoneyIn() {
   const [kind, setKind] = useState<MoneyInKind | null>(null);
   const [busy, setBusy] = useState(false);
   // 받은 날은 처음엔 “오늘” 한 줄, ‘바꾸기’를 누르면 날짜 칸(날짜 칸이 처음부터 있으면 금액 칸 포커스를 가져감)
-  const [pickDate, setPickDate] = useState(false);
   const editId = params.get('edit');
   const ins = useQuery({
     queryKey: qk.moneyIns,
@@ -67,7 +66,6 @@ export function W20MoneyIn() {
     setAmount(rec.amount);
     setKind(rec.kind);
     setDate(rec.received_on);
-    setPickDate(rec.received_on !== todayKst());
   }, [rec?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const close = () =>
     window.history.length > 1 ? nav(-1) : nav(editId ? togetherPaths.moneyInList : backOf(params));
@@ -140,23 +138,25 @@ export function W20MoneyIn() {
           </Chip>
         ))}
       </div>
-      {pickDate ? (
-        <DateWheelInput
+      <div className="hg-dfield__named">
+        <span className="hg-dfield__name">{copy.moneyInDate}</span>
+        <DateField
           label={copy.moneyInDate}
           value={date}
           today={todayKst()}
           maxYear={Number(todayKst().slice(0, 4)) + 1}
+          max={todayKst()}
+          invalid={future}
           onChange={(v) => setDate(v)}
-          error={future ? copy.moneyInFuture : undefined}
+          below={
+            future ? (
+              <p className="hg-help is-error" role="alert">
+                {copy.moneyInFuture}
+              </p>
+            ) : undefined
+          }
         />
-      ) : (
-        <div className="hg-row" style={{ gap: 'var(--space-2)' }}>
-          <span className="hg-help">{copy.moneyInDateToday}</span>
-          <button type="button" className="hg-btn hg-btn--link" onClick={() => setPickDate(true)}>
-            {copy.change}
-          </button>
-        </div>
-      )}
+      </div>
       {/* 잘못 적은 기록 고치기·지우기(W-20b, 2026-11-14 M6) */}
       {!rec && (
         <button

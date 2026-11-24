@@ -1,7 +1,7 @@
 import { addSavingNote, updateSavingNote } from '@sweetwo/api';
 import { todayKst } from '@sweetwo/core';
 import {
-  DateWheelInput,
+  DateField,
   FormAmount,
   FormScreen,
   FormSection,
@@ -123,21 +123,25 @@ export function W14aNoteEdit({ kind }: { kind: 'goal' | 'bundle' }) {
           )
         }
       >
-        <DateWheelInput
+        <DateField
           label={copy.noteDateQ}
           value={v.date}
           onChange={(x) => setDate(x)}
-          error={err}
           today={todayKst()}
           minYear={Number(todayKst().slice(0, 4)) - 1}
+          maxYear={Number(todayKst().slice(0, 4)) + 10}
+          invalid={!!err}
+          below={
+            err ? (
+              <p className="hg-help is-error" role="alert">
+                {err}
+              </p>
+            ) : undefined
+          }
         />
       </FormSection>
       {old && (
-        <button
-          type="button"
-          className="hg-btn hg-btn--link hg-form__quick"
-          onClick={remove}
-        >
+        <button type="button" className="hg-btn hg-btn--link hg-form__quick" onClick={remove}>
           {copy.noteDelete}
         </button>
       )}

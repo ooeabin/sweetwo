@@ -2,17 +2,16 @@ import { insertCareDays, qk, updateCareDay, type CareDay } from '@sweetwo/api';
 import { lunarToSolar, nextCareDate, quickChips, todayKst } from '@sweetwo/core';
 import {
   Chip,
-  DateWheel,
+  DateField,
   FormAmount,
   FormScreen,
   FormSection,
   ShortText,
-  SegChoice,
   Toggle,
   QuestionSkeleton,
 } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { create } from 'zustand';
 import { carryToast, toast } from '../../../shared/toast';
@@ -46,12 +45,6 @@ interface Draft {
   yearly: boolean;
   amount: number | null;
 }
-const pad2 = (n: number) => String(n).padStart(2, '0');
-const wheelOf = (s: string) => ({
-  y: Number(s.slice(0, 4)),
-  m: Number(s.slice(5, 7)),
-  d: Number(s.slice(8, 10)),
-});
 const start = (date: string | null = null): Draft => ({
   editId: null,
   chip: null,
@@ -110,6 +103,10 @@ export function Y07CareAdd() {
   const [saving, setSaving] = useState(false);
   /** 같은 날 확인을 한 번 보여 줬음(다시 누르면 그대로 진행) */
   const [asked, setAsked] = useState(false);
+  // 처음 값은 오늘(예전 휠이 처음 위치를 바로 답으로 알리던 것과 같음, 날짜를 정하는 칩이 아닐 때)
+  useEffect(() => {
+    if (!d.date && !d.editId && !(d.chip && FIXED[d.chip])) set({ date: todayKst() });
+  }, [d.date, d.editId, d.chip, set]);
   if (c.loading) return <QuestionSkeleton />;
   const editing = d.editId ? c.cares.find((x) => x.id === d.editId) : null;
   const fixed = d.chip ? FIXED[d.chip] : undefined;
@@ -254,38 +251,28 @@ export function Y07CareAdd() {
       </FormSection>
       {!fixed && (
         <FormSection title={copy.dateQ}>
-          <SegChoice<'solar' | 'lunar'>
+          {/* 2026-11-24 날짜는 한 줄 + 달력 시트(DateField, 양력/음력은 시트 맨 위). 처음 값은 달력에서 고른 날 또는 오늘 */}
+          <DateField
             label={copy.dateQ}
-            value={d.lunar ? 'lunar' : 'solar'}
-            onChange={(v) => set({ lunar: v === 'lunar', leap: false })}
-            items={[
-              { value: 'solar', label: copy.solar },
-              { value: 'lunar', label: copy.lunar },
-            ]}
-          />
-          {/* 2026-11-04 다른 날짜 질문(만기일, 목표 기한)과 같은 휠. 처음 값은 달력에서 고른 날 또는 오늘. 음력은 어느 달이든 30일까지 */}
-          <DateWheel
-            label={copy.dateQ}
-            lunar={d.lunar}
-            value={d.date ? wheelOf(d.date) : null}
-            initial={wheelOf(todayKst())}
+            value={d.date}
+            today={todayKst()}
             minYear={1940}
             maxYear={Number(todayKst().slice(0, 4)) + 10}
-            onChange={(v) => {
+            calendar={{ lunar: d.lunar, leap: d.leap }}
+            sub={d.lunar ? (d.leap ? `${copy.lunar} ${copy.leapMonth}` : copy.lunar) : copy.solar}
+            invalid={past || (!!d.date && !solar)}
+            onChange={(v, cal) => {
               setAsked(false);
-              set({ date: `${v.y}-${pad2(v.m)}-${pad2(v.d)}` });
+              set({ date: v, lunar: cal?.lunar ?? d.lunar, leap: cal?.leap ?? false });
             }}
+            below={
+              past || (d.date && !solar) ? (
+                <p className="hg-help is-error" role="alert">
+                  {past ? copy.pastDate : copy.dateError}
+                </p>
+              ) : undefined
+            }
           />
-          {(past || (d.date && !solar)) && (
-            <p className="hg-help is-error" role="alert">
-              {past ? copy.pastDate : copy.dateError}
-            </p>
-          )}
-          {d.lunar && (
-            <Chip small selected={d.leap} onClick={() => set({ leap: !d.leap })}>
-              {copy.leapMonth}
-            </Chip>
-          )}
           <Toggle label={copy.yearly} checked={d.yearly} onChange={(yearly) => set({ yearly })} />
         </FormSection>
       )}

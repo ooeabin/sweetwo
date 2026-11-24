@@ -26,7 +26,7 @@ import {
   Button,
   ChoiceCards,
   ConflictChoice,
-  DateWheel,
+  DateSheet,
   LineChart,
   ListRow,
   Menu,
@@ -259,55 +259,65 @@ export function F04Item() {
     const [y = 0, mo = 1, dd = 1] = v.split('-').map(Number);
     return { y, m: mo, d: dd };
   };
-  const pad2 = (n: number) => String(n).padStart(2, '0');
   const mat = a.maturity_date ? ymd(a.maturity_date) : null;
-  const editor = field && (
-    <BottomSheet
-      title={fieldLabel}
-      onClose={() => setField(null)}
-      actions={
-        <Button variant="primary" block disabled={!valueOk} loading={busy} onClick={saveValue}>
-          {copy.saveEdit}
-        </Button>
-      }
-    >
-      <div
-        className="hg-stack"
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && field !== 'maturity_date') saveValue();
-        }}
-      >
-        {field === 'monthly_payment' ? (
-          <AmountInput
-            label={fieldLabel}
-            value={draftAmount}
-            onChange={setDraftAmount}
-            allowZero
-            embedded
-            autoFocus
-          />
-        ) : field === 'maturity_date' ? (
-          <DateWheel
-            label={fieldLabel}
-            value={draft ? ymd(draft) : null}
-            initial={mat ?? ymd(today)}
-            minYear={Math.min(Number(today.slice(0, 4)), mat?.y ?? 9999)}
-            maxYear={Number(today.slice(0, 4)) + 40}
-            onChange={(v) => setDraft(`${v.y}-${pad2(v.m)}-${pad2(v.d)}`)}
-          />
-        ) : (
-          <Field
-            label={fieldLabel}
-            inputMode={field === 'interest_rate' ? 'decimal' : 'numeric'}
-            value={draft}
-            onChange={(e) => setDraft(e.target.value.trim())}
-            error={valueError}
-            autoFocus
-          />
-        )}
-      </div>
-    </BottomSheet>
-  );
+  const editor =
+    field === 'maturity_date' ? (
+      // 2026-11-24 만기일은 달력 시트(고르면 바로 저장)
+      <DateSheet
+        title={fieldLabel}
+        closeLabel={copy.close}
+        today={today}
+        value={a.maturity_date}
+        initial={a.maturity_date ?? undefined}
+        minYear={Math.min(Number(today.slice(0, 4)), mat?.y ?? 9999)}
+        maxYear={Number(today.slice(0, 4)) + 40}
+        onClose={() => setField(null)}
+        onDone={(v) =>
+          void run(() => updateAsset(a.id, { maturity_date: v }), copy.saved, {
+            maturity_date: a.maturity_date,
+          }).then(() => setField(null))
+        }
+      />
+    ) : (
+      field && (
+        <BottomSheet
+          title={fieldLabel}
+          onClose={() => setField(null)}
+          actions={
+            <Button variant="primary" block disabled={!valueOk} loading={busy} onClick={saveValue}>
+              {copy.saveEdit}
+            </Button>
+          }
+        >
+          <div
+            className="hg-stack"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') saveValue();
+            }}
+          >
+            {field === 'monthly_payment' ? (
+              <AmountInput
+                label={fieldLabel}
+                value={draftAmount}
+                onChange={setDraftAmount}
+                allowZero
+                embedded
+                autoFocus
+              />
+            ) : (
+              <Field
+                label={fieldLabel}
+                inputMode={field === 'interest_rate' ? 'decimal' : 'numeric'}
+                value={draft}
+                onChange={(e) => setDraft(e.target.value.trim())}
+                error={valueError}
+                autoFocus
+              />
+            )}
+          </div>
+        </BottomSheet>
+      )
+    );
   const body = (
     <div className="hg-stack hg-detail" style={{ gap: 0 }}>
       {/* 2026-11-04 저금 항목 상세와 같은 머리: ‹ 이름 + ⋯(삭제). 묶음 이름 보조 줄과 아래 회색 삭제 버튼은 없앰 */}
