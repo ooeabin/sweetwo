@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cx } from './cx';
+import { Icon } from './Icon';
 
 // 알약 탭(hg-tabs)과 세그먼트(hg-seg). docs/design/components/Tabs.md
 export interface TabItem<T extends string> {
@@ -51,8 +52,9 @@ export function Tabs<T extends string>({
 
 /**
  * 고르기(`SegChoice`, 2026-11-24 사용자 결정 ‘고르기 토글’): 입력에서 꼭 하나를 고름. 회색 판 + 흰 알약은 입력 고르기에 쓰지 않음.
- * - A 테두리 버튼(`hg-choice`): 짧은 2~3개. 같은 너비 칸, 고른 것은 `ink` 테두리 + 700.
- * - C 라디오 줄(`hg-choice--rows`): 4개 이상, 긴 글자, 설명(`sub`)이 있을 때. 줄마다 56px 이상, 왼쪽 원(고르면 오렌지 채움).
+ * 2026-11-24 사용자 결정 ‘F 떠 있는 흰 알약’(테두리 없음):
+ * - 버튼(`hg-choice`): 짧은 2~3개. 회색 판 안 같은 너비 칸, 고른 칸은 흰 판 + 그림자 + 700.
+ * - 카드 줄(`hg-choice--rows`): 4개 이상, 긴 글자, 설명(`sub`)이 있을 때. 줄마다 56px 이상, 오른쪽 원(고르면 오렌지 체크).
  * 어느 쪽인지는 `variant`를 안 주면 위 기준으로 정함(`choiceVariant`). `role="radiogroup"` + `role="radio"`(탭이 아니라 선택)
  */
 export interface ChoiceItem<T extends string> {
@@ -101,11 +103,15 @@ export function SegChoice<T extends string>({
           className={cx('hg-choice__item', it.value === value && 'is-on')}
           onClick={() => onChange(it.value)}
         >
-          {v === 'rows' && <span className="hg-choice__dot" aria-hidden="true" />}
           <span className="hg-choice__text">
             <span className="hg-choice__label">{it.label}</span>
             {it.sub && <span className="hg-choice__sub">{it.sub}</span>}
           </span>
+          {v === 'rows' && (
+            <span className="hg-choice__dot" aria-hidden="true">
+              <Icon name="check" size={16} />
+            </span>
+          )}
         </button>
       ))}
     </div>
