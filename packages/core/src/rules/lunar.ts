@@ -36,3 +36,33 @@ export function solarToLunar(date: string) {
   const l = c.getLunarCalendar();
   return { month: l.month, day: l.day, leap: !!l.intercalation };
 }
+
+/** 음력 그 달 그 날의 양력(없는 날이면 null, lunarToSolar와 달리 대신 쓰는 날 없음) */
+export function lunarDaySolar(year: number, month: number, day: number, leap = false): string | null {
+  if (year > LUNAR_MAX_YEAR) return null;
+  const c = new KoreanLunarCalendar();
+  if (!c.setLunarDate(year, month, day, leap)) return null;
+  const solar = c.getSolarCalendar();
+  // 라이브러리는 없는 윤달·없는 30일도 받아 주므로 되돌려 같은 음력 날짜인지 확인
+  if (!c.setSolarDate(solar.year, solar.month, solar.day)) return null;
+  const l = c.getLunarCalendar();
+  return l.year === year && l.month === month && l.day === day && !!l.intercalation === leap
+    ? iso(solar)
+    : null;
+}
+
+/**
+ * 음력 한 달 달력 칸(일요일 시작): 앞 빈 칸 null, 그 뒤 1~29(또는 30). 첫날의 양력 요일에 맞춤.
+ * 그 달이 없으면(그해 윤달이 없음, 지원 범위 밖) null. 달력 시트 음력(2026-11-24)
+ */
+export function lunarMonthCells(year: number, month: number, leap = false): (number | null)[] | null {
+  const first = lunarDaySolar(year, month, 1, leap);
+  if (!first) return null;
+  const [fy = 0, fm = 1, fd = 1] = first.split('-').map(Number);
+  const lead = new Date(Date.UTC(fy, fm - 1, fd)).getUTCDay();
+  const days = lunarDaySolar(year, month, 30, leap) ? 30 : 29;
+  return [
+    ...Array.from({ length: lead }, () => null),
+    ...Array.from({ length: days }, (_, i) => i + 1),
+  ];
+}

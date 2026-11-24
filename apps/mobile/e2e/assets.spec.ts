@@ -435,10 +435,10 @@ test('추가: 유형 → 이름 → 금액 → 명의 → 공개 범위 → 적�
   await axe(page);
   // 적금 접힌 줄(F-03f): 만기일, 월 납입액
   const m = await openFold(page, '만기일');
-  // 날짜 휠(처음 값 1년 뒤 오늘 2027-10-07): 월 ↑ 한 번(9월), 일 End(30일)
-  await m.getByRole('spinbutton', { name: '월' }).press('ArrowUp');
-  await m.getByRole('spinbutton', { name: '일' }).press('End');
-  await m.getByRole('button', { name: '확인' }).click();
+  // 달력 시트(처음 보이는 달 1년 뒤 오늘 2027-10): 이전 달(9월)의 30일
+  await m.getByRole('button', { name: '이전 달' }).click();
+  await m.getByRole('gridcell', { name: /^2027년 9월 30일/ }).click();
+  await m.getByRole('button', { name: /선택$/ }).click();
   await foldAmount(page, '월 납입액', 300_000);
   await page.getByRole('button', { name: '추가하기' }).click();
 
@@ -852,7 +852,7 @@ test('금리는 0~30% 소수 1자리(D5, F-03g와 F-04 같음), 보증금은 팔
   await expect(dlg.getByText('0~30% 사이로 적어 주세요')).toHaveCount(0);
 });
 
-test('F-04 맨 위는 W-10 모양(오렌지 채움 버튼 없음), 값 고치기는 시트, 만기일은 날짜 휠(type=date 없음)', async ({
+test('F-04 맨 위는 W-10 모양(오렌지 채움 버튼 없음), 값 고치기는 시트, 만기일은 달력 시트(type=date 없음)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -883,9 +883,11 @@ test('F-04 맨 위는 W-10 모양(오렌지 채움 버튼 없음), 값 고치기
   await axe(page);
   await page.getByRole('button', { name: /만기일/ }).click();
   const sheet = page.getByRole('dialog', { name: '만기일' });
-  await expect(sheet.getByRole('spinbutton')).toHaveCount(3);
+  await expect(sheet.getByRole('grid')).toBeVisible();
+  await expect(sheet.getByRole('spinbutton')).toHaveCount(0);
   await expect(page.locator('input[type="date"]')).toHaveCount(0);
-  await sheet.getByRole('button', { name: '저장' }).click();
+  await sheet.getByRole('gridcell', { name: /^2027년 5월 21일/ }).click();
+  await sheet.getByRole('button', { name: /선택$/ }).click();
   await expect(page.getByText('저장했어요')).toBeVisible();
   // 금액 고치기: 금액 칸 + 아래 고정 주 버튼 ‘저장’
   await page.getByRole('button', { name: '금액 고치기' }).click();

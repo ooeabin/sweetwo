@@ -16,7 +16,7 @@ import {
   BottomSheet,
   Button,
   Chip,
-  DateWheel,
+  DateSheet,
   Field,
   FormAmount,
   FormFold,
@@ -40,14 +40,6 @@ import { copy } from '../copy';
 import { useAssetGroups, useAssetsData, useRefreshAssets } from '../data';
 import { assetFolds, assetFormReady, assetHero, type AssetFold } from '../form-logic';
 import { shareOptions, type ShareVis } from './f-03e-share';
-
-const pad = (n: number) => String(n).padStart(2, '0');
-const ymdText = (v: { y: number; m: number; d: number }) => `${v.y}-${pad(v.m)}-${pad(v.d)}`;
-const ymdOf = (s: string) => ({
-  y: Number(s.slice(0, 4)),
-  m: Number(s.slice(5, 7)),
-  d: Number(s.slice(8, 10)),
-});
 
 type Owner = 'me' | 'partner' | 'joint';
 type Sheet = AssetFold | 'visibility' | 'unsure';
@@ -544,7 +536,7 @@ function PaymentSheet({
   );
 }
 
-/** 만기일 시트: 날짜 휠(처음 값 1년 뒤 오늘, F-03f와 같음) */
+/** 만기일 시트: 달력 시트(처음 보이는 달은 1년 뒤 오늘, F-03f와 같음, 2026-11-24 휠 대신) */
 function MaturitySheet({
   title,
   value,
@@ -557,29 +549,27 @@ function MaturitySheet({
   onDone: (v: string | null) => void;
 }) {
   const t = todayKst();
-  const initial = {
-    y: Number(t.slice(0, 4)) + 1,
-    m: Number(t.slice(5, 7)),
-    d: Number(t.slice(8, 10)),
-  };
-  const [v, setV] = useState<string>(value ?? ymdText(initial));
+  const next = `${Number(t.slice(0, 4)) + 1}${t.slice(4)}`;
   return (
-    <FoldSheet
+    <DateSheet
       title={title}
+      closeLabel={copy.close}
+      today={t}
+      value={value}
+      initial={next}
+      minYear={Number(t.slice(0, 4)) - 10}
+      maxYear={Number(t.slice(0, 4)) + 40}
       onClose={onClose}
-      onConfirm={() => onDone(v)}
       clearLabel={value ? copy.foldClear(title) : undefined}
-      onClear={() => onDone(null)}
-    >
-      <DateWheel
-        label={title}
-        value={ymdOf(v)}
-        initial={initial}
-        minYear={initial.y - 11}
-        maxYear={initial.y + 39}
-        onChange={(x) => setV(ymdText(x))}
-      />
-    </FoldSheet>
+      onClear={() => {
+        onDone(null);
+        onClose();
+      }}
+      onDone={(v) => {
+        onDone(v);
+        onClose();
+      }}
+    />
   );
 }
 

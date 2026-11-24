@@ -52,3 +52,22 @@ test('formatDateDot·parseDateDot·parseTimeText: 어드민 날짜 칸', () => {
   expect(parseTimeText('9:05')).toBe('09:05');
   expect(parseTimeText('24:00')).toBeNull();
 });
+
+test('달력 시트: 요일 포함 표기(2026-11-24)', () => {
+  expect(dt.formatDateDow('2026-11-26')).toBe('2026년 11월 26일 (목)');
+  expect(dt.formatMonthDayDow('2026-11-01')).toBe('11월 1일 (일)');
+  expect(dt.formatDateReadout('2026-11-26')).toBe('2026년 11월 26일 목요일');
+  expect(dt.weekdayIndex('2026-11-28')).toBe(6);
+});
+
+test('달력 시트: 한 달 칸(일요일 시작, 앞 빈 칸)', () => {
+  // 2026년 11월은 일요일 1일: 앞 빈 칸 0, 30일
+  const nov = dt.monthCells(2026, 11);
+  expect(nov[0]).toBe(1);
+  expect(nov).toHaveLength(30);
+  // 2026년 2월은 일요일 1일, 28일. 2026년 12월은 화요일 1일: 앞 빈 칸 2
+  expect(dt.monthCells(2026, 12).slice(0, 3)).toEqual([null, null, 1]);
+  // 윤년 2월 29일
+  expect(dt.daysInMonth(2028, 2)).toBe(29);
+  expect(dt.daysInMonth(2026, 2)).toBe(28);
+});

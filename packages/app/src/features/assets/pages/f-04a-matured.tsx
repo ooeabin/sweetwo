@@ -2,7 +2,7 @@ import { AssetForbiddenError, settleMatured } from '@sweetwo/api';
 import { todayKst } from '@sweetwo/core';
 import {
   Chip,
-  DateWheel,
+  DateField,
   FormHero,
   FormScreen,
   FormSection,
@@ -19,14 +19,7 @@ import { canEdit, useAssetsData, useRefreshAssets } from '../data';
 // F-04a 만기 금액 정리(23 F-04 아래 ‘만기일 당일’, 2026-11-24 한 화면 입력 FormScreen): 만기일 당일 알림·홈 할 일에서 들어옴.
 // 맨 위 요약 문장(“청년 적금 / 960만 원 정리할까요?”) + “만기 금액은 어디로 옮겼어요?”(다른 통장으로 / 다시 가입했어요)
 //   + 해당 섹션: 다른 통장으로 → “어느 통장으로 옮겼어요?” 통장 칩(그 통장 + 만기 금액, 이 항목은 ‘만기 완료’로 보관)
-//   / 다시 가입했어요 → “새 만기일” 날짜 휠(F-03f와 같은 휠). 아래 “정리하기”. 고칠 수 있는 사람만, 만기 전이면 F-04로(옛 주소로 들어온 경우)
-const pad = (n: number) => String(n).padStart(2, '0');
-const ymdOf = (s: string) => ({
-  y: Number(s.slice(0, 4)),
-  m: Number(s.slice(5, 7)),
-  d: Number(s.slice(8, 10)),
-});
-
+//   / 다시 가입했어요 → “새 만기일” 날짜 한 줄 + 달력 시트(F-03f와 같음). 아래 “정리하기”. 고칠 수 있는 사람만, 만기 전이면 F-04로(옛 주소로 들어온 경우)
 type How = 'to' | 'date';
 
 export function F04aMatured() {
@@ -131,14 +124,16 @@ export function F04aMatured() {
         </FormSection>
       ) : (
         <FormSection title={copy.maturedDateQ}>
-          {/* 2026-11-04 다른 날짜 질문과 같은 휠(처음 값 1년 뒤 오늘) */}
-          <DateWheel
+          {/* 2026-11-24 날짜는 한 줄 + 달력 시트(처음 보이는 달은 1년 뒤 오늘) */}
+          <DateField
             label={copy.maturedDateQ}
-            value={date ? ymdOf(date) : null}
-            initial={ymdOf(nextYear)}
+            value={picked}
+            today={today}
+            initial={nextYear}
             minYear={Number(today.slice(0, 4))}
             maxYear={Number(today.slice(0, 4)) + 40}
-            onChange={(v) => setDate(`${v.y}-${pad(v.m)}-${pad(v.d)}`)}
+            invalid={!!date && !dateOk}
+            onChange={(v) => setDate(v)}
           />
           {date && !dateOk && <p className="hg-help is-error">{copy.maturedDateError}</p>}
         </FormSection>
