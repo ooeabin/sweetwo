@@ -6,6 +6,7 @@ import {
   qk,
   type JoinResult,
 } from '@sweetwo/api';
+import { isOnline } from '@sweetwo/api';
 import { CodeCells, Illustration, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
@@ -127,8 +128,7 @@ export function P01JoinStart() {
   // 초대 정보를 못 불러옴(13 공통 상태 6·7번): 정상인 척 ‘합류하기’를 보이지 않음(2026-11-10 S1-07)
   if (wellFormed && preview.isError && !blocked) {
     const off =
-      (typeof navigator !== 'undefined' && navigator.onLine === false) ||
-      (preview.error instanceof AuthCallError && preview.error.code === 'network');
+      !isOnline() || (preview.error instanceof AuthCallError && preview.error.code === 'network');
     return (
       <QuestionLayout
         hero={<StatusArt name={off ? 'status-offline' : 'status-error'} />}

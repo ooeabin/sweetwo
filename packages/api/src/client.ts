@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient, type SupportedStorage } from '@supabase/supabase-js';
 import type { Database } from '@sweetwo/core';
+import { isOnline, probeOnline, reportReachable } from './connectivity';
 
 // Supabase 클라이언트는 하나만. 앱에는 공개돼도 되는 값(VITE_)만 들어간다.
 // - 웹(개발·e2e): supabase-js가 세션을 localStorage에(15 A-02 6번)
@@ -43,7 +44,7 @@ export function subscribeSaving(f: () => void) {
 let blockedAt = 0;
 /** 인터넷이 없어 쓰기를 막은 마지막 시각(ms) */
 export const lastOfflineBlock = () => blockedAt;
-const offline = () => typeof navigator !== 'undefined' && navigator.onLine === false;
+const offline = () => !isOnline();
 
 // 보기만(15 A-01 5번 ‘업데이트 없이 보기만 할게요’, 13 공통 상태 12번): 최소 지원 버전 미만이면 서버로 가는 쓰기를 보내지 않음.
 // 화면은 그대로 두고 저장하려 하면 바로 실패 → 앱이 “지금 버전으로는 저장할 수 없어요” 토스트(toast.tsx).
@@ -96,10 +97,22 @@ const blockedByReadOnly = (url: string) => {
   const m = /\/rest\/v1\/rpc\/([a-z0-9_]+)/.exec(url);
   return !(m?.[1] && READ_RPC.has(m[1]));
 };
+// 실제 요청이 성공하면 바로 온라인, 네트워크 오류면 실제 확인(connectivity.ts)
+const watched = (p: Promise<Response>) =>
+  p.then(
+    (r) => {
+      reportReachable();
+      return r;
+    },
+    (e: unknown) => {
+      void probeOnline();
+      throw e;
+    },
+  );
 const trackedFetch: typeof fetch = async (input, init) => {
   const method = (init?.method ?? (input instanceof Request ? input.method : 'GET')).toUpperCase();
   const write = method !== 'GET' && method !== 'HEAD';
-  if (!write) return fetch(input, init);
+  if (!write) return watched(fetch(input, init));
   const url = input instanceof Request ? input.url : String(input);
   // 로그인 토큰 갱신(auth)은 막지 않음(Supabase가 알아서 다시 시도)
   if (offline() && !url.includes('/auth/v1/')) {
@@ -113,7 +126,7 @@ const trackedFetch: typeof fetch = async (input, init) => {
   writing++;
   emitSaving();
   try {
-    return await fetch(input, init);
+    return await watched(fetch(input, init));
   } finally {
     writing--;
     emitSaving();

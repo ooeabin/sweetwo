@@ -4,6 +4,7 @@ import {
   qk,
   setReadOnly as setApiReadOnly,
 } from '@sweetwo/api';
+import { checkOnline } from '@sweetwo/api';
 import { formatKstDateTime, isBelowMin } from '@sweetwo/core';
 import { AuthLayout, Button, Icon, Wordmark } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
@@ -74,7 +75,7 @@ export function A01Launch() {
     try {
       const here = loc.pathname;
       if (here === paths.callback) return setPhase('ready'); // 콜백 페이지가 스스로 처리
-      const online = navigator.onLine;
+      const online = await checkOnline();
       if (online && !skipVersion) {
         try {
           const cfg = await withTimeout(fetchLaunchConfig(session.platform), CONFIG_TIMEOUT_MS);

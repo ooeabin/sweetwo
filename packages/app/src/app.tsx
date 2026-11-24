@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { bindQueryOnline } from './shared/online';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { trackInputModality } from '@sweetwo/ui';
@@ -26,6 +27,7 @@ export function App({ platform }: { platform: Platform }) {
   // 세션 방식(모바일 앱 브리지 / 웹 브라우저 저장소)을 Supabase를 처음 쓰기 전에 정한다
   const [queryClient] = useState(() => {
     initSession(platform);
+    bindQueryOnline();
     return new QueryClient();
   });
   const [router] = useState(() => createBrowserRouter(routes));

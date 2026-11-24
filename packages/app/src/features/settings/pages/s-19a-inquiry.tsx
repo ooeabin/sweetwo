@@ -1,4 +1,5 @@
 import { createInquiry, qk, type InquiryCategory } from '@sweetwo/api';
+import { isOnline } from '@sweetwo/api';
 import { QuestionLayout, Textarea, Toggle } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -42,7 +43,7 @@ export function S19aInquiry() {
                     ? 'windows'
                     : 'other',
             couple_state: d.space?.couple_state ?? '',
-            sync: navigator.onLine ? 'online' : 'offline',
+            sync: isOnline() ? 'online' : 'offline',
           }
         : null;
       const no = await createInquiry(cat, text.trim(), info);

@@ -1,4 +1,5 @@
 import { maskMoney, notiGroup, notiTime } from '@sweetwo/core';
+import { useOnline } from '../../shared/online';
 import { leadOf, NotificationPanel } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchRevertibleNotifications, qk, revertPartnerChange, RevertGone } from '@sweetwo/api';
@@ -44,17 +45,7 @@ export function NotiView({ variant, onClose }: { variant: 'sheet' | 'page'; onCl
       setReverting(null);
     }
   };
-  const [online, setOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
-  useEffect(() => {
-    const on = () => setOnline(true);
-    const off = () => setOnline(false);
-    window.addEventListener('online', on);
-    window.addEventListener('offline', off);
-    return () => {
-      window.removeEventListener('online', on);
-      window.removeEventListener('offline', off);
-    };
-  }, []);
+  const online = useOnline();
   // 0.3초 넘게 걸릴 때만 Skeleton
   const [slow, setSlow] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>();

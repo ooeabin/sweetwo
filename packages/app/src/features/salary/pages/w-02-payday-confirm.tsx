@@ -9,6 +9,7 @@ import {
   type PayChecklist,
   type PayCheckLine,
 } from '@sweetwo/api';
+import { isOnline } from '@sweetwo/api';
 import {
   chipCounts,
   confirmableLines,
@@ -571,8 +572,7 @@ export function W02PaydayConfirm() {
     partnerTab || (readOnly && !late) ? [] : confirmableLines(shown.pay_check_line, mineOpt);
   const confirm = async () => {
     if (busy || !confirmable.length) return;
-    if (typeof navigator !== 'undefined' && navigator.onLine === false)
-      return toast(sharedCopy.needOnline);
+    if (!isOnline()) return toast(sharedCopy.needOnline);
     setBusy(true);
     const ids = confirmable.map((l) => l.id);
     const before = confirmable.map((l) => ({ id: l.id, state: l.state }));

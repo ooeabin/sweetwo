@@ -16,6 +16,7 @@ import {
   subscribeNotifications,
   type Notification,
 } from '@sweetwo/api';
+import { isOnline } from '@sweetwo/api';
 import { coupleOf, notiCursor, partnerLabel, type NotiCursor } from '@sweetwo/core';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
@@ -91,7 +92,7 @@ onSessionReset(() => {
   pendingRead.clear();
   pendingAll = false;
 });
-const isOffline = () => typeof navigator !== 'undefined' && navigator.onLine === false;
+const isOffline = () => !isOnline();
 
 /** 목록 캐시에 바로 읽음 표시(오프라인에서도 줄이 읽음으로 보임) */
 function markLocal(qc: ReturnType<typeof useQueryClient>, ids?: string[]) {
