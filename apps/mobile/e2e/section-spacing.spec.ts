@@ -67,7 +67,9 @@ test('W-02: hero 아래 32, 밑줄 탭 아래 24, 수입 줄 앞 32', async ({ p
   expect(await gap(page, '.hg-checklist__list', '.hg-incomeline')).toBe(32);
 });
 
-test('W-01(흰 바탕): 영역 사이 32 + 8px 회색 띠 + 아래 12, 영역 안 위 여백 없음', async ({ page }) => {
+test('W-01(흰 바탕): 영역 사이 32 + 8px 회색 띠 + 아래 12, 영역 안 위 여백 없음', async ({
+  page,
+}) => {
   await open(page, '/salary/plan');
   await expect(page.locator('.hg-plancard').first()).toBeVisible();
   // 영역 사이 = 위 32 + 띠 8 + 아래 12(띠는 ::before)
