@@ -15,6 +15,8 @@ export const CareDaySchema = z.object({
   space_id: z.string().default(''),
   category: z.enum(E.care_category),
   kind: z.string(),
+  /** 달력 그림 키(2026-11-24 K안, 없으면 종류 기본값: core careArtKey) */
+  art_key: text,
   name: z.string(),
   member_id: text,
   side: z.enum(E.couple_side).nullable().default(null),

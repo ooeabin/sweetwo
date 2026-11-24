@@ -1,6 +1,16 @@
 import { insertCareDays, qk, updateCareDay, type CareDay } from '@sweetwo/api';
-import { lunarToSolar, nextCareDate, quickChips, todayKst } from '@sweetwo/core';
 import {
+  CARE_ART_KEYS,
+  careArtDefault,
+  careArtKey,
+  lunarToSolar,
+  nextCareDate,
+  quickChips,
+  todayKst,
+  type CareArtKey,
+} from '@sweetwo/core';
+import {
+  ArtPick,
   Chip,
   DateField,
   FormAmount,
@@ -9,6 +19,8 @@ import {
   ShortText,
   Toggle,
   QuestionSkeleton,
+  hasIllustration,
+  illustrations,
 } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -54,6 +66,8 @@ interface Draft {
   /** 고친다면 그 경조사 id */
   editId: string | null;
   chip: ChipKey | null;
+  /** 달력 그림 키(이름 칩을 고르면 그 칩 기본값, 그림 고르기에서 바꿈, 2026-11-24 K안) */
+  art: CareArtKey | null;
   name: string;
   date: string | null;
   lunar: boolean;
@@ -64,6 +78,7 @@ interface Draft {
 const start = (date: string | null = null): Draft => ({
   editId: null,
   chip: null,
+  art: null,
   name: '',
   date,
   lunar: false,
@@ -94,6 +109,7 @@ export const startCareEdit = (c: CareDay, today: string) => {
   useDraft.getState().set({
     ...start(date),
     editId: c.id,
+    art: careArtKey(c),
     name: c.name,
     lunar: c.date_rule === 'lunar_yearly',
     leap: c.leap,
@@ -162,6 +178,8 @@ export function Y07CareAdd() {
         )
       : d.date;
   const past = !d.yearly && !!solar && solar < c.today;
+  // 그림 고르기는 그림 파일이 하나라도 있을 때만(없으면 질문째 숨김, Illustrations 숨김 규칙). 파일이 있는 키만 보임
+  const artKeys = CARE_ART_KEYS.filter((k) => hasIllustration(k));
   const name = d.name.trim();
   const dup =
     !!rule &&
@@ -183,20 +201,29 @@ export function Y07CareAdd() {
         // 2026-11-12 S9-04 Toast ‘되돌리기’: 고치기 전 이름·날짜로
         const prev = {
           name: editing.name,
+          art_key: editing.art_key,
           date_rule: editing.date_rule,
           month: editing.month,
           day: editing.day,
           leap: editing.leap,
           once_on: editing.once_on,
         };
-        await updateCareDay(editing.id, { name, ...rule });
+        await updateCareDay(editing.id, { name, art_key: d.art ?? careArtKey(editing), ...rule });
         await qc.invalidateQueries({ queryKey: qk.careDays });
         carryToast(copy.edited, careUndo(qc, editing.id, prev));
         nav(`/calendar/day/${editing.id}`, { replace: true });
         return;
       }
       const [id] = await insertCareDays([
-        { category: 'couple', kind: KIND[d.chip ?? 'custom'], name, budget: amount, ...rule },
+        {
+          category: 'couple',
+          kind: KIND[d.chip ?? 'custom'],
+          // 이름 칩 기본 그림 키를 저장(그림 고르기에서 바꿨으면 그것, 2026-11-24 K안)
+          art_key: d.art ?? careArtDefault(KIND[d.chip ?? 'custom']),
+          name,
+          budget: amount,
+          ...rule,
+        },
       ]);
       await qc.invalidateQueries({ queryKey: qk.careDays });
       trackCareShared(!!c.couple?.joined); // 상대 알림이 감(32 4-6, S9-05)
@@ -255,6 +282,7 @@ export function Y07CareAdd() {
                   setAsked(false);
                   set({
                     chip: k,
+                    art: careArtDefault(KIND[k]),
                     name: k === 'custom' ? d.name : copy.chips[k],
                     yearly: k !== 'event',
                     lunar: FIXED[k]?.lunar ?? false,
@@ -268,6 +296,21 @@ export function Y07CareAdd() {
           </div>
         )}
       </FormSection>
+      {artKeys.length > 0 && (
+        <FormSection title={copy.artQ}>
+          <ArtPick
+            round
+            columns={6}
+            label={copy.artLabel}
+            items={artKeys.map((k) => ({ key: k, src: illustrations[k] }))}
+            itemLabel={(i) => copy.artNames[artKeys[i] ?? ''] ?? ''}
+            value={
+              d.art ?? (editing ? careArtKey(editing) : careArtDefault(KIND[d.chip ?? 'custom']))
+            }
+            onPick={(k) => set({ art: k as CareArtKey })}
+          />
+        </FormSection>
+      )}
       {!fixed && (
         <FormSection title={copy.dateQ}>
           {/* 2026-11-24 날짜는 한 줄 + 달력 시트(DateField, 양력/음력은 시트 맨 위). 처음 값은 달력에서 고른 날 또는 오늘 */}

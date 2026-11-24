@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (451c926f). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (8c8b667e). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
@@ -631,35 +631,46 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-menu__item--danger { color: var(--danger); }
 .hg-menu__sep { height: 1px; margin: var(--space-1) var(--space-2); background: var(--hairline-soft); }
 
-/* Calendar(2026-11-04 소비 달력형): 카드 없이 가운데 ‘‹ 10월 ›’ + 그 달 주만, 칸 = 숫자 + 짧은 이름 + 월급 전 확인 이어진 띠 */
-.hg-cal { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-2); width: 100%; max-width: 520px; }
-.hg-cal__head { position: relative; display: flex; align-items: center; justify-content: center; gap: var(--space-3); min-height: 40px; }
-.hg-cal__month { display: inline-flex; align-items: baseline; gap: var(--space-1); }
-.hg-cal__month b { font: var(--text-title-3); font-weight: 700; }
-.hg-cal__month span { font: var(--text-title-3); color: var(--stone); }
-.hg-cal__head .hg-iconbtn { color: var(--stone); }
-.hg-cal__today { position: absolute; right: 0; height: 28px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--slate); font: var(--text-micro); cursor: pointer; }
-.hg-cal__today:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-.hg-cal__grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); row-gap: var(--space-1); margin-bottom: calc(var(--space-4) * -1); text-align: center; }  /* 2026-11-24 구역 4: 마지막 주 아래 빈 칸 줄임(5주 달은 5주 높이만. 칸은 그 주 줄만 그림) */
-.hg-cal__dow { font: var(--text-caption); color: var(--stone); padding: var(--space-1) 0 var(--space-2); }
-.hg-cal__day { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; height: 68px; padding-top: 8px; box-sizing: border-box; border-radius: var(--radius-lg); z-index: 0; }  /* 2026-11-24 구역 4: 64 → 68. 아래 14px는 확인 목록 띠 자리라 고른 칸(::before)이 띠를 가리지 않음 */
-.hg-cal__day::before { content: ""; position: absolute; inset: 0 0 16px; z-index: -1; border-radius: var(--radius-lg); }
-.hg-cal__num { font: var(--weight-medium) 17px/24px var(--font-sans); color: var(--ink); font-variant-numeric: tabular-nums; }
-.hg-cal__day.is-muted .hg-cal__num { color: var(--hairline); }
-.hg-cal__day.is-today .hg-cal__num { font-weight: 700; }
-.hg-cal__day.is-selected::before { background: var(--surface); box-shadow: var(--shadow-2), 0 0 0 1px var(--hairline-soft); }  /* 떠 있는 흰 칸 */
+/* Calendar(2026-11-24 K안, 한국 금융 앱 달력형): 머리 왼쪽 큰 “12월 ⌄” + 오른쪽 ‘오늘’·‹ › → 요약 한 줄 → 요일 → 주 줄 → 손잡이(한 주로 접기).
+   칸 높이는 모두 같고(그림이 없어도 줄 안 흐트러짐), 숫자 아래 20px 그림 칸은 그림이 있을 때만 그림. 일정 있는 날 숫자 700 ink, 없는 날 slate 400, 지난 날 stone, 오늘 오렌지 700(accent-app-text),
+   고른 날 칸 전체(숫자 + 그림 칸)를 덮는 회색 둥근 판(surface-alt, radius 14), 공휴일 holiday-ink. 숫자 15px, “+1” 13px 700 stone. 칸 안 짧은 이름·확인 목록 띠는 없앰. */
+.hg-cal { box-sizing: border-box; display: flex; flex-direction: column; gap: 0; width: 100%; max-width: 520px; }
+.hg-cal__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 44px; }
+.hg-cal__month { display: inline-flex; align-items: center; gap: var(--space-1); min-height: 44px; margin: 0; padding: 0; border: 0; background: none; color: var(--ink); cursor: pointer; }
+.hg-cal__month b { font: var(--text-amount-lg); }
+.hg-cal__month .hg-ico { color: var(--stone); }
+.hg-cal__month:focus-visible, .hg-cal__handle:focus-visible, .hg-cal__today:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.hg-cal__nav { display: flex; align-items: center; gap: var(--space-2); }
+.hg-cal__nav .hg-iconbtn { background: var(--surface-alt); color: var(--ink-2); }
+.hg-cal__today { position: relative; height: 32px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink-2); font: var(--text-note); cursor: pointer; }
+.hg-cal__today::after { content: ""; position: absolute; inset: -6px -2px; }
+.hg-cal__summary { margin: var(--space-1) 0 0; font: var(--text-value); color: var(--slate); }
+.hg-cal__summary b { font-weight: 700; color: var(--ink); }
+.hg-cal__dows { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); margin: var(--space-3) calc(var(--space-3) * -1) 0; text-align: center; }
+.hg-cal__dow { font: var(--text-note); color: var(--stone); padding: var(--space-1) 0 var(--space-2); }
+.hg-cal__grid { margin: 0 calc(var(--space-3) * -1); }
+.hg-cal__week { display: grid; grid-template-rows: 1fr; transition: grid-template-rows var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out); }
+.hg-cal__weekin { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); min-height: 0; overflow: hidden; }
+.hg-cal__week.is-hidden { grid-template-rows: 0fr; opacity: 0; visibility: hidden; transition: grid-template-rows var(--dur-base) var(--ease-out), opacity var(--dur-base) var(--ease-out), visibility 0s linear var(--dur-base); }
+.hg-cal__day { position: relative; display: flex; flex-direction: column; align-items: center; gap: var(--space-1); height: 64px; padding-top: var(--space-2); box-sizing: border-box; border-radius: 14px; }
+.hg-cal__num { font: 400 15px/24px var(--font-sans); color: var(--slate); font-variant-numeric: tabular-nums; }
+.hg-cal__day.is-past .hg-cal__num { color: var(--stone); }
+.hg-cal__day.is-event .hg-cal__num { font-weight: 700; color: var(--ink); }
 .hg-cal__day.is-holiday .hg-cal__num { color: var(--holiday-ink); }
-.hg-cal__day.is-festive:not(.is-selected)::before { background: var(--family); }
-.hg-cal__short { max-width: 100%; padding: 0 2px; box-sizing: border-box; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: var(--weight-medium) 11px/14px var(--font-sans); color: var(--slate); }  /* 2026-11-24 구역 4: 10px → 11px(달력 칸 11px 예외, DESIGN.md 예외 표) */
-.hg-cal__short.is-care { color: var(--together-ink); }
-.hg-cal__short.is-holiday { color: var(--holiday-ink); }
-/* 월급 전 확인 기간: 칸 아래 이어진 한 줄 띠(칸마다 회색 판이 아니라). 시작 칸에 이름 */
-.hg-cal__band { position: absolute; left: 0; right: 0; bottom: 0; height: 14px; background: var(--surface-alt); font: var(--weight-semibold) 11px/14px var(--font-sans); color: var(--slate); text-align: left; padding-left: 6px; white-space: nowrap; overflow: visible; }
-.hg-cal__band.is-start, .hg-cal__band.is-single { left: 4px; border-top-left-radius: var(--radius-full); border-bottom-left-radius: var(--radius-full); }
-.hg-cal__band.is-end, .hg-cal__band.is-single { right: 4px; border-top-right-radius: var(--radius-full); border-bottom-right-radius: var(--radius-full); }
-.hg-cal__band.is-mid, .hg-cal__band.is-end { color: transparent; }
+.hg-cal__day.is-today .hg-cal__num { font-weight: 700; color: var(--accent-app-text); }
+.hg-cal__day.is-selected { background: var(--surface-alt); }
+.hg-cal__day.is-festive:not(.is-selected) { background: var(--family); }
+.hg-cal__art { display: inline-flex; align-items: center; justify-content: center; gap: 1px; height: 20px; }
+.hg-cal__art .hg-cal__img { width: 20px; height: 20px; }
+.hg-cal__art b { font: 700 13px/20px var(--font-sans); color: var(--stone); }
+/* 손잡이: 끌거나 눌러서 한 주로 접고 펴기. 보이는 막대는 36×4, 누르는 칸은 가로 44 이상 × 세로 44 */
+.hg-cal__handle { box-sizing: border-box; display: flex; align-items: center; justify-content: center; align-self: center; width: 100%; height: 44px; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; touch-action: none; }
+.hg-cal__handle i { display: block; width: 36px; height: 4px; border-radius: var(--radius-full); background: var(--hairline); }
+@media (prefers-reduced-motion: reduce) { .hg-cal__week, .hg-cal__week.is-hidden { transition: none; } }
 .hg-cal__agenda { display: flex; flex-direction: column; gap: var(--space-1); max-width: 520px; }
-.hg-cal__agenda .hg-cal__date { margin: 0; font: var(--text-body-sm); color: var(--slate); }
+.hg-cal__agenda .hg-cal__date { display: flex; align-items: baseline; gap: var(--space-2); margin: 0; padding: 0; }  /* 2026-11-24 K안: “12월 14일 월요일” 17/700 + 보조 “음력 10월 25일” 13/400 stone */
+.hg-cal__agenda .hg-cal__date b { font: var(--text-amount); color: var(--ink); }
+.hg-cal__agenda .hg-cal__date span { font: var(--text-note); color: var(--stone); }
 .hg-cal__agenda .hg-listrow__label { font: var(--text-body); font-weight: var(--weight-medium); }
 .hg-cal__agenda .hg-cal__add .hg-listrow__label { font: var(--text-body); font-weight: var(--weight-medium); color: var(--slate); }
 .hg-cal__add .hg-lead { background: none; border: 1.5px dashed var(--hairline); }

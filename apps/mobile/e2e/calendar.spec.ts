@@ -216,7 +216,7 @@ test('캘린더 첫 화면은 달력(Y-04): 아래 ‘다가오는 일정’ 60�
   await expect(page).toHaveURL(/\/assets\/a-sav$/);
 });
 
-test('달력(Y-04) 머리: 일정 추가 → Y-07(좁은 창 보기 필터 줄 오른쪽, 넓은 창 제목 줄), 이번 주 띠·‘달력 ›’ 링크는 없음', async ({
+test('달력(Y-04) 머리: 일정 추가 → Y-07(좁은 창 ‘다가오는 일정’ 머리 오른쪽, 넓은 창 제목 줄), 이번 주 띠·‘달력 ›’ 링크는 없음', async ({
   page,
 }, info) => {
   await page.clock.setFixedTime(NOW);
@@ -229,7 +229,9 @@ test('달력(Y-04) 머리: 일정 추가 → Y-07(좁은 창 보기 필터 줄 �
   await expect(add).toBeVisible();
   if (info.project.name === 'narrow')
     await expect(
-      page.locator('.hg-cal__tools').getByRole('button', { name: '일정 추가' }),
+      page
+        .getByRole('region', { name: '다가오는 일정' })
+        .getByRole('button', { name: '일정 추가' }),
     ).toBeVisible();
   await axe(page);
   await add.click();
@@ -252,22 +254,19 @@ test('달력(Y-04): 금융 일정 점, 확인 목록 안내 띠(→ W-02, W-05 �
   await expect(page.getByRole('button', { name: '10월 7일' })).toHaveClass(/is-selected/);
   await expect(page.getByText('10월 7일 수요일')).toBeVisible();
   await expect(page.getByText('이 날은 일정이 없어요')).toBeVisible();
-  // 칸 안 짧은 이름
-  await expect(page.getByRole('button', { name: '10월 9일, 일정 1개' })).toContainText('월급');
+  // 칸 안 짧은 이름 글자는 없음(2026-11-24 K안): 일정 있는 날은 굵은 숫자만(그림 파일이 없으면 그림 칸도 없음)
+  await expect(page.getByRole('button', { name: '10월 9일, 일정 1개' })).toHaveClass(/is-event/);
+  await expect(page.getByRole('button', { name: '10월 9일, 일정 1개' })).toHaveText('9');
+  await expect(page.locator('.hg-cal__short, .hg-cal__art')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '오늘' })).toHaveCount(0);
   await axe(page);
 
-  // 월급날 확인 목록 안내 기간은 칸 아래 이어진 띠, 시작 칸에 이름. 25일(일)이 23일(금)로 앞당겨지니 띠도 그 3일 전 20~22일
-  // (2026-11-14 R3, 서버 cycle_end − 2와 같음)
-  await expect(
-    page.getByRole('button', { name: '10월 22일', exact: true }).locator('.hg-cal__band'),
-  ).toHaveCount(1);
-  await expect(
-    page.getByRole('button', { name: '10월 23일, 일정 1개' }).locator('.hg-cal__band'),
-  ).toHaveCount(0);
-  await expect(
-    page.getByRole('button', { name: '10월 20일, 일정 1개' }).locator('.hg-cal__band'),
-  ).toHaveText('월급날 확인 목록');
+  // 월급날 확인 목록 안내 기간(25일(일)이 23일(금)로 앞당겨지니 그 3일 전 20~22일, 2026-11-14 R3)은 칸 띠를 그리지 않음(2026-11-24 K안):
+  // 칸은 그냥 숫자, 안내는 고른 날 줄과 ‘다가오는 일정’ 줄로만
+  await expect(page.locator('.hg-cal__band')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '10월 22일', exact: true })).toHaveClass(
+    /is-plain/,
+  );
   await page.getByRole('button', { name: '10월 20일, 일정 1개' }).click();
   await page.getByRole('button', { name: /9월 월급날 확인 목록에 남은 게 있어요/ }).click();
   // 오늘(10월 7일)은 월급 탭 W-02로 감(W-05 화면은 2026-11-15 없앰)
@@ -321,6 +320,8 @@ test('경조사 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건너
     name: '어머니 생신',
     category: 'couple',
     kind: 'birthday',
+    // 이름 칩 기본 그림 키가 같이 저장됨(2026-11-24 K안)
+    art_key: 'cake',
     date_rule: 'lunar_yearly',
     month: 8,
     day: 3,
@@ -335,6 +336,7 @@ test('경조사 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건너
   await expect(page).toHaveURL(/\/calendar$/);
   expect(db.cares.at(-1)).toMatchObject({
     name: '추석',
+    art_key: 'moon-stars',
     date_rule: 'lunar_yearly',
     month: 8,
     day: 15,
@@ -360,6 +362,7 @@ test('경조사 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건너
   expect(db.cares.at(-1)).toMatchObject({
     name: '민지 결혼식',
     kind: 'event',
+    art_key: 'gift',
     date_rule: 'once',
     once_on: '2026-11-21',
   });
@@ -536,7 +539,10 @@ test('공휴일: 빨간 숫자와 이름, 설·추석 연휴 띠, 월급날이 �
   await page.goto('/calendar');
   const hangul = page.getByRole('button', { name: '10월 9일, 한글날' });
   await expect(hangul).toHaveClass(/is-holiday/);
-  await expect(hangul).toContainText('한글날');
+  // 이름은 칸에 쓰지 않고 고른 날 목록에만(2026-11-24 K안)
+  await expect(hangul).toHaveText('9');
+  await hangul.click();
+  await expect(page.locator('.hg-cal__agenda .hg-listrow__label').first()).toHaveText('한글날');
   await expect(page.getByRole('button', { name: '10월 5일, 대체공휴일(개천절)' })).toHaveClass(
     /is-holiday/,
   );
@@ -883,4 +889,170 @@ test('상세(Y-05): 기록을 마친 회차는 요약 + 기록 고치기, 지남
   await expect(page).toHaveURL(/\/calendar\/day\/c-done$/);
   expect(db.careRecords.find((r) => r.id === 'rec-x')).toMatchObject({ memo: '모두 즐거웠어요' });
   expect(db.careRecords).toHaveLength(1);
+});
+
+// ── 2026-11-24 K안(한국 금융 앱 달력형) ──────────────────────────────────────────────
+
+test('달력 K안: 머리 “10월 ⌄”, 요약 줄, 모든 칸 높이 같음, 칸 숫자 상태, 고른 날 머리 + 음력, 그림 파일이 없으면 그림 칸 없음', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.cares.push(
+    care({ id: 'c-mom', name: '어머니 생신', month: 10, day: 20, budget: 300_000 }),
+    care({
+      id: 'c-friend',
+      name: '친구 집들이',
+      kind: 'event',
+      month: 10,
+      day: 12,
+      budget: 50_000,
+    }),
+    care({ id: 'c-past', name: '지난 모임', month: 10, day: 2, budget: 0 }),
+  );
+  await page.goto('/calendar');
+  // 머리 왼쪽 큰 월 + ⌄, 올해라 연도는 없음. 오늘이 든 달이라 ‘오늘’ 버튼 없음
+  const head = page.getByRole('button', { name: '2026년 10월, 연·월 고르기' });
+  await expect(head).toHaveText('10월');
+  await expect(page.getByRole('button', { name: '오늘' })).toHaveCount(0);
+  // 요약 한 줄: 그 달 경조사 수 + 금액 메모 합(35만 원이 아니라 30 + 5 = 35만, 금액 0은 합에 영향 없음)
+  await expect(page.locator('.hg-cal__summary')).toHaveText('경조사 3개(35만 원 예상)');
+  // 모든 칸 높이가 같음(그림이 없어도 줄이 흐트러지지 않음)
+  const heights = await page
+    .locator('button.hg-cal__day')
+    .evaluateAll((els) => [
+      ...new Set(els.map((e) => Math.round(e.getBoundingClientRect().height))),
+    ]);
+  expect(heights).toHaveLength(1);
+  // 그림 파일이 아직 없어서 그림 칸과 ‘+n’은 그리지 않음
+  await expect(page.locator('.hg-cal__art')).toHaveCount(0);
+  // 칸 숫자 상태: 일정 있는 날 굵게, 일정 없는 지난 날 stone, 오늘 오렌지, 고른 날 회색 판(오늘을 처음 고름)
+  const num = (label: RegExp) => page.getByRole('button', { name: label }).locator('.hg-cal__num');
+  await expect(page.getByRole('button', { name: /^10월 12일/ })).toHaveClass(/is-event/);
+  expect(await num(/^10월 12일/).evaluate((e) => getComputedStyle(e).fontWeight)).toBe('700');
+  await expect(page.getByRole('button', { name: /^10월 3일/ })).toHaveClass(/is-past/);
+  await expect(page.getByRole('button', { name: /^10월 15일/ })).toHaveClass(/is-plain/);
+  expect(await num(/^10월 15일/).evaluate((e) => getComputedStyle(e).fontWeight)).toBe('400');
+  const today = page.getByRole('button', { name: /^10월 7일/ });
+  await expect(today).toHaveClass(/is-today/);
+  await expect(today).toHaveClass(/is-selected/);
+  expect(await today.evaluate((e) => getComputedStyle(e).backgroundColor)).not.toBe(
+    'rgba(0, 0, 0, 0)',
+  );
+  // 고른 날 머리 “10월 7일 수요일” + 보조 음력
+  await page.getByRole('button', { name: /^10월 12일/ }).click();
+  await expect(page.locator('.hg-cal__date b')).toHaveText('10월 12일 월요일');
+  await expect(page.locator('.hg-cal__date span')).toHaveText(/^음력 \d+월 \d+일$/);
+  await expect(page.locator('.hg-cal__agenda .hg-list:not(.hg-cal__add) .hg-lead')).toHaveCount(0); // 줄 앞 그림 칸도 그림이 있을 때만
+  await axe(page);
+
+  // 요약 줄: ‘금융 일정’ 필터는 금융 일정 수, 경조사가 0개면 줄 없음
+  await page.getByRole('tab', { name: '금융 일정', exact: true }).click();
+  await expect(page.locator('.hg-cal__summary')).toHaveText(/^금융 일정 \d+개$/);
+  await page.getByRole('tab', { name: '경조사·기념일', exact: true }).click();
+  await expect(page.locator('.hg-cal__summary')).toHaveText('경조사 3개(35만 원 예상)');
+  await page.getByRole('button', { name: '다음 달' }).click();
+  await expect(page.locator('.hg-cal__summary')).toHaveCount(0);
+});
+
+test('달력 K안: 금액 메모가 없으면 “경조사 2개”만', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.cares.push(
+    care({ id: 'c-a', name: '모임 하나', month: 10, day: 20, budget: 0 }),
+    care({ id: 'c-b', name: '모임 둘', month: 10, day: 21, budget: 0 }),
+  );
+  await page.goto('/calendar');
+  await expect(page.locator('.hg-cal__summary')).toHaveText('경조사 2개');
+});
+
+test('달력 K안: 손잡이로 한 주로 접고 펴기(누르기·키보드·끌기), 보던 상태 기억, 동작 줄이기면 전환 없음', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/calendar');
+  const handle = page.getByRole('button', { name: '한 주만 보기' });
+  await expect(handle).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('.hg-cal__week.is-hidden')).toHaveCount(0);
+  // 접으면 고른 날(10월 7일)이 든 주만 보임. 10월은 5주
+  await handle.click();
+  const unfold = page.getByRole('button', { name: '한 달 모두 보기' });
+  await expect(unfold).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.locator('.hg-cal__week.is-hidden')).toHaveCount(4);
+  await expect(
+    page.locator('.hg-cal__week:not(.is-hidden)').getByRole('button', { name: /^10월 7일/ }),
+  ).toBeVisible();
+  // 접힌 주 안에서 다른 날을 고르면 그 날 일정이 아래에 나옴(보이는 주는 그대로)
+  await page.getByRole('button', { name: /^10월 9일/ }).click();
+  await expect(page.locator('.hg-cal__date b')).toHaveText('10월 9일 금요일');
+  // 갔다 와도 접힌 채(앱을 쓰는 동안만 기억)
+  await page.getByRole('button', { name: '이 날에 경조사 추가' }).click();
+  await expect(page.getByRole('heading', { name: '경조사 추가' })).toBeVisible();
+  await page.getByRole('button', { name: '뒤로' }).first().click();
+  await expect(page.getByRole('button', { name: '한 달 모두 보기' })).toBeVisible();
+  await expect(page.locator('.hg-cal__week.is-hidden')).toHaveCount(4);
+  await axe(page);
+  // 키보드: 손잡이에 포커스 + Enter로 펴기
+  await page.getByRole('button', { name: '한 달 모두 보기' }).focus();
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('button', { name: '한 주만 보기' })).toBeVisible();
+  await expect(page.locator('.hg-cal__week.is-hidden')).toHaveCount(0);
+  // 끌기: 위로 끌면 접고, 아래로 끌면 폄(전환이 끝나 손잡이 자리가 멈춘 뒤에)
+  const settle = () =>
+    page.evaluate(() =>
+      Promise.all(document.getAnimations().map((a) => a.finished.catch(() => null))),
+    );
+  await settle();
+  const box = await page.getByRole('button', { name: '한 주만 보기' }).boundingBox();
+  if (!box) throw new Error('손잡이 없음');
+  const cx = box.x + box.width / 2;
+  const cy = box.y + box.height / 2;
+  await page.mouse.move(cx, cy);
+  await page.mouse.down();
+  await page.mouse.move(cx, cy - 40, { steps: 4 });
+  await page.mouse.up();
+  await expect(page.locator('.hg-cal__week.is-hidden')).toHaveCount(4);
+  await settle();
+  const box2 = await page.getByRole('button', { name: '한 달 모두 보기' }).boundingBox();
+  if (!box2) throw new Error('손잡이 없음');
+  await page.mouse.move(box2.x + box2.width / 2, box2.y + 10);
+  await page.mouse.down();
+  await page.mouse.move(box2.x + box2.width / 2, box2.y + 60, { steps: 4 });
+  await page.mouse.up();
+  await expect(page.locator('.hg-cal__week.is-hidden')).toHaveCount(0);
+  // 동작 줄이기: 접고 펴는 전환 없음
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  expect(
+    await page
+      .locator('.hg-cal__week')
+      .first()
+      .evaluate((e) => getComputedStyle(e).transitionDuration),
+  ).toBe('0s');
+});
+
+test('달력 K안: “10월 ⌄” → 연·월 휠로 이동, 다른 해는 “2027년 2월” + ‘오늘’', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/calendar');
+  await page.getByRole('button', { name: '2026년 10월, 연·월 고르기' }).click();
+  const sheet = page.getByRole('dialog', { name: '연·월 고르기' });
+  await expect(sheet).toBeVisible();
+  await axe(page);
+  await setYearMonth(page, 2027, 2);
+  await sheet.getByRole('button', { name: '2027년 2월 보기' }).click();
+  await expect(sheet).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '2027년 2월, 연·월 고르기' })).toHaveText(
+    '2027년 2월',
+  );
+  await expect(page.getByRole('region', { name: '2027년 2월' })).toBeVisible();
+  // 다른 달은 그 달 1일을 고름 + ‘오늘’
+  await expect(page.locator('.hg-cal__date b')).toHaveText('2월 1일 월요일');
+  await page.getByRole('button', { name: '오늘', exact: true }).click();
+  await expect(page.getByRole('button', { name: '2026년 10월, 연·월 고르기' })).toHaveText('10월');
+  await expect(page.getByRole('button', { name: '오늘', exact: true })).toHaveCount(0);
 });

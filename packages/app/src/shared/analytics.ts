@@ -332,6 +332,11 @@ export type AnalyticsEvent =
       };
     }
   | {
+      // 32 4-6 달력 Y-04 한 주로 접기·펴기(2026-11-24 K안). via: 손잡이를 눌렀나(키보드 포함) 끌었나
+      name: 'calendar_folded';
+      props: { state: 'folded' | 'expanded'; via: 'tap' | 'drag' };
+    }
+  | {
       name: 'change_reverted';
       props: {
         // asset: F-04 저장 Toast ‘되돌리기’(2026-11-12 S8-05)
