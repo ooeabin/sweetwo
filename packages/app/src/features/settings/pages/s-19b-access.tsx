@@ -1,11 +1,11 @@
 import { answerAccessRequest, fetchInquiries, qk } from '@sweetwo/api';
-import { Badge, Button, PageHeader, SectionHeader } from '@sweetwo/ui';
+import { Badge, Button, PageHeader, SectionHeader, StickyBar } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { carryToast, toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
-import { copy } from '../copy';
+import { accessScopeNames, copy } from '../copy';
 
 // S-19b 관리자 열람 동의(docs/spec/25-settings.md): “문의 #A-10234” / “동의하면 24시간만 봐요”,
 // 볼 수 있어요(요청 범위 + “금액은 구간으로” 또는 원값이면 “금액이 그대로 보여요”), 보지 않아요(고정 칩),
@@ -44,35 +44,41 @@ export function S19bAccess() {
         backLabel={copy.back}
         onBack={() => nav(`/settings/help/inquiries/${q.id}`)}
       />
-      <p>
-        <strong>{copy.access24}</strong>
-      </p>
-      <section className="hg-stack" style={{ gap: 'var(--space-2)' }}>
-        <SectionHeader title={copy.accessCan} />
-        <ul className="hg-stack" style={{ gap: 'var(--space-1)', paddingLeft: 'var(--space-5)' }}>
-          {r.scope.map((s) => (
-            <li key={s}>{copy.accessScopes[s] ?? s}</li>
-          ))}
-        </ul>
-        <p className="hg-q__help">{r.raw_amount ? copy.accessRaw : copy.accessRange}</p>
-      </section>
-      <section className="hg-stack" style={{ gap: 'var(--space-2)' }}>
-        <SectionHeader title={copy.accessCannot} />
-        <div className="hg-row" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
-          {copy.accessNever.map((t) => (
-            <Badge key={t} kind="temp">
-              {t}
-            </Badge>
-          ))}
-        </div>
-      </section>
-      <div className="hg-row">
-        <Button variant="secondary" loading={busy === false} onClick={() => void answer(false)}>
-          {copy.accessNo}
-        </Button>
-        <Button variant="primary" loading={busy === true} onClick={() => void answer(true)}>
-          {copy.accessYes}
-        </Button>
+      <div className="hg-page hg-stack">
+        <p className="hg-copy hg-copy--strong">{copy.access24}</p>
+        <section className="hg-stack" style={{ gap: 'var(--space-2)' }}>
+          <SectionHeader title={copy.accessCan} />
+          <ul className="hg-bullets hg-bullets--body">
+            {accessScopeNames(r.scope).map((s) => (
+              <li key={s}>{s}</li>
+            ))}
+          </ul>
+          <p className="hg-q__help">{r.raw_amount ? copy.accessRaw : copy.accessRange}</p>
+        </section>
+        <section className="hg-stack" style={{ gap: 'var(--space-2)' }}>
+          <SectionHeader title={copy.accessCannot} />
+          <div className="hg-row" style={{ flexWrap: 'wrap', gap: 'var(--space-2)' }}>
+            {copy.accessNever.map((t) => (
+              <Badge key={t} kind="temp">
+                {t}
+              </Badge>
+            ))}
+          </div>
+        </section>
+        {/* 2026-11-24 구역 5: 본문 중간 오렌지 채움 대신 아래 고정 주 버튼 + 그 위 보조 */}
+        <StickyBar pair>
+          <Button
+            variant="secondary"
+            block
+            loading={busy === false}
+            onClick={() => void answer(false)}
+          >
+            {copy.accessNo}
+          </Button>
+          <Button variant="primary" block loading={busy === true} onClick={() => void answer(true)}>
+            {copy.accessYes}
+          </Button>
+        </StickyBar>
       </div>
     </div>
   );

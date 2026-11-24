@@ -121,7 +121,7 @@ export function S13Sharing() {
           <div className="hg-list">
             <SheetSelect<PlanShare>
               label={copy.planShareTitle}
-              rowLabel={copy.planShareTitle}
+              rowLabel={copy.planShareRow}
               value={share}
               options={PLAN_SHARES}
               nameOf={(v) => copy.planShares[v] ?? v}
@@ -194,7 +194,7 @@ export function S13Sharing() {
         )}
         {ask && (
           <div className="hg-stack" role="alertdialog" aria-label={copy.visApplyAll(differ(ask))}>
-            <b>{copy.visApplyAll(differ(ask))}</b>
+            <p className="hg-copy hg-copy--strong">{copy.visApplyAll(differ(ask))}</p>
             <div className="hg-row" style={{ gap: 'var(--space-2)' }}>
               <Button
                 variant="primary"
@@ -246,7 +246,7 @@ export function S13Sharing() {
           <SectionHeader title={copy.rankTitle} />
           <div className="hg-card">
             <Toggle
-              label={copy.rankTitle}
+              label={copy.rankToggle}
               help={myRankOpen ? copy.rankWaiting(c.partnerName) : copy.rankHelp}
               checked={me.rank_consent}
               onChange={(on) =>

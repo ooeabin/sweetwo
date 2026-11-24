@@ -1,3 +1,4 @@
+import { addQuickAmount } from '@sweetwo/core';
 import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { BottomSheet } from './BottomSheet';
 import { Button } from './Button';
@@ -33,8 +34,8 @@ export function FormScreen({
   hero?: ReactNode;
   /** 스테퍼(2026-11-24): “1/3” 글자 + 앞에서 답한 줄. 뒤 질문이 앞 답에 달렸거나 확인·동의 단계라 한 화면으로 못 합칠 때만 */
   step?: { index: number; total: number; label?: string; done?: StepDone[] };
-  /** 건너뛰기 같은 조용한 글자 버튼(주 버튼 위) */
-  later?: { label: string; onClick: () => void; loading?: boolean };
+  /** 건너뛰기 같은 조용한 글자 버튼(주 버튼 위). secondary면 보조 버튼 모양으로 주 버튼과 8px 띄움(S-12a ‘먼저 내보내기’, 2026-11-24) */
+  later?: { label: string; onClick: () => void; loading?: boolean; secondary?: boolean };
   children: ReactNode;
   primary: { label: string; disabled?: boolean; loading?: boolean };
   onSubmit: () => void;
@@ -60,8 +61,19 @@ export function FormScreen({
         {step && <FormStepHead {...step} />}
         {hero}
         {children}
-        <StickyBar>
-          {later && (
+        <StickyBar pair={!!later?.secondary}>
+          {later && later.secondary && (
+            <Button
+              type="button"
+              variant="secondary"
+              block
+              disabled={later.loading || primary.loading}
+              onClick={later.onClick}
+            >
+              {later.label}
+            </Button>
+          )}
+          {later && !later.secondary && (
             <button
               type="button"
               className="hg-btn hg-btn--link hg-btn--quiet"
@@ -227,6 +239,7 @@ export function FormAmount({
   value,
   onChange,
   quick,
+  quickSet = false,
   allowZero = true,
   monthly = true,
   invalid,
@@ -239,6 +252,8 @@ export function FormAmount({
   value: number | null;
   onChange: (v: number | null) => void;
   quick?: readonly { label: string; value: number }[];
+  /** 칩이 더하기 대신 그 금액으로 바꾸기(W-11b ‘10만 원’). 기본은 지금 값에 더하기(+100만, 2026-11-24 S-11c 버그: 늘 바꾸기로 동작했음) */
+  quickSet?: boolean;
   allowZero?: boolean;
   monthly?: boolean;
   invalid?: boolean;
@@ -260,7 +275,7 @@ export function FormAmount({
           value={value}
           onChange={onChange}
           quick={quick}
-          quickSet
+          quickSet={quickSet}
           monthly={monthly}
           allowZero={allowZero}
           embedded
@@ -292,7 +307,7 @@ export function FormAmount({
               key={q.label}
               small
               aria-pressed={undefined}
-              onClick={() => onChange(q.value)}
+              onClick={() => onChange(quickSet ? q.value : addQuickAmount(value, q.value))}
             >
               {q.label}
             </Chip>

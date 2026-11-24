@@ -80,6 +80,7 @@ const TABLE: [RegExp, string][] = [
   [/^\/settings\/help\/inquiries(\/[^/]+)?$/, 'S-19a'],
   [new RegExp(`^/settings/help/access/${ID}$`), 'S-19b'],
   [/^\/settings\/trash$/, 'S-21'],
+  [/^\/settings\/widgets$/, 'S-22'],
   [/^\/settings\/guides$/, 'S-01'],
   [new RegExp(`^/settings/guides/check/${ID}$`), 'S-02'],
   [new RegExp(`^/settings/guides/read/${ID}$`), 'S-03'],

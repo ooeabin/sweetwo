@@ -189,9 +189,7 @@ export function S11fManageStyle() {
           className="hg-row"
           style={{ gap: 'var(--space-2)', alignItems: 'center', justifyContent: 'space-between' }}
         >
-          <p className="hg-help" style={{ margin: 0 }}>
-            {copy.styleWaiting(partnerName)}
-          </p>
+          <p className="hg-copy hg-copy--sub">{copy.styleWaiting(partnerName)}</p>
           <Button
             variant="ghost"
             size="sm"
@@ -208,9 +206,7 @@ export function S11fManageStyle() {
           className="hg-row"
           style={{ gap: 'var(--space-2)', alignItems: 'center', justifyContent: 'space-between' }}
         >
-          <p className="hg-help" style={{ margin: 0 }}>
-            {copy.styleReceived(partnerName)}
-          </p>
+          <p className="hg-copy hg-copy--sub">{copy.styleReceived(partnerName)}</p>
           <Button
             variant="ghost"
             size="sm"

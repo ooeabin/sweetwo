@@ -52,6 +52,8 @@ struct WidgetSave: Decodable {
     let pct: Int?
     let line: String?
     let done: String?
+    /// S-22 ‘위젯에 금액 보이기’를 켰을 때만 오는 모은 금액 글(없으면 가림)
+    let amount: String?
     let to: String
 }
 struct WidgetNext: Decodable {
@@ -222,8 +224,10 @@ struct SaveTogetherView: View {
         return VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 4) {
                 Text(T.saveName).font(.system(size: 12, weight: .bold)).foregroundColor(C.goalInk).lineLimit(1)
-                Image("widget-eye-slash").resizable().renderingMode(.template).frame(width: 12, height: 12)
-                    .foregroundColor(C.goalInk).accessibilityLabel(T.amountHidden)
+                if s.amount == nil {
+                    Image("widget-eye-slash").resizable().renderingMode(.template).frame(width: 12, height: 12)
+                        .foregroundColor(C.goalInk).accessibilityLabel(T.amountHidden)
+                }
             }
             Text(s.name).font(.system(size: 14, weight: .bold)).foregroundColor(C.ink).lineLimit(1).padding(.top, 2)
             Text(s.big).font(.system(size: 32, weight: .bold)).foregroundColor(C.ink).lineLimit(1)
@@ -238,6 +242,9 @@ struct SaveTogetherView: View {
                 .frame(height: 6)
                 .padding(.top, 6)
                 .accessibilityHidden(true)
+            }
+            if let amount = s.amount {
+                Text(amount).font(.system(size: 12, weight: .bold)).foregroundColor(C.slate).lineLimit(1).padding(.top, 4)
             }
             if medium, let line = s.line {
                 Text(line).font(.system(size: 12)).foregroundColor(C.slate).lineLimit(1).padding(.top, 4)

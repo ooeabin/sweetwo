@@ -31,7 +31,7 @@ export interface LockStatus {
   autoLockMin: number;
 }
 /**
- * 위젯에 둘 값(26 v2.2). 금액은 없음(26 ‘금액 표시’: 기본 가림, S-22 ‘위젯에 금액 보이기’는 아직 없음).
+ * 위젯에 둘 값(26 v2.2). 금액은 기본 없음(26 ‘금액 표시’: 기본 가림, S-22 ‘위젯에 금액 보이기’를 켰을 때만 save.amount).
  * 글은 앱 copy가 만든 그대로, D-n은 위젯이 그날(KST) 다시 셈
  */
 /** 놓인 위젯 하나(26 위젯 v2.2): WG-01 소·중, WG-04 소 */
@@ -58,11 +58,18 @@ export interface WidgetData {
     line: string | null;
     /** 다 모았으면 배지 글(“다 모았어요”) */
     done: string | null;
+    /** S-22 ‘위젯에 금액 보이기’를 켰을 때만 “3,200만 원 모았어요”. 가림이면 없음(앱 금액 가리기가 켜져 있어도 없음) */
+    amount?: string | null;
     to: string;
   } | null;
   /** WG-04 다가오는 날: 가장 가까운 경조사 또는 쓸 곳 메모(금액 없음). 없으면 null */
   next: { name: string; date: string; to: string } | null;
 }
+/** 위젯 설정(S-22, 기기마다). 기본 끔 */
+export interface WidgetSettings {
+  showAmounts: boolean;
+}
+
 export type VerifyResult = { ok: true } | { ok: false; failed: number; signedOut: boolean };
 
 export interface AppBridge {
@@ -168,6 +175,11 @@ export interface AppBridge {
     update: (d: WidgetData) => Promise<void>;
     /** 홈 화면에 놓인 위젯 종류·크기(widget_added 분석, 2026-11-13 PR 14). 옛 앱은 없음 */
     installed?: () => Promise<WidgetPlaced[]>;
+    /** 위젯 설정(S-22 ‘위젯에 금액 보이기’, 이 기기에만 저장). 옛 앱은 없음 */
+    settings?: {
+      get: () => Promise<WidgetSettings>;
+      set: (s: WidgetSettings) => Promise<void>;
+    };
   };
   /**
    * 분석 전송(ADR 0010, 2026-11-17): 네이티브 Firebase Analytics(GA4). 값은 analytics-ga.ts toGaParams가 거른 것만

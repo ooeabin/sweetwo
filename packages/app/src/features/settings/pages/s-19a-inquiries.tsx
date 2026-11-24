@@ -1,19 +1,19 @@
 import { addInquiryMessage, fetchInquiries, qk, stopAccess, type Inquiry } from '@sweetwo/api';
 import { formatDot, todayKst } from '@sweetwo/core';
-import { Badge, Button, EmptyState, ListRow, PageHeader } from '@sweetwo/ui';
+import { Badge, Button, EmptyState, ListRow, PageHeader, StickyBar } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useBackOr } from '../../../shared/back-or';
 import { toast } from '../../../shared/toast';
 import { LoadingFrame, MainFrame } from '../../frame';
-import { copy } from '../copy';
+import { accessScopeNames, copy } from '../copy';
 import { InquiryText } from './s-19a-inquiry';
 
 const day = (s: string) => formatDot(todayKst(new Date(s)));
 const hoursLeft = (until: string | null) =>
   until ? Math.max(0, Math.ceil((Date.parse(until) - Date.now()) / 3_600_000)) : 0;
-const scopeText = (s: string[]) => s.map((x) => copy.accessScopes[x] ?? x).join(', ');
+const scopeText = (s: string[]) => accessScopeNames(s).join(', ');
 
 // S-19a 내 문의: 목록(번호, 분류, 상태, 날짜) → 상세(대화, 덧붙이기). 열람 요청이 오면 상세 위 “문의를 확인하려면
 // 동의가 필요해요” → S-19b, 동의한 동안 “운영자가 확인하고 있어요 / 월 수입·지출 화면 / 23시간 남았어요” + ‘지금 그만 보게 하기’.
@@ -54,43 +54,35 @@ export function S19aInquiries() {
         backTo={copy.help}
         onBack={goBack}
       />
-      {rows.length === 0 ? (
-        // 2026-11-04 비었으면 ‘문의하기’를 빈 화면 가운데에
-        <EmptyState
-          list
-          title={copy.noInquiries}
-          action={
-            <Button variant="primary" onClick={() => nav('/settings/help/inquiry')}>
-              {copy.contact}
-            </Button>
-          }
-        />
-      ) : (
-        <div className="hg-list">
-          {rows.map((r) => (
-            <ListRow
-              key={r.id}
-              label={
-                <>
-                  {copy.inquiryNo(r.no)}{' '}
-                  <Badge kind={r.status === 'done' ? 'done' : 'temp'}>
-                    {copy.inquiryStatus[r.status]}
-                  </Badge>
-                </>
-              }
-              sub={`${copy.categories[r.category]}, ${day(r.created_at)}`}
-              onClick={() => nav(`/settings/help/inquiries/${r.id}`)}
-            />
-          ))}
-        </div>
-      )}
-      {rows.length > 0 && (
-        <div className="hg-row">
-          <Button variant="primary" onClick={() => nav('/settings/help/inquiry')}>
+      <div className="hg-page hg-stack">
+        {rows.length === 0 ? (
+          // 2026-11-24 구역 5: ‘문의하기’는 빈 화면 가운데 오렌지 채움 대신 아래 고정 주 버튼(StickyBar)
+          <EmptyState list title={copy.noInquiries} />
+        ) : (
+          <div className="hg-list">
+            {rows.map((r) => (
+              <ListRow
+                key={r.id}
+                label={
+                  <>
+                    {copy.inquiryNo(r.no)}{' '}
+                    <Badge kind={r.status === 'done' ? 'done' : 'temp'}>
+                      {copy.inquiryStatus[r.status]}
+                    </Badge>
+                  </>
+                }
+                sub={`${copy.categories[r.category]}, ${day(r.created_at)}`}
+                onClick={() => nav(`/settings/help/inquiries/${r.id}`)}
+              />
+            ))}
+          </div>
+        )}
+        <StickyBar>
+          <Button variant="primary" block onClick={() => nav('/settings/help/inquiry')}>
             {copy.contact}
           </Button>
-        </div>
-      )}
+        </StickyBar>
+      </div>
     </div>
   );
   if (!q) return <MainFrame sub="settings" current={null} columns={[listBody]} />;
@@ -110,7 +102,7 @@ export function S19aInquiries() {
       />
       {on && (
         <div className="hg-card hg-stack" style={{ gap: 'var(--space-2)' }} role="status">
-          <strong>{copy.accessOn}</strong>
+          <strong className="hg-copy hg-copy--strong">{copy.accessOn}</strong>
           <span>{scopeText(on.scope)}</span>
           <span className="hg-q__help">{copy.accessLeft(hoursLeft(on.expires_at))}</span>
           <div className="hg-row">

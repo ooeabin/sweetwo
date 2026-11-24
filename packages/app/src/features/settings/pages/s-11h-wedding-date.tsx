@@ -1,6 +1,6 @@
 import { qk, updateSpace } from '@sweetwo/api';
 import { todayKst } from '@sweetwo/core';
-import { DateWheel, QuestionLayout, YearMonthInput, QuestionSkeleton } from '@sweetwo/ui';
+import { Button, DateWheel, QuestionLayout, YearMonthInput, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -139,14 +139,10 @@ export function S11hWeddingDate() {
         </p>
       )}
       {engaged && (
-        <button
-          type="button"
-          className="hg-btn hg-btn--link"
-          style={{ alignSelf: 'flex-start' }}
-          onClick={() => setUndecided(true)}
-        >
+        // 2026-11-24 구역 5: 글자 링크가 눈에 안 띄어 보조 버튼으로(기획서 ‘아직 미정이에요’ 선택)
+        <Button variant="secondary" block onClick={() => setUndecided(true)}>
           {copy.undecided}
-        </button>
+        </Button>
       )}
     </QuestionLayout>
   );

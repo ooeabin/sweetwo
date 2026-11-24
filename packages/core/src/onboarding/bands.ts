@@ -1,4 +1,4 @@
-import type { Won } from '../money';
+import { MAX_WON, type Won } from '../money';
 
 // ‘잘 모르겠어요’ 구간 칩(docs/spec/09-data-items.md 5장). 저장값 = 구간 중간값(첫 구간 = 상한의 1/2, 끝 구간 = 하한) + ‘추정’.
 export interface Band {
@@ -66,3 +66,8 @@ export const quickChips = {
   ],
 } as const;
 export type QuickKind = keyof typeof quickChips;
+
+/** 빠른 금액 칩 ‘+100만’ 더하기: 지금 값 + 칩 금액, 입력 상한(999억)까지(2026-11-24 S-11c 3,500,000 + 100만이 1,000,000이 되던 버그) */
+export function addQuickAmount(current: number | null, add: number): number {
+  return Math.min((current ?? 0) + add, MAX_WON);
+}

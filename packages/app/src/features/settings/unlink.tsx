@@ -9,15 +9,15 @@ export function UnlinkDeleted() {
     <dl className="hg-stack" style={{ gap: 'var(--space-3)', margin: 0 }}>
       <div className="hg-stack" style={{ gap: 'var(--space-1)' }}>
         <dt>
-          <b>{copy.unlinkKeepTitle}</b>
+          <span className="hg-copy hg-copy--strong">{copy.unlinkKeepTitle}</span>
         </dt>
-        <dd style={{ margin: 0 }}>{copy.unlinkKeep}</dd>
+        <dd className="hg-copy">{copy.unlinkKeep}</dd>
       </div>
       <div className="hg-stack" style={{ gap: 'var(--space-1)' }}>
         <dt>
-          <b>{copy.unlinkGoneTitle}</b>
+          <span className="hg-copy hg-copy--strong">{copy.unlinkGoneTitle}</span>
         </dt>
-        <dd style={{ margin: 0 }}>{copy.unlinkGone}</dd>
+        <dd className="hg-copy">{copy.unlinkGone}</dd>
       </div>
     </dl>
   );

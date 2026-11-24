@@ -30,7 +30,8 @@ export function Toggle({
       style={{
         justifyContent: 'space-between',
         gap: 'var(--space-3)',
-        minHeight: 44,
+        minHeight: 56,
+        paddingBlock: 'var(--space-2)',
         cursor: disabled ? 'not-allowed' : 'pointer',
       }}
     >

@@ -69,6 +69,7 @@ import {
   S11gMarriage,
   S11hWeddingDate,
   S11iBirthYear,
+  S22WidgetSettings,
   S14Notifications,
   S14aQuiet,
 } from './features/settings';
@@ -396,6 +397,16 @@ export const routes: RouteObject[] = [
           </RequireAccount>
         ),
       }, // S-21 휴지통
+      {
+        path: '/settings/widgets',
+        element: (
+          <RequireAccount>
+            <OnboardingGate>
+              <S22WidgetSettings />
+            </OnboardingGate>
+          </RequireAccount>
+        ),
+      }, // S-22 위젯 설정(모바일 앱만)
       {
         path: '/settings/about',
         element: (

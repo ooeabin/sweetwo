@@ -398,6 +398,7 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
             value={newMonthly}
             onChange={setNewMonthly}
             quick={quickChips.monthly}
+            quickSet
             below={
               newMonthly !== null && newMonthly % 10_000 !== 0 ? (
                 <p className="hg-help">{copy.tenThousandUnit}</p>

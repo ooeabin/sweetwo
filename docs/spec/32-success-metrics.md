@@ -138,6 +138,7 @@
 | `invite_code_autofilled` | O-01 시트 | 됨 |
 | `saving_item_created` entry onboarding | O-60 | 됨 |
 | `widget_added` / `widget_tapped` | 앱 시작 때 놓인 위젯 확인(브리지 `widget.installed`, 이 기기에서 처음 본 종류·크기만) / 위젯 링크 `w` | 됨(PR 14) |
+| `widget_setting_changed` | S-22에서 바꿈. `setting` = `amounts`(+ `on`) / `goal`(+ `choice` = `picked` / `default`). 금액·이름 없음 | 됨(2026-11-24) |
 | `unlink_resolved` path timeout | 서버: 14일 기한 확정(`couple_unlink` 트리거) | 됨(PR 14). acknowledged·canceled는 앱 |
 | `rejoin_requested` / `_responded`, `reconnect_blocked` | S-12, S-12g | 됨 |
 | `partner_change_reverted` | N-01·N-02 ‘이전 값으로 돌리기’(속성 hours\_since\_change = 알림이 온 뒤 시간) | 됨(`revert_partner_change`, PR 14 후속) |

@@ -502,8 +502,9 @@ test('연결 해제 요청(S-12a·c): 지워지는 것, “연결 해제” 입�
   await send.click();
   await expect(page.getByText('예빈님에게 연결 해제를 요청했어요')).toBeVisible();
   await expect(page).toHaveURL(/\/settings\/couple$/);
-  // 요청한 사람 제목은 “연결 해제 대기 중”(2026-11-12 QA 11구간 D3)
-  await expect(page.getByRole('strong').filter({ hasText: /^연결 해제 대기 중$/ })).toBeVisible();
+  // 2026-11-24 구역 5: “연결 해제 대기 중”은 위 상태 값에 한 번만, 카드 제목은 “{이름}님 답을 기다리고 있어요”
+  await expect(page.getByText('연결 해제 대기 중', { exact: true })).toHaveCount(1);
+  await expect(page.getByText('예빈님 답을 기다리고 있어요')).toBeVisible();
   await expect(page.getByText('예빈님이 확인하거나 10월 21일이 되면 해제돼요')).toBeVisible();
   await expect(page.getByText('해제 전까지 월급 계획을 고칠 수 없어요')).toBeVisible();
   await axe(page);
@@ -719,7 +720,7 @@ test('공개 범위(S-13 한 목록): 내 월급 계획 단계, 새 항목 기�
   await axe(page);
 
   // ① 내 월급 계획: 했어요만으로 좁힘
-  await page.getByRole('button', { name: /^내 월급 계획/ }).click();
+  await page.getByRole('button', { name: /^보이는 범위/ }).click();
   await page
     .getByRole('dialog', { name: '내 월급 계획' })
     .getByRole('radio', { name: '했어요만 보여 주기' })
@@ -748,9 +749,9 @@ test('공개 범위(S-13 한 목록): 내 월급 계획 단계, 새 항목 기�
   // ④ 자산 순위 같이 보기: 켜져 있으면 끄기는 바로, 켜기는 F-08c(동의 보내기)로
   (db.me as Record<string, unknown>).rank_consent = true;
   await page.reload();
-  await page.getByRole('switch', { name: '자산 순위 같이 보기' }).click();
+  await page.getByRole('switch', { name: '같이 보기' }).click();
   await expect.poll(() => v.calls.some((c) => c.fn === 'set_rank_consent')).toBe(true);
-  await page.getByRole('switch', { name: '자산 순위 같이 보기' }).click();
+  await page.getByRole('switch', { name: '같이 보기' }).click();
   await expect(page).toHaveURL(/\/assets\/rank\/consent$/);
 });
 
@@ -947,6 +948,8 @@ test('도움말(S-20) 검색 → 문의하기(S-19a) → 내 문의, 열람 동�
   await page.getByRole('button', { name: '보내기' }).click();
   await expect(page.getByText('문의 #A-10001를 받았어요')).toBeVisible();
   await expect(page).toHaveURL(/\/settings\/help\/inquiries$/);
+  // 2026-11-24 구역 5: S-19a ‘문의하기’는 맨 아래 고정 주 버튼 하나
+  await expect(page.locator('.hg-stickybar .hg-btn--primary')).toHaveText('문의하기');
   expect(db.inquiries[0]?.attach).toMatchObject({ couple_state: 'connected', platform: 'web' });
 
   // 운영자 답변과 열람 요청이 왔다고 치고
@@ -980,6 +983,11 @@ test('도움말(S-20) 검색 → 문의하기(S-19a) → 내 문의, 열람 동�
     await expect(page.locator('.hg-badge', { hasText: chip }).first()).toBeVisible();
   await expect(page.getByText('용돈 내역')).toHaveCount(0);
   await axe(page);
+  // S-19b: 보조 ‘거절할게요’ + 주 ‘동의해요’가 아래 고정 한 쌍
+  await expect(page.locator('.hg-stickybar').getByRole('button')).toHaveText([
+    '거절할게요',
+    '동의해요',
+  ]);
   await page.getByRole('button', { name: '동의해요' }).click();
   await expect(page.getByText('운영자가 확인하고 있어요')).toBeVisible();
   await page.getByRole('button', { name: '지금 그만 보게 하기' }).click();

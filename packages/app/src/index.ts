@@ -8,4 +8,5 @@ export type {
   VerifyResult,
   WidgetData,
   WidgetPlaced,
+  WidgetSettings,
 } from './platform';

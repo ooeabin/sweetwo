@@ -19,7 +19,7 @@ export function S03Guide() {
         onBack={() => nav(guidesPath)}
       />
       {g.paragraphs.map((p) => (
-        <p key={p} style={{ margin: 0 }}>
+        <p key={p} className="hg-copy">
           {p}
         </p>
       ))}

@@ -38,6 +38,7 @@ export const copy = {
   bothSaved: '둘이 모은 금액', // [확인 필요]
   emptyAdd: '모으기 시작하기', // [확인 필요] 2026-11-18 H-10 빈 상태 버튼(예전 ‘+ 저축·투자 추가’, O-60과 같은 말)
   emptyCustom: '직접 정하기', // [확인 필요] 2026-11-18 H-10 빈 상태 맨 끝 칩(W-11a를 이름 칸 빈 채로 엶)
+  widgetAmount: (won: string) => `${won} 모았어요`, // [확인 필요] 26 WG-01 S-22 ‘위젯에 금액 보이기’를 켰을 때 한 줄
   widgetSaving: '모으는 중', // [확인 필요] 26 WG-01 목표 금액이 없고 금액 가림
   /** 화면 읽기 문장 하나(“같이 모으기, 결혼 비용, 3,100만 원, 목표 금액의 62%, …”) */
   togetherLabel: (parts: string[]) => ['같이 모으기', ...parts].filter(Boolean).join(', '),

@@ -44,7 +44,7 @@ import {
   unlockWithBiometric,
   verifyPin,
 } from './lock';
-import { placedWidgets, writeWidget } from './widget';
+import { placedWidgets, readWidgetSettings, saveWidgetSettings, writeWidget } from './widget';
 import { analytics } from './analytics';
 
 // 모바일 브리지(window.sweetwo). 모양은 packages/app/src/platform.ts AppBridge.
@@ -206,7 +206,11 @@ export async function installBridge(): Promise<'ios' | 'android'> {
     // 첫 실행 초대 코드(O-01, invite-code.ts): Android 설치 리퍼러, iOS 클립보드 1회
     inviteCode: { firstRun: () => firstRunInviteCode() },
     // 홈 화면 위젯(26 WG-01·WG-04, widget.ts): 금액 없는 글만
-    widget: { update: (d) => writeWidget(d), installed: () => placedWidgets() },
+    widget: {
+      update: (d) => writeWidget(d),
+      installed: () => placedWidgets(),
+      settings: { get: readWidgetSettings, set: saveWidgetSettings },
+    },
     // 분석(ADR 0010, analytics.ts): Firebase Analytics(GA4). 값은 앱이 거른 것만
     analytics,
   };

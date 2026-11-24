@@ -1,6 +1,6 @@
 import { qk, setChecklistDone } from '@sweetwo/api';
 import { formatDateFull, partnerLabel } from '@sweetwo/core';
-import { Button, PageHeader, SectionHeader } from '@sweetwo/ui';
+import { Button, PageHeader, SectionHeader, StickyBar } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -47,7 +47,7 @@ export function S02ChecklistItem() {
     try {
       await setChecklistDone(key, v);
       await qc.invalidateQueries({ queryKey: qk.checklistDone });
-      if (v) back();
+      if (v && fromTodo) back();
     } catch {
       toast(copy.failed);
     } finally {
@@ -62,54 +62,69 @@ export function S02ChecklistItem() {
         backTo={fromTodo ? undefined : copy.guidesTitle}
         onBack={back}
       />
-      <p style={{ margin: 0 }}>{item.desc}</p>
-      {item.steps.length > 0 && (
-        <section className="hg-stack">
-          <SectionHeader title={copy.steps} />
-          <ol className="hg-stack" style={{ margin: 0, paddingLeft: 'var(--space-6)' }}>
-            {item.steps.map((s) => (
-              <li key={s}>{s}</li>
+      <div className="hg-page hg-stack">
+        <p className="hg-copy">{item.desc}</p>
+        {item.steps.length > 0 && (
+          <section className="hg-stack">
+            <SectionHeader title={copy.steps} />
+            <ol className="hg-copy hg-steps">
+              {item.steps.map((s) => (
+                <li key={s}>{s}</li>
+              ))}
+            </ol>
+          </section>
+        )}
+        {item.sources.length > 0 && (
+          <section className="hg-stack">
+            <SectionHeader title={copy.sources} />
+            {item.sources.map((s) => (
+              <p key={s.url} className="hg-copy hg-copy--sub">
+                <button
+                  type="button"
+                  className="hg-btn hg-btn--link"
+                  onClick={() => window.open(s.url, '_blank', 'noopener')}
+                >
+                  {s.name}
+                </button>{' '}
+                {copy.checked(formatDateFull(s.checked))}
+              </p>
             ))}
-          </ol>
-        </section>
-      )}
-      {item.sources.length > 0 && (
-        <section className="hg-stack">
-          <SectionHeader title={copy.sources} />
-          {item.sources.map((s) => (
-            <p key={s.url} className="hg-card__meta" style={{ margin: 0 }}>
-              <button
-                type="button"
-                className="hg-btn hg-btn--link"
-                onClick={() => window.open(s.url, '_blank', 'noopener')}
-              >
-                {s.name}
-              </button>{' '}
-              {copy.checked(formatDateFull(s.checked))}
-            </p>
-          ))}
-        </section>
-      )}
-      {item.feature && (
-        <Button variant="secondary" onClick={() => item.feature && nav(item.feature.path)}>
-          {item.feature.label}
-        </Button>
-      )}
-      {who && (
-        <p className="hg-card__meta" role="status">
-          {copy.doneBy(who)}
-        </p>
-      )}
-      {fromTodo &&
-        (done ? (
-          <Button variant="secondary" loading={saving === false} onClick={() => void toggle(false)}>
-            {copy.undo}
+          </section>
+        )}
+        {item.feature && (
+          <Button variant="secondary" onClick={() => item.feature && nav(item.feature.path)}>
+            {item.feature.label}
           </Button>
-        ) : (
-          <Button variant="primary" loading={saving === true} onClick={() => void toggle(true)}>
-            {copy.markDone}
-          </Button>
-        ))}
+        )}
+        {/* 두 사람 공유 완료(25 S-02): 완료하면 체크 + 완료한 사람 이름, 둘 다 같은 상태를 봄 */}
+        {who && (
+          <p className="hg-copy hg-done" role="status">
+            <span className="hg-check is-on" aria-hidden="true" />
+            {copy.doneBy(who)}
+          </p>
+        )}
+        <StickyBar>
+          {done ? (
+            <Button
+              variant="secondary"
+              block
+              loading={saving === false}
+              onClick={() => void toggle(false)}
+            >
+              {copy.undo}
+            </Button>
+          ) : (
+            <Button
+              variant="primary"
+              block
+              loading={saving === true}
+              onClick={() => void toggle(true)}
+            >
+              {copy.markDone}
+            </Button>
+          )}
+        </StickyBar>
+      </div>
     </div>
   );
   return <MainFrame sub="settings" current={null} columns={[body]} />;

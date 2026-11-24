@@ -1,6 +1,6 @@
 import type { BundleView, HeroItem } from '@sweetwo/core';
 import { describe, expect, it } from 'vitest';
-import { widgetLanding, widgetNext, widgetSave } from './widget-sync';
+import { widgetHero, widgetLanding, widgetNext, widgetSave } from './widget-sync';
 
 // 홈 화면 위젯 글(26 ‘위젯 v2.2’): 금액 없이 %·이름·기한 달, 다가오는 날은 날짜만
 const G = '0b9c1d2e-3f40-4a5b-8c6d-7e8f90a1b2c3';
@@ -52,9 +52,24 @@ describe('WG-01 같이 모으기 글', () => {
       pct: 62,
       line: '2027년 5월까지',
       done: null,
+      amount: null,
       to: `/salary/items/${G}`,
     });
     expect(JSON.stringify(s)).not.toMatch(/31,000,000|3,100만|원/);
+  });
+  it('금액 보이기를 켜면 모은 금액 한 줄, 끄면 없음(기본)', () => {
+    expect(widgetSave({ hero: goal(), savedOf: () => 31_000_000, amounts: true })?.amount).toBe(
+      '3,100만 원 모았어요',
+    );
+    expect(widgetSave({ hero: goal(), savedOf: () => 31_000_000 })?.amount).toBeNull();
+  });
+  it('묶음은 퍼센트만 보여 주기면 금액을 켜도 금액 없음', () => {
+    expect(
+      widgetSave({ hero: bundle({ percent_only: true }), savedOf: () => 0, amounts: true })?.amount,
+    ).toBeNull();
+    expect(widgetSave({ hero: bundle(), savedOf: () => 0, amounts: true })?.amount).toContain(
+      '모았어요',
+    );
   });
   it('목표 금액이 없으면 “모으는 중”, 막대 없음', () => {
     const s = widgetSave({ hero: goal({ target_amount: null, deadline: null }), savedOf: () => 5 });
@@ -131,5 +146,33 @@ describe('widgetLanding(widget_tapped landing_screen, 32 4-7)', () => {
     expect(widgetLanding('/calendar')).toBe('Y-04');
     expect(widgetLanding(`/calendar/day/${id}`)).toBe('Y-05');
     expect(widgetLanding('/settings')).toBe('other');
+  });
+});
+
+describe('S-22 위젯에 보일 저축·투자', () => {
+  const first = goal({ id: 'first' });
+  const g = (o: Record<string, unknown> = {}) => ({
+    id: G,
+    name: '결혼 비용',
+    target_amount: 50_000_000,
+    deleted_at: null,
+    closed_at: null,
+    bundle_id: null,
+    ...o,
+  });
+  const run = (goals: unknown[], chosenId: string | null) =>
+    widgetHero({ first, goals: goals as never, chosenId });
+  it('고른 게 없으면 대표 저축·투자', () => {
+    expect(run([g()], null)).toBe(first);
+  });
+  it('고른 항목이 있으면 그것', () => {
+    const h = run([g()], G);
+    expect(h?.kind === 'goal' && h.goal.id).toBe(G);
+  });
+  it('지워졌거나 묶음에 들어갔거나 목표 금액이 없으면 대표로 돌아감', () => {
+    expect(run([g({ deleted_at: 'x' })], G)).toBe(first);
+    expect(run([g({ bundle_id: 'b' })], G)).toBe(first);
+    expect(run([g({ target_amount: null })], G)).toBe(first);
+    expect(run([], G)).toBe(first);
   });
 });

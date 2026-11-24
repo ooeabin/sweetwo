@@ -1,5 +1,20 @@
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
+/* 2026-11-24 구역 5 설정 검토: 사용자 앱 글자 바탕값 15/22. 클래스 없는 b·p·li가 브라우저 기본 16px로 나오던 것(기준 17/15 밖). 어드민·웹사이트는 data-platform이 없어 그대로 */
+.hg-root[data-platform] { font: var(--text-body); }
+/* 본문 글자 역할(2026-11-24): 클래스 없는 글자를 쓰지 않고 이 셋 중 하나. 본문 17/400, 본문 강조·작은 제목 17/700, 보조 15/400 */
+.hg-copy { margin: 0; font: var(--text-name); }
+.hg-copy--strong { font: var(--text-amount); }
+.hg-copy--sub { font: var(--text-value); color: var(--slate); }
+/* 목록 글머리(2026-11-24): 기본 점(•) 대신 작은 회색 점, 줄 사이 8px. 기준 글자 15 */
+.hg-bullets { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--space-2); font: var(--text-value); color: var(--ink-2); }
+.hg-bullets--body { font: var(--text-name); }  /* 화면의 핵심 내용인 목록은 본문 17 */
+.hg-bullets > li { position: relative; padding-left: var(--space-4); }
+.hg-bullets > li::before { content: ""; position: absolute; left: 0; top: 0.5em; width: 4px; height: 4px; border-radius: var(--radius-full); background: var(--stone); }
+/* 번호 목록(S-02 해야 할 일): 기본 번호, 본문 17 */
+.hg-steps { margin: 0; padding-left: var(--space-6); display: flex; flex-direction: column; gap: var(--space-2); }
+/* 완료 표시 줄(S-02): 체크 원 + 완료한 사람 */
+.hg-done { display: flex; align-items: center; gap: var(--space-3); }
 .hg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
 .hg-row--fill > * { flex: 1; }  /* 버튼 두 개를 반씩 */
 .hg-stack { display: flex; flex-direction: column; gap: var(--space-3); }
@@ -296,7 +311,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-nav { display: flex; align-items: center; gap: var(--space-3); height: 40px; padding: 0 var(--space-3); border-radius: var(--radius-full); font: var(--text-label); color: var(--slate); }
 .hg-nav > span:not(.hg-ico):not(.hg-nav__count) { flex: 1; }
 .hg-nav.is-active { background: var(--ink); color: var(--on-ink); }
-.hg-nav__count { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); font: var(--weight-semibold) 12px/1 var(--font-sans); font-variant-numeric: tabular-nums; }
+.hg-nav__count { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: var(--radius-full); background: var(--ink); color: var(--on-ink); font: var(--weight-semibold) 13px/1 var(--font-sans); font-variant-numeric: tabular-nums; }
 .hg-nav.is-active .hg-nav__count { background: var(--on-ink); color: var(--ink); }
 .hg-side__who { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .hg-side__who b { font: var(--text-label); }
@@ -567,6 +582,9 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-avatars { display: inline-flex; }
 .hg-avatar--empty { background: var(--surface-alt); color: var(--muted); }  /* 파트너 빈 자리: 사람 아이콘 */
 .hg-avatars .hg-avatar + .hg-avatar { margin-left: -8px; box-shadow: 0 0 0 2px var(--surface); }
+/* 2026-11-24 구역 5: 줄 앞 칸 두 사람은 겹치지 않고 8px 띄움(겹치면 앞 원의 글자 끝이 가려졌음). 이름이 있는 줄(S-12), 겹침은 이름 없는 작은 묶음 */
+.hg-avatars.hg-avatars--apart { gap: var(--space-2); }
+.hg-avatars.hg-avatars--apart .hg-avatar + .hg-avatar { margin-left: 0; box-shadow: none; }
 
 /* Slider */
 .hg-slider { display: flex; flex-direction: column; gap: var(--space-3); max-width: 480px; }
@@ -1222,8 +1240,8 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-pair { display: inline-flex; align-items: baseline; gap: 6px; color: var(--ink-2); font-weight: var(--weight-semibold); }
 .hg-pair i { font-style: normal; font-weight: 400; font-size: 0.92em; color: var(--stone); }
 .hg-card--tint .hg-pair i { color: var(--slate); }
-.hg-tag { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--slate); font: var(--weight-semibold) 12px/1 var(--font-sans); }
-.hg-count { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: var(--radius-full); background: var(--surface); color: var(--ink); font: var(--weight-semibold) 12px/1 var(--font-sans); font-style: normal; font-variant-numeric: tabular-nums; }
+.hg-tag { display: inline-flex; align-items: center; height: 20px; padding: 0 8px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--slate); font: var(--weight-semibold) 13px/1 var(--font-sans); }
+.hg-count { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box; border-radius: var(--radius-full); background: var(--surface); color: var(--ink); font: var(--weight-semibold) 13px/1 var(--font-sans); font-style: normal; font-variant-numeric: tabular-nums; }
 .hg-tip i { display: block; font-style: normal; font-size: 13px; opacity: .72; }
 .hg-tip b { display: block; font-weight: var(--weight-semibold); font-size: 15px; line-height: 22px; }
 .hg-side__foot { margin-top: auto; display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-lg); background: var(--surface); border: 1px solid var(--hairline-soft); color: var(--stone); cursor: pointer; }
@@ -2703,6 +2721,7 @@ button.hg-datepill { cursor: pointer; }
 .hg-empty--plan .hg-empty__title > span { display: block; }
 .hg-stickybar { position: sticky; bottom: 0; z-index: 1; margin-top: var(--space-4); padding: var(--gap-area) 0 calc(var(--space-3) + env(safe-area-inset-bottom, 0px)); background: var(--surface); }  /* 2026-11-24 주 버튼 위 간격: 바 위쪽 32px(--gap-area)는 바탕색으로 꽉 채워 스크롤 중에도 내용이 버튼 윗변 32px 안으로 안 들어오게 하고, 그 위 16px은 ::before가 투명 → 바탕으로 부드럽게 가림(예전: 위 24px 안에서 그라데이션이라 내용이 버튼 바로 위에 붙어 보임). 버튼 크기·아래 여백·안전 영역은 그대로 */
 .hg-stickybar::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: var(--space-4); background: linear-gradient(to bottom, transparent, var(--surface)); pointer-events: none; }
+.hg-stickybar--pair { display: flex; flex-direction: column; gap: var(--space-2); }  /* 2026-11-24 구역 5: 보조 버튼 위 + 주 버튼 아래(S-12a ‘먼저 내보내기’, S-19b ‘거절할게요’) */
 .hg-w02done__bg { display: none; }
 .hg-frame:has(.hg-w02done__bg) { background: linear-gradient(180deg, var(--brand-soft) 0, var(--canvas) 420px) no-repeat, var(--canvas); }  /* 다 확인 상태 축하 배경: 화면 위 420px, hg-celebrate-bg와 같은 brand-soft → 바탕 (2026-11-19 사용자 결정, 축하 배경 예외에 W-02 다 확인 상태) */
 .hg-confetti { position: absolute; top: 120px; width: 8px; height: 14px; border-radius: 2px; pointer-events: none; }
@@ -2936,7 +2955,7 @@ button.hg-datepill { cursor: pointer; }
 .hg-linetab { flex: none; white-space: nowrap; }
 @media (max-width: 767px) { .hg-frame--alt .hg-linetabs { margin-inline: calc(var(--space-4) * -1); padding-inline: var(--space-4); } }
 
-.hg-listrow > :is(.hg-lead, .hg-ico) { margin-right: var(--space-3); }  /* 앞 칸이 있을 때만(앞 칸이 없으면 빈 칸이라 간격 0) */
+.hg-listrow > :is(.hg-lead, .hg-ico, .hg-avatars, .hg-avatar) { margin-right: var(--space-3); }  /* 2026-11-24 구역 5: 앞 칸이 사람 원(Avatar)일 때도 12px */  /* 앞 칸이 있을 때만(앞 칸이 없으면 빈 칸이라 간격 0) */
 
 /* ── 월급 탭 정리(2026-11-23 ‘바탕 정리 2’ B) ──
    선택지 카드(`hg-option--card`, 질문·W-10b·W-12·W-15 등): 고르기 전엔 회색 판(`surface-alt`)에 테두리 없음, 고르면 흰 판 + ink 테두리. 회색 바탕 화면은 흰 판.

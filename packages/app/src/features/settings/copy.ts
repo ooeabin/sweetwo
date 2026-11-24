@@ -30,6 +30,7 @@ export const copy = {
     data: '데이터',
     dataSub: '내보내기, 휴지통, 계정 삭제',
     about: '앱 정보·문의',
+    widgets: '위젯', // 모바일 앱에서만(위젯 브리지가 있을 때)
   },
   later: '준비 중이에요', // [확인 필요] 아직 없는 화면 줄
 
@@ -51,7 +52,8 @@ export const copy = {
   },
   weddingDay: { married: '결혼한 날', engaged: '결혼 예정일' }, // [확인 필요]
   weddingPlannedMonth: (y: number, m: number) => `${y}년 ${m}월 예정`, // [확인 필요]
-  undecidedValue: '미정', // [확인 필요]
+  undecidedValue: '미정', // [확인 필요] 결혼 준비 중이고 예정이 없을 때
+  weddingDateNone: '날짜 정하기', // [확인 필요] 2026-11-24 결혼했어요인데 날짜가 비어 있을 때 줄 값(글자 버튼 모양 아님, 줄 누르면 S-11h)
   birthYearRow: '출생연도',
   birthYearValue: (y: number) => `${y}년생`, // [확인 필요]
   salaryGroup: '월급',
@@ -410,10 +412,23 @@ export const copy = {
     assets: '자산 관리 화면',
     income_spend: '월 수입·지출 화면',
     calendar: '캘린더 화면',
+    split: '월급 계획 화면', // [확인 필요] 2026-11-24 예전 요청 기록 키(내부 키가 화면에 그대로 보였음)
   } as Record<string, string>,
+  accessScopeOther: '그 밖의 화면', // [확인 필요] 2026-11-24 모르는 키는 내부 이름을 보이지 않고 이 말로
   accessYes: '동의해요',
   accessNo: '거절할게요',
   accessDeclined: '거절했어요. 다른 방법으로 도와드릴게요', // [확인 필요]
+
+  // S-22 위젯 설정(26 S-22, 2026-11-24) [확인 필요] 아래 문구 모두 기획서에 이름만 있어 새로 씀
+  widgetsTitle: '위젯',
+  widgetAmounts: '위젯에 금액 보이기',
+  widgetAmountsHelp: '이 기기에서만 바뀌어요. 금액 가리기가 켜져 있으면 가려요',
+  widgetGoal: '위젯에 보일 저축·투자',
+  widgetGoalDefault: '대표 저축·투자',
+  widgetGoalDefaultSub: '홈 같이 모으기의 첫 칸을 보여 줘요',
+  widgetGoalTarget: (won: string) => `목표 금액 ${won}`,
+  widgetGoalNone: '목표 금액이 있는 저축·투자가 없어요',
+  widgetGoalSaved: '위젯에 보일 저축·투자를 바꿨어요',
 
   // S-20 도움말
   help: '도움말',
@@ -470,7 +485,6 @@ export const copy = {
   quietEnd: '끝', // [확인 필요]
   // S-01~S-03 가이드
   guidesTitle: '가이드 모아보기',
-  checklistProgress: (done: number, total: number) => `월급날 확인 목록 ${done}/${total}`,
   checklistCount: (done: number, total: number) => `${done}/${total}`, // 2026-11-04 S-01은 제목에 ‘체크리스트’가 있어 숫자만
   checklistStage: (stage: string) => `${stage} 월급날 확인 목록`, // [확인 필요] 요소 이름
   forUs: '맞춤 정보', // [확인 필요] 요소 이름
@@ -634,6 +648,7 @@ export const copy = {
   // S-13 공개 범위(한 목록 ①~④) [확인 필요]
   previewLink: (name: string) => `${name}님에게 보이는 모습 보기 ›`,
   planShareTitle: '내 월급 계획',
+  planShareRow: '보이는 범위', // [확인 필요] 2026-11-24 구역 5: 섹션 제목 “내 월급 계획”과 줄 이름이 같아 줄 쪽을 줄임
   planShares: {
     all: '모두 보여 주기',
     saving_only: '저축·투자만 보여 주기',
@@ -654,6 +669,7 @@ export const copy = {
   } as Record<string, string>,
   assetDefaultNone: '아직 안 골랐어요', // [확인 필요] 처음 자산을 적기 전
   rankTitle: '자산 순위 같이 보기',
+  rankToggle: '같이 보기', // [확인 필요] 2026-11-24 구역 5: 섹션 제목과 같던 줄 이름을 줄임
   rankHelp: '두 분 모두 켜면 둘의 합으로 순위를 봐요', // [확인 필요]
   rankWaiting: (name: string) => `${name}님 답을 기다려요`, // [확인 필요]
   alwaysShared: '경조사, 공동 명의, 합쳐서 쓰는 월급 계획과 저축·투자는 늘 같이 봐요',
@@ -712,7 +728,6 @@ export const copy = {
 
   // S-15 앱 잠금 권장 줄 [확인 필요]
   lockRecommend: '열 때 PIN 6자리를 물어요',
-  lockTurnOn: '켜기',
 
   // S-20 1366 항목(기관 검토 전에는 플래그로 숨김, Q4)
   helpAbuse: '상대가 돈을 통제하거나 위협할 때',
@@ -727,4 +742,9 @@ export function hourLabel(h: number) {
   if (h < 18) return `오후 ${h - 12}시`;
   if (h < 21) return `저녁 ${h - 12}시`;
   return `밤 ${h - 12}시`;
+}
+
+/** 열람 범위 키 → 사용자 말(모르는 키는 내부 이름 대신 ‘그 밖의 화면’, 같은 말은 한 번만). */
+export function accessScopeNames(scope: readonly string[]): string[] {
+  return [...new Set(scope.map((k) => copy.accessScopes[k] ?? copy.accessScopeOther))];
 }
