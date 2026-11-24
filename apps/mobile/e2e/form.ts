@@ -56,3 +56,11 @@ export async function foldText(page: Page, label: string, value: string) {
   await dlg.getByRole('button', { name: '확인' }).click();
   await expect(dlg).toHaveCount(0);
 }
+
+/** 금액 칸 값 확인(예: '100,000'): 넓은 창은 칸 값, 좁은 창은 칸 버튼 이름 “라벨, 100,000원” */
+export async function expectAmount(page: Page, label: string, text: string) {
+  if (!narrow(page)) return expect(page.getByLabel(label, { exact: true })).toHaveValue(text);
+  await expect(
+    page.getByRole('button', { name: `${label}, ${text}원`, exact: true }),
+  ).toBeVisible();
+}

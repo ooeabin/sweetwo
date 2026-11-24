@@ -3,6 +3,7 @@ import { axe as runAxe } from './axe';
 import { type MemDb, mockOnboarding, mockV22Settings } from './mocks';
 import { setWheel } from './wheel';
 import { homeTaskTexts } from './home-tasks';
+import { fillAmount } from './form';
 
 // 설정(docs/spec/25-settings.md S-10, S-11, S-11a, S-14, S-14a). 찬우(시작, 25일)와 합류한 예빈(10일), 웹
 
@@ -262,7 +263,7 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
   // 내 월급
   await page.getByRole('button', { name: /내 월급/ }).click();
   await expect(page.getByRole('heading', { name: '한 달 실수령액은 얼마예요?' })).toBeVisible();
-  await page.getByLabel('한 달 실수령액은 얼마예요?').fill('3800000');
+  await fillAmount(page, '한 달 실수령액은 얼마예요?', 3_800_000);
   await axe(page);
   // 금액이 바뀌면 “언제부터 이 금액이에요?”(v2.2 S-11c). 이번 달(10월)부터면 월급날(25일) 전이어도 바로 적용
   // (2026-11-13 P2 = A, 07 5장)

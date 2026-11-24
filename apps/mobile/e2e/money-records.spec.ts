@@ -12,6 +12,7 @@ import {
   seed,
   YEBIN,
 } from './mocks';
+import { fillAmount } from './form';
 
 // v2.2 돈 기록(20 W-20·W-20a 수입 적기, W-10b 바로잡기, W-10c 잔액 맞추기, W-14·W-14a 쓸 곳 메모, ADR 0009 결정 4, F1·F3·G7·G11).
 // 찬우 ‘내 집 마련’(목표 1억 5,000만, 이미 모은 300만). 바로잡기 상대 문구는 찬우·예빈 두 계정(묶음)
@@ -124,9 +125,9 @@ test('W-10b 바로잡기(묶음): 사유는 나만, 예빈에게는 사람·금�
   await expect(c.getByRole('heading', { name: '모은 금액 바로잡기' })).toBeVisible();
   await c.getByRole('radio', { name: '뺄게요' }).click();
   await expect(c.getByText('지금 모은 금액 300만 원')).toBeVisible();
-  await c.getByLabel('얼마를 뺄까요?').fill('5000000');
+  await fillAmount(c, '얼마를 뺄까요?', 5_000_000);
   await expect(c.getByText('모은 금액보다 많이 뺄 수 없어요')).toBeVisible();
-  await c.getByLabel('얼마를 뺄까요?').fill('300000');
+  await fillAmount(c, '얼마를 뺄까요?', 300_000);
   await expect(c.getByText('왜 바꾸나요?')).toBeVisible();
   await expect(c.getByText('이 내용은 나만 봐요')).toBeVisible();
   await c.getByRole('button', { name: '꺼내 썼어요' }).click();
@@ -179,7 +180,7 @@ test('W-10b 바로잡기(묶음): 사유는 나만, 예빈에게는 사람·금�
   // 찬우 되돌리기: 모은 금액이 돌아오고 예빈 한 줄도 지움
   await c.goto('/salary/items/goal-h/adjust/1');
   await c.getByRole('radio', { name: '더할게요' }).click();
-  await c.getByLabel('얼마를 더할까요?').fill('100000');
+  await fillAmount(c, '얼마를 더할까요?', 100_000);
   await c.getByRole('button', { name: '이자가 붙었어요' }).click();
   await c.getByRole('button', { name: '바로잡기' }).click();
   await c.getByRole('button', { name: '되돌리기' }).click();
@@ -213,7 +214,7 @@ test('W-14 쓸 곳 메모: 추가 → ‘냈어요’ “모은 금액에서 250
   await expect(page.getByText('아직 메모가 없어요')).toBeVisible();
   await page.getByRole('button', { name: '메모 추가' }).click();
   await page.getByLabel('모은 금액을 어디에 쓸 거예요?').fill('예식장 잔금');
-  await page.getByLabel('얼마쯤 들어요?').fill('2500000');
+  await fillAmount(page, '얼마쯤 들어요?', 2_500_000);
   // 2026-11-23: 글자 칸 대신 W-11d 기한과 같은 연·월·일 휠
   await setWheel(page, '언제 내요?', 2026, 12, 3);
   await page.getByRole('button', { name: '저장' }).click();

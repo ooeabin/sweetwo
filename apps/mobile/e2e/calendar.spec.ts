@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { setWheel } from './wheel';
 import { axe as runAxe } from './axe';
 import { type MemDb, mockOnboarding, mockRealtime } from './mocks';
-import { fillAmount } from './form';
+import { expectAmount, fillAmount } from './form';
 
 /** 추가 입구: 넓은 창은 제목 줄 버튼, 좁은 창은 화면 안 회색 ‘+ … 추가’ 줄(AddRow, 2026-11-09 + 버튼 대신) */
 const addEntry = (page: Page, name: string) =>
@@ -402,7 +402,7 @@ test('상세(Y-05)와 기록(Y-08): 7일 지난 날 기록하기(꺼내 쓰기 �
 
   await overdue.click();
   await expect(page.getByRole('heading', { name: '기록하기' })).toBeVisible();
-  await expect(page.getByLabel('얼마 썼어요?')).toHaveValue('100,000');
+  await expectAmount(page, '얼마 썼어요?', '100,000');
   // 2026-11-08 ‘목표에서 꺼내 쓰기’ 없앰(ADR 0007)
   await expect(page.getByRole('button', { name: '목표에서 꺼내 쓰기' })).toHaveCount(0);
   await axe(page);
