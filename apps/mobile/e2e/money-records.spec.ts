@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
-import { setWheel } from './wheel';
+import { pickDate } from './wheel';
 import {
   chanwoo,
   type MemDb,
@@ -46,7 +46,9 @@ test('W-20 수입 적기 → W-20a 저금에 나눠 넣기: 남은 금액, 넘�
   await expect(page.getByRole('heading', { name: '얼마를 받았어요?' })).toBeVisible();
   // 칩은 미리 고른 값 없음, 받은 날은 오늘
   await expect(page.getByRole('button', { name: '상여' })).toHaveAttribute('aria-pressed', 'false');
-  await expect(page.getByText('받은 날 오늘')).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: /^받은 날, 2026년 10월 7일 \(수\)/ }),
+  ).toBeVisible();
   await page.getByLabel('얼마를 받았어요?').fill('3000000');
   await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
   await page.getByRole('button', { name: '가족이 보태 줬어요' }).click();
@@ -215,8 +217,8 @@ test('W-14 쓸 곳 메모: 추가 → ‘냈어요’ “모은 금액에서 250
   await page.getByRole('button', { name: '메모 추가' }).click();
   await page.getByLabel('모은 금액을 어디에 쓸 거예요?').fill('예식장 잔금');
   await fillAmount(page, '얼마쯤 들어요?', 2_500_000);
-  // 2026-11-23: 글자 칸 대신 W-11d 기한과 같은 연·월·일 휠
-  await setWheel(page, '언제 내요?', 2026, 12, 3);
+  // 2026-11-24: 날짜는 한 줄 + 달력 시트
+  await pickDate(page, '언제 내요?', '2026-12-03');
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h\/notes$/);
   await expect(page.getByText('12월 3일, 250만 원')).toBeVisible();

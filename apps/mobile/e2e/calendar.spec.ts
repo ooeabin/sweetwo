@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { setWheel } from './wheel';
+import { pickDate, setYearMonth } from './wheel';
 import { axe as runAxe } from './axe';
 import { type MemDb, mockOnboarding, mockRealtime } from './mocks';
 import { expectAmount, fillAmount } from './form';
@@ -311,8 +311,7 @@ test('경조사 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건너
   await page.getByRole('button', { name: '생일', exact: true }).click();
   await expect(page.getByLabel('어떤 날이에요?')).toHaveValue('생일');
   await page.getByLabel('어떤 날이에요?').fill('어머니 생신');
-  await page.getByRole('radio', { name: '음력' }).click();
-  await setWheel(page, '언제예요?', 2026, 8, 3);
+  await pickDate(page, '언제예요?', '2026-08-03', { lunar: true });
   await expect(page.getByRole('switch', { name: '매년 돌아와요' })).toBeChecked();
   await fillAmount(page, '쓸 금액을 메모해 둘까요?', 300_000);
   await axe(page);
@@ -347,10 +346,10 @@ test('경조사 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건너
   await page.getByRole('button', { name: '행사', exact: true }).click();
   await page.getByLabel('어떤 날이에요?').fill('민지 결혼식');
   await expect(page.getByRole('switch', { name: '매년 돌아와요' })).not.toBeChecked();
-  await setWheel(page, '언제예요?', 2026, 9, 1);
+  await pickDate(page, '언제예요?', '2026-09-01');
   await expect(page.getByText('이미 지난 날이에요. 기록으로 남길까요?').first()).toBeVisible();
   await expect(page.getByRole('button', { name: '추가하기' })).toBeDisabled();
-  await setWheel(page, '언제예요?', 2026, 11, 21);
+  await pickDate(page, '언제예요?', '2026-11-21');
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/calendar$/);
   expect(db.cares.at(-1)).toMatchObject({
@@ -364,10 +363,9 @@ test('경조사 추가(Y-07): 이름 칩, 음력 매년, 명절은 날짜 건너
   await page.getByRole('button', { name: /^10월 30일/ }).click();
   await page.getByRole('button', { name: '이 날에 경조사 추가' }).click();
   await page.getByLabel('어떤 날이에요?').fill('집들이');
-  await expect(page.getByRole('spinbutton', { name: '일', exact: true })).toHaveAttribute(
-    'aria-valuenow',
-    '30',
-  );
+  await expect(
+    page.getByRole('button', { name: /^언제예요\?, 2026년 10월 30일 \(금\)/ }),
+  ).toBeVisible();
 });
 
 test('상세(Y-05)와 기록(Y-08): 7일 지난 날 기록하기(꺼내 쓰기 없음, ADR 0007), 수정, 지우기 되돌리기', async ({
@@ -433,10 +431,9 @@ test('상세(Y-05)와 기록(Y-08): 7일 지난 날 기록하기(꺼내 쓰기 �
   await page.getByRole('menuitem', { name: '수정' }).click();
   await expect(page.getByLabel('어떤 날이에요?')).toHaveValue('어머니 생신');
   await page.getByLabel('어떤 날이에요?').fill('엄마 생신');
-  await expect(page.getByRole('spinbutton', { name: '일', exact: true })).toHaveAttribute(
-    'aria-valuenow',
-    '20',
-  );
+  await expect(
+    page.getByRole('button', { name: /^언제예요\?, 2026년 10월 20일 \(화\)/ }),
+  ).toBeVisible();
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByRole('heading', { name: '엄마 생신' })).toBeVisible();
   expect(db.cares.find((x) => x.id === 'c-mom')).toMatchObject({
@@ -731,4 +728,59 @@ test('Realtime: 상대가 경조사를 넣거나 기록하면 목록이 바로 �
   db.cares.push(care({ id: 'c-y', name: '할머니 생신', month: 10, day: 30, created_by: 'yebin' }));
   rt.emit('care_day', 'INSERT', { id: 'c-y', space_id: 'space-1' });
   await expect(page.getByRole('region', { name: '다음 경조사' })).toContainText('할머니 생신');
+});
+
+test('달력 시트(Y-07, 2026-11-24): 날짜는 한 줄 → 시트 → 날 고르기, ⌄로 연 이동, 키보드, 음력, 휠은 펼쳐 두지 않음', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/calendar');
+  await addEntry(page, '+ 일정 추가').click();
+  await page.getByLabel('어떤 날이에요?').fill('어머니 생신');
+  // 폼 안에는 휠이 없고 날짜 한 줄(처음 값 오늘, 보조 ‘양력’)
+  await expect(page.getByRole('spinbutton')).toHaveCount(0);
+  const line = page.getByRole('button', { name: /^언제예요\?, 2026년 10월 7일 \(수\), 양력/ });
+  await expect(line).toBeVisible();
+  await line.click();
+  const sheet = page.getByRole('dialog', { name: '언제예요?' });
+  await expect(sheet.getByRole('button', { name: /연·월 고르기/ })).toHaveAttribute(
+    'aria-label',
+    '2026년 10월, 연·월 고르기',
+  );
+  await expect(sheet.getByRole('gridcell', { name: /^2026년 10월 7일/ })).toHaveAttribute(
+    'aria-current',
+    'date',
+  );
+  await axe(page);
+  // 날 고르기 전엔 이미 고른 오늘이 선택돼 있고, 키보드: ←→ 하루, ↑↓ 한 주, Enter 고름
+  await sheet.getByRole('gridcell', { name: /^2026년 10월 7일/ }).focus();
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Enter');
+  await expect(sheet.getByRole('gridcell', { name: /^2026년 10월 15일/ })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  await expect(sheet.getByRole('button', { name: '10월 15일 (목) 선택' })).toBeVisible();
+  // ⌄ 연·월 휠로 먼 달 이동 → 다시 격자
+  await sheet.getByRole('button', { name: /연·월 고르기/ }).click();
+  await setYearMonth(page, 2029, 3);
+  await sheet.getByRole('button', { name: '2029년 3월 보기' }).click();
+  await expect(sheet.getByRole('grid', { name: '2029년 3월' })).toBeVisible();
+  await sheet.getByRole('gridcell', { name: /^2029년 3월 20일/ }).click();
+  await sheet.getByRole('button', { name: '3월 20일 (화) 선택' }).click();
+  await expect(sheet).toBeHidden();
+  await expect(
+    page.getByRole('button', { name: /^언제예요\?, 2029년 3월 20일 \(화\), 양력/ }),
+  ).toBeVisible();
+  // 음력: 시트 맨 위에서 고르면 줄 보조가 ‘음력’
+  await pickDate(page, '언제예요?', '2026-08-15', { lunar: true });
+  await expect(
+    page.getByRole('button', { name: /^언제예요\?, 2026년 8월 15일 \(.\), 음력/ }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: '추가하기' }).click();
+  await expect(page).toHaveURL(/\/calendar$/);
+  expect(db.cares.at(-1)).toMatchObject({ date_rule: 'lunar_yearly', month: 8, day: 15 });
 });
