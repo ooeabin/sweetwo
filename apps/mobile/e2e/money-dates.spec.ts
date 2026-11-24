@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { type MemDb, mockOnboarding, seed } from './mocks';
+import { fillAmount } from './form';
 
 // 만기일 당일(23 F-04a, 19 H-06 ‘만기·경조사’, H-05 만기): 홈 할 일 한 줄 → F-04a → 다른 통장으로 / 다시 가입했어요.
 // 찬우 혼자, 10월 7일. 청년 적금 만기 10월 7일, 입출금 통장 300만.
@@ -62,11 +63,12 @@ test('만기일 당일: 할 일 한 줄 → 다른 통장으로 옮겼어요(통
   const band = page.locator('.hg-hubband', { hasText: '청년 적금이 만기됐어요' });
   await expect(band).toBeVisible();
   await band.getByRole('button').first().click();
-  await expect(page.getByRole('heading', { name: '만기 금액은 어디로 옮겼어요?' })).toBeVisible();
+  await expect(page.getByRole('radiogroup', { name: '만기 금액은 어디로 옮겼어요?' })).toBeVisible();
   await axe(page);
-  await page.getByRole('radio', { name: /다른 통장으로/ }).click();
-  await expect(page.getByRole('heading', { name: '어느 통장으로 옮겼어요?' })).toBeVisible();
-  await page.getByRole('radio', { name: /입출금 통장/ }).click();
+  // 한 화면: 다른 통장으로(처음 값) → 통장 칩 → 정리하기
+  await page.getByRole('group', { name: '어느 통장으로 옮겼어요?' }).getByRole('button', { name: /입출금 통장/ }).click();
+  await expect(page.getByText('입출금 통장 300만 원 > 1,500만 원')).toBeVisible();
+  await page.getByRole('button', { name: '정리하기', exact: true }).click();
   await expect(page).toHaveURL(/\/assets\/a-bank$/);
   expect(db.assets.find((a) => a.id === 'a-bank')?.amount).toBe(15_000_000);
   expect(db.assets.find((a) => a.id === 'a-sav')?.status).toBe('matured');
@@ -83,9 +85,8 @@ test('만기일 당일: 다시 가입했어요 → 새 만기일, 닫으면 그�
   seedAssets(db);
   await page.goto('/assets/a-sav/matured');
   await page.getByRole('radio', { name: /다시 가입했어요/ }).click();
-  await expect(page.getByRole('heading', { name: '만기일은 언제예요?' })).toBeVisible();
-  // 2026-11-04 날짜 휠: 처음 값이 1년 뒤 오늘(2027-10-07)이라 그대로 저장
-  await page.getByRole('button', { name: '저장' }).click();
+  // 날짜 휠: 처음 값이 1년 뒤 오늘(2027-10-07)이라 그대로 정리하기
+  await page.getByRole('button', { name: '정리하기', exact: true }).click();
   await expect(page).toHaveURL(/\/assets\/a-sav$/);
   expect(db.assets.find((a) => a.id === 'a-sav')?.maturity_date).toBe('2027-10-07');
 
@@ -125,16 +126,14 @@ test('F-04 투자: 시세 바꾸기, 팔았어요(일부) → 받은 통장 → 
   await expect(page.getByRole('heading', { name: '찬우 주식' })).toBeVisible();
   await page.getByRole('button', { name: '팔았어요' }).click();
   // 먼저 묻기(전부 / 일부만) → 받은 금액 → 남은 평가금액, 화면마다 키패드 하나
-  await expect(page.getByRole('heading', { name: '얼마나 팔았어요?' })).toBeVisible();
+  await expect(page.getByRole('radiogroup', { name: '얼마나 팔았어요?' })).toBeVisible();
   await axe(page);
-  await page.getByRole('radio', { name: /일부만 팔았어요/ }).click();
-  await expect(page.getByRole('heading', { name: '받은 금액은 얼마예요?' })).toBeVisible();
-  await page.getByLabel('받은 금액은 얼마예요?').fill('5000000');
-  await page.getByRole('button', { name: '다음' }).click();
-  await expect(page.getByRole('heading', { name: '남은 평가금액은 얼마예요?' })).toBeVisible();
-  await page.getByLabel('남은 평가금액은 얼마예요?').fill('5000000');
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByRole('radio', { name: /입출금 통장/ }).click();
+  await page.getByRole('radio', { name: '일부' }).click();
+  await fillAmount(page, '받은 금액', 5_000_000);
+  await fillAmount(page, '남은 평가금액', 5_000_000);
+  await page.getByRole('group', { name: '어느 통장에 들어왔어요?' }).getByRole('button', { name: /입출금 통장/ }).click();
+  await expect(page.getByText('입출금 통장 300만 원 > 800만 원')).toBeVisible();
+  await page.getByRole('button', { name: '적기', exact: true }).click();
   await expect(page.getByText('입출금 통장 +500만 원')).toBeVisible();
   await expect(page.getByText('판 수익 +100만 원')).toBeVisible();
   await axe(page);
@@ -164,10 +163,9 @@ test('F-04 투자: 전부 팔았어요 → 받은 통장 → 결과(F-04d)가 �
     created_at: '2026-01-10T00:00:00Z',
   });
   await page.goto('/assets/a-stock/sold');
-  await page.getByRole('radio', { name: /전부 팔았어요/ }).click();
-  await page.getByLabel('받은 금액은 얼마예요?').fill('11000000');
-  await page.getByRole('button', { name: '다음' }).click();
-  await page.getByRole('radio', { name: /입출금 통장/ }).click();
+  await fillAmount(page, '받은 금액', 11_000_000);
+  await page.getByRole('group', { name: '어느 통장에 들어왔어요?' }).getByRole('button', { name: /입출금 통장/ }).click();
+  await page.getByRole('button', { name: '적기', exact: true }).click();
   await expect(page.getByRole('heading', { name: '팔았어요' })).toBeVisible();
   await expect(page.getByText('입출금 통장 +1,100만 원')).toBeVisible();
   await expect(page.getByText('판 수익 +300만 원')).toBeVisible();
@@ -212,7 +210,7 @@ test('만기일 + 31일째: 홈 띠는 내려가고, 상세 “만기일이 지�
   await expect(note).toBeVisible();
   await axe(page);
   await note.getByRole('button', { name: '정리하기' }).click();
-  await expect(page.getByRole('heading', { name: '만기 금액은 어디로 옮겼어요?' })).toBeVisible();
+  await expect(page.getByRole('radiogroup', { name: '만기 금액은 어디로 옮겼어요?' })).toBeVisible();
   // 만기 전 항목에는 띠 없음
   await page.goto('/assets/a-bank');
   await expect(page.getByRole('heading', { name: '입출금 통장' })).toBeVisible();
