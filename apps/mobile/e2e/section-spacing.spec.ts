@@ -91,21 +91,16 @@ test('바탕: 홈만 회색(surface-alt) + 흰 상자, 그 밖은 흰 바탕(sur
       return getComputedStyle(el).backgroundColor;
     }, sel);
   const homeBg = await color('.hg-frame');
-  const surface = await page.evaluate(() => {
-    const i = document.createElement('i');
-    i.style.backgroundColor = 'var(--surface)';
-    document.body.append(i);
-    const c = getComputedStyle(i).backgroundColor;
-    i.remove();
-    return c;
-  });
+  await page.goto('/salary'); // 흰 바탕 기준(W-02, 다크는 canvas)
+  await expect(page.locator('.hg-frame')).toBeVisible();
+  const white = await color('.hg-frame');
   for (const path of ['/salary/plan', '/assets', '/assets/items', '/settings', '/settings/me']) {
     await page.goto(path);
     await expect(page.locator('.hg-frame')).toBeVisible();
     await expect(page.locator('.hg-frame')).not.toHaveClass(/hg-frame--alt/);
-    expect(await color('.hg-frame')).toBe(surface);
+    expect(await color('.hg-frame')).toBe(white);
   }
-  expect(homeBg).not.toBe(surface);
+  expect(homeBg).not.toBe(white);
 });
 
 test('시트: 제목 아래 24, 영역 사이 24', async ({ page }) => {
