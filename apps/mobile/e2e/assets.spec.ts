@@ -608,7 +608,7 @@ test('자산 관리 빈 상태(F-01): 순위 줄 + 묶음 타일로 항목별 �
   db.assets.length = 0;
   db.partnerSums.length = 0;
   await page.goto('/assets');
-  await expect(page.getByText('자산을 적으면 상위 몇 %인지 알려 드려요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '자산 적고 순위 보기' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '무엇부터 적어 볼까요?' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '부채도 있나요?' })).toBeVisible();
   await axe(page);

@@ -122,7 +122,8 @@ export function RankBanner() {
   const [busy, setBusy] = useState(false);
   if (!r) return null;
   const s = r.state;
-  if (s.kind === 'empty') return <RankRow title={copy.rankEmpty} />;
+  if (s.kind === 'empty')
+    return <RankRow title={copy.rankEmpty} onClick={() => nav('/assets/new')} />;
   const tap = (kind: 'unseen' | 'seen' | 'stale') =>
     track('rank_banner_tapped', { state: kind, entry: 'assets' });
   if (r.pair.mode === 'peer')

@@ -172,7 +172,7 @@ test('W-02 h: 월급날 없는 사람은 같은 모양(제목, 기간 알약, �
   const card = page.getByRole('group', { name: '이번 기간 수입' });
   await expect(card).toBeVisible();
   await expect(card.getByRole('button')).toBeVisible();
-  await expect(page.getByText('수입이 들어오면')).toHaveCount(0);
+  await expect(page.getByText('아직 적은 수입이 없어요')).toHaveCount(0);
   const group = page.getByRole('region', { name: '저축·투자', exact: true });
   await expect(group.locator('.hg-receipt__row', { hasText: '내 집 마련' })).toContainText(
     '목표 금액',

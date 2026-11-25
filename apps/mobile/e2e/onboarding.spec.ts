@@ -314,7 +314,7 @@ test('O-32 ‘날짜가 정해져 있지 않아요’(매달 달라요일 때만
   await expect(page.getByText('경조사 일주일 전에도 알려 드려요')).toHaveCount(0);
   await page.getByRole('button', { name: '나중에 할게요' }).click();
   await heading(page, '찬우님, 준비가 끝났어요');
-  await expect(page.getByText('수입이 들어오면 월급 ‘이번 달’에서 적어 주세요')).toBeVisible();
+  await expect(page.getByText('수입은 월급 ‘이번 달’에서 적어요')).toBeVisible();
   expect(db.me).toMatchObject({ payday: null, payday_last: false, payday_none: true });
   expect(db.space?.marriage_status).toBe('dating');
   expect(db.splits).toHaveLength(1);

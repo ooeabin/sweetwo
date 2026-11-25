@@ -147,8 +147,7 @@ export const copy = {
   /** H-04 값 이름표와 값 아래 작은 줄(2026-11-20) [확인 필요] */
   netLabel: '순자산',
   // 2026-11-18 빈 타일에서 자산을 적고 싶게(궁금함, 파트너 소식) [확인 필요]
-  assetsAskTwo: '우리 둘 순자산, 또래 중 어디쯤일까요?',
-  assetsAskMe: '내 순자산, 또래 중 어디쯤일까요?',
+  assetsEmpty: '아직 적은 자산이 없어요', // 2026-11-26 빈 상태 규칙(예전 “…또래 중 어디쯤일까요?” 둘/나 두 문구를 하나로)
   assetsPartner: (name: string) => `${name}님이 자산을 적었어요`,
   rankBadge: (pct: number) => `상위 ${pct}%`,
   assetsTileLabel: (net: string, rank: string | null) =>

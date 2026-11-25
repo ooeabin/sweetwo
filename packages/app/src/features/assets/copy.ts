@@ -23,13 +23,13 @@ export const copy = {
   gainIncl: (amount: string) => `안 판 수익 ${amount} 포함`,
   assetsLabel: '자산',
   debtsLabel: '부채',
-  empty: '자산을 적으면 순자산을 보여 드려요', // 23 빈 상태(홈 H-04와 같음, 칩이 안 보일 때만)
+  empty: '아직 적은 자산이 없어요', // 23 빈 상태 제목 한 줄(2026-11-26 빈 상태 규칙, 칩이 안 보일 때만) [확인 필요]
   expectedName: '예상 순자산',
   emptyAdd: '자산 추가하기', // 23 빈 상태
 
   // F-02 빈 상태 쉬운 첫 입력(2026-11-18, 23 F-02 빈 상태) [확인 필요]
-  firstChipsLabel: '자산을 적으면 순자산을 보여 드려요. 금액만 적어도 돼요',
-  firstChipsDebtLabel: '부채도 적으면 순자산이 정확해져요. 금액만 적어도 돼요',
+  firstChipsLabel: '아직 적은 자산이 없어요', // 2026-11-26 제목 한 줄(예전 설명 문장은 없앰) [확인 필요]
+  firstChipsDebtLabel: '아직 적은 부채가 없어요',
   firstChips: {
     bank: '통장',
     savings: '적금·예금',
@@ -159,7 +159,8 @@ export const copy = {
   maturedMoved: '다른 통장으로', // [확인 필요]
   maturedRejoin: '다시 가입했어요', // [확인 필요]
   maturedPick: '어느 통장으로 옮겼어요?', // [확인 필요]
-  maturedNoAccount: '옮길 통장이 없어요. 먼저 통장을 추가해 주세요', // [확인 필요]
+  maturedNoAccount: '옮길 통장이 없어요', // [확인 필요] 2026-11-26 제목 한 줄 + 아래 글자 버튼
+  maturedAddAccount: '통장 추가하기', // [확인 필요]
   // F-04b~d 팔았어요
   sold: '팔았어요',
   unsure: '잘 모르겠어요',
@@ -283,10 +284,10 @@ export const copy = {
   rankAd: '광고',
   rankSource: (label: string) => `${label} 기준`, // [확인 필요] 2026-11-24 그래프 아래 한 줄(예전 세 줄)
   rankCheck: '확인하기', // [확인 필요] F-01 순위 줄과 같은 말(다시 동의한 뒤 광고 앞)
-  rankEmptyLine: '자산을 적으면 상위 몇 %인지 알려 드려요', // [확인 필요] F-01 순위 줄과 같은 말
+  rankEmptyLine: '아직 적은 자산이 없어요', // [확인 필요] 2026-11-26 제목 한 줄(‘왜’는 아래 버튼 글자에)
   rankMore: '자세히', // [확인 필요] 설명 시트 열기
   rankMoreTitle: '순위는 이렇게 봐요', // [확인 필요]
-  rankEmptyCta: '자산 입력하기', // [확인 필요] F-08 자산이 없을 때 주 버튼(홈 H-04 줄 이름과 같음)
+  rankEmptyCta: '자산 적고 순위 보기', // [확인 필요] F-08 자산이 없을 때 주 버튼(F-01 순위 줄과 같은 말)
   // F-08 v2.2 (나) 순위 없음
   rankPeerLine: (amount: string) => `또래 가구 중간값은 ${amount}이에요`, // [확인 필요]
   /** (나) 보조 “2025년 가계금융복지조사(2025년 3월 말), 30대 가구 기준”(23 F-08 v2.2) */
