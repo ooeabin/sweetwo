@@ -103,6 +103,8 @@ async function celebrate(page: Page, help = '이제 같이 모으는 저축·투
 async function pushKinds(page: Page, rows: [string, boolean][]) {
   const list = page.getByRole('region', { name: '이런 알림을 보내 드려요' });
   await expect(list.getByRole('switch')).toHaveCount(rows.length);
+  // 테두리 카드 없이 흰 바탕 줄(2026-11-25 구역 6)
+  expect(await list.evaluate((el) => getComputedStyle(el).borderTopWidth)).toBe('0px');
   for (const [name, on] of rows)
     await expect(list.getByRole('switch', { name })).toHaveAttribute('aria-checked', String(on));
   await axe(page);
@@ -132,13 +134,12 @@ async function salary(page: Page) {
   await expect(page.getByRole('heading', { name: '한 달 실수령액은 얼마예요?' })).toBeVisible();
   await page.getByLabel('한 달 실수령액은 얼마예요?').fill('2700000');
   await page.getByRole('button', { name: '다음' }).click();
-  // 월급날은 따로 P-05b(2026-11-03), 휠 25일에서 시작 → 10일
+  // 월급날은 따로 P-05b(2026-11-03), 날짜 칸(2026-11-25 휠 대신) 25일에서 시작 → 10일
   await expect(page.getByRole('heading', { name: '월급날은 며칠이에요?' })).toBeVisible();
-  const day = page.getByRole('spinbutton', { name: '월급날은 며칠이에요?' });
-  await expect(day).toHaveAttribute('aria-valuetext', '25일');
-  await day.focus();
-  for (let i = 0; i < 15; i++) await day.press('ArrowUp');
-  await expect(day).toHaveAttribute('aria-valuetext', '10일');
+  const days = page.getByRole('radiogroup', { name: '월급날은 며칠이에요?' });
+  await expect(days.getByRole('radio', { name: '25일' })).toBeChecked();
+  await days.getByRole('radio', { name: '10일' }).click();
+  await expect(days.getByRole('radio', { name: '10일' })).toBeChecked();
   await page.getByRole('button', { name: '다음' }).click();
 }
 
@@ -525,6 +526,14 @@ test('P-02a 혼자 쓰던 기록 옮기기: 이미 시작한 기록 → 합류�
   const row = page.getByRole('button', { name: /예빈 적금 500만 원/ });
   await expect(row).toContainText('총액만 보여 주기');
   await expect(page.getByText(/30일 동안 보관한 뒤 지워요/)).toBeVisible();
+  // 테두리 카드 없이 흰 바탕 줄 + 묶음 사이 8px 띠(2026-11-25 구역 6)
+  const lists = page.locator('.hg-q .hg-list');
+  for (let i = 0; i < (await lists.count()); i++)
+    expect(await lists.nth(i).evaluate((el) => getComputedStyle(el).borderTopWidth)).toBe('0px');
+  const bandH = await page
+    .locator('.hg-q > .hg-list + .hg-sechead')
+    .evaluate((el) => getComputedStyle(el, '::before').height);
+  expect(bandH).toBe('8px');
   await axe(page);
   await row.click();
   const sheet = page.getByRole('dialog', { name: '예빈 적금 공개 범위' });
@@ -696,4 +705,86 @@ test('합류를 마치고 P-09에서 앱을 닫았다 열면 A-06 권장보다 P
   await page.getByRole('button', { name: '나중에 할게요' }).click();
   await expect(page).toHaveURL(/\/$/);
   expect(await page.evaluate(() => localStorage.getItem('sweetwo.join-after'))).toBeNull();
+});
+
+// 구역 6(2026-11-25): 뺀 화면 /join/p-03a, /join/p-06은 화면을 그리지 않고 그 흐름의 다음 화면으로
+test('/join/p-06(없앤 화면): 화면 없이 다음 화면 P-04, 시작한 사람이 온보딩 중이면 P-05', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  joining(db);
+  db.me.onboarding_step = 'P-06';
+  await page.goto('/join/p-06');
+  await expect(page).toHaveURL(/\/join\/p-04$/);
+  await expect(page.getByRole('heading', { name: '찬우님이 이렇게 골랐어요' })).toBeVisible();
+  await expect(page.getByText('같이 쓰는 월급 계획이에요')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '이대로 저장하기' })).toHaveCount(0);
+});
+
+test('/join/p-06: 시작한 사람이 아직 온보딩 중(같이 계열)이면 P-05', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  joining(db, false, 'together');
+  db.me.onboarding_step = 'P-06';
+  await page.goto('/join/p-06');
+  await expect(page).toHaveURL(/\/join\/p-05$/);
+  await expect(page.getByRole('heading', { name: '한 달 실수령액은 얼마예요?' })).toBeVisible();
+});
+
+test('/join/p-06, /join/p-03a: 합류를 마친 계정은 홈으로', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.me, { onboarding_done_at: '2026-10-07T00:50:00Z', onboarding_step: 'P-06' });
+  Object.assign(db.space ?? {}, { couple_state: 'connected' });
+  await page.goto('/join/p-06');
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto('/join/p-03a');
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByText('같이 쓰는 월급 계획이에요')).toHaveCount(0);
+});
+
+// 구역 6(2026-11-25): A-07 이미 다른 파트너와 연결됨은 ‘홈으로 가기’ 하나(15 A-07 7번 예외)
+test('A-07 이미 다른 파트너와 연결됨: 버튼은 ‘홈으로 가기’ 하나', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.route('**/rest/v1/rpc/join_space', (r) =>
+    r.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify('already_connected'),
+      headers: { 'Access-Control-Allow-Origin': '*' },
+    }),
+  );
+  await page.goto('/i/K7M2QX');
+  await page.getByRole('button', { name: '합류하기' }).click();
+  await expect(
+    page.getByRole('heading', { name: '이미 우리 둘 공간이 연결돼 있어요' }),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: '코드 다시 입력하기' })).toHaveCount(0);
+  const buttons = page.locator('.hg-q button:not(.hg-back)');
+  await expect(buttons).toHaveCount(1);
+  await axe(page);
+  await page.getByRole('button', { name: '홈으로 가기' }).click();
+  await expect(page).toHaveURL(/\/$/);
+});
+
+test('P-05b 월급날: 펼친 날짜 칸(25일에서 시작), 10일을 고르고 다음', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  joining(db);
+  db.me.onboarding_step = 'P-05B';
+  Object.assign(db.me, { monthly_income: 2_700_000 });
+  await page.goto('/join/p-05b');
+  await expect(page.getByRole('heading', { name: '월급날은 며칠이에요?' })).toBeVisible();
+  await expect(page.locator('.hg-wheel')).toHaveCount(0);
+  const days = page.getByRole('radiogroup', { name: '월급날은 며칠이에요?' });
+  await expect(days.getByRole('radio')).toHaveCount(32);
+  await expect(days.getByRole('radio', { name: '25일' })).toBeChecked();
+  await days.getByRole('radio', { name: '말일' }).click();
+  await expect(days.getByRole('radio', { name: '말일' })).toBeChecked();
+  await days.getByRole('radio', { name: '10일' }).click();
+  await axe(page);
 });

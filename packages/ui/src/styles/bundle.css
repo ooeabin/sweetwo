@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (81c3fa8a). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (9048500c). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 /* 2026-11-24 구역 5 설정 검토: 사용자 앱 글자 바탕값 15/22. 클래스 없는 b·p·li가 브라우저 기본 16px로 나오던 것(기준 17/15 밖). 어드민·웹사이트는 data-platform이 없어 그대로 */
@@ -227,8 +227,8 @@ a.hg-btn { box-sizing: border-box; max-width: 100%; text-decoration: none; }
 .hg-toasts { position: fixed; left: 0; right: 0; bottom: max(calc(var(--space-8) + env(safe-area-inset-bottom, 0px)), calc(var(--hg-bottom-bar-h, 0px) + var(--space-4))); z-index: 50; display: flex; justify-content: center; padding: 0 var(--space-4); pointer-events: none; }
 .hg-toasts > * { pointer-events: auto; }
 /* 2026-11-09 좁은 창 하단 탭 막대와 + 버튼(FAB)을 없애 토스트는 늘 화면 아래(space-8 + 안전 영역) */
-/* 2026-11-03 토스트가 아래 버튼을 가리지 않게: 질문 화면 아래 바(주 버튼 52px) 위로, 시트가 열려 있으면 화면 위쪽에 */
-@media (max-width: 767px), (hover: none), (pointer: coarse) { body:has(.hg-q__foot:not(.is-backonly)) .hg-toasts { bottom: calc(52px + var(--space-4) * 2 + var(--space-3) + env(safe-area-inset-bottom, 0px)); } }
+/* 2026-11-03 토스트가 아래 버튼을 가리지 않게: 질문 화면 아래 바(주 버튼 + 안내 줄, QuestionLayout이 높이를 --hg-bottom-bar-h로 알림, 2026-11-25) 위로, 시트가 열려 있으면 화면 위쪽에 */
+@media (max-width: 767px), (hover: none), (pointer: coarse) { body:has(.hg-q__foot:not(.is-backonly)) .hg-toasts { bottom: calc(var(--hg-bottom-bar-h, calc(52px + var(--space-4) * 2 + env(safe-area-inset-bottom, 0px))) + var(--space-3)); } }
 body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area-inset-top, 0px)); bottom: auto; }
 @media (prefers-reduced-motion: reduce) { .hg-toast { animation: none; } }
 
@@ -1142,14 +1142,16 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-datefield__seg::placeholder { color: var(--stone); }
 .hg-datefield__unit { margin-right: var(--space-2); font: 400 15px/22px var(--font-sans); color: var(--slate); }
 .hg-datefield__unit:last-child { margin-right: 0; }
-/* 월급날 숫자 판(DayChips): 회색 판 위 1~31 7칸, 테두리 없는 숫자, 고른 날만 검정 동그라미. ‘말일’은 판 아래 한 줄 */
-.hg-daygrid { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); background: var(--plate); border-radius: var(--radius-xl); }
-.hg-daygrid__days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); justify-items: center; }
-.hg-daygrid__day, .hg-daygrid__last { display: inline-grid; place-items: center; margin: 0; padding: 0; border: 0; background: none; color: var(--ink); font: var(--weight-medium) 17px/1 var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; }
-.hg-daygrid__day { width: 44px; max-width: 100%; aspect-ratio: 1; border-radius: var(--radius-full); }
-.hg-daygrid__last { grid-column: span 2; justify-self: stretch; height: 44px; border-radius: var(--radius-full); }  /* 31 옆 두 칸(29 30 31 말일) */
-.hg-daygrid__day:hover, .hg-daygrid__last:hover { background: var(--surface-alt); }
-.hg-daygrid__day.is-on, .hg-daygrid__last.is-on { background: var(--ink); color: var(--on-ink); font-weight: 700; }
+/* 월급날 날짜 칸(DayChips, 2026-11-25 구역 6 O-32·P-05b): 휠 대신 화면에 펼친 1~31 7칸, 판 없이 흰 바탕 위 숫자(17/400 고정폭 숫자).
+   고른 칸은 `brand` 채움 + `on-accent-app-text` 700(radius-lg). ‘말일’은 31 옆 두 칸을 차지하는 회색 칸(`choice-plate`), 고르면 같은 brand 채움. 칸 높이 44 이상 */
+.hg-daygrid { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-2); }
+.hg-daygrid.is-disabled { opacity: 0.4; }
+.hg-daygrid__days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); }
+.hg-daygrid__day, .hg-daygrid__last { display: inline-grid; place-items: center; box-sizing: border-box; min-height: 44px; margin: 0; padding: 0; border: 0; border-radius: var(--radius-lg); background: none; color: var(--ink); font: 400 17px/1 var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; }
+.hg-daygrid__day { width: 100%; height: 48px; }
+.hg-daygrid__last { grid-column: span 2; background: var(--choice-plate); color: var(--ink-2); }  /* 31 옆 두 칸(29 30 31 말일) */
+.hg-daygrid__day:hover { background: var(--surface-alt); }
+.hg-daygrid__day.is-on, .hg-daygrid__last.is-on { background: var(--accent-app); color: var(--on-accent-app-text); font-weight: 700; }
 .hg-daygrid__day:focus-visible, .hg-daygrid__last:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 /* 생년월일 휠(DateWheel): 연, 월, 일 세 줄. 한 줄 44px, 다섯 줄 보임. 가운데 회색 띠가 고른 줄, 위아래는 흐리게 */
 .hg-wheel { --wheel-row: 44px; position: relative; box-sizing: border-box; display: grid; grid-template-columns: 1.4fr 1fr 1fr; width: 100%; height: calc(var(--wheel-row) * 5); border-radius: var(--radius-xl); }  /* 2026-11-11 흐리게(mask)는 줄(hg-wheel__col)로 옮김: 휠 둘레 포커스 링이 잘리지 않게 */
@@ -3135,3 +3137,17 @@ button.hg-datepill { cursor: pointer; }
 /* Y-05 기록 요약 줄: 이름 slate + 값 ink 700 오른쪽 */
 .hg-recsum { display: flex; flex-direction: column; }
 .hg-recsum__memo { margin: 0; font: var(--text-note); color: var(--slate); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── 질문 화면(온보딩·합류) 안 목록·카드: 테두리 없는 흰 바탕 줄 + 묶음 사이 8px 회색 띠(2026-11-25 구역 6, 바탕 기준 2026-11-23) ──
+   P-02a 옮기기 목록, P-02b 미리 적어 둔 정보, P-11 알림 종류는 테두리 카드를 그리지 않고 본문 그대로의 줄.
+   목록 뒤에 제목이 오는 묶음 사이(P-02a ‘옮겨요’ → ‘안 옮겨요’)는 화면 폭 8px 회색 띠. 띠 위 24 + 8 + 아래 12(제목). */
+.hg-q :is(.hg-card, .hg-list):not(.hg-card--tint, .hg-card--fill, .hg-list--plain) { border: 0; border-radius: 0; background: none; box-shadow: none; padding-inline: 0; max-width: none; overflow: visible; }
+.hg-q > .hg-list + .hg-sechead { position: relative; margin-top: calc(8px + var(--gap-title)); }
+.hg-q > .hg-list + .hg-sechead::before { content: ""; position: absolute; top: calc(-8px - var(--gap-title)); left: 50%; width: 100vw; height: 8px; transform: translateX(-50%); background: var(--surface-alt); }
+
+/* ── A-06 앱 잠금 묻기·Face ID 질문: ‘나중에 할게요’는 O-55·O-60·P-11처럼 주 버튼 왼쪽 글자 버튼(2026-11-25 구역 6) ── */
+.hg-auth__actions--row > .hg-btn--link { flex: 0 1 auto; min-width: 0; white-space: normal; word-break: keep-all; text-align: center; }
+.hg-auth__actions--row > .hg-btn--link + .hg-btn--primary { flex: 1; }
+
+/* ── AmountInput 읽기 줄 자리(2026-11-25 구역 6 O-31·P-05): “350만 원”이 나타나도 아래 칩이 밀리지 않게 빈 값일 때도 한 줄(13/18) 자리를 잡음 ── */
+.hg-amountin > .hg-help { display: block; min-height: 18px; }

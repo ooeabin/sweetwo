@@ -68,8 +68,6 @@ export function ChoiceCards<T extends string>({
   /** 1~9 키로 고르기(한 화면에 묶음이 여럿이면 하나만) */
   shortcuts?: boolean;
 }) {
-  // 오른쪽 끝: 고른 뒤 ‘다음’을 누르는 카드만 동그라미. 누르면 바로 넘어가는 카드는 › 없음(2026-11-17 사용자 결정)
-  const showMark = !(autoAdvance && !!onPick);
   const timer = useRef<ReturnType<typeof setTimeout>>();
   const first = useRef<HTMLButtonElement>(null);
 
@@ -159,11 +157,10 @@ export function ChoiceCards<T extends string>({
               {o.sub && <span className="hg-help">{o.sub}</span>}
               {o.detail}
             </span>
-            {showMark && (
-              <span className="hg-option__mark" aria-hidden="true">
-                <Icon name="check" size={16} />
-              </span>
-            )}
+            {/* 오른쪽 끝 원: 안 고른 카드는 빈 원, 고르면 오렌지 체크 원(바로 넘어가는 카드도 같음, 2026-11-25 구역 6) */}
+            <span className="hg-option__mark" aria-hidden="true">
+              <Icon name="check" size={16} />
+            </span>
           </button>
         );
       })}

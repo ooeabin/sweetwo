@@ -168,6 +168,7 @@ export function P01JoinStart() {
   // ‘코드 다시 입력하기’(P-01 코드 입력) + 로그인 전 ‘처음으로’(A-02), 로그인됨 ‘홈으로 가기’(2026-11-11 D4).
   // 잘못된 코드면 코드 상자를 보이지 않음(이상한 글자를 크게 보여 주지 않게)
   if (blocked) {
+    const connected = blocked === 'already_connected';
     return (
       <QuestionLayout
         hero={<StatusArt name="status-invite-blocked" />}
@@ -181,13 +182,20 @@ export function P01JoinStart() {
             : undefined
         }
         center
-        primary={{ label: copy.reenterCode }}
+        // 이미 다른 파트너와 연결됨은 코드를 다시 넣어도 소용없어서 ‘홈으로 가기’ 하나(2026-11-25 구역 6, 15 A-07 7번 예외)
+        primary={{ label: connected ? copy.toHome : copy.reenterCode }}
         secondary={
-          loggedIn
-            ? { label: copy.toHome, onClick: goHome }
-            : { label: copy.toStart, onClick: () => nav(paths.login) }
+          connected
+            ? undefined
+            : loggedIn
+              ? { label: copy.toHome, onClick: goHome }
+              : { label: copy.toStart, onClick: () => nav(paths.login) }
         }
-        onSubmit={() => nav(paths.joinCode, { state: { from: loggedIn ? '/' : paths.login } })}
+        onSubmit={() =>
+          connected
+            ? goHome()
+            : nav(paths.joinCode, { state: { from: loggedIn ? '/' : paths.login } })
+        }
       >
         {blocked !== 'invalid' && (
           <p className="hg-invite-code hg-invite-code--static">

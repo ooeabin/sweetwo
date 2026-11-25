@@ -1,4 +1,4 @@
-import { Children, useEffect, useRef, type ReactNode } from 'react';
+import { Children, useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { useLoadingShown } from './Button';
 import { Icon } from './Icon';
 import { Wordmark } from './Wordmark';
@@ -254,6 +254,22 @@ export function QuestionLayout({
   }, [!!primary]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const backOnly = !primary && !later && !secondary;
+  // 아래 고정 바(주 버튼 + 안내 한 줄) 높이를 --hg-bottom-bar-h로 알려 Toast가 안내 줄까지 피해 그 위로 뜸(StickyBar와 같은 방식, 2026-11-25)
+  const footRef = useRef<HTMLDivElement>(null);
+  const hasFoot = !backOnly && !!(primary || later || secondary);
+  useLayoutEffect(() => {
+    const el = footRef.current;
+    if (!el || !hasFoot) return;
+    const root = document.documentElement;
+    const set = () => root.style.setProperty('--hg-bottom-bar-h', `${el.offsetHeight}px`);
+    set();
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(set);
+    ro?.observe(el);
+    return () => {
+      ro?.disconnect();
+      root.style.removeProperty('--hg-bottom-bar-h');
+    };
+  }, [hasFoot]);
   return (
     <main className={celebrate ? 'hg-qmain hg-celebrate-bg' : 'hg-qmain'}>
       <div className="hg-qbar">
@@ -305,6 +321,7 @@ export function QuestionLayout({
         {children}
         {(primary || later || secondary || onBack) && (
           <div
+            ref={footRef}
             className={`hg-q__foot${backOnly ? ' is-backonly' : ''}${summary ? ' has-sum' : ''}${note ? ' has-note' : ''}`}
           >
             {note && <p className="hg-q__note">{note}</p>}

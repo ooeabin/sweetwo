@@ -28,7 +28,6 @@ export function joinScreens(
   d: Pick<JoinData, 'waiting' | 'resumed' | 'me'> &
     Partial<Pick<JoinData, 'styleChosen' | 'nonManager'>>,
 ): string[] {
-  if (d.me?.onboarding_step === 'P-06') return ['p-06'];
   const tail = d.nonManager ? ['p-05c'] : [];
   if (d.resumed) return ['p-04', ...tail];
   if (d.waiting) return ['p-03', 'p-05', 'p-05b'];
@@ -37,7 +36,7 @@ export function joinScreens(
 /**
  * 합류 흐름에서 뺀 화면 → 그 화면 바로 앞 화면(이어하기). P-03a 출생연도(2026-11-11 뺌, 출생연도는 자산 순위 F-08 → S-11i에서)
  */
-export const JOIN_REMOVED: Readonly<Record<string, string>> = { 'p-03a': 'p-03' };
+export const JOIN_REMOVED: Readonly<Record<string, string>> = { 'p-03a': 'p-03', 'p-06': 'p-03' };
 
 /** 뺀 화면에 멈춘 사람이 갈 곳: 지금 흐름(기본 / 시작한 사람이 온보딩 중)에서 앞 화면의 다음 화면. 뺀 화면이 아니면 null */
 export function movedJoinScreen(
@@ -57,7 +56,7 @@ export function movedJoinScreen(
 export const joinChapter = (id: string, list: readonly string[] = BAR) => {
   const bar = list.includes(id) ? list : BAR;
   const total = Math.max(bar.length, 1);
-  const done = id === 'p-06' ? total : Math.max(bar.indexOf(id), 0) + 1;
+  const done = Math.max(bar.indexOf(id), 0) + 1;
   return {
     index: 1,
     total: 1,
@@ -100,7 +99,7 @@ export function useJoinStep(id: string) {
       await save?.();
       const to = next === null ? undefined : (next ?? list[i + 1]);
       // 마지막 화면: 추천 월급 계획으로 합류 완료(월급 계획 화면 없이, 첫 확인 목록은 다음 월급날)
-      if (!to && id !== 'p-06') {
+      if (!to) {
         const r = await finishJoin(d, o);
         if (r === 'split_changed') throw new Error('split_changed');
         // 그 사이 시작한 사람이 초대를 취소했거나 잡아 둔 24시간이 지남: 합류가 끝난 초대 안내(JoinRoute)
