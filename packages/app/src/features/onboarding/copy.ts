@@ -77,7 +77,7 @@ export const copy = {
   readyDone: {
     split: '월급 계획을 만들어 뒀어요',
     firstCheck: (date: string) => `${date} 월급날에 처음 확인해요`,
-    noDate: '수입이 들어오면 월급 ‘이번 달’에서 적어 주세요',
+    noDate: '수입은 월급 ‘이번 달’에서 적어요',
     salary: '월급이 생기면 설정에서 넣어 주세요',
   },
   readyGo: '모으기 시작하기',

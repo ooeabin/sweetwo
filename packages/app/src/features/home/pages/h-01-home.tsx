@@ -799,9 +799,7 @@ export function H01Home() {
       ? undefined
       : tileHint === 'partner'
         ? copy.assetsPartner(partnerName)
-        : tileHint === 'ask-two'
-          ? copy.assetsAskTwo
-          : copy.assetsAskMe;
+        : copy.assetsEmpty;
   const blocks: Record<HomeBlock, ReactNode> = {
     tasks: todoBands.length ? <Fragment key="tasks">{todoBands}</Fragment> : null,
     hero: <Fragment key="hero">{hero}</Fragment>,

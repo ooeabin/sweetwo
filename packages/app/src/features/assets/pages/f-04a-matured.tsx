@@ -1,6 +1,7 @@
 import { AssetForbiddenError, settleMatured } from '@sweetwo/api';
 import { todayKst } from '@sweetwo/core';
 import {
+  Button,
   Chip,
   DateField,
   FormHero,
@@ -119,7 +120,12 @@ export function F04aMatured() {
               )}
             </>
           ) : (
-            <p className="hg-form__hint">{copy.maturedNoAccount}</p>
+            <>
+              <p className="hg-form__hint">{copy.maturedNoAccount}</p>
+              <Button variant="link" onClick={() => nav('/assets/new?chip=bank')}>
+                {copy.maturedAddAccount}
+              </Button>
+            </>
           )}
         </FormSection>
       ) : (

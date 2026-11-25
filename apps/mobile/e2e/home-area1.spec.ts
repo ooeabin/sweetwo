@@ -133,7 +133,7 @@ test('H-04 자산 관리 타일: 이름표 “순자산”, 마이너스 그대�
 test('H-04 자산 0개면 기존 동기 문구 그대로(이름표·작은 줄 없음)', async ({ page }) => {
   await open(page);
   const tile = page.getByRole('button', { name: /^자산 관리/ });
-  await expect(tile).toContainText('내 순자산, 또래 중 어디쯤일까요?');
+  await expect(tile).toContainText('아직 적은 자산이 없어요');
   await expect(tile.locator('.hg-hubtile__foot')).toHaveCount(0);
 });
 

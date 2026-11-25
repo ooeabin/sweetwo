@@ -239,11 +239,7 @@ export function W20aDistribute() {
     <QuestionLayout
       title={copy.moneyInDistributeQ}
       help={
-        goals.length
-          ? copy.moneyInLeft(m(rec.amount), m(Math.max(left, 0)))
-          : join
-            ? copy.moneyInNoSavingJoin(join.name)
-            : copy.moneyInNoSaving
+        goals.length ? copy.moneyInLeft(m(rec.amount), m(Math.max(left, 0))) : copy.moneyInNoSaving
       }
       onBack={leave}
       primary={{ label: copy.moneyInPut, disabled: over, loading: busy }}

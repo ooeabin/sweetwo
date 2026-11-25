@@ -60,7 +60,7 @@ test('W-02 저금 줄 진행, 시트 ‘저금 보기’ → W-10 상세(목표 
   // 목표 금액이 없는 항목: 진행 대신 ‘목표 금액 정하기’
   await page.goto('/salary/items/goal-e');
   await expect(page.getByRole('heading', { name: '청약' })).toBeVisible();
-  await expect(page.getByText('목표 금액을 정하면 얼마나 모았는지 보여 드려요')).toBeVisible();
+  await expect(page.getByText('아직 목표 금액이 없어요')).toBeVisible();
   await page.getByRole('button', { name: '금액 정하기' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-e\/edit\/amount\?first=1$/);
   await page.getByRole('textbox').first().fill('5000000');
@@ -95,7 +95,10 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await page.getByRole('button', { name: '30만 원' }).click();
   await page.getByRole('button', { name: '10만 원' }).click();
   // 2026-11-24: 빠른 금액 칩은 고른 표시·aria-pressed 없음(눌러서 값을 바꾸기만 하는 버튼)
-  await expect(page.getByRole('button', { name: '10만 원' })).not.toHaveAttribute('aria-pressed', /.*/);
+  await expect(page.getByRole('button', { name: '10만 원' })).not.toHaveAttribute(
+    'aria-pressed',
+    /.*/,
+  );
   await expect(page.locator('.hg-quick .is-selected')).toHaveCount(0);
   await fillAmount(page, '매달 얼마씩?', 200000);
   await expect(hero).toHaveText('제주 여행에 매달 20만 원씩 모을까요?');

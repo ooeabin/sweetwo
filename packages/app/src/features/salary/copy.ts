@@ -198,7 +198,7 @@ export const copy = {
   closed: '지난 달 월급날 확인 목록은 고칠 수 없어요', // [확인 필요]
   failed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   retry: '다시 시도',
-  emptyPlan: '월급 계획 템플릿에서 항목을 추가해 주세요', // [확인 필요] 2026-11-19 W-02 줄이 하나도 없을 때(월급 0원 포함)
+  emptyPlan: '확인할 항목이 없어요', // [확인 필요] 2026-11-19 W-02 줄이 하나도 없을 때(월급 0원 포함), 2026-11-26 제목 한 줄
   // W-02 월급 계획이 없을 때 안내(2026-11-25 사용자 확정 B안 최종, 20 W-02 0b) [모두 확인 필요]
   guideTitle: '월급날 루틴, 한 번에 끝내기',
   guideSteps: [
@@ -308,7 +308,7 @@ export const copy = {
   edit: '고치기',
   until: (ym: string) => `${ym}까지`,
   setDeadline: '기한 정하기', // [확인 필요]
-  noTarget: '목표 금액을 정하면 얼마나 모았는지 보여 드려요', // [확인 필요]
+  noTarget: '아직 목표 금액이 없어요', // [확인 필요] 2026-11-26 제목 한 줄(행동은 아래 ‘목표 금액 · 정하기’ 줄)
   setTarget: '금액 정하기', // [확인 필요]
   reachedAll: (target: string) => `${target}을 다 모았어요`, // [확인 필요]
   achieved: '달성',
@@ -509,7 +509,7 @@ export const copy = {
   autoPickEmpty: '고를 지출이나 저축·투자가 없어요',
   autoPickLine: (name: string) => `${name} 자동으로 나가요`,
   // H-13 기간 한 줄(07 6장, 홈 H-11 자리와 월급 탭 ‘이번 달’ 자리가 같이 씀) [모두 확인 필요]
-  periodNone: '수입이 들어오면 ‘수입 적기’로 알려 주세요',
+  periodNone: '아직 적은 수입이 없어요', // 2026-11-26 제목 한 줄(행동은 오른쪽 “수입 적기 ›”)
   periodEarly: (amount: string) => `이번 기간 수입 ${amount}`,
   periodIn: (amount: string) => `수입 ${amount}`,
   periodNeed: (amount: string) => `월급 계획 ${amount}`,
@@ -712,7 +712,7 @@ export const copy = {
   moneyInSkip: '저축·투자에 안 넣을게요',
   /** W-02 ‘수입’ 묶음(이번 달에 적은 기록, 2026-11-16 R4-7) */
   moneyInRow: (date: string, kind: string) => `${date}, ${kind}`,
-  moneyInNoSaving: '넣을 저축·투자가 없어요. 수입만 적어 둘게요',
+  moneyInNoSaving: '넣을 저축·투자가 없어요', // 2026-11-26 제목 한 줄
   moneyInLogged: '수입을 적었어요',
   moneyInPutDone: (n: number, amount: string) => `저축·투자 ${n}개에 ${amount} 넣었어요`, // [확인 필요]
   amountOf: (name: string) => `${name} 금액`, // 화면 읽기
@@ -724,8 +724,6 @@ export const copy = {
   bundleWaitingHelp: '다른 저축·투자로 하나 더 같이 모을 수도 있어요',
   bundleOpenBlocked: '들어오길 기다리는 같이 모으기가 있어요', // [확인 필요] 서버 bundle_open
   bundleJoinCta: '같이 모으기에 들어가기', // [확인 필요] W-10 0c, W-20a
-  moneyInNoSavingJoin: (name: string) =>
-    `넣을 저축·투자가 없어요. ‘${name}’에 같이 모으면 넣을 수 있어요`, // [확인 필요]
   moneyInAll: '나머지 모두 넣기', // W-20a
   moneyInAllLabel: (name: string) => `${name}에 나머지 모두 넣기`, // 화면 읽기
   moneyInList: '수입 기록', // W-20b

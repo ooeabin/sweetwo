@@ -425,13 +425,13 @@ const shot = async (page: Page, name: string) => {
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/${name}.png` });
 };
 
-test('H-04 빈 타일(둘): “우리 둘 순자산, 또래 중 어디쯤일까요?” → F-02 종류 칩 → 금액만 → 저장 → 순자산 + 순위 링크(한 번만)', async ({
+test('H-04 빈 타일(둘): “아직 적은 자산이 없어요” → F-02 종류 칩 → 금액만 → 저장 → 순자산 + 순위 링크(한 번만)', async ({
   page,
 }) => {
   const db = await start(page, { withAssets: false });
   db.me.asset_share_default = 'sum';
   await page.goto('/');
-  await expect(tile(page)).toContainText('우리 둘 순자산, 또래 중 어디쯤일까요?');
+  await expect(tile(page)).toContainText('아직 적은 자산이 없어요');
   await expect(tile(page)).not.toContainText('+ 자산 추가');
   await expect(tile(page)).not.toContainText('원');
   await expect(tile(page)).toHaveClass(/hg-hubtile--point/);
@@ -441,7 +441,7 @@ test('H-04 빈 타일(둘): “우리 둘 순자산, 또래 중 어디쯤일까�
   await expect(page).toHaveURL(/\/assets\/items$/);
   await expect(page.getByText('예빈님이 자산을 적었어요')).toHaveCount(0);
   const chips = page.getByRole('group', {
-    name: '자산을 적으면 순자산을 보여 드려요. 금액만 적어도 돼요',
+    name: '아직 적은 자산이 없어요',
   });
   await expect(chips.getByRole('button')).toHaveText([
     '통장',
@@ -452,15 +452,13 @@ test('H-04 빈 타일(둘): “우리 둘 순자산, 또래 중 어디쯤일까�
     '직접 고르기',
   ]);
   // 칩 위 안내는 한 줄, 예전 빈 상태(문구 + 자산 추가하기)는 칩과 같은 일이라 안 그림
-  await expect(page.getByText('자산을 적으면 순자산을 보여 드려요', { exact: true })).toHaveCount(
-    0,
-  );
+  await expect(page.locator('.hg-empty')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '자산 추가하기' })).toHaveCount(0);
   await expect(page.getByText('부채가 없어요')).toHaveCount(0);
   await shot(page, '5-f02-asset-tab');
   await page.getByRole('tab', { name: '부채', exact: true }).click();
   const debtChips = page.getByRole('group', {
-    name: '부채도 적으면 순자산이 정확해져요. 금액만 적어도 돼요',
+    name: '아직 적은 부채가 없어요',
   });
   await expect(debtChips.getByRole('button')).toHaveText([
     '신용대출',
@@ -488,9 +486,7 @@ test('H-04 빈 타일(둘): “우리 둘 순자산, 또래 중 어디쯤일까�
   await expect(nw).toContainText('2,300만 원');
   const rank = page.getByRole('button', { name: '또래 중 어디쯤인지 보기' });
   await expect(rank).toBeVisible();
-  await expect(
-    page.getByRole('group', { name: '자산을 적으면 순자산을 보여 드려요. 금액만 적어도 돼요' }),
-  ).toHaveCount(0);
+  await expect(page.getByRole('group', { name: '아직 적은 자산이 없어요' })).toHaveCount(0);
   await shot(page, '3-f02-after-first');
   await axe(page);
   const saved = db.assets.filter((a) => !a.deleted_at);
@@ -586,9 +582,7 @@ test('H-04 파트너 소식: 내 자산 0개 + 예빈님이 적음(모두 / 총�
   await expect(
     page.getByText('예빈님이 자산을 적었어요. 내 것도 적으면 우리 둘 순자산이 보여요'),
   ).toBeVisible();
-  await expect(
-    page.getByRole('group', { name: '자산을 적으면 순자산을 보여 드려요. 금액만 적어도 돼요' }),
-  ).toBeVisible();
+  await expect(page.getByRole('group', { name: '아직 적은 자산이 없어요' })).toBeVisible();
   await axe(page);
   // ‘총액만’: 묶음 개수만 서버가 줌
   db.assets.length = 0;
@@ -609,12 +603,12 @@ test('H-04 파트너가 숨기기만 적었으면(서버가 아무것도 안 줌
 }) => {
   const db = await start(page, { withAssets: false });
   await page.goto('/');
-  await expect(tile(page)).toContainText('우리 둘 순자산, 또래 중 어디쯤일까요?');
+  await expect(tile(page)).toContainText('아직 적은 자산이 없어요');
   await expect(tile(page)).not.toContainText('자산을 적었어요');
   db.space = { ...db.space, couple_state: 'solo' };
   db.partner = null;
   await page.goto('/');
-  await expect(tile(page)).toContainText('내 순자산, 또래 중 어디쯤일까요?');
+  await expect(tile(page)).toContainText('아직 적은 자산이 없어요');
   await expect(tile(page)).not.toContainText('우리 둘');
 });
 
@@ -642,17 +636,17 @@ test('F-08 (가): 그래프 아래는 한 줄 + ‘자세히’ 시트(‘중간
   await axe(page);
 });
 
-test('F-08 직접 열기: 자산이 하나도 없으면 순위 없이 F-01과 같은 안내 + 자산 입력하기', async ({
+test('F-08 직접 열기: 자산이 하나도 없으면 순위 없이 “아직 적은 자산이 없어요” + 자산 적고 순위 보기', async ({
   page,
 }) => {
   const db = await start(page, { withAssets: false });
   db.rank = { pair: true, topPct: 97, views: [], requests: [] };
   await page.goto('/assets/rank');
-  await expect(page.getByText('자산을 적으면 상위 몇 %인지 알려 드려요')).toBeVisible();
+  await expect(page.getByText('아직 적은 자산이 없어요')).toBeVisible();
   await expect(page.getByText(/상위 \d+%/)).toHaveCount(0);
   expect(db.rpc).not.toContain('record_rank_view');
   await axe(page);
-  await page.locator('.hg-stickybar').getByRole('button', { name: '자산 입력하기' }).click();
+  await page.locator('.hg-stickybar').getByRole('button', { name: '자산 적고 순위 보기' }).click();
   await expect(page).toHaveURL(/\/assets\/new/);
 });
 

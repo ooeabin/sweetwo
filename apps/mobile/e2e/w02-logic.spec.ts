@@ -101,7 +101,7 @@ test('파트너 보기만: 보이는 줄이 없으면(‘했어요만’ 공개 
   yebinList(db, []);
   await page.goto('/salary?who=yebin');
   await expect(page.getByText('아직 확인한 게 없어요')).toBeVisible();
-  await expect(page.getByText('월급 계획 템플릿에서 항목을 추가해 주세요')).toHaveCount(0);
+  await expect(page.getByText('확인할 항목이 없어요')).toHaveCount(0);
   await axe(page);
 });
 
