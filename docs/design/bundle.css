@@ -2738,7 +2738,7 @@ button.hg-datepill { cursor: pointer; }
 .hg-w02guide__head > * { margin: 0; }
 .hg-w02guide__tag { font: var(--text-note); color: var(--slate); }
 .hg-w02guide__title { font: var(--text-amount-lg); letter-spacing: -0.3px; word-break: keep-all; text-wrap: balance; }
-.hg-w02guide__steps { display: flex; flex-direction: column; gap: var(--space-6); margin: 0; padding: 0; list-style: none; }
+.hg-w02guide__steps { display: flex; flex-direction: column; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
 .hg-w02guide__step { display: grid; grid-template-columns: 16px minmax(0, 1fr); column-gap: var(--space-3); align-items: baseline; }
 .hg-w02guide__num { width: 16px; font: var(--text-note); font-weight: 700; color: var(--slate); }  /* 번호 13/700 slate, 원 없음(2026-11-25 B안). 번호는 그래픽, 뜻은 순서 목록(ol)이 전함 */
 .hg-w02guide__step-title { font: var(--text-value); color: var(--ink-2); word-break: keep-all; }
