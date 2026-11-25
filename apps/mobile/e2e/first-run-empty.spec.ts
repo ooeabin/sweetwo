@@ -83,7 +83,7 @@ test('W-02 빈 상태: 날짜 태그 + 큰 제목 + 번호 3줄 + 예시 판 + �
   const sample = page.locator('.hg-w02guide__sample');
   await expect(sample).toHaveAttribute('aria-hidden', 'true');
   await expect(sample.locator('.hg-w02guide__sample-head')).toContainText('확인할 것 2');
-  await expect(sample.locator('.hg-w02guide__sample-head')).toContainText('예시');
+  await expect(sample.locator('.hg-w02guide__sample-badge')).toHaveText('예시');
   await expect(sample).toContainText('비상금');
   await expect(sample).toContainText('30만 원');
   await expect(sample).toContainText('월세');
