@@ -879,7 +879,8 @@ function EmptyPlan({ tag, onFill }: { tag: ReactNode; onFill: () => void }) {
         <div className="hg-w02guide__head">
           {tag}
           <h2 id="w02-guide-title" className="hg-w02guide__title">
-            {copy.guideTitle}
+            {copy.guideTitle[0]} <br />
+            {copy.guideTitle[1]}
           </h2>
           <p className="hg-w02guide__sub">{copy.guideSub}</p>
         </div>
