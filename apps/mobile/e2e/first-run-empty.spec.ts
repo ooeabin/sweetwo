@@ -70,7 +70,7 @@ test('W-02 빈 상태: 날짜 태그 + 큰 제목 + 번호 3줄 + 예시 판 + �
   page,
 }) => {
   await open(page, clearPlan, '/salary');
-  await expect(page.getByRole('heading', { name: '월급날 루틴, 한 번에 끝내요' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '월급날 루틴, 한 번에 끝내기' })).toBeVisible();
   await expect(page.locator('.hg-w02guide__tag')).toHaveText(/월급$/);
   // 설명 문장은 없음
   await expect(page.getByText('월급 계획을 세우면 확인할 것이 생겨요')).toHaveCount(0);
@@ -141,7 +141,7 @@ test('W-02 월급 0원 + 계획 없음도 같은 3단계 안내(예전 “월급
     },
     '/salary',
   );
-  await expect(page.getByRole('heading', { name: '월급날 루틴, 한 번에 끝내요' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '월급날 루틴, 한 번에 끝내기' })).toBeVisible();
   await expect(page.getByText('월급을 적고')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '월급 계획 세우기', exact: true })).toBeVisible();
 });

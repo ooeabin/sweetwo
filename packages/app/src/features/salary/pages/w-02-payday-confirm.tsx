@@ -894,15 +894,20 @@ function EmptyPlan({ tag, onFill }: { tag: ReactNode; onFill: () => void }) {
         </ol>
         <p className="hg-sr">{copy.guideSampleSr}</p>
         <div className="hg-w02guide__sample" aria-hidden="true">
-          <div className="hg-w02guide__sample-head">
-            <span>{copy.guideSampleHead}</span>
-            <span>{copy.guideSampleTag}</span>
-          </div>
+          <span className="hg-w02guide__sample-badge">{copy.guideSampleTag}</span>
+          <div className="hg-w02guide__sample-head">{copy.guideSampleHead}</div>
           {copy.guideSample.map((r) => (
-            <div key={r.name} className="hg-w02guide__sample-row">
+            <div key={r.name} className={`hg-w02guide__sample-row${r.auto ? ' is-auto' : ''}`}>
               <i className={r.auto ? undefined : 'is-on'} />
               <span>{r.name}</span>
-              {r.auto ? <span>{r.value}</span> : <b>{r.value}</b>}
+              {r.auto ? (
+                <span>{r.value}</span>
+              ) : (
+                <>
+                  <b>{r.value}</b>
+                  <em>›</em>
+                </>
+              )}
             </div>
           ))}
         </div>
