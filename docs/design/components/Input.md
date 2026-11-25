@@ -7,6 +7,7 @@
 - 자리표시는 `stone`.
 - 오류: 칸에 `is-error`, 도움말에 `is-error` + 고치는 방법(“0원보다 큰 금액을 넣어 주세요”).
 - 포커스는 2px `ink` 테두리(검색 칸도 같음). 키보드 포커스 링은 `focus-ring`(`ink`, 2026-11-09). 입력 칸 테두리에 오렌지는 오류 빨강과 헷갈려 쓰지 않음.
+- 오류 입력 칸은 선 하나(2026-11-25 사용자 결정): 빨간 `danger` 테두리 한 줄(1px)뿐이고, 포커스여도 ink 링을 겹쳐 그리지 않으며 빨간 선이 포커스 표시를 겸함(포커스 중에는 포커스 링과 같은 2px). `hg-input`·밑줄 칸(FormScreen)·날짜 칸·코드 칸·PaydayPicker 직접 적기 칸 모두 같음.
 - 여러 칸을 나란히 둘 때는 `hg-fields`(위쪽 정렬, 같은 너비)로 묶고 칸마다 라벨 `hg-field__label`·도움말 자리를 같게 둠.
 - 여러 줄 글자(2026-11-17, `Textarea`, `hg-input hg-textarea`): 입력 칸과 같은 테두리·포커스, 크기 조절 손잡이 없음(`resize: none`). 글이 늘면 높이가 따라 커지고(`Textarea`가 맞춤) 120px부터(어드민 96px) 최대 320px(어드민 240px)까지, 넘으면 안에서 스크롤. 사용자 앱 문의 내용(S-19a)도 같은 `Textarea`. 라벨·도움말 자리는 `Field`와 같음. 어드민 공지 내용(AD-10), 문의 답변(AD-06), 정기 검토 메모(AD-18).
 - 어드민 칸은 모두 `Field`·`Textarea`·`Select`·`DatePicker`(2026-11-17, 브라우저 기본 select·date·number·checkbox를 쓰지 않음). 숫자만 받는 칸(가입 주차)은 `type="number"`(브라우저 위아래 화살표) 대신 글자 칸 + `inputmode="numeric"`, 숫자 아닌 글자는 지움. 꺼진 칸은 `surface-sunk` 바탕 + `muted` 글자(어드민).

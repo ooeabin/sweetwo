@@ -673,7 +673,7 @@ test('O-32 월급날 고르기(A안): 칩 + 직접 적기는 서로 하나만, �
   });
   await page.goto('/onboarding/o-32');
   await heading(page, '월급날은 며칠이에요?');
-  await expect(page.getByText('회사마다 많이 쓰는 날을 먼저 보여 드려요')).toBeVisible();
+  await expect(page.getByText('회사마다 많이 쓰는 날을 먼저 보여 드려요')).toHaveCount(0);
   // 휠도 1~31 판도 아님: 칩 6개(10 15 20 21 25 말일) + 직접 적기 칸
   await expect(page.locator('.hg-wheel')).toHaveCount(0);
   const chips = page.getByRole('radiogroup', { name: '월급날은 며칠이에요?' });
@@ -741,10 +741,25 @@ test('O-32 월급날 고르기(A안): 칩 + 직접 적기는 서로 하나만, �
   // ‘날짜가 정해져 있지 않아요’(매달 금액이 달라요일 때만) = 고르기를 흐리게 끔
   await page.getByRole('checkbox', { name: '날짜가 정해져 있지 않아요' }).click();
   await expect(page.locator('.hg-payday')).toHaveAttribute('aria-disabled', 'true');
+  // 꺼진 동안은 고른 표시가 없음(모든 칩이 같은 꺼진 회색, 2026-11-25)
+  await expect(page.locator('.hg-payday__chip.is-on')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '다음' })).toBeEnabled();
   await axe(page);
   await page.getByRole('checkbox', { name: '날짜가 정해져 있지 않아요' }).click();
   await expect(page.locator('.hg-payday')).not.toHaveAttribute('aria-disabled', 'true');
+  // 풀면 이전 선택(15일)이 돌아옴
+  await expect(chips.getByRole('radio', { name: '15일' })).toBeChecked();
+  // 오류 칸은 선 하나: 포커스여도 ink 링(outline)을 겹치지 않고 빨간 2px 선이 포커스를 겸함
+  await custom.fill('40');
+  await custom.focus();
+  const errBox = page.locator('.hg-payday__custom.is-error');
+  await expect(errBox).toHaveCount(1);
+  const st = await errBox.evaluate((el) => {
+    const c = getComputedStyle(el);
+    return { outline: c.outlineStyle, shadow: c.boxShadow };
+  });
+  expect(st.outline).toBe('none');
+  expect(st.shadow).toContain('2px');
 });
 
 test('O-32 직접 적은 날이 저장되고 다시 열면 칩 날짜는 칩으로, 아닌 날은 직접 적기 칸에 복원됨', async ({

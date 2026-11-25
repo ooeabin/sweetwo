@@ -26,7 +26,6 @@ export function P05bPayday() {
     <QuestionLayout
       chapter={s.chapter}
       title={copy.paydayTitle}
-      help={copy.paydayHelp}
       onBack={s.onBack}
       primary={{ label: copy.next, disabled: !noDate && payday === null, loading: s.saving }}
       onSubmit={() =>
