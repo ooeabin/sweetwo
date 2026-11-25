@@ -70,7 +70,7 @@ test('W-02 빈 상태: 날짜 태그 + 큰 제목 + 번호 3줄 + 예시 판 + �
   page,
 }) => {
   await open(page, clearPlan, '/salary');
-  await expect(page.getByRole('heading', { name: '월급날 루틴, 한 번에 끝내요' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '월급날 루틴, 한 번에 끝내기' })).toBeVisible();
   await expect(page.locator('.hg-w02guide__tag')).toHaveText(/월급$/);
   // 설명 문장은 없음
   await expect(page.getByText('월급 계획을 세우면 확인할 것이 생겨요')).toHaveCount(0);
@@ -83,7 +83,7 @@ test('W-02 빈 상태: 날짜 태그 + 큰 제목 + 번호 3줄 + 예시 판 + �
   const sample = page.locator('.hg-w02guide__sample');
   await expect(sample).toHaveAttribute('aria-hidden', 'true');
   await expect(sample.locator('.hg-w02guide__sample-head')).toContainText('확인할 것 2');
-  await expect(sample.locator('.hg-w02guide__sample-head')).toContainText('예시');
+  await expect(sample.locator('.hg-w02guide__sample-badge')).toHaveText('예시');
   await expect(sample).toContainText('비상금');
   await expect(sample).toContainText('30만 원');
   await expect(sample).toContainText('월세');
@@ -141,7 +141,7 @@ test('W-02 월급 0원 + 계획 없음도 같은 3단계 안내(예전 “월급
     },
     '/salary',
   );
-  await expect(page.getByRole('heading', { name: '월급날 루틴, 한 번에 끝내요' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '월급날 루틴, 한 번에 끝내기' })).toBeVisible();
   await expect(page.getByText('월급을 적고')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '월급 계획 세우기', exact: true })).toBeVisible();
 });
@@ -210,7 +210,7 @@ test('알림이 거의 없을 때: 목록 아래 “알림 종류 고르기” �
   await expect(page.getByText('마케팅 정보 받기에 동의했어요')).toBeVisible();
   const pick = page.getByRole('button', { name: '알림 종류 고르기' });
   await expect(pick).toBeVisible();
-  expect((await pick.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+  expect((await pick.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(43.9); // 소수점 렌더 오차(43.99998)
   await axe(page);
   await pick.click();
   await expect(page).toHaveURL(/\/settings\/notifications/);

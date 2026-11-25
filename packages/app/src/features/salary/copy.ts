@@ -200,17 +200,19 @@ export const copy = {
   retry: '다시 시도',
   emptyPlan: '월급 계획 템플릿에서 항목을 추가해 주세요', // [확인 필요] 2026-11-19 W-02 줄이 하나도 없을 때(월급 0원 포함)
   // W-02 월급 계획이 없을 때 안내(2026-11-25 사용자 확정 B안 최종, 20 W-02 0b) [모두 확인 필요]
-  guideTitle: '월급날 루틴, 한 번에 끝내요',
+  guideTitle: '월급날 루틴, 한 번에 끝내기',
   guideSteps: [
     '어디에 쓸지 미리 정해두세요',
     '월급날이 되면 목록이 자동으로 떠요',
     '하나씩 체크 하면 끝!',
   ] as const,
-  guideSampleHead: '확인할 것 2',
+  guideSampleHead: '확인할 것 2개',
   guideSampleTag: '예시',
-  guideSampleSr: '월급 계획을 세우면 이런 목록이 떠요. 비상금 30만 원, 월세는 자동으로 나가요', // 흐린 예시 판은 aria-hidden, 이 한 줄로 대신 읽음
+  guideSampleSr:
+    '예시: 월급 계획을 세우면 이런 목록이 떠요. 비상금 30만 원, 여행 20만 원, 월세는 자동으로 나가요', // 흐린 예시 판은 aria-hidden, 이 한 줄로 대신 읽음
   guideSample: [
     { name: '비상금', value: '30만 원', auto: false },
+    { name: '여행', value: '20만 원', auto: false },
     { name: '월세', value: '자동으로 나가요', auto: true },
   ],
   fillPlan: '월급 계획 세우기',

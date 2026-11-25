@@ -93,7 +93,7 @@ test('W-02 a: 템플릿 줄이 0개면 날짜 태그 + 제목 + 3단계 + 예시
   const list = db.checklists[0];
   if (list) list.pay_check_line = [];
   await page.goto('/salary');
-  await expect(page.getByRole('heading', { name: '월급날 루틴, 한 번에 끝내요' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '월급날 루틴, 한 번에 끝내기' })).toBeVisible();
   await expect(page.locator('.hg-w02guide__step')).toHaveCount(3);
   await expect(page.getByRole('region', { name: '이번 달 수입' })).toHaveCount(0);
   await expect(page.locator('.hg-w02hero__amt')).toHaveCount(0);

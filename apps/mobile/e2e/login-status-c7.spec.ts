@@ -62,7 +62,10 @@ test('서버 오류(CS-07): 못 받으면 뼈대에 머물지 않고 오류 카�
   await expect(page.locator('.hg-skel')).toHaveCount(0);
   await axe(page);
   broken = false;
-  await card.getByRole('button', { name: '다시 시도' }).click();
+  // 다른 요청의 재시도로 오류 카드가 다시 그려질 수 있어(요소 교체), 눌릴 때까지 다시 찾는다
+  await expect(async () => {
+    await card.getByRole('button', { name: '다시 시도' }).click({ timeout: 3_000 });
+  }).toPass({ timeout: 30_000 });
   await expect(card).toHaveCount(0, { timeout: 15_000 });
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 });
