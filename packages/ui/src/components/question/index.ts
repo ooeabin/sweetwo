@@ -1,7 +1,6 @@
 export * from './ChoiceCards';
 export * from './AmountInput';
 export * from './DateInputs';
-export * from './DateWheel';
 export * from './PaydayPicker';
 export * from './ShortText';
 export * from './Checkbox';

@@ -275,7 +275,7 @@ test('첫 월급날 전(소급 없음): 월급 상자 첫 줄 “10월 23일부�
     p_items: [{ id: 'split-1-line-1', auto_pay: true, auto_day: 26 }],
   });
   expect(db.v22?.tasks).toContain('auto_pick');
-  // 줄 보조 줄 “26일 자동”(2026-11-19 짧게, 예전 알약 “자동 26일”)
+  // 줄 보조 줄 “27일 자동”(2026-11-19 짧게, 예전 알약 “자동 26일”)
   await expect(page.locator('.hg-receipt__row', { hasText: '내 집 마련' })).toContainText(
     '26일 자동',
   );
@@ -593,7 +593,7 @@ test('한 사람 관리형 관리하지 않는 쪽: 월급 상자 첫 줄 “자
   await axe(page);
 });
 
-test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동으로 보내요 + 나가는 날 → 바로 저장 + 되돌리기, 보조 줄 “26일 자동”', async ({
+test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동으로 보내요 + 나가는 날 → 바로 저장 + 되돌리기, 보조 줄 “27일 자동”', async ({
   page,
 }) => {
   const db = await open(page, undefined, NOW, '/salary/plan');
@@ -608,13 +608,31 @@ test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동
   await sheet.getByRole('radio', { name: '자동으로 나가요' }).click();
   await sheet.getByRole('button', { name: '다음 날' }).click();
   await axe(page);
+  // 나가는 날은 한 줄 → 1~31 + 말일 칸 시트(2026-11-26 휠에서 바꿈). 시트 위의 시트: Esc는 위 시트만 닫음
+  await page.getByRole('button', { name: '나가는 날, 매달 26일' }).click();
+  const day = page.getByRole('dialog', { name: '나가는 날' });
+  await expect(day.getByRole('radio', { name: '26', exact: true })).toBeChecked();
+  await axe(page);
+  await page.keyboard.press('Escape');
+  await expect(day).toHaveCount(0);
+  await expect(sheet).toBeVisible();
+  await page.getByRole('button', { name: '나가는 날, 매달 26일' }).click();
+  await page
+    .getByRole('dialog', { name: '나가는 날' })
+    .getByRole('radio', { name: '27', exact: true })
+    .click();
+  await page
+    .getByRole('dialog', { name: '나가는 날' })
+    .getByRole('button', { name: '매달 27일로 하기' })
+    .click();
+  await expect(sheet.getByRole('button', { name: '나가는 날, 매달 27일' })).toBeVisible();
   await sheet.getByRole('button', { name: '확인' }).click();
   await expect(page.locator('.hg-toast')).toContainText('고정지출 설정을 바꿨어요');
   expect(db.v22?.calls.at(-1)?.body).toEqual({
-    p_items: [{ id: 'split-1-line-2', in_checklist: true, auto_pay: true, auto_day: 26 }],
+    p_items: [{ id: 'split-1-line-2', in_checklist: true, auto_pay: true, auto_day: 27 }],
   });
   await expect(page.locator('.hg-receipt__row', { hasText: '고정지출' })).toContainText(
-    '26일 자동',
+    '27일 자동',
   );
   // 저금 줄 시트에는 ‘확인 안 해요’가 없음(늘 목록에 넣음)
   await page.goto('/salary/plan?line=goal-e'); // W-10 ‘매달 금액 바꾸기’로 그 저금 줄 시트를 엶

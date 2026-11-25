@@ -50,8 +50,9 @@
 | [ConsentCard](ConsentCard.md) | Inputs | 동의 받기 |
 | [CopyField](CopyField.md) | Inputs | 초대 코드·링크를 보여 주고 복사 |
 | [DatePicker](DatePicker.md) | Inputs | 날짜 입력(결혼식 날짜 묻기 등), 어드민 날짜·시각·기간 칸(`DatePicker`, `DateRange`, 2026-11-17) |
-| [DateSheet](DateSheet.md) | Inputs | 폼 날짜 한 줄(`DateField`) + 달력 시트(`DateSheet`, 양력/음력, ⌄ 연·월 휠, 2026-11-24) |
-| [DateWheel](DateWheel.md) | Inputs | 날짜·연도 휠(연도만 S-11i / 연·월·일 S-11h. `commitInitial`) |
+| [DateSheet](DateSheet.md) | Inputs | 폼 날짜 한 줄(`DateField`) + 달력 시트(`DateSheet`, 양력/음력, ⌄ 연·월 칸, 2026-11-24) |
+| [PickSheet](PickSheet.md) | Inputs | 한 줄 + 칸 시트(일 1~31·말일 / 연·월 / 연도 / 시, 2026-11-26 휠을 모두 대신함) |
+| [DateWheel](DateWheel.md) | Inputs | (없앰 2026-11-26) → PickSheet |
 | [PaydayPicker](PaydayPicker.md) | Inputs | 월급날 고르기(칩 10·15·20·21·25일·말일 + ‘다른 날 직접 적기’ 칸, 2026-11-25 A안). O-32·P-05b·S-11c·W-01 월급 금액 시트가 씀 |
 | [FileAttach](FileAttach.md) | Inputs | 파일 첨부 칸 |
 | [ImageCrop](ImageCrop.md) | Inputs | 프로필 사진 올리기와 자르기(S-11e) |

@@ -1,5 +1,5 @@
 import { qk, updateMe } from '@sweetwo/api';
-import { NumberWheel, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
+import { HourField, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -8,9 +8,7 @@ import { copy, hourLabel } from '../copy';
 import { useSettingsData } from '../data';
 
 // S-14a 방해 금지 시간(Q4 시각): 시작·끝 시(한국 시간). 기본 밤 10시 ~ 아침 8시. 저장 → S-14
-// 2026-11-03 기본 드롭다운 대신 시작·끝 휠 두 개를 나란히
-const HOURS = Array.from({ length: 24 }, (_, h) => h);
-
+// 2026-11-26 시작·끝 한 줄 두 개를 나란히, 누르면 시(0~23) 칸 시트(예전 휠)
 export function S14aQuiet() {
   const nav = useNavigate();
   const qc = useQueryClient();
@@ -45,10 +43,9 @@ export function S14aQuiet() {
             <span className="hg-field__label" aria-hidden="true">
               {k === 'start' ? copy.quietStart : copy.quietEnd}
             </span>
-            <NumberWheel
+            <HourField
               label={k === 'start' ? copy.quietStart : copy.quietEnd}
               value={cur[k]}
-              items={HOURS}
               format={hourLabel}
               onChange={(h) => setV({ ...cur, [k]: h })}
             />

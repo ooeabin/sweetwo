@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { fillAmount, foldAmount, pickName } from './form';
 import { mockOnboarding, seed } from './mocks';
+import { pickDay } from './wheel';
 
 // W-11 저축·투자 추가 한 화면 입력(2026-11-23, FormScreen): 필수 비활성, 직접 정하기, 자동으로 나가요 + 나가는 날, 칩 미리 고름
 const NOW = new Date('2026-10-07T10:00:00+09:00');
@@ -41,7 +42,9 @@ test('필수가 비면 추가하기 비활성, 1만 원 단위, 직접 정하기
   await axe(page);
 });
 
-test('자동으로 나가요 → 나가는 날(월급날 / 다음 날 / 휠) → 새 줄에 자동 설정', async ({ page }) => {
+test('자동으로 나가요 → 나가는 날(월급날 / 다음 날 / 한 줄 + 일 칸 시트) → 새 줄에 자동 설정', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
@@ -62,11 +65,23 @@ test('자동으로 나가요 → 나가는 날(월급날 / 다음 날 / 휠) →
     'true',
   );
   await days.getByRole('button', { name: '다음 날' }).click();
+  await expect(page.getByRole('button', { name: '나가는 날, 매달 26일' })).toBeVisible();
+  // 한 줄 → 1~31 + 말일 칸 시트(2026-11-26 휠에서 바꿈): 키보드로 옮기면 바로 고름, 주 버튼으로 확정
+  await page.getByRole('button', { name: '나가는 날, 매달 26일' }).click();
+  const dlg = page.getByRole('dialog', { name: '나가는 날' });
+  await expect(dlg.getByRole('radio', { name: '26', exact: true })).toBeChecked();
+  await dlg.getByRole('radio', { name: '26', exact: true }).press('ArrowRight');
+  await expect(dlg.getByRole('radio', { name: '27', exact: true })).toBeChecked();
+  await axe(page);
+  await dlg.getByRole('button', { name: '매달 27일로 하기' }).click();
+  await expect(page.getByRole('button', { name: '나가는 날, 매달 27일' })).toBeVisible();
+  await pickDay(page, '나가는 날', 'last');
+  await expect(page.getByRole('button', { name: '나가는 날, 매달 말일' })).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/salary\/plan/);
   const call = db.v22?.calls.find((c) => 'p_items' in (c.body as Record<string, unknown>));
-  expect(call?.body).toMatchObject({ p_items: [{ auto_pay: true, auto_day: 26 }] });
+  expect(call?.body).toMatchObject({ p_items: [{ auto_pay: true, auto_day: 31 }] });
   // 다시 월급날 확인으로 돌리면 나가는 날 칸이 사라짐
   await page.goto('/salary/items/new');
   await page.getByRole('button', { name: '비상금', exact: true }).click();

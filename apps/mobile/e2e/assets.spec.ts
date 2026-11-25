@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { type MemDb, mockOnboarding, mockRealtime } from './mocks';
-import { setWheel } from './wheel';
+import { pickYear } from './wheel';
 import { fillAmount, fillAssetName, foldAmount, foldText, openFold, pickAssetKind } from './form';
 
 /** 추가 입구: 넓은 창은 제목 줄 버튼, 좁은 창은 화면 안 회색 ‘+ … 추가’ 줄(AddRow, 2026-11-09 + 버튼 대신) */
@@ -638,7 +638,7 @@ test('자산 순위(F-08 (나)): 출생연도가 없으면 ‘출생연도 알�
   await expect(page.getByRole('heading', { name: '찬우님은 몇 년생이에요?' })).toBeVisible();
   // 처음 보이는 값(올해 − 30)으로 바로 저장할 수 있음(2026-11-13 실구동)
   await expect(page.getByRole('button', { name: '저장' })).toBeEnabled();
-  await setWheel(page, '찬우님은 몇 년생이에요?', 1993);
+  await pickYear(page, '찬우님은 몇 년생이에요?', 1993);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/assets\/rank$/);
   expect(db.me.birth_year).toBe(1993);
