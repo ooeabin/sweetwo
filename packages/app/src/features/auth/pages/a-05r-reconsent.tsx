@@ -1,6 +1,6 @@
 import { agreeTerms, fetchPendingTerms, qk } from '@sweetwo/api';
 import { formatDateFull, todayKst } from '@sweetwo/core';
-import { ConsentGroup, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
+import { ConsentGroup, ListRow, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
@@ -61,11 +61,8 @@ export function A05rReconsent() {
           }}
           onSubmit={() => void submit(true)}
         >
-          <p className="hg-help" style={{ margin: 0 }}>
-            <button type="button" className="hg-btn hg-btn--link" onClick={() => setDoc(true)}>
-              {copy.marketing.replace(/^\[선택\] /, '')} {copy.view}
-            </button>
-          </p>
+          {/* 약관 동의 화면(A-05)처럼 이름 + › 한 줄(글자 링크 아님, 2026-11-25 구역 7) */}
+          <ListRow label={copy.marketing.replace(/^\[선택\] /, '')} onClick={() => setDoc(true)} />
         </QuestionLayout>
         {doc && <ConsentDocSheet doc="marketing" onClose={() => setDoc(false)} />}
       </>

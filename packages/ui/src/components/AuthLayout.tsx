@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useLayoutEffect, useRef, type ReactNode } from 'react';
 import { Icon } from './Icon';
 import { IconButton } from './IconButton';
 import { Illustration } from './Illustration';
@@ -41,8 +41,40 @@ export function AuthLayout({
   children?: ReactNode;
   className?: string;
 }) {
+  // 아래에 붙은 버튼 묶음(과 그 위 안내 띠)이 있으면 그 위쪽까지의 높이를 --hg-bottom-bar-h로 알려 Toast가 버튼을 가리지 않고 그 위로 뜸
+  // (docs/design/components/Toast.md ‘아래 고정 바’, 2026-11-25 구역 7). 태블릿 가운데 묶음처럼 화면 아래에 붙지 않으면 알리지 않음(Toast 기본 자리)
+  const ref = useRef<HTMLElement>(null);
+  const hasActions = !!actions;
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el || !hasActions) return;
+    const root = document.documentElement;
+    const set = () => {
+      const parts = el.querySelectorAll(':scope > .hg-auth__alert, :scope > .hg-auth__actions');
+      let top = Infinity;
+      let bottom = 0;
+      parts.forEach((x) => {
+        const r = x.getBoundingClientRect();
+        top = Math.min(top, r.top);
+        bottom = Math.max(bottom, r.bottom);
+      });
+      const edge = window.innerHeight - bottom;
+      if (parts.length && edge < 160 && top < window.innerHeight)
+        root.style.setProperty('--hg-bottom-bar-h', `${Math.round(window.innerHeight - top)}px`);
+      else root.style.removeProperty('--hg-bottom-bar-h');
+    };
+    set();
+    const ro = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(set);
+    ro?.observe(el);
+    window.addEventListener('resize', set);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener('resize', set);
+      root.style.removeProperty('--hg-bottom-bar-h');
+    };
+  }, [hasActions, alert]);
   return (
-    <main className={className ? `hg-auth ${className}` : 'hg-auth'}>
+    <main ref={ref} className={className ? `hg-auth ${className}` : 'hg-auth'}>
       {onBack && (
         <div className="hg-auth__back">
           <IconButton icon="chevron-left" label="뒤로" ghost className="hg-back" onClick={onBack} />

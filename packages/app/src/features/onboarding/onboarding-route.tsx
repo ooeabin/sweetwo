@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { track } from '../../shared/analytics';
+import { RouteLoadingFrame } from '../frame';
 import { isJoinScreen } from '../pairing';
 import { useMe, useSpace } from './data';
 import { firstSavingPath } from './first-saving-resume';
@@ -108,11 +109,18 @@ export function OnboardingGate({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (me.data) savingResumeChecked = true;
   }, [me.data]);
-  // 모든 화면을 감싸는 문이라 뼈대 없이(어느 화면 모양인지 모름, 보통 A-01에서 이미 불러옴)
-  if (me.isLoading) return null;
+  // 모든 화면을 감싸는 문이라 어느 화면인지는 주소로(2026-11-25 구역 7: 빈 화면 대신 화면 모양 뼈대, 0.3초 안이면 아무것도 안 보임).
+  // 계정을 못 받았고 받아 둔 것도 없으면(서버 오류) 같은 틀에 오류 + 다시 시도(13 공통 상태 7번)
+  if (!me.data && (me.isLoading || me.isError))
+    return (
+      <RouteLoadingFrame
+        failed={me.errorUpdateCount > 0 && !me.isFetching}
+        onRetry={() => void me.refetch()}
+      />
+    );
   const step = current(me.data?.onboarding_step ?? FIRST);
   const open = !!me.data && !me.data.onboarding_done_at;
-  if (open && isOnboardingScreen(step) && space.isLoading) return null;
+  if (open && isOnboardingScreen(step) && space.isLoading) return <RouteLoadingFrame />;
   const to =
     open && isOnboardingScreen(step)
       ? `/onboarding/${step}`

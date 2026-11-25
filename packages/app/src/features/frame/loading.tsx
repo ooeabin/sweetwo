@@ -1,5 +1,7 @@
 import { Skel, SkelRows, useDelayed, type AppTab } from '@sweetwo/ui';
+import { useLocation } from 'react-router-dom';
 import { MainFrame } from './frame';
+import { LoadErrorCard } from './load-error';
 
 /**
  * 뼈대 모양(docs/design/components/Skeleton.md). 2026-11-04 화면 모양별(당근·대형 금융 앱처럼):
@@ -109,22 +111,62 @@ export function SkelBody({ shape }: { shape: SkelShape }) {
 
 /**
  * 불러오는 중(19 예외, 13 공통 상태 5번): 0.3초 넘으면 실제 화면 모양 뼈대, 그 전엔 빈 본문.
+ * failed면(7번, 2026-11-25 구역 7 CS-07) 같은 앱 틀 안 본문 자리에 “잠시 문제가 생겼어요” + ‘다시 시도’(onRetry).
+ * 뼈대와 오류가 같은 틀 한 벌이라 다시 시도해도 틀이 다시 만들어지지 않음(만들어지며 또 요청하는 되풀이 없음)
  */
 export function LoadingFrame({
   current,
   sub,
   shape,
+  failed,
+  onRetry,
 }: {
   current: AppTab | null;
   /** 상세·설정 하위 화면(앱 머리 없이 ‹ 제목) */
   sub?: 'detail' | 'settings';
   shape?: SkelShape;
+  /** 못 받음(받아 둔 것도 없음): 뼈대 대신 오류 카드 */
+  failed?: boolean;
+  onRetry?: () => void;
 }) {
   const s = shape ?? (sub ? 'list' : current === 'month' ? 'home' : 'cards');
   // 홈만 회색 바탕(2026-11-24 사용자 결정, 그 밖은 모두 흰 바탕)
   const tone = !sub && current === 'month' ? 'alt' : undefined;
   return (
-    <MainFrame current={current} sub={sub} tone={tone} columns={[<SkelBody key="l" shape={s} />]} />
+    <MainFrame
+      current={current}
+      sub={sub}
+      tone={tone}
+      columns={[
+        failed && onRetry ? (
+          <LoadErrorCard key="l" onRetry={onRetry} />
+        ) : (
+          <SkelBody key="l" shape={s} />
+        ),
+      ]}
+    />
+  );
+}
+
+/**
+ * 화면 문(OnboardingGate)이 계정을 처음 받는 동안(13 공통 상태 5번, 2026-11-25 구역 7 CS-05): 빈 화면 대신 주소로 알 수 있는 화면 모양 뼈대.
+ * 탭 첫 화면(홈·월급·자산 관리·캘린더)은 그 탭 모양, 그 밖은 상세 모양. 못 받으면(failed) 같은 틀에 오류 + 다시 시도
+ */
+export function RouteLoadingFrame({ failed, onRetry }: { failed?: boolean; onRetry?: () => void }) {
+  const { pathname } = useLocation();
+  const p = { failed, onRetry };
+  if (pathname === '/') return <LoadingFrame current="month" {...p} />;
+  if (pathname === '/salary' || pathname === '/salary/plan')
+    return <LoadingFrame current="salary" shape="cards" {...p} />;
+  if (pathname === '/assets') return <LoadingFrame current="assets" shape="cards" {...p} />;
+  if (pathname === '/assets/items') return <LoadingFrame current="assets" shape="rows" {...p} />;
+  if (pathname === '/calendar') return <LoadingFrame current="calendar" shape="calendar" {...p} />;
+  return (
+    <LoadingFrame
+      current={null}
+      sub={pathname.startsWith('/settings') ? 'settings' : 'detail'}
+      {...p}
+    />
   );
 }
 

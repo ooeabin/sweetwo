@@ -28,7 +28,8 @@ export function App({ platform }: { platform: Platform }) {
   const [queryClient] = useState(() => {
     initSession(platform);
     bindQueryOnline();
-    return new QueryClient();
+    // 서버 오류는 읽기 요청 자체가 이미 몇 번 다시 보내므로(postgrest-js) 화면 단위 재시도는 한 번만: 못 받으면 오래 뼈대에 머물지 않고 CS-07 + 다시 시도(2026-11-25)
+    return new QueryClient({ defaultOptions: { queries: { retry: 1 } } });
   });
   const [router] = useState(() => createBrowserRouter(routes));
   // 로그아웃하면 앞 계정 화면 데이터를 메모리에서 모두 비움(features/auth sign-out.ts, 2026-11-10)
