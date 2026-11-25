@@ -1,6 +1,6 @@
 import { fetchMoneyIns, fetchPastChecklists, qk } from '@sweetwo/api';
 import { archiveRow, formatMonthDay, pastPeriods, todayKst } from '@sweetwo/core';
-import { EmptyState, ListRow, PageHeader, SkelRows } from '@sweetwo/ui';
+import { Button, EmptyState, ListRow, PageHeader, SkelRows } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -10,7 +10,7 @@ import { speakMasked } from '../../../shared/masked-text';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { baseDayOf, cycleName, useShownPayday } from '../cycle';
-import { useChecklists, useMe, useSpace } from '../data';
+import { useChecklists, useMe, useSpace, useSplits } from '../data';
 import { salaryPaths, togetherPaths } from '../paths';
 import { lateLines, lateOpen } from './w-02-last-month';
 
@@ -24,6 +24,7 @@ export function W21MonthArchive() {
   const me = useMe();
   const space = useSpace();
   const lists = useChecklists();
+  const splits = useSplits();
   const shownPayday = useShownPayday();
   const { masked } = useMask();
   const today = todayKst();
@@ -48,6 +49,10 @@ export function W21MonthArchive() {
     (ins.data ?? []).filter((r) => r.owner_user_id === meId),
     today,
   );
+  // 월급 계획이 없음 = W-02 빈 상태와 같은 기준(확인 목록에 들어갈 0원 아닌 줄이 없음, 2026-11-25)
+  const hasPlan = (splits.data ?? [])
+    .find((x) => x.owner_user_id === owner)
+    ?.split_line.some((l) => l.in_checklist && l.amount > 0);
   const rowCount = periodMode ? periods.length : (past.data?.length ?? 0);
   const loaded = periodMode ? ins.isSuccess : past.isSuccess;
   const sent = useRef(false);
@@ -105,7 +110,20 @@ export function W21MonthArchive() {
           ]}
         />
       ) : rowCount === 0 ? (
-        <EmptyState list page title={copy.archiveEmpty} />
+        // 다음 행동(2026-11-25 사용자 확정): 월급 계획이 없으면 “+ 월급 계획 세우기” → W-01, 있으면 안내 문구만
+        <EmptyState
+          list
+          page
+          title={copy.archiveEmpty}
+          body={splits.isSuccess && hasPlan && !periodMode ? copy.archiveEmptyWait : undefined}
+          action={
+            splits.isSuccess && !hasPlan && !periodMode ? (
+              <Button variant="secondary" size="sm" onClick={() => nav(salaryPaths.plan)}>
+                {copy.archiveEmptyPlan}
+              </Button>
+            ) : undefined
+          }
+        />
       ) : periodMode ? (
         <div className="hg-list">
           {periods.map((p) =>

@@ -1,6 +1,6 @@
 import { maskMoney, notiGroup, notiTime } from '@sweetwo/core';
 import { useOnline } from '../../shared/online';
-import { leadOf, NotificationPanel } from '@sweetwo/ui';
+import { Button, leadOf, NotificationPanel } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchRevertibleNotifications, qk, revertPartnerChange, RevertGone } from '@sweetwo/api';
 import { track } from '../../shared/analytics';
@@ -80,6 +80,13 @@ export function NotiView({ variant, onClose }: { variant: 'sheet' | 'page'; onCl
     items: rows.filter((n) => notiGroup(n.created_at, now) === key).map(item),
   }));
 
+  // 알림 화면(page)은 닫지(뒤로 가지) 않고 그대로 두고 앞으로: 닫으면 뒤로 가기가 설정 이동을 이겨 홈에 남았고,
+  // 알림 설정 ‹가 알림으로 돌아오게 하려면 알림 화면이 기록에 남아 있어야 함(2026-11-16)
+  const goSettings = () => {
+    if (variant !== 'page') onClose();
+    nav('/settings/notifications');
+  };
+
   return (
     <NotificationPanel
       variant={variant}
@@ -106,17 +113,20 @@ export function NotiView({ variant, onClose }: { variant: 'sheet' | 'page'; onCl
           </p>
         )
       }
+      after={
+        // 알림이 거의 없을 때(3개 이하, 더 불러올 것 없음) 다음 행동 하나(2026-11-25 사용자 확정): 알림 종류 고르기 → S-xx 알림 설정
+        rows.length > 0 && rows.length <= 3 && !list.hasNextPage ? (
+          <Button variant="secondary" size="sm" onClick={goSettings}>
+            {copy.pickKinds}
+          </Button>
+        ) : undefined
+      }
       onItem={(id) => {
         const n = rows.find((x) => x.id === id);
         if (n) void open(n);
       }}
       onReadAll={() => void markRead(qc)}
-      onSettings={() => {
-        // 알림 화면(page)은 닫지(뒤로 가지) 않고 그대로 두고 앞으로: 닫으면 뒤로 가기가 설정 이동을 이겨 홈에 남았고,
-        // 알림 설정 ‹가 알림으로 돌아오게 하려면 알림 화면이 기록에 남아 있어야 함(2026-11-16)
-        if (variant !== 'page') onClose();
-        nav('/settings/notifications');
-      }}
+      onSettings={goSettings}
       onClose={onClose}
       onEnd={list.hasNextPage ? () => void list.fetchNextPage() : undefined}
       more={list.isFetchingNextPage}

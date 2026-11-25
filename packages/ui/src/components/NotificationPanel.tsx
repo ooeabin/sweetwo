@@ -40,6 +40,8 @@ export function NotificationPanel(p: {
   error?: { text: string; retry: string; onRetry: () => void };
   /** 맨 위 회색 안내 띠(오프라인 등) */
   notice?: ReactNode;
+  /** 목록 아래 다음 행동 하나(알림이 거의 없을 때 ‘알림 종류 고르기’, 2026-11-25). 목록이 있을 때만 그림 */
+  after?: ReactNode;
   onItem: (id: string) => void;
   onReadAll: () => void;
   onSettings?: () => void;
@@ -231,6 +233,7 @@ export function NotificationPanel(p: {
                 </section>
               ))}
             {p.more && skeleton(2)}
+            {p.after && <div className="hg-noti__after">{p.after}</div>}
             <div ref={end} aria-hidden="true" style={{ height: 1 }} />
           </>
         )}

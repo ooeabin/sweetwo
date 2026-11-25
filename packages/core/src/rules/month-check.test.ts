@@ -79,11 +79,11 @@ describe('W-02 다 확인 상태', () => {
     expect(doneState([L('wait', 1, { auto: true })])).toBeNull();
     expect(doneState([])).toBeNull();
   });
-  it('자동 줄뿐인 달: 모두 확인됐으면 all, 건너뜀·다른 금액이면 mixed, 나가는 날 전이 있으면 null', () => {
+  it('자동 줄뿐인 달(손 줄 0개)은 모두 확인됐어도 다 확인 상태가 아님(2026-11-25): 첫날 축하 화면 오류', () => {
     const a = (state: string, o: object = {}) => L(state, 1, { auto: true, ...o });
-    expect(doneState([a('checked'), a('checked')])).toBe('all');
-    expect(doneState([a('checked'), a('skipped')])).toBe('mixed');
-    expect(doneState([a('checked', { actual: 50 })])).toBe('mixed');
+    expect(doneState([a('checked'), a('checked')])).toBeNull();
+    expect(doneState([a('checked'), a('skipped')])).toBeNull();
+    expect(doneState([a('checked', { actual: 50 })])).toBeNull();
     expect(doneState([a('checked'), a('wait')])).toBeNull();
   });
   it('저축·투자 합 = 확인한 저축·투자 줄(다른 금액 반영, 건너뜀 0)', () => {

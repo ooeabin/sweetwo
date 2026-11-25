@@ -91,15 +91,16 @@ test('월급 0원 + 기록 없음: W-02 한 줄 값 0원, W-20b 큰 금액 0원 
   await expect(page.getByText(/^\+/)).toHaveCount(0);
 });
 
-test('템플릿 줄 0개: 한 덩어리 안내 + 주 버튼 → 월급 계획 템플릿', async ({ page }) => {
+test('템플릿 줄 0개: 3단계 안내 + 주 버튼 → 월급 계획 템플릿', async ({ page }) => {
   await open(page, (db) => {
     const list = db.checklists[0];
     if (list) list.pay_check_line = [];
   });
-  await expect(page.getByText('350만 원을 나눠서')).toBeVisible();
-  await expect(page.getByText('월급 계획 템플릿을 완성해 주세요')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: '월급날마다 여기서 한 번에 확인해요' }),
+  ).toBeVisible();
   await expect(page.getByRole('group', { name: '이번 달 수입' })).toHaveCount(0);
   await expect(page.getByText('월급 계획 템플릿에서 항목을 추가해 주세요')).toHaveCount(0);
-  await page.getByRole('button', { name: '월급 계획 템플릿 채우기' }).click();
+  await page.getByRole('button', { name: '월급 계획 세우기' }).click();
   await expect(page).toHaveURL(/\/salary\/plan/);
 });

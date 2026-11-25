@@ -759,7 +759,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-stackbar { display: flex; gap: 2px; height: 12px; border-radius: var(--radius-full); overflow: hidden; }
 .hg-stackbar span { display: block; height: 100%; }
 .hg-breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
-.hg-breakdown__row { display: flex; flex-direction: column; gap: 2px; padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--surface-alt); }
+.hg-breakdown__row { display: flex; flex-direction: column; gap: 2px; padding: var(--space-3) var(--space-4); border-radius: var(--radius-xl); background: var(--surface-alt); }
 .hg-breakdown__name { display: flex; align-items: center; gap: var(--space-2); font: var(--text-caption); color: var(--slate); }
 .hg-breakdown__name i { width: 8px; height: 8px; border-radius: var(--radius-full); }
 .hg-breakdown__val { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); font: var(--text-title-3); }
@@ -2732,16 +2732,31 @@ button.hg-datepill { cursor: pointer; }
 .hg-transfer--act.is-view.is-done .hg-transfer__label, .hg-transfer--act.is-view.is-done .hg-transfer__amount, .hg-transfer--act.is-view.is-done .hg-transfer__meta { color: var(--stone); }
 /* 빈 목록 안내(W-02 파트너 보기, 2026-11-23): 가운데 회색 글자 한 줄 */
 .hg-checklist__none { margin: 0; padding: var(--space-8) 0; text-align: center; font: var(--text-body); color: var(--slate); }
-.hg-empty--plan { flex: 1 1 auto; justify-content: center; padding-left: 0; padding-right: 0; }  /* 문장 자리가 앱 틀 본문 영역의 남는 높이를 채워 주 버튼(`hg-stickybar`)이 화면 아래에 오게 함 */
-/* 2026-11-20 빈 계획 화면 스크롤 수정: 예전 min-height(100dvh - 320px)는 머리·여백·주 버튼 위에 더해져 한 화면에 들어가는 내용도 스크롤이 생겼다. 틀부터 본문 칸까지 세로 flex로 이어 남는 높이만 채움(내용이 더 길면 그때만 스크롤) */
-.hg-frame:has(.hg-empty--plan) { align-items: stretch; }
-.hg-frame__main:has(.hg-empty--plan) { display: flex; flex-direction: column; }
-.hg-frame__main:has(.hg-empty--plan) > .hg-body { flex: 1 1 auto; display: flex; flex-direction: column; align-items: stretch; width: 100%; }  /* 2026-11-20 주 버튼 폭 수정: 본문(`hg-body`)의 grid용 align-items: start가 flex 열로 바뀌면 가로 줄이기가 돼 주 버튼이 내용 폭(260px)으로 좁아졌다. 가로는 stretch, 세로 flex 안 margin: 0 auto 칸은 width: 100%. 가운데 정렬은 문장 묶음(hg-empty)에만 */
-.hg-frame__main:has(.hg-empty--plan) > .hg-body > .hg-body__col { flex: 1 1 auto; }
-.hg-frame__main:has(.hg-empty--plan) .hg-body__col > .hg-stack { flex: 1 1 auto; }
-@media (max-width: 767px) { .hg-frame:has(.hg-empty--plan) { display: flex; flex-direction: column; } .hg-frame:has(.hg-empty--plan) > .hg-frame__main { flex: 1 1 auto; } }
-.hg-empty--plan .hg-empty__title { font: var(--text-title-2); letter-spacing: -0.3px; }
-.hg-empty--plan .hg-empty__title > span { display: block; }
+/* W-02 월급 계획이 없을 때 3단계 안내(2026-11-25 사용자 확정 첫 사용 화면, 예전 한 문장 `hg-empty--plan` 대체): 왼쪽 정렬 날짜 태그 + 큰 제목 + 보조 + 번호 3단계 + 회색 ‘이렇게 보여요(예시)’ 판. 글자는 34/22/17/15/13 다섯 크기, 굵기 400·700, 오렌지 없음(주 버튼만). 그림 자리 없음 */
+.hg-w02guide { flex: 1 1 auto; display: flex; flex-direction: column; gap: var(--gap-area); padding-top: var(--space-4); }  /* 문장 자리가 앱 틀 본문 영역의 남는 높이를 채워 주 버튼(`hg-stickybar`)이 화면 아래에 오게 함 */
+.hg-w02guide__head { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); }
+.hg-w02guide__head > * { margin: 0; }
+.hg-w02guide__tag { font: var(--text-value); color: var(--slate); }
+.hg-w02guide__title { font: var(--text-amount-lg); letter-spacing: -0.3px; word-break: keep-all; text-wrap: balance; }
+.hg-w02guide__sub { font: var(--text-value); color: var(--slate); word-break: keep-all; }
+.hg-w02guide__steps { display: flex; flex-direction: column; gap: var(--space-6); margin: 0; padding: 0; list-style: none; }
+.hg-w02guide__step { display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: var(--space-4); align-items: start; }
+.hg-w02guide__num { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink); font: var(--text-value); font-weight: 700; }  /* 번호 원은 그래픽, 뜻은 순서 목록(ol)이 전함 */
+.hg-w02guide__step-title { margin: 0; font: var(--text-amount); word-break: keep-all; }
+.hg-w02guide__step-sub { margin: 0; font: var(--text-note); color: var(--slate); word-break: keep-all; }
+.hg-w02guide__sample { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-radius: var(--radius-xl); background: var(--surface-alt); }
+.hg-w02guide__sample-label { margin: 0; font: var(--text-note); color: var(--slate); }
+.hg-w02guide__sample-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-3); font: var(--text-name); color: var(--slate); }  /* 흐린 줄은 글자 색(slate)으로 흐리게(opacity는 대비 검사에 걸림) */
+.hg-w02guide__sample-row > b { font: var(--text-amount); }
+.hg-w02guide__sample-row > i { display: block; width: 24px; height: 24px; border-radius: var(--radius-full); background: var(--bar-track); box-shadow: inset 0 0 0 2px var(--hairline); }
+.hg-w02guide__sample-row > span:last-child { font: var(--text-value); }
+/* 2026-11-20 빈 계획 화면 스크롤 수정: 틀부터 본문 칸까지 세로 flex로 이어 남는 높이만 채움(내용이 더 길면 그때만 스크롤) */
+.hg-frame:has(.hg-w02guide) { align-items: stretch; }
+.hg-frame__main:has(.hg-w02guide) { display: flex; flex-direction: column; }
+.hg-frame__main:has(.hg-w02guide) > .hg-body { flex: 1 1 auto; display: flex; flex-direction: column; align-items: stretch; width: 100%; }  /* 2026-11-20 주 버튼 폭 수정: 본문(`hg-body`)의 grid용 align-items: start가 flex 열로 바뀌면 가로 줄이기가 돼 주 버튼이 내용 폭으로 좁아졌다. 가로는 stretch */
+.hg-frame__main:has(.hg-w02guide) > .hg-body > .hg-body__col { flex: 1 1 auto; }
+.hg-frame__main:has(.hg-w02guide) .hg-body__col > .hg-stack { flex: 1 1 auto; }
+@media (max-width: 767px) { .hg-frame:has(.hg-w02guide) { display: flex; flex-direction: column; } .hg-frame:has(.hg-w02guide) > .hg-frame__main { flex: 1 1 auto; } }
 .hg-stickybar { position: sticky; bottom: 0; z-index: 1; margin-top: var(--space-4); padding: var(--gap-area) 0 calc(var(--space-3) + env(safe-area-inset-bottom, 0px)); background: var(--surface); }  /* 2026-11-24 주 버튼 위 간격: 바 위쪽 32px(--gap-area)는 바탕색으로 꽉 채워 스크롤 중에도 내용이 버튼 윗변 32px 안으로 안 들어오게 하고, 그 위 16px은 ::before가 투명 → 바탕으로 부드럽게 가림(예전: 위 24px 안에서 그라데이션이라 내용이 버튼 바로 위에 붙어 보임). 버튼 크기·아래 여백·안전 영역은 그대로 */
 .hg-stickybar::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: var(--space-4); background: linear-gradient(to bottom, transparent, var(--surface)); pointer-events: none; }
 .hg-stickybar--pair { display: flex; flex-direction: column; gap: var(--space-2); }  /* 2026-11-24 구역 5: 보조 버튼 위 + 주 버튼 아래(S-12a ‘먼저 내보내기’, S-19b ‘거절할게요’) */
@@ -3158,3 +3173,8 @@ button.hg-datepill { cursor: pointer; }
 
 /* ── AmountInput 읽기 줄 자리(2026-11-25 구역 6 O-31·P-05): “350만 원”이 나타나도 아래 칩이 밀리지 않게 빈 값일 때도 한 줄(13/18) 자리를 잡음 ── */
 .hg-amountin > .hg-help { display: block; min-height: 18px; }
+
+/* 첫 사용 화면 빈 상태의 다음 행동 하나(2026-11-25 사용자 확정): 빈 상태 아래 회색 보조 버튼 `hg-btn--secondary hg-btn--sm`(글자 700), 누르는 칸 44px */
+.hg-empty .hg-btn--sm, .hg-noti__after .hg-btn--sm { min-height: 44px; }
+.hg-empty > .hg-btn--sm { margin-top: var(--space-2); }
+.hg-noti__after { display: flex; padding: var(--space-4) var(--space-3) 0; }  /* N-01 알림이 거의 없을 때 목록 아래 ‘알림 종류 고르기’(왼쪽 줄 글자와 같은 시작) */

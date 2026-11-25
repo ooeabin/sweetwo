@@ -68,6 +68,7 @@ import {
   useShownPayday,
   myChecklist,
   salaryChangedDay,
+  togetherPaths,
   useChecklists,
   useCheckRealtime,
   useGoalRealtime,
@@ -213,6 +214,7 @@ export function H01Home() {
         : { goalId: first.goal.id }
       : null,
   );
+  const noNotes = !!heroNotes.data && !heroNotes.data.some((n) => !n.paid && !n.deleted_at);
 
   // 홈 화면 위젯(26 v2.2): H-10 첫 칸과 H-08 다가오는 날을 금액 없이 브리지로(모바일 앱만, 값이 바뀔 때만)
   useWidgetSync(
@@ -808,13 +810,19 @@ export function H01Home() {
         key="wedding"
         notes={heroNotes.data ?? []}
         today={today}
+        hasSaving={!!first}
         onClick={() =>
           go(
             'wedding',
+            // 안 낸 쓸 곳 메모가 0개면 바로 쓸 곳 메모 추가(W-14a), 있으면 목록(W-14). 저금이 하나도 없으면 메모를 붙일 곳이 없어 저축·투자 추가(2026-11-25)
             first?.kind === 'bundle'
-              ? `/salary/bundles/${first.bundle.id}/notes`
+              ? noNotes
+                ? togetherPaths.bundleNote(first.bundle.id, 'new')
+                : `/salary/bundles/${first.bundle.id}/notes`
               : first
-                ? `/salary/items/${first.goal.id}/notes`
+                ? noNotes
+                  ? togetherPaths.note(first.goal.id, 'new')
+                  : `/salary/items/${first.goal.id}/notes`
                 : '/salary/items/new?from=home',
           )
         }

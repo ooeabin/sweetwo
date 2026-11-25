@@ -1,5 +1,5 @@
 import { formatDateFull, giftRepeated } from '@sweetwo/core';
-import { EmptyState, LineTabs, ListRow, PageHeader, SectionHeader } from '@sweetwo/ui';
+import { Button, EmptyState, LineTabs, ListRow, PageHeader, SectionHeader } from '@sweetwo/ui';
 import { fetchCarePhotos, qk } from '@sweetwo/api';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -9,6 +9,7 @@ import { usePhotoUrls } from '../../../shared/photo';
 import { LoadingFrame, MainFrame } from '../../frame';
 import { copy } from '../copy';
 import { useCalendarData } from '../data';
+import { startCareAdd } from './y-07-care-add';
 
 type View = 'care' | 'year';
 const VIEW_KEY = 'sweetwo.gift-view';
@@ -79,7 +80,24 @@ export function Y09GiftLog() {
         ]}
       />
       {!rows.length ? (
-        <EmptyState list title={copy.giftedEmpty} body={copy.giftedEmptyBody} />
+        <EmptyState
+          list
+          title={copy.giftedEmpty}
+          body={copy.giftedEmptyBody}
+          action={
+            // 다음 행동 하나(2026-11-25 사용자 확정): 기념일을 먼저 적어 두면 그날 한 일이 여기에 모임 → Y-07
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                startCareAdd();
+                nav('/calendar/add/a');
+              }}
+            >
+              {copy.giftedEmptyAdd}
+            </Button>
+          }
+        />
       ) : (
         groups.map((g) => (
           <section key={g.key} className="hg-stack" aria-label={g.title}>

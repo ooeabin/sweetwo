@@ -189,9 +189,9 @@ test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 �
   await expect(tl.locator('.hg-listrow').nth(2)).toContainText('같이 모을 사람을 초대해 보세요');
   await axe(page);
   await page.keyboard.press('Escape');
-  // H-12: 메모가 없으면 “+ 쓸 곳 메모 추가”
+  // H-12: 저축·투자가 하나도 없으면 쓸 곳 메모를 붙일 곳이 없어 “+ 저축·투자 추가”(2026-11-25, 예전엔 “+ 쓸 곳 메모 추가”인데 저축·투자 추가로 감)
   await expect(page.getByRole('button', { name: /^결혼 준비 메모,/ })).toContainText(
-    '+ 쓸 곳 메모 추가',
+    '+ 저축·투자 추가',
   );
   await axe(page);
   // 띠 → W-01 저축·투자 묶음 빈 상태
