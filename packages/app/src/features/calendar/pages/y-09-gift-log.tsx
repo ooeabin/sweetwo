@@ -83,7 +83,6 @@ export function Y09GiftLog() {
         <EmptyState
           list
           title={copy.giftedEmpty}
-          body={copy.giftedEmptyBody}
           action={
             // 다음 행동 하나(2026-11-25 사용자 확정): 기념일을 먼저 적어 두면 그날 한 일이 여기에 모임 → Y-07
             <Button

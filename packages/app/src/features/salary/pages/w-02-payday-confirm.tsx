@@ -869,8 +869,8 @@ function HeroWithBurst({
 }
 
 /**
- * 월급 계획이 없어 템플릿 줄이 하나도 없을 때(20 W-02 0b, 2026-11-25 사용자 확정 ‘첫 사용 화면’): 작은 날짜 태그 + 큰 제목 + 보조 +
- * 번호 3단계 + 회색 ‘이렇게 보여요(예시)’ 판 + 아래 고정 주 버튼 “월급 계획 세우기”(→ W-01). 그림 자리 없음, 오렌지는 주 버튼만
+ * 월급 계획이 없어 템플릿 줄이 하나도 없을 때(20 W-02 0b, 2026-11-25 사용자 확정 B안): 작은 날짜 태그 + 큰 제목 +
+ * 번호 3줄(설명 줄 없음) + 흐려지는 예시 판(aria-hidden) + 아래 고정 주 버튼 “월급 계획 세우기”(→ W-01). 그림 자리 없음, 오렌지는 주 버튼만
  */
 function EmptyPlan({ tag, onFill }: { tag: ReactNode; onFill: () => void }) {
   return (
@@ -879,29 +879,28 @@ function EmptyPlan({ tag, onFill }: { tag: ReactNode; onFill: () => void }) {
         <div className="hg-w02guide__head">
           {tag}
           <h2 id="w02-guide-title" className="hg-w02guide__title">
-            {copy.guideTitle[0]} <br />
-            {copy.guideTitle[1]}
+            {copy.guideTitle}
           </h2>
-          <p className="hg-w02guide__sub">{copy.guideSub}</p>
         </div>
         <ol className="hg-w02guide__steps">
-          {copy.guideSteps.map((st, i) => (
-            <li key={st.title} className="hg-w02guide__step">
+          {copy.guideSteps.map((t, i) => (
+            <li key={t} className="hg-w02guide__step">
               <span className="hg-w02guide__num" aria-hidden="true">
                 {i + 1}
               </span>
-              <div>
-                <p className="hg-w02guide__step-title">{st.title}</p>
-                <p className="hg-w02guide__step-sub">{st.sub}</p>
-              </div>
+              <span className="hg-w02guide__step-title">{t}</span>
             </li>
           ))}
         </ol>
-        <div className="hg-w02guide__sample" role="group" aria-label={copy.guideSampleLabel}>
-          <p className="hg-w02guide__sample-label">{copy.guideSampleLabel}</p>
+        <p className="hg-sr">{copy.guideSampleSr}</p>
+        <div className="hg-w02guide__sample" aria-hidden="true">
+          <div className="hg-w02guide__sample-head">
+            <span>{copy.guideSampleHead}</span>
+            <span>{copy.guideSampleTag}</span>
+          </div>
           {copy.guideSample.map((r) => (
             <div key={r.name} className="hg-w02guide__sample-row">
-              <i aria-hidden="true" />
+              <i />
               <span>{r.name}</span>
               {r.auto ? <span>{r.value}</span> : <b>{r.value}</b>}
             </div>

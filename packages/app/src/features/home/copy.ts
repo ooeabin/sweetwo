@@ -124,7 +124,7 @@ export const copy = {
   /** H-08 보조 줄(2026-11-24 구역 4: 일정 이름 + D-day “{이름} D-2”, H-16과 같은 첫 항목, 당일 “{이름} 오늘”, 없음 null) [확인 필요] */
   nextSchedule: (next: { name: string; days: number } | null) =>
     next === null
-      ? '기념일을 적어 두면 미리 알려 드려요' // 2026-11-25 사용자 확정(예전 “다가오는 일정이 없어요”)
+      ? '기념일을 적어 보세요' // 2026-11-25 사용자 확정(예전 “다가오는 일정이 없어요”)
       : next.days === 0
         ? `${next.name} 오늘`
         : `${next.name} D-${next.days}`,

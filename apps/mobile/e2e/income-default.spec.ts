@@ -96,9 +96,7 @@ test('템플릿 줄 0개: 3단계 안내 + 주 버튼 → 월급 계획 템플�
     const list = db.checklists[0];
     if (list) list.pay_check_line = [];
   });
-  await expect(
-    page.getByRole('heading', { name: '월급날마다 여기서 한 번에 확인해요' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: '월급날 루틴, 한 번에 끝내요' })).toBeVisible();
   await expect(page.getByRole('group', { name: '이번 달 수입' })).toHaveCount(0);
   await expect(page.getByText('월급 계획 템플릿에서 항목을 추가해 주세요')).toHaveCount(0);
   await page.getByRole('button', { name: '월급 계획 세우기' }).click();

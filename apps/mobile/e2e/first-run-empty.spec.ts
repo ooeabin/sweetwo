@@ -66,31 +66,29 @@ const joint = (db: MemDb) => {
   for (const g of db.goals) g.owner_user_id = null;
 };
 
-test('W-02 빈 상태: 날짜 태그 + 큰 제목 + 보조 + 번호 3단계 + 예시 판 + 아래 주 버튼 “월급 계획 세우기”', async ({
+test('W-02 빈 상태: 날짜 태그 + 큰 제목 + 번호 3줄 + 예시 판 + 아래 주 버튼 “월급 계획 세우기”', async ({
   page,
 }) => {
   await open(page, clearPlan, '/salary');
-  await expect(
-    page.getByRole('heading', { name: '월급날마다 여기서 한 번에 확인해요' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: '월급날 루틴, 한 번에 끝내요' })).toBeVisible();
   await expect(page.locator('.hg-w02guide__tag')).toHaveText(/월급$/);
-  await expect(page.getByText('월급 계획을 세우면 확인할 것이 생겨요')).toBeVisible();
-  // 번호 3단계(순서 목록)
+  // 설명 문장은 없음
+  await expect(page.getByText('월급 계획을 세우면 확인할 것이 생겨요')).toHaveCount(0);
   const steps = page.locator('.hg-w02guide__step');
   await expect(steps).toHaveCount(3);
-  await expect(steps.nth(0)).toContainText('월급을 어디에 나눌지 정해요');
-  await expect(steps.nth(0)).toContainText('저축·투자, 매달 나가는 지출');
-  await expect(steps.nth(1)).toContainText('월급날 이 화면에 목록이 생겨요');
-  await expect(steps.nth(1)).toContainText('자동으로 나가는 건 앱이 알아서 확인해요');
-  await expect(steps.nth(2)).toContainText('한 번에 ‘모두 계획대로 됐어요’');
-  await expect(steps.nth(2)).toContainText('모은 금액이 바로 쌓여요');
-  // 예시 판: 흐린 줄 둘
-  const sample = page.getByRole('group', { name: '이렇게 보여요(예시)' });
+  await expect(steps.nth(0)).toHaveText('1어디에 쓸지 미리 정해두세요');
+  await expect(steps.nth(1)).toHaveText('2월급날이 되면 목록이 자동으로 떠요');
+  await expect(steps.nth(2)).toHaveText('3하나씩 체크 하면 끝!');
+  // 예시 판: 화면 읽기에서는 숨김, 머리 + 흐린 줄 둘
+  const sample = page.locator('.hg-w02guide__sample');
+  await expect(sample).toHaveAttribute('aria-hidden', 'true');
+  await expect(sample.locator('.hg-w02guide__sample-head')).toContainText('확인할 것 2');
+  await expect(sample.locator('.hg-w02guide__sample-head')).toContainText('예시');
   await expect(sample).toContainText('비상금');
   await expect(sample).toContainText('30만 원');
   await expect(sample).toContainText('월세');
   await expect(sample).toContainText('자동으로 나가요');
-  // 바탕 기준: 제목 22/700, 단계 제목 17/700, 보조 13/400, 번호 원 안 15/700
+  // 바탕 기준: 제목 22/700, 번호 13/700, 문구 15/400, 태그 13/400
   const font = (sel: string) =>
     page
       .locator(sel)
@@ -100,20 +98,14 @@ test('W-02 빈 상태: 날짜 태그 + 큰 제목 + 보조 + 번호 3단계 + �
         return `${c.fontSize}/${c.fontWeight}`;
       });
   expect(await font('.hg-w02guide__title')).toBe('22px/700');
-  expect(await font('.hg-w02guide__step-title')).toBe('17px/700');
-  expect(await font('.hg-w02guide__step-sub')).toBe('13px/400');
+  expect(await font('.hg-w02guide__num')).toBe('13px/700');
+  expect(await font('.hg-w02guide__step-title')).toBe('15px/400');
+  expect(await font('.hg-w02guide__tag')).toBe('13px/400');
   // 예전 한 문장 안내와 칩·수입 카드는 없음
   await expect(page.getByText('월급 계획 템플릿을 완성해 주세요')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^전체/ })).toHaveCount(0);
-  // 오렌지 채움은 주 버튼뿐: 번호 원은 회색 판
-  const bg = await page
-    .locator('.hg-w02guide__num')
-    .first()
-    .evaluate((el) => getComputedStyle(el).backgroundColor);
   const btn = page.getByRole('button', { name: '월급 계획 세우기', exact: true });
   await expect(btn).toBeVisible();
-  const btnBg = await btn.evaluate((el) => getComputedStyle(el).backgroundColor);
-  expect(bg).not.toBe(btnBg);
   await axe(page);
   await btn.click();
   await expect(page).toHaveURL(/\/salary\/plan/);
@@ -149,21 +141,18 @@ test('W-02 월급 0원 + 계획 없음도 같은 3단계 안내(예전 “월급
     },
     '/salary',
   );
-  await expect(
-    page.getByRole('heading', { name: '월급날마다 여기서 한 번에 확인해요' }),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: '월급날 루틴, 한 번에 끝내요' })).toBeVisible();
   await expect(page.getByText('월급을 적고')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '월급 계획 세우기', exact: true })).toBeVisible();
 });
 
-test('선물 기록 빈 상태: 새 보조 문구 + 회색 “+ 기념일 적기” → 경조사 추가(Y-07)', async ({
+test('선물 기록 빈 상태: 제목 한 줄 + 회색 “+ 기념일 적기” → 경조사 추가(Y-07)', async ({
   page,
 }) => {
   await open(page, undefined, '/calendar/gifts');
   await expect(page.getByText('아직 선물 기록이 없어요')).toBeVisible();
-  await expect(
-    page.getByText('다가오는 생일·기념일을 먼저 적어 두면 그날 무엇을 했는지 여기에 모여요'),
-  ).toBeVisible();
+  // 설명 문구 없음(제목 한 줄 + 버튼 하나)
+  await expect(page.getByText('다가오는 생일·기념일을 먼저')).toHaveCount(0);
   const add = page.getByRole('button', { name: '+ 기념일 적기' });
   const box = await add.boundingBox();
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
@@ -177,13 +166,13 @@ test('선물 기록 빈 상태: 새 보조 문구 + 회색 “+ 기념일 적기
   await expect(page.getByRole('heading', { name: '경조사 추가' })).toBeVisible();
 });
 
-test('지난 달 모아보기 빈 상태: 월급 계획이 없으면 “+ 월급 계획 세우기” → W-01, 있으면 안내 문구만', async ({
+test('지난 달 모아보기 빈 상태: 월급 계획이 없으면 “+ 월급 계획 세우기” → W-01, 있으면 제목만', async ({
   page,
 }) => {
   // 계획 있음(확인 목록에 들어갈 줄이 있음): 문구만
   await open(page, undefined, '/salary/archive');
   await expect(page.getByText('아직 지난 달 기록이 없어요')).toBeVisible();
-  await expect(page.getByText('첫 월급날이 지나면 여기에 모여요')).toBeVisible();
+  await expect(page.getByText('첫 월급날이 지나면 여기에 모여요')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '+ 월급 계획 세우기' })).toHaveCount(0);
   await axe(page);
 });

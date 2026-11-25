@@ -115,7 +115,6 @@ export function W21MonthArchive() {
           list
           page
           title={copy.archiveEmpty}
-          body={splits.isSuccess && hasPlan && !periodMode ? copy.archiveEmptyWait : undefined}
           action={
             splits.isSuccess && !hasPlan && !periodMode ? (
               <Button variant="secondary" size="sm" onClick={() => nav(salaryPaths.plan)}>
