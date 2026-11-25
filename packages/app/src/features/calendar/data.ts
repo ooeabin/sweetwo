@@ -187,6 +187,7 @@ export function useCalendarData() {
     failed,
     retry,
     holidayOf,
+    holidayList,
     holidays: holidaySet,
     records: recordList,
     recordOn,

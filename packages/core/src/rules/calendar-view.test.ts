@@ -6,10 +6,18 @@ import {
   careArtKey,
   dayArt,
   dayTone,
+  holidayStreakArtKey,
+  holidayStreaks,
+  streakLabel,
+  streakSpan,
+  streakOn,
+  streaksInMonth,
+  withStreakArt,
   isCareArtKey,
   monthSummary,
   moneyArtKey,
   weekIndexOf,
+  type HolidayStreak,
 } from './calendar-view';
 
 describe('경조사 그림 키', () => {
@@ -109,5 +117,67 @@ describe('한 주로 접기', () => {
     expect(weekIndexOf(dates, 'd7')).toBe(1);
     expect(weekIndexOf(dates, 'd34')).toBe(4);
     expect(weekIndexOf(dates, 'none')).toBe(0);
+  });
+});
+
+describe('공휴일 연휴(설·추석 포함 이어진 공휴일)', () => {
+  const seol2027 = [
+    { date: '2027-01-01', name: '신정' },
+    { date: '2027-02-06', name: '설날 연휴' },
+    { date: '2027-02-07', name: '설날' },
+    { date: '2027-02-08', name: '설날 연휴' },
+    { date: '2027-02-09', name: '대체공휴일(설날)' },
+    { date: '2027-03-01', name: '삼일절' },
+  ];
+  it('2027 설 2월 6~9일, 대체공휴일 포함, 하루짜리 공휴일은 연휴 아님', () => {
+    const s = holidayStreaks(seol2027);
+    const st = s[0] as HolidayStreak;
+    expect(s).toEqual([{ kind: 'seol', start: '2027-02-06', end: '2027-02-09' }]);
+    expect(streakLabel(st)).toBe('설 연휴 6~9일');
+    expect(streakSpan(st)).toBe('6~9일');
+    expect(streakOn(s, '2027-02-09')).toEqual(s[0]);
+    expect(streakOn(s, '2027-02-10')).toBeNull();
+    expect(streakOn(s, '2027-01-01')).toBeNull();
+  });
+  it('달을 넘는 추석 연휴 라벨과 두 달 모두에 걸림', () => {
+    const h = [
+      { date: '2027-09-30', name: '추석 연휴' },
+      { date: '2027-10-01', name: '추석' },
+      { date: '2027-10-02', name: '추석 연휴' },
+      { date: '2027-10-03', name: '개천절' },
+    ];
+    const s = holidayStreaks(h);
+    const st = s[0] as HolidayStreak;
+    // 개천절이 이어져 한 덩어리가 되면 연휴 끝이 3일
+    expect(s).toEqual([{ kind: 'chuseok', start: '2027-09-30', end: '2027-10-03' }]);
+    expect(streakLabel(st)).toBe('추석 연휴 9월 30일~10월 3일');
+    expect(streaksInMonth(s, 2027, 9)).toHaveLength(1);
+    expect(streaksInMonth(s, 2027, 10)).toHaveLength(1);
+    expect(streaksInMonth(s, 2027, 11)).toHaveLength(0);
+  });
+  it('정렬되지 않은 입력, 설·추석이 없는 연휴, 같은 날짜 겹침', () => {
+    expect(
+      holidayStreaks([
+        { date: '2027-05-05', name: '어린이날' },
+        { date: '2027-05-06', name: '대체공휴일(어린이날)' },
+      ]),
+    ).toEqual([]);
+    const s = holidayStreaks([
+      { date: '2026-09-26', name: '추석 연휴' },
+      { date: '2026-09-24', name: '추석 연휴' },
+      { date: '2026-09-25', name: '추석' },
+      { date: '2026-09-25', name: '추석' },
+    ]);
+    expect(s).toEqual([{ kind: 'chuseok', start: '2026-09-24', end: '2026-09-26' }]);
+  });
+  it('연휴 그림은 그 날의 첫 그림, 나머지는 +n', () => {
+    expect(holidayStreakArtKey('seol')).toBe('holiday-seol');
+    expect(holidayStreakArtKey('chuseok')).toBe('holiday-chuseok');
+    expect(dayArt(withStreakArt(['cake'], 'holiday-seol'))).toEqual({
+      first: 'holiday-seol',
+      more: 1,
+    });
+    expect(dayArt(withStreakArt([], 'holiday-seol'))).toEqual({ first: 'holiday-seol', more: 0 });
+    expect(dayArt(withStreakArt(['cake'], null))).toEqual({ first: 'cake', more: 0 });
   });
 });

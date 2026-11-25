@@ -554,14 +554,11 @@ test('공휴일: 빨간 숫자와 이름, 설·추석 연휴 띠, 월급날이 �
   ).toBeVisible();
   await axe(page);
 
-  // 9월: 추석 연휴 띠, 고른 날 목록 맨 위에 이름
+  // 9월: 추석 연휴는 칸 바탕 없이 달 머리 요약 줄 맨 앞 글자로(2026-11-26), 고른 날 목록 맨 위에 이름
   await page.getByRole('button', { name: '이전 달' }).click();
   const chuseok = page.getByRole('button', { name: /^9월 25일, 추석/ });
-  await expect(chuseok).toHaveClass(/is-festive/);
-  await expect(page.getByRole('button', { name: /^9월 24일, 추석 연휴/ })).toHaveClass(
-    /is-festive/,
-  );
-  await expect(page.getByRole('button', { name: /^9월 27일/ })).not.toHaveClass(/is-festive/);
+  await expect(chuseok).not.toHaveClass(/is-festive/);
+  await expect(page.locator('.hg-cal__summary .hg-cal__streak')).toHaveText('추석 연휴 24~26일');
   await chuseok.click();
   await expect(page.locator('.hg-cal__agenda .hg-listrow__label').first()).toHaveText('추석');
   await axe(page);

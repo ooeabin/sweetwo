@@ -48,9 +48,6 @@ export function businessDayOnOrBefore(s: string, holidays: ReadonlySet<string> =
   return d;
 }
 
-/** 설·추석 연휴 띠(24 Y-04 10번): 설날·추석과 그 연휴, 그 대체공휴일 */
-export const isFestive = (name: string) => name.includes('설날') || name.includes('추석');
-
 /** 달력 칸 6주 × 7일(일요일 시작). 다른 달 날짜는 muted */
 export function monthGrid(y: number, m: number) {
   const first = `${ymOf(y, m)}-01`;

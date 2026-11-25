@@ -666,6 +666,7 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-cal__today::after { content: ""; position: absolute; inset: -6px -2px; }
 .hg-cal__summary { margin: var(--space-1) 0 0; font: var(--text-value); color: var(--slate); }
 .hg-cal__summary b { font-weight: 700; color: var(--ink); }
+.hg-cal__summary b.hg-cal__streak { color: var(--holiday-ink); }
 .hg-cal__dows { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); margin: var(--space-3) calc(var(--space-3) * -1) 0; text-align: center; }
 .hg-cal__dow { font: var(--text-note); color: var(--stone); padding: var(--space-1) 0 var(--space-2); }
 .hg-cal__grid { margin: 0 calc(var(--space-3) * -1); }
@@ -679,7 +680,6 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
 .hg-cal__day.is-holiday .hg-cal__num { color: var(--holiday-ink); }
 .hg-cal__day.is-today .hg-cal__num { font-weight: 700; color: var(--accent-app-text); }
 .hg-cal__day.is-selected { background: var(--surface-alt); }
-.hg-cal__day.is-festive:not(.is-selected) { background: var(--family); }
 .hg-cal__art { display: inline-flex; align-items: center; justify-content: center; gap: 1px; height: 20px; }
 .hg-cal__art .hg-cal__img { width: 20px; height: 20px; }
 .hg-cal__art b { font: 700 13px/20px var(--font-sans); color: var(--stone); }
