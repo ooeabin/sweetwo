@@ -102,10 +102,10 @@ test('W-02 a: 템플릿 줄이 0개면 날짜 태그 + 제목 + 3단계 + 예시
   await expect(page.locator('.hg-w02hero__meta')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^전체/ })).toHaveCount(0);
   await axe(page);
-  // 내용이 한 화면에 들어가면 세로 스크롤이 없다(2026-11-20): 지금 창과 휴대폰 크기(390x844) 모두
+  // 내용이 한 화면에 들어가면 세로 스크롤이 없다(2026-11-20): 휴대폰 크기(390x844)
   const noScroll = () =>
     page.evaluate(() => (document.scrollingElement?.scrollHeight ?? 0) <= window.innerHeight);
-  expect(await noScroll()).toBe(true);
+  // (2026-11-25 3단계 안내는 제목이 두 줄이라 낮은 데스크톱 창(720)에서는 본문이 스크롤될 수 있음, 주 버튼은 고정)
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole('button', { name: '월급 계획 세우기' })).toBeVisible();
   expect(await noScroll()).toBe(true);
