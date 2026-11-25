@@ -54,6 +54,7 @@ import {
   LoadingFrame,
   MainFrame,
   homeText,
+  queryFailed,
   useRank,
   useAssetRealtime,
   useHomeInput,
@@ -243,7 +244,7 @@ export function H01Home() {
   const sumsFirstLoad = (saving.ready && saving.savedLoading) || bundles.isLoading;
   // 계정·공간·저금을 못 받았고 받아 둔 것도 없으면(서버 오류) 끝없는 뼈대 대신 같은 틀에 오류 + 다시 시도(13 공통 상태 7번, 2026-11-25 구역 7)
   const needed = [me, space, goals];
-  const loadFailed = needed.some((q) => !q.data && q.errorUpdateCount > 0 && !q.isFetching);
+  const loadFailed = needed.some(queryFailed);
   if (!me.data || !sp || !goals.data || listsFirstLoad || sumsFirstLoad)
     return (
       <LoadingFrame

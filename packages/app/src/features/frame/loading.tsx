@@ -110,6 +110,17 @@ export function SkelBody({ shape }: { shape: SkelShape }) {
 }
 
 /**
+ * 못 받음(받아 둔 데이터도 없음, 13 공통 상태 7번): 한 번이라도 요청이 실패했으면(다시 시도하는 중이어도) 오류 카드를 먼저 보임.
+ * 다시 시도가 성공하면 카드는 저절로 사라지고 화면이 나옴
+ */
+export const queryFailed = (q: {
+  data: unknown;
+  failureCount: number;
+  errorUpdateCount: number;
+  isFetching: boolean;
+}) => !q.data && (q.failureCount > 0 || (q.errorUpdateCount > 0 && !q.isFetching));
+
+/**
  * 불러오는 중(19 예외, 13 공통 상태 5번): 0.3초 넘으면 실제 화면 모양 뼈대, 그 전엔 빈 본문.
  * failed면(7번, 2026-11-25 구역 7 CS-07) 같은 앱 틀 안 본문 자리에 “잠시 문제가 생겼어요” + ‘다시 시도’(onRetry).
  * 뼈대와 오류가 같은 틀 한 벌이라 다시 시도해도 틀이 다시 만들어지지 않음(만들어지며 또 요청하는 되풀이 없음)
