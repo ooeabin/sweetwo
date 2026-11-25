@@ -199,15 +199,16 @@ export const copy = {
   failed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   retry: '다시 시도',
   emptyPlan: '월급 계획 템플릿에서 항목을 추가해 주세요', // [확인 필요] 2026-11-19 W-02 줄이 하나도 없을 때(월급 0원 포함)
-  // W-02 월급 계획이 없을 때 3단계 안내(2026-11-25 사용자 확정 첫 사용 화면, 20 W-02 0b) [모두 확인 필요]
-  guideTitle: '월급날마다 여기서 한 번에 확인해요',
-  guideSub: '월급 계획을 세우면 확인할 것이 생겨요',
+  // W-02 월급 계획이 없을 때 안내(2026-11-25 사용자 확정 B안 최종, 20 W-02 0b) [모두 확인 필요]
+  guideTitle: '월급날 루틴, 한 번에 끝내요',
   guideSteps: [
-    { title: '월급을 어디에 나눌지 정해요', sub: '저축·투자, 매달 나가는 지출' },
-    { title: '월급날 이 화면에 목록이 생겨요', sub: '자동으로 나가는 건 앱이 알아서 확인해요' },
-    { title: '한 번에 ‘모두 계획대로 됐어요’', sub: '모은 금액이 바로 쌓여요' },
-  ],
-  guideSampleLabel: '이렇게 보여요(예시)',
+    '어디에 쓸지 미리 정해두세요',
+    '월급날이 되면 목록이 자동으로 떠요',
+    '하나씩 체크 하면 끝!',
+  ] as const,
+  guideSampleHead: '확인할 것 2',
+  guideSampleTag: '예시',
+  guideSampleSr: '월급 계획을 세우면 이런 목록이 떠요. 비상금 30만 원, 월세는 자동으로 나가요', // 흐린 예시 판은 aria-hidden, 이 한 줄로 대신 읽음
   guideSample: [
     { name: '비상금', value: '30만 원', auto: false },
     { name: '월세', value: '자동으로 나가요', auto: true },
@@ -749,7 +750,6 @@ export const copy = {
   },
   archivePlanned: (amount: string) => `계획한 월급 ${amount}`, // 오른쪽 큰 숫자가 모은 금액이라 보조 줄에 계획 합
   archiveEmpty: '아직 지난 달 기록이 없어요',
-  archiveEmptyWait: '첫 월급날이 지나면 여기에 모여요', // [확인 필요] 2026-11-25 월급 계획이 있을 때 문구만
   archiveEmptyPlan: '+ 월급 계획 세우기', // [확인 필요] 2026-11-25 월급 계획이 없을 때 → W-01
   /** 날짜 없는 사람: 줄 이름 “10월 3일 ~ 11월 1일”, 보조 “수입 2번” */
   archivePeriod: (start: string, end: string) => `${start} ~ ${end}`,

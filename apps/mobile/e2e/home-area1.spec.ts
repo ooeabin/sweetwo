@@ -180,13 +180,11 @@ test('H-16 다가오는 날 상자(최대 2개, D-n) → 달력, H-08 타일 보
   await expect(page).toHaveURL(/\/calendar$/);
 });
 
-test('H-16 일정이 없으면 상자를 안 그림, 캘린더 타일은 “기념일을 적어 두면 미리 알려 드려요”', async ({
+test('H-16 일정이 없으면 상자를 안 그림, 캘린더 타일은 “기념일을 적어 보세요”', async ({
   page,
 }) => {
   await open(page);
-  await expect(page.getByRole('button', { name: /^캘린더/ })).toContainText(
-    '기념일을 적어 두면 미리 알려 드려요',
-  );
+  await expect(page.getByRole('button', { name: /^캘린더/ })).toContainText('기념일을 적어 보세요');
   await expect(page.locator('.hg-hubup')).toHaveCount(0);
 });
 

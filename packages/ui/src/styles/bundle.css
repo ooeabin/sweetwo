@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (e32f8f29). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (fef3cbda). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 /* 2026-11-24 구역 5 설정 검토: 사용자 앱 글자 바탕값 15/22. 클래스 없는 b·p·li가 브라우저 기본 16px로 나오던 것(기준 17/15 밖). 어드민·웹사이트는 data-platform이 없어 그대로 */
@@ -2737,16 +2737,14 @@ button.hg-datepill { cursor: pointer; }
 .hg-w02guide { flex: 1 1 auto; display: flex; flex-direction: column; gap: var(--gap-area); padding-top: var(--space-4); }  /* 문장 자리가 앱 틀 본문 영역의 남는 높이를 채워 주 버튼(`hg-stickybar`)이 화면 아래에 오게 함 */
 .hg-w02guide__head { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); }
 .hg-w02guide__head > * { margin: 0; }
-.hg-w02guide__tag { font: var(--text-value); color: var(--slate); }
+.hg-w02guide__tag { font: var(--text-note); color: var(--slate); }
 .hg-w02guide__title { font: var(--text-amount-lg); letter-spacing: -0.3px; word-break: keep-all; text-wrap: balance; }
-.hg-w02guide__sub { font: var(--text-value); color: var(--slate); word-break: keep-all; }
 .hg-w02guide__steps { display: flex; flex-direction: column; gap: var(--space-6); margin: 0; padding: 0; list-style: none; }
-.hg-w02guide__step { display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: var(--space-4); align-items: start; }
-.hg-w02guide__num { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink); font: var(--text-value); font-weight: 700; }  /* 번호 원은 그래픽, 뜻은 순서 목록(ol)이 전함 */
-.hg-w02guide__step-title { margin: 0; font: var(--text-amount); word-break: keep-all; }
-.hg-w02guide__step-sub { margin: 0; font: var(--text-note); color: var(--slate); word-break: keep-all; }
-.hg-w02guide__sample { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-radius: var(--radius-xl); background: var(--surface-alt); }
-.hg-w02guide__sample-label { margin: 0; font: var(--text-note); color: var(--slate); }
+.hg-w02guide__step { display: grid; grid-template-columns: 16px minmax(0, 1fr); column-gap: var(--space-3); align-items: baseline; }
+.hg-w02guide__num { width: 16px; font: var(--text-note); font-weight: 700; color: var(--slate); }  /* 번호 13/700 slate, 원 없음(2026-11-25 B안). 번호는 그래픽, 뜻은 순서 목록(ol)이 전함 */
+.hg-w02guide__step-title { font: var(--text-value); color: var(--ink-2); word-break: keep-all; }
+.hg-w02guide__sample { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-radius: var(--radius-xl); background: var(--surface-alt);  -webkit-mask-image: linear-gradient(to bottom, #000 35%, transparent); mask-image: linear-gradient(to bottom, #000 35%, transparent); }
+.hg-w02guide__sample-head { display: flex; justify-content: space-between; font: var(--text-note); color: var(--slate); }
 .hg-w02guide__sample-row { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-3); font: var(--text-name); color: var(--slate); }  /* 흐린 줄은 글자 색(slate)으로 흐리게(opacity는 대비 검사에 걸림) */
 .hg-w02guide__sample-row > b { font: var(--text-amount); }
 .hg-w02guide__sample-row > i { display: block; width: 24px; height: 24px; border-radius: var(--radius-full); background: var(--bar-track); box-shadow: inset 0 0 0 2px var(--hairline); }
