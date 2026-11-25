@@ -1163,6 +1163,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-payday__unit { flex: none; color: var(--slate); font: 400 17px/24px var(--font-sans); }
 .hg-payday__custom.is-on .hg-payday__unit { color: var(--ink); font-weight: 700; }
 .hg-payday__hint { margin: 0; font: var(--text-body); color: var(--slate); }  /* 29~31일 안내 한 줄 */
+.hg-payday__custom + .hg-help, .hg-payday__custom + .hg-payday__hint { margin-top: calc(var(--space-2) - var(--space-4)); }  /* 2026-11-25 오류·안내 줄은 직접 적기 칸에 붙여 8px(묶음 간격 16에서 당김) */
 /* 생년월일 휠(DateWheel): 연, 월, 일 세 줄. 한 줄 44px, 다섯 줄 보임. 가운데 회색 띠가 고른 줄, 위아래는 흐리게 */
 .hg-wheel { --wheel-row: 44px; position: relative; box-sizing: border-box; display: grid; grid-template-columns: 1.4fr 1fr 1fr; width: 100%; height: calc(var(--wheel-row) * 5); border-radius: var(--radius-xl); }  /* 2026-11-11 흐리게(mask)는 줄(hg-wheel__col)로 옮김: 휠 둘레 포커스 링이 잘리지 않게 */
 .hg-wheel__band { position: absolute; left: 0; right: 0; top: calc(var(--wheel-row) * 2); height: var(--wheel-row); background: var(--plate); border-radius: var(--radius-full); pointer-events: none; }
