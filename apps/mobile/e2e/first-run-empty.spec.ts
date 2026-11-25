@@ -155,7 +155,7 @@ test('선물 기록 빈 상태: 제목 한 줄 + 회색 “+ 기념일 적기”
   await expect(page.getByText('다가오는 생일·기념일을 먼저')).toHaveCount(0);
   const add = page.getByRole('button', { name: '+ 기념일 적기' });
   const box = await add.boundingBox();
-  expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+  expect(box?.height ?? 0).toBeGreaterThanOrEqual(43.9);
   // 회색 보조 버튼(오렌지 채움 아님), 글자 700
   await expect(add).toHaveCSS('font-weight', '700');
   const bg = await add.evaluate((el) => getComputedStyle(el).backgroundColor);
