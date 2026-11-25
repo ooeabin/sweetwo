@@ -900,7 +900,7 @@ function EmptyPlan({ tag, onFill }: { tag: ReactNode; onFill: () => void }) {
           </div>
           {copy.guideSample.map((r) => (
             <div key={r.name} className="hg-w02guide__sample-row">
-              <i />
+              <i className={r.auto ? undefined : 'is-on'} />
               <span>{r.name}</span>
               {r.auto ? <span>{r.value}</span> : <b>{r.value}</b>}
             </div>
