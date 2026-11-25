@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { cx } from '../cx';
 import { DateWheel } from './DateWheel';
 import { Chip } from '../Chip';
@@ -334,12 +334,19 @@ export function DayChips({
   onChange,
   label,
   lastLabel = '말일',
+  disabled = false,
 }: {
   value: number | 'last' | null;
   onChange: (d: number | 'last') => void;
   label: string;
   lastLabel?: string;
+  /** 끔(O-32·P-05b ‘날짜가 정해져 있지 않아요’): 흐리게 + 누르기·키보드·화면 읽기에서 빠짐(inert) */
+  disabled?: boolean;
 }) {
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (box.current) box.current.inert = disabled;
+  }, [disabled]);
   const days: (number | 'last')[] = [...Array.from({ length: 31 }, (_, i) => i + 1), 'last'];
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
   const at = value === null ? -1 : days.indexOf(value);
@@ -392,8 +399,52 @@ export function DayChips({
     </button>
   );
   return (
-    <div className="hg-daygrid" role="radiogroup" aria-label={label}>
+    <div
+      ref={box}
+      className={cx('hg-daygrid', disabled && 'is-disabled')}
+      role="radiogroup"
+      aria-label={label}
+      aria-disabled={disabled || undefined}
+    >
       <div className="hg-daygrid__days">{days.map((d, i) => cell(d, i))}</div>
+    </div>
+  );
+}
+
+/**
+ * 월급날 날짜 칸(O-32, P-05b, 2026-11-25 구역 6): 휠 대신 화면에 펼친 1~31 7칸 + ‘말일’(DayChips).
+ * 값이 없으면 initial(25일)을 바로 알려 줌(휠과 같게). hint는 칸 아래 한 줄(29~31일 안내)
+ */
+export function DayGrid({
+  label,
+  value,
+  onChange,
+  lastLabel,
+  hint,
+  initial = 25,
+  disabled = false,
+}: {
+  label: string;
+  value: number | 'last' | null;
+  onChange: (d: number | 'last') => void;
+  lastLabel: string;
+  hint?: ReactNode;
+  initial?: number | 'last';
+  disabled?: boolean;
+}) {
+  useEffect(() => {
+    if (value === null) onChange(initial);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- 처음 한 번만
+  return (
+    <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
+      <DayChips
+        label={label}
+        value={value ?? initial}
+        onChange={onChange}
+        lastLabel={lastLabel}
+        disabled={disabled}
+      />
+      {hint && !disabled && <p className="hg-wheel__age">{hint}</p>}
     </div>
   );
 }

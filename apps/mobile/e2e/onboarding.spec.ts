@@ -660,26 +660,55 @@ test('첫 저금 끝: 이미 합류했으면 초대 시트 없이 홈', async ({
   await expect(page.getByRole('dialog', { name: '같이 모을 사람을 초대할까요?' })).toHaveCount(0);
 });
 
-test('O-32 휠 둘레 링은 키보드로 왔을 때만(손가락·마우스로 고르면 없음, 2026-11-11)', async ({
+test('O-32 월급날은 펼친 날짜 칸: 25일에서 시작, 31일 안내, 말일, 날짜 없음은 칸을 끔(2026-11-25 구역 6)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
-  Object.assign(db.me, { nickname: '찬우', onboarding_step: 'O-32', monthly_income: 3_500_000 });
+  Object.assign(db.me, {
+    nickname: '찬우',
+    onboarding_step: 'O-32',
+    monthly_income: 3_500_000,
+    income_variable: true,
+  });
   await page.goto('/onboarding/o-32');
   await heading(page, '월급날은 며칠이에요?');
-  const wheel = page.locator('.hg-wheel');
-  const col = wheel.getByRole('spinbutton');
-  const ring = () => wheel.evaluate((el) => getComputedStyle(el).outlineStyle);
-  await col.getByText('26일').click();
-  await expect(col).toHaveAttribute('aria-valuenow', '26');
-  await expect(col).toBeFocused();
-  expect(await ring()).toBe('none');
-  await col.press('ArrowDown');
-  await expect(col).toHaveAttribute('aria-valuenow', '27');
-  expect(await ring()).toBe('solid');
-  await col.getByText('25일').click();
-  expect(await ring()).toBe('none');
+  // 휠이 아니라 화면에 펼친 칸: 1~31 + 말일
+  await expect(page.locator('.hg-wheel')).toHaveCount(0);
+  const grid = page.getByRole('radiogroup', { name: '월급날은 며칠이에요?' });
+  await expect(grid.getByRole('radio')).toHaveCount(32);
+  const d25 = grid.getByRole('radio', { name: '25일' });
+  await expect(d25).toBeChecked();
+  // 고른 칸은 오렌지(brand) 채움, 누르는 칸 44px 이상
+  const box = await d25.boundingBox();
+  expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+  expect(box?.width ?? 0).toBeGreaterThanOrEqual(44);
+  const bg = await d25.evaluate((el) => getComputedStyle(el).backgroundColor);
+  const brand = await page.evaluate(() => {
+    const s = document.createElement('i');
+    s.style.color = 'var(--accent-app)';
+    document.body.append(s);
+    const c = getComputedStyle(s).color;
+    s.remove();
+    return c;
+  });
+  expect(bg).toBe(brand);
+  await expect(page.getByText('그날이 없는 달은 말일로 계산해요')).toHaveCount(0);
+  await grid.getByRole('radio', { name: '31일' }).click();
+  await expect(grid.getByRole('radio', { name: '31일' })).toBeChecked();
+  await expect(page.getByText('그날이 없는 달은 말일로 계산해요')).toBeVisible();
+  await grid.getByRole('radio', { name: '말일' }).click();
+  await expect(grid.getByRole('radio', { name: '말일' })).toBeChecked();
+  // 키보드: ←는 하루 앞
+  await grid.getByRole('radio', { name: '말일' }).press('ArrowLeft');
+  await expect(grid.getByRole('radio', { name: '31일' })).toBeChecked();
+  // ‘날짜가 정해져 있지 않아요’(매달 금액이 달라요일 때만) = 칸을 흐리게 끔
+  await page.getByRole('checkbox', { name: '날짜가 정해져 있지 않아요' }).click();
+  await expect(grid).toHaveAttribute('aria-disabled', 'true');
+  await expect(page.getByRole('button', { name: '다음' })).toBeEnabled();
+  await axe(page);
+  await page.getByRole('checkbox', { name: '날짜가 정해져 있지 않아요' }).click();
+  await expect(grid).not.toHaveAttribute('aria-disabled', 'true');
 });
 
 test('시작한 사람이 첫 저금·초대 시트에서 앱을 닫았다 열면 A-06 권장보다 그 단계부터, A-06은 끝난 뒤 한 번(r5)', async ({
@@ -750,4 +779,125 @@ test('O-60 → 첫 저금 만들기 → W-11 뒤로 → O-60, ‘나중에 할�
   await page.getByRole('button', { name: '나중에 할게요' }).click();
   await expect(page).toHaveURL(/\/$/);
   expect(db.me.onboarding_done_at).toBe(done);
+});
+
+// 구역 6 온보딩·합류 화면 검토(2026-11-25) 수정 9가지
+test('O-31 오프라인에서 ‘다음’: Toast “인터넷에 연결되면 할 수 있어요”, 공개 고지 줄을 가리지 않고 주 버튼 위, 입력값 그대로', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  await start(page);
+  await manage(page, '아니요', '아직 없어요');
+  await amount(page).fill('3500000');
+  // 끊김 신호(offline 이벤트) 없이 쓰기가 네트워크 오류로 실패하는 경우도 같은 안내
+  await page.route(/\/rest\/v1\/|\/auth\/v1\/health/, (r) => r.abort('internetdisconnected'));
+  await next(page);
+  const toast = page.locator('.hg-toast');
+  await expect(toast).toContainText('인터넷에 연결되면 할 수 있어요');
+  await expect(toast).not.toContainText('잠시 문제가 생겼어요');
+  await toast.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
+  const note = await page.locator('.hg-q__note').boundingBox();
+  const tb = await toast.boundingBox();
+  expect((tb?.y ?? 0) + (tb?.height ?? 0)).toBeLessThanOrEqual(note?.y ?? 0);
+  await expect(amount(page)).toHaveValue('3,500,000');
+  await expect(page).toHaveURL(/\/onboarding\/o-31$/);
+  expect(db.me.monthly_income ?? null).not.toBe(3_500_000);
+});
+
+test('O-31 월급 읽기 줄 자리를 미리 잡음(칩이 안 밀림), ‘지금은 월급이 없어요’는 글자 버튼(hg-btn--link)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  await mockOnboarding(page, { now: NOW });
+  await start(page);
+  await manage(page, '아니요', '아직 없어요');
+  const chip = page.locator('.hg-quick .hg-chip').first();
+  // 들어오는 움직임(6px)이 끝난 뒤 잼
+  const settled = () =>
+    page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => null))));
+  await settled();
+  const before = (await chip.boundingBox())?.y ?? 0;
+  await amount(page).fill('3500000');
+  await expect(page.getByText('350만 원', { exact: true })).toBeVisible();
+  await settled();
+  expect((await chip.boundingBox())?.y ?? -1).toBe(before);
+  const link = page.getByRole('button', { name: '지금은 월급이 없어요' });
+  await expect(link).toHaveClass(/hg-btn--link/);
+  expect((await link.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+});
+
+test('질문 선택지 카드(O-11 등): 안 고르면 빈 원, 고르면 흰 판 + 오른쪽 오렌지 체크 원, 고르면 바로 넘어감', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  await mockOnboarding(page, { now: NOW });
+  await page.goto('/');
+  await page.getByLabel('내 이름이나 애칭을 알려 주세요').fill('찬우');
+  await next(page);
+  await heading(page, '두 사람은 어떤 사이예요?');
+  const cards = page.locator('.hg-option--card');
+  await expect(cards).toHaveCount(4);
+  await expect(page.locator('.hg-option__mark')).toHaveCount(4);
+  const first = cards.first();
+  const box = await first.boundingBox();
+  expect(box?.height ?? 0).toBeGreaterThanOrEqual(56);
+  expect(await first.evaluate((el) => getComputedStyle(el).borderTopColor)).toBe('rgba(0, 0, 0, 0)');
+  expect(await first.evaluate((el) => getComputedStyle(el).borderRadius)).toBe('16px');
+  const mark = first.locator('.hg-option__mark');
+  const empty = await mark.evaluate((el) => getComputedStyle(el).backgroundColor);
+  await radio(page, '결혼했어요');
+  await heading(page, '같이 쓰는 생활비가 있어요?');
+  // 뒤로 와서 보면 고른 카드: 오렌지 체크 원 + 700
+  await back(page);
+  await heading(page, '두 사람은 어떤 사이예요?');
+  const on = page.getByRole('radio', { name: '결혼했어요' });
+  await expect(on).toBeChecked();
+  const filled = await on
+    .locator('.hg-option__mark')
+    .evaluate((el) => getComputedStyle(el).backgroundColor);
+  expect(filled).not.toBe(empty);
+  expect(await on.evaluate((el) => getComputedStyle(el).fontWeight)).toBe('400');
+  expect(await on.locator('.hg-option__label').evaluate((el) => getComputedStyle(el).fontWeight)).toBe(
+    '700',
+  );
+  await axe(page);
+});
+
+test('O-60 준비 끝: 축하 배경(hg-celebrate-bg, P-10과 같게)', async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.clock.setFixedTime(NOW);
+  await mockOnboarding(page, { now: NOW });
+  await start(page);
+  await manage(page, '아니요', '아직 없어요');
+  await salary(page);
+  await page.getByRole('button', { name: '나중에 할게요' }).click(); // O-55
+  await heading(page, '찬우님, 준비가 끝났어요');
+  await expect(page.locator('main.hg-celebrate-bg')).toHaveCount(1);
+  await axe(page);
+});
+
+test('A-06 앱 잠금 묻기: ‘나중에 할게요’는 주 버튼 왼쪽 글자 버튼(회색 상자 버튼 아님)', async ({
+  page,
+}) => {
+  test.setTimeout(60_000);
+  await page.clock.setFixedTime(NOW);
+  await mockOnboarding(page, { now: NOW });
+  await fakeBridge(page, { signedIn: true, pin: null });
+  await start(page);
+  await manage(page, '아니요', '아직 없어요');
+  await salary(page);
+  await page.getByRole('button', { name: '나중에 할게요' }).click(); // O-55
+  await heading(page, '찬우님, 준비가 끝났어요');
+  await page.getByRole('button', { name: '나중에 할게요' }).click(); // O-60
+  await heading(page, '앱 잠금을 켤까요?');
+  const later = page.getByRole('button', { name: '나중에 할게요' });
+  await expect(later).toHaveClass(/hg-btn--link/);
+  await expect(later).toHaveClass(/hg-btn--quiet/);
+  await expect(later).not.toHaveClass(/hg-btn--secondary/);
+  const lb = await later.boundingBox();
+  const pb = await page.getByRole('button', { name: '켜기' }).boundingBox();
+  expect((lb?.x ?? 0) + (lb?.width ?? 0)).toBeLessThanOrEqual(pb?.x ?? 0);
+  await axe(page);
 });

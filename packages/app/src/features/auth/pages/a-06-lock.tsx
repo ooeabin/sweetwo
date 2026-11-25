@@ -52,7 +52,8 @@ export function A06LockSetup() {
         actions={
           <>
             <Button
-              variant="secondary"
+              variant="link"
+              className="hg-btn--quiet"
               onClick={() => {
                 track('app_lock_answered', { result: 'later' });
                 finish();
@@ -84,7 +85,7 @@ export function A06LockSetup() {
         actionsRow
         actions={
           <>
-            <Button variant="secondary" onClick={finish}>
+            <Button variant="link" className="hg-btn--quiet" onClick={finish}>
               {copy.later}
             </Button>
             <Button

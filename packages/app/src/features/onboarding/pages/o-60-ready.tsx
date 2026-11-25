@@ -56,6 +56,7 @@ export function O60Ready() {
         onClick: () => void s.finish(undefined, completed, () => afterSetupPath()),
       }}
       center
+      celebrate
       hero={<DoneMark />}
     >
       <ul className="hg-intro-steps">

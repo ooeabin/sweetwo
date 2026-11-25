@@ -25,15 +25,16 @@ describe('joinScreens', () => {
     expect(joinChapter('p-05', list).steps).toEqual({ total: 3, done: 2 });
     expect(joinChapter('p-05b', list).fill).toBe(100);
   });
-  it('예전 P-06은 막대 끝까지(S3-23)', () => {
-    expect(joinChapter('p-06', ['p-06']).fill).toBe(100);
-  });
 });
 
 describe('movedJoinScreen', () => {
   it('P-03a에 멈춘 사람은 다음 화면으로: 기본 P-04, 시작한 사람이 온보딩 중이면 P-05', () => {
     expect(movedJoinScreen('p-03a', st({ step: 'P-03A' }))).toBe('p-04');
     expect(movedJoinScreen('p-03a', st({ step: 'P-03A', waiting: true }))).toBe('p-05');
+  });
+  it('P-06(없앤 화면)에 멈춘 사람도 화면 없이 다음 화면으로(2026-11-25)', () => {
+    expect(movedJoinScreen('p-06', st({ step: 'P-06' }))).toBe('p-04');
+    expect(movedJoinScreen('p-06', st({ step: 'P-06', waiting: true }))).toBe('p-05');
   });
   it('뺀 화면이 아니면 null', () => {
     expect(movedJoinScreen('p-04', st())).toBeNull();

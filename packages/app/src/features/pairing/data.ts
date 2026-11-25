@@ -1,18 +1,13 @@
 import {
-  fetchGoals,
   fetchJoinContext,
   fetchMe,
-  fetchPartner,
-  fetchSpace,
   qk,
   updateMe,
   updateSpace,
 } from '@sweetwo/api';
-import { coupleOf } from '@sweetwo/core';
 import { useQuery } from '@tanstack/react-query';
 import { create } from 'zustand';
 import { onSessionReset } from '../../shared/session-reset';
-import { useGoalSaved, useSplits } from '../salary';
 
 /**
  * P-04 ‘월급은 대부분 {시작한 사람}님에게 보내요’(18 v2.2): 합류를 마치기 전에는 공간 구성원이 아니라 요청을 못 보내서
@@ -89,28 +84,6 @@ export function useJoinData() {
   };
 }
 export type JoinData = ReturnType<typeof useJoinData>;
-
-/** 예전에 P-06에서 멈춘 사람만(이미 공간 구성원): 공간 데이터를 그대로 읽음 */
-export function useMemberJoinData() {
-  const me = useQuery({ queryKey: qk.me, queryFn: fetchMe });
-  const space = useQuery({ queryKey: qk.space, queryFn: fetchSpace });
-  const partner = useQuery({ queryKey: qk.partner, queryFn: fetchPartner });
-  const goals = useQuery({ queryKey: qk.goals, queryFn: fetchGoals });
-  const splits = useSplits();
-  const saved = useGoalSaved();
-  const ready = [me, space, partner, goals, splits, saved].every((q) => !q.isLoading);
-  const couple = me.data && space.data ? coupleOf(me.data, space.data, partner.data ?? null) : null;
-  return {
-    ready,
-    me: me.data ?? null,
-    space: space.data ?? null,
-    partner: partner.data ?? null,
-    goals: goals.data ?? [],
-    saved: saved.data,
-    splits: splits.data ?? [],
-    couple,
-  };
-}
 
 export const saveMe = updateMe;
 export const saveSpace = updateSpace;

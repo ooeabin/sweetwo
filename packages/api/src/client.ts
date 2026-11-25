@@ -111,10 +111,16 @@ const watched = (p: Promise<Response>) => {
     },
   );
 };
+// 끊김 신호(offline 이벤트)보다 먼저 요청이 네트워크 오류로 실패해도(쓰기 앞의 읽기 포함: updateMe는 먼저 내 정보를 읽음)
+// 실제로 오프라인이면 같은 안내 “인터넷에 연결되면 할 수 있어요”가 뜨게 시각을 남김(2026-11-25 구역 6 O-31)
+const markIfOffline = async (e: unknown): Promise<never> => {
+  if (e instanceof TypeError && !(await probeOnline())) blockedAt = Date.now();
+  throw e;
+};
 const trackedFetch: typeof fetch = async (input, init) => {
   const method = (init?.method ?? (input instanceof Request ? input.method : 'GET')).toUpperCase();
   const write = method !== 'GET' && method !== 'HEAD';
-  if (!write) return watched(fetch(input, init));
+  if (!write) return watched(fetch(input, init)).catch(markIfOffline);
   const url = input instanceof Request ? input.url : String(input);
   // 로그인 토큰 갱신(auth)은 막지 않음(Supabase가 알아서 다시 시도)
   if (offline() && !url.includes('/auth/v1/')) {
@@ -129,6 +135,8 @@ const trackedFetch: typeof fetch = async (input, init) => {
   emitSaving();
   try {
     return await watched(fetch(input, init));
+  } catch (e) {
+    return await markIfOffline(e);
   } finally {
     writing--;
     emitSaving();

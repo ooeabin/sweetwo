@@ -95,7 +95,13 @@ export async function updateMe(
     | 'widget_goal_id'
   >,
 ) {
-  const me = await fetchMe();
+  // 쓰기 앞의 내 id 읽기는 자동 다시 시도(1·2·4초)를 끔: 오프라인이면 7초 뒤에야 실패 안내가 뜨던 것(2026-11-25 구역 6 O-31)
+  const { data: me, error: readError } = await supabase()
+    .from('app_user')
+    .select('id')
+    .retry(false)
+    .maybeSingle();
+  fail(readError);
   if (!me) throw new AuthCallError('unknown');
   const { error } = await supabase().from('app_user').update(patch).eq('id', me.id);
   fail(error);
