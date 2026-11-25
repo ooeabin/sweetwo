@@ -51,8 +51,9 @@ export function PaydayPicker({
 
   const custom = text !== '';
   const n = Number(text);
-  const bad = custom && !(Number.isInteger(n) && n >= 1 && n <= 31);
-  const at = custom ? -1 : PAYDAY_CHIPS.indexOf(value as PayDay);
+  // 꺼진 동안(‘날짜가 정해져 있지 않아요’)은 고른 표시·오류를 보이지 않음(모두 같은 꺼진 회색). 값은 그대로라 체크를 풀면 이전 선택이 돌아옴(2026-11-25)
+  const bad = !disabled && custom && !(Number.isInteger(n) && n >= 1 && n <= 31);
+  const at = custom || disabled ? -1 : PAYDAY_CHIPS.indexOf(value as PayDay);
 
   const pick = (i: number) => {
     const d = PAYDAY_CHIPS[i];
@@ -103,7 +104,13 @@ export function PaydayPicker({
           </button>
         ))}
       </div>
-      <label className={cx('hg-payday__custom', custom && !bad && 'is-on', bad && 'is-error')}>
+      <label
+        className={cx(
+          'hg-payday__custom',
+          custom && !bad && !disabled && 'is-on',
+          bad && 'is-error',
+        )}
+      >
         <input
           className="hg-payday__input"
           type="text"

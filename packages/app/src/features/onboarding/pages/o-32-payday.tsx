@@ -38,7 +38,6 @@ export function O32Payday() {
     <QuestionLayout
       chapter={s.chapter}
       title={copy.payday}
-      help={copy.paydayHelp}
       onBack={s.onBack}
       primary={{ label: copy.next, disabled: !noDate && payday === null, loading: s.saving }}
       onSubmit={() => (noDate || payday !== null) && void save()}
