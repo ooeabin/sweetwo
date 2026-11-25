@@ -3,10 +3,16 @@ import {
   dayArt,
   dayTone,
   dday,
-  isFestive,
+  holidayStreakArtKey,
+  holidayStreaks,
   moneyArtKey,
   monthGrid,
   monthSummary,
+  streakLabel,
+  streakOn,
+  streakSpan,
+  streaksInMonth,
+  withStreakArt,
   solarToLunar,
 } from '@sweetwo/core';
 import {
@@ -114,6 +120,7 @@ export function Y04Calendar() {
     return d.monthOf(cy, cm).bands.find((b) => date >= b.start && date <= b.end);
   };
   // 그 달 주만(다음 달만 있는 마지막 주는 뺌)
+  const streaks = holidayStreaks(d.holidayList);
   const cells = monthGrid(y, m);
   const weeks = Array.from({ length: 6 }, (_, i) => cells.slice(i * 7, i * 7 + 7)).filter((w) =>
     w.some((c) => !c.muted),
@@ -125,8 +132,14 @@ export function Y04Calendar() {
     const [, cm, cd] = ymd(c.date);
     const hol = d.holidayOf(c.date);
     // 첫 일정 그림 + ‘+n’(경조사가 먼저, 금융 일정 다음). 파일이 없으면 그림 칸을 그리지 않음
-    const keys = [...cs.map((x) => careArtKey(x.care)), ...ms.map((x) => moneyArtKey(x.kind))].map(
-      (k) => (k && hasIllustration(k) ? k : null),
+    // 연휴(설·추석 포함 이어진 공휴일)의 모든 날은 연휴 그림이 첫 그림, 다른 일정은 “+n”(그림 파일이 없으면 연휴 그림 없이 지금처럼)
+    const streak = streakOn(streaks, c.date);
+    const streakKey = streak ? holidayStreakArtKey(streak.kind) : null;
+    const keys = withStreakArt(
+      [...cs.map((x) => careArtKey(x.care)), ...ms.map((x) => moneyArtKey(x.kind))].map((k) =>
+        k && hasIllustration(k) ? k : null,
+      ),
+      streakKey && hasIllustration(streakKey) ? streakKey : null,
     );
     const art = c.muted ? null : dayArt(keys);
     return {
@@ -137,7 +150,6 @@ export function Y04Calendar() {
       art: art ? artOf(art.first) : undefined,
       more: art?.more,
       holiday: !!hol,
-      festive: !!hol && isFestive(hol.name),
       label: copy.dayLabel(cm, cd, moneyOf(c.date).length + cs.length, hol?.name),
     };
   });
@@ -152,6 +164,7 @@ export function Y04Calendar() {
   };
 
   // 달 머리 아래 요약 한 줄(“경조사 3개(85만 원 예상)”, ‘금융 일정’ 필터는 “금융 일정 4개”, 0개면 줄 없음)
+  const monthStreaks = streaksInMonth(streaks, y, m);
   const sum = monthSummary({
     filter,
     cares: filter === 'money' ? [] : d.caresOf(y, m).map((x) => x.care),
@@ -167,8 +180,17 @@ export function Y04Calendar() {
     const cs = caresOn(date);
     const rows: ReactNode[] = [];
     // 같은 날 같은 이름 경조사(설날 등)가 있으면 공휴일 줄은 숨김(경조사 줄이 같은 말을 함, 2026-11-24 구역 4)
-    if (hol && !cs.some((x) => sameName(x.care.name, hol.name)))
-      rows.push(<ListRow key="hol" label={hol.name} sub={copy.holiday} chevron={false} />);
+    if (hol && !cs.some((x) => sameName(x.care.name, hol.name))) {
+      const st = streakOn(holidayStreaks(d.holidayList), date);
+      rows.push(
+        <ListRow
+          key="hol"
+          label={hol.name}
+          sub={st ? copy.holidayStreak(streakSpan(st)) : copy.holiday}
+          chevron={false}
+        />,
+      );
+    }
     if (band)
       rows.push(
         <ListRow
@@ -238,11 +260,22 @@ export function Y04Calendar() {
         monthMenuLabel={copy.monthMenu(y, m)}
         onMonthMenu={() => setSheet(true)}
         summary={
-          sum && (
+          (monthStreaks.length > 0 || sum) && (
             <>
-              {sum.kind === 'care' ? copy.summaryCare : copy.summaryMoney}{' '}
-              <b>{copy.summaryCount(sum.count)}</b>
-              {sum.budget !== null && copy.summaryBudget(won(sum.budget, masked))}
+              {monthStreaks.map((st, i) => (
+                <Fragment key={st.start}>
+                  {i > 0 && ', '}
+                  <b className="hg-cal__streak">{streakLabel(st)}</b>
+                </Fragment>
+              ))}
+              {monthStreaks.length > 0 && sum && ', '}
+              {sum && (
+                <>
+                  {sum.kind === 'care' ? copy.summaryCare : copy.summaryMoney}{' '}
+                  <b>{copy.summaryCount(sum.count)}</b>
+                  {sum.budget !== null && copy.summaryBudget(won(sum.budget, masked))}
+                </>
+              )}
             </>
           )
         }

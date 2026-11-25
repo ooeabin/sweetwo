@@ -20,8 +20,6 @@ export interface CalDay {
   more?: number;
   /** 공휴일(숫자 빨간 글자) */
   holiday?: boolean;
-  /** 설·추석 연휴 */
-  festive?: boolean;
   /** 화면 읽기용(“10월 25일, 일정 2개”) */
   label: string;
 }
@@ -166,7 +164,6 @@ export function Calendar({
                       className={cx(
                         'hg-cal__day',
                         `is-${d.tone}`,
-                        d.festive && 'is-festive',
                         d.holiday && 'is-holiday',
                         d.date === today && 'is-today',
                         d.date === selected && 'is-selected',

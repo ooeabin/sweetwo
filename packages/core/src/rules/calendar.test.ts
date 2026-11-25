@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { businessDayOnOrBefore, isFestive, monthGrid, moneyDates } from './calendar';
+import { businessDayOnOrBefore, monthGrid, moneyDates } from './calendar';
 
 it('달력 칸: 일요일 시작 6주, 다른 달은 muted', () => {
   const g = monthGrid(2026, 10);
@@ -128,15 +128,6 @@ it('공휴일이면 직전 영업일(주말 넘어서까지)', () => {
   expect(businessDayOnOrBefore('2026-09-25', new Set(['2026-09-24', '2026-09-25']))).toBe(
     '2026-09-23',
   );
-});
-it('설·추석 연휴 띠', () => {
-  expect(['설날', '설날 연휴', '대체공휴일(설날)', '추석 연휴', '개천절'].map(isFestive)).toEqual([
-    true,
-    true,
-    true,
-    true,
-    false,
-  ]);
 });
 it('앞당기기를 끄면 월급날 그대로', () => {
   const o = {

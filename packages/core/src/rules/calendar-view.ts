@@ -1,3 +1,4 @@
+import { addDays } from '../date';
 import type { MoneyKind } from './calendar';
 
 // 달력 Y-04 K안(docs/spec/24-calendar.md, 2026-11-24): 칸 그림 키 표(한 곳), 달 요약 줄, 칸 숫자 상태, 한 주로 접기.
@@ -98,3 +99,83 @@ export function weekIndexOf(dates: readonly string[], selected: string): number 
   const i = dates.indexOf(selected);
   return i < 0 ? 0 : Math.floor(i / 7);
 }
+
+/** 연휴 그림 키 2개(2026-11-26): 연휴의 모든 날 칸에 같은 그림. 파일이 없으면 안 그림 */
+export const HOLIDAY_ART_KEYS = ['holiday-seol', 'holiday-chuseok'] as const;
+export type HolidayStreakKind = 'seol' | 'chuseok';
+const STREAK_ART: Record<HolidayStreakKind, (typeof HOLIDAY_ART_KEYS)[number]> = {
+  seol: 'holiday-seol',
+  chuseok: 'holiday-chuseok',
+};
+const STREAK_NAME: Record<HolidayStreakKind, string> = { seol: '설', chuseok: '추석' };
+
+/** 설날·추석 날짜를 포함해 이어진 공휴일 한 덩어리(대체공휴일 포함) */
+export interface HolidayStreak {
+  kind: HolidayStreakKind;
+  /** 첫 날, 끝 날(YYYY-MM-DD) */
+  start: string;
+  end: string;
+}
+
+/**
+ * 연휴 찾기: 공휴일 날짜를 이어진 덩어리로 묶고, 이름에 ‘설날’ 또는 ‘추석’이 든 날이 있는 덩어리만 연휴.
+ * (주말은 공휴일 표에 연휴로 들어 있어야 이어짐. 설날과 추석이 한 덩어리로 이어지는 일은 없음)
+ */
+export function holidayStreaks(
+  holidays: readonly { date: string; name: string }[],
+): HolidayStreak[] {
+  const sorted = [...holidays].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+  const out: HolidayStreak[] = [];
+  let group: { date: string; name: string }[] = [];
+  const flush = () => {
+    if (!group.length) return;
+    const kind: HolidayStreakKind | null = group.some((h) => h.name.includes('설날'))
+      ? 'seol'
+      : group.some((h) => h.name.includes('추석'))
+        ? 'chuseok'
+        : null;
+    const first = group[0];
+    const last = group[group.length - 1];
+    if (kind && first && last) out.push({ kind, start: first.date, end: last.date });
+    group = [];
+  };
+  for (const h of sorted) {
+    const last = group[group.length - 1];
+    if (last && last.date === h.date) {
+      group.push(h);
+      continue;
+    }
+    if (last && addDays(last.date, 1) !== h.date) flush();
+    group.push(h);
+  }
+  flush();
+  return out;
+}
+
+/** 그 날이 든 연휴(없으면 null) */
+export const streakOn = (streaks: readonly HolidayStreak[], date: string): HolidayStreak | null =>
+  streaks.find((s) => date >= s.start && date <= s.end) ?? null;
+
+/** 연휴 그림 키(칸 첫 그림) */
+export const holidayStreakArtKey = (k: HolidayStreakKind) => STREAK_ART[k];
+
+/** 그 달에 하루라도 걸린 연휴 */
+export const streaksInMonth = (streaks: readonly HolidayStreak[], y: number, m: number) => {
+  const ym = `${y}-${String(m).padStart(2, '0')}`;
+  return streaks.filter((s) => s.start.slice(0, 7) <= ym && ym <= s.end.slice(0, 7));
+};
+
+/** 연휴 기간 글자: “6~9일”, 달을 넘으면 “9월 30일~10월 2일” */
+export function streakSpan(s: HolidayStreak): string {
+  const [, sm, sd] = s.start.split('-').map(Number) as [number, number, number];
+  const [, em, ed] = s.end.split('-').map(Number) as [number, number, number];
+  return sm === em ? `${sd}~${ed}일` : `${sm}월 ${sd}일~${em}월 ${ed}일`;
+}
+
+/** 요약 줄 맨 앞 글자: “설 연휴 6~9일”, 달을 넘으면 “추석 연휴 9월 30일~10월 2일” */
+export const streakLabel = (s: HolidayStreak): string =>
+  `${STREAK_NAME[s.kind]} 연휴 ${streakSpan(s)}`;
+
+/** 칸 그림 목록 앞에 연휴 그림을 붙임(그 날의 첫 그림이 연휴 그림, 나머지는 “+n”) */
+export const withStreakArt = <T>(arts: readonly (T | null)[], streakArt: T | null): (T | null)[] =>
+  streakArt === null ? [...arts] : [streakArt, ...arts];

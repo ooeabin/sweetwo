@@ -55,6 +55,8 @@ export const copy = {
   },
   monthHead: (m: number) => `${m}월`,
   holiday: '공휴일',
+  // 연휴에 든 공휴일 줄 보조(2026-11-26) [확인 필요]
+  holidayStreak: (span: string) => `공휴일, ${span} 연휴`,
   agendaDay: (m: number, d: number, dow: string) => `${m}월 ${d}일 ${dow}요일`,
   // Y-04 고른 날 줄(맨 위 ‘월급날 확인 목록’ 띠는 2026-11-12 D1로 없앰) [확인 필요]
   reviewBand: (month: number) => `${month}월 월급날 확인 목록에 남은 게 있어요`,
