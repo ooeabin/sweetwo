@@ -210,7 +210,7 @@ test('알림이 거의 없을 때: 목록 아래 “알림 종류 고르기” �
   await expect(page.getByText('마케팅 정보 받기에 동의했어요')).toBeVisible();
   const pick = page.getByRole('button', { name: '알림 종류 고르기' });
   await expect(pick).toBeVisible();
-  expect((await pick.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+  expect((await pick.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(43.9); // 소수점 렌더 오차(43.99998)
   await axe(page);
   await pick.click();
   await expect(page).toHaveURL(/\/settings\/notifications/);
