@@ -76,8 +76,9 @@ export function S18bDelete() {
     (a) => a.owner === 'person' && a.owner_user_id === me.id,
   ).length;
   const joined = space.couple_state === 'connected' || space.couple_state === 'unlink_pending';
+  // 내 명의 항목이 0개면 그 줄은 숨김(“0개는 지워져요” 방지, 2026-11-25 구역 7)
   const lines = [
-    copy.deleteMine(n),
+    ...(n > 0 ? [copy.deleteMine(n)] : []),
     joined ? copy.deleteSharedGone : copy.deleteWholeSpace,
     copy.deleteRestore,
   ];

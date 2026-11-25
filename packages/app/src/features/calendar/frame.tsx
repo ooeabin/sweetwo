@@ -1,8 +1,7 @@
 import { AddText, Button, LineTabs } from '@sweetwo/ui';
 import { useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { sharedCopy } from '../../shared/copy';
-import { MainFrame } from '../frame';
+import { LoadErrorCard, MainFrame } from '../frame';
 import { copy } from './copy';
 import { startCareAdd } from './pages/y-07-care-add';
 
@@ -102,18 +101,5 @@ export function CalendarFrame({
  * Y-04 본문 자리, Y-05 머리 아래(목록으로 튕기지 않음). 저금(W-10 SavingLoadError)과 같은 카드
  */
 export function CalendarLoadError({ onRetry }: { onRetry: () => void }) {
-  return (
-    <section className="hg-card hg-card--fill hg-stack" role="status">
-      <p className="hg-card__title">{sharedCopy.errorTitle}</p>
-      <p className="hg-card__meta">{sharedCopy.errorBody}</p>
-      <button
-        type="button"
-        className="hg-btn hg-btn--link"
-        style={{ alignSelf: 'flex-start' }}
-        onClick={onRetry}
-      >
-        {sharedCopy.retry}
-      </button>
-    </section>
-  );
+  return <LoadErrorCard onRetry={onRetry} />;
 }

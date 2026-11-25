@@ -1,6 +1,5 @@
 import { Navigate, useSearchParams } from 'react-router-dom';
-import { sharedCopy } from '../../shared/copy';
-import { MainFrame, SkelBody } from '../frame';
+import { LoadErrorCard, MainFrame, SkelBody } from '../frame';
 import { copy } from './copy';
 import { useCheckRealtime, useGoalRealtime, useSpace, useSplitRealtime } from './data';
 import { useTogetherRealtime } from './together';
@@ -80,18 +79,7 @@ export function SalaryLoadError({
       page={{ title }}
       columns={[
         <div key="l" className="hg-stack">
-          <section className="hg-card hg-card--fill hg-stack" role="status">
-            <p className="hg-card__title">{sharedCopy.errorTitle}</p>
-            <p className="hg-card__meta">{sharedCopy.errorBody}</p>
-            <button
-              type="button"
-              className="hg-btn hg-btn--link"
-              style={{ alignSelf: 'flex-start' }}
-              onClick={onRetry}
-            >
-              {sharedCopy.retry}
-            </button>
-          </section>
+          <LoadErrorCard onRetry={onRetry} />
         </div>,
       ]}
     />

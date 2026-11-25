@@ -54,6 +54,7 @@ import {
   LoadingFrame,
   MainFrame,
   homeText,
+  queryFailed,
   useRank,
   useAssetRealtime,
   useHomeInput,
@@ -241,8 +242,17 @@ export function H01Home() {
   const listsFirstLoad = lists.isLoading && lists.errorUpdateCount === 0;
   // 모은 금액·묶음 합계도 처음 받을 때까지 기다림(2026-11-14 R7: 먼저 0원·옛 숫자를 2초쯤 보였다가 바뀌었음)
   const sumsFirstLoad = (saving.ready && saving.savedLoading) || bundles.isLoading;
+  // 계정·공간·저금을 못 받았고 받아 둔 것도 없으면(서버 오류) 끝없는 뼈대 대신 같은 틀에 오류 + 다시 시도(13 공통 상태 7번, 2026-11-25 구역 7)
+  const needed = [me, space, goals];
+  const loadFailed = needed.some(queryFailed);
   if (!me.data || !sp || !goals.data || listsFirstLoad || sumsFirstLoad)
-    return <LoadingFrame current="month" />;
+    return (
+      <LoadingFrame
+        current="month"
+        failed={loadFailed}
+        onRetry={() => needed.forEach((q) => void q.refetch())}
+      />
+    );
 
   // 연결 해제 확정 뒤 처음 열면 해제 안내(25 S-12h)
   if (me.data.onboarding_step === 'S-12H')
