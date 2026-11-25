@@ -185,11 +185,14 @@ test('각자(저금만 같이 해요): 형태 확인 ‘좋아요’ → 월급(
   expect(db.v22?.calls.find((c) => c.fn === 'join_saving_start')?.body).toEqual({
     p_amount: 4_000_000,
   });
-  expect(ev.find((e) => e.name === 'join_saved_answered')?.props).toEqual({
-    entered: true,
-    amount_band: '300-1000만',
-    new_bundle: true,
-  });
+  // 콘솔 이벤트는 비동기로 모여서 기다림(좁은 창 CI에서 가끔 늦음)
+  await expect
+    .poll(() => ev.find((e) => e.name === 'join_saved_answered')?.props)
+    .toEqual({
+      entered: true,
+      amount_band: '300-1000만',
+      new_bundle: true,
+    });
 
   // 월급 계획 화면 없이 합류 축하(P-10) → P-11. 첫 확인 목록은 다음 월급날(소급 없음)
   await celebrate(page);

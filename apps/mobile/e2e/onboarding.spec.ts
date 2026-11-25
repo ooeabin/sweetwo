@@ -814,9 +814,14 @@ test('O-31 월급 읽기 줄 자리를 미리 잡음(칩이 안 밀림), ‘지�
   await start(page);
   await manage(page, '아니요', '아직 없어요');
   const chip = page.locator('.hg-quick .hg-chip').first();
+  // 들어오는 움직임(6px)이 끝난 뒤 잼
+  const settled = () =>
+    page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => null))));
+  await settled();
   const before = (await chip.boundingBox())?.y ?? 0;
   await amount(page).fill('3500000');
   await expect(page.getByText('350만 원', { exact: true })).toBeVisible();
+  await settled();
   expect((await chip.boundingBox())?.y ?? -1).toBe(before);
   const link = page.getByRole('button', { name: '지금은 월급이 없어요' });
   await expect(link).toHaveClass(/hg-btn--link/);
