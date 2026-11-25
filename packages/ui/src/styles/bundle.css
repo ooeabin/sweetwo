@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (4eab310a). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (a41ce66f). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 /* 2026-11-24 구역 5 설정 검토: 사용자 앱 글자 바탕값 15/22. 클래스 없는 b·p·li가 브라우저 기본 16px로 나오던 것(기준 17/15 밖). 어드민·웹사이트는 data-platform이 없어 그대로 */
@@ -1164,6 +1164,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-payday__unit { flex: none; color: var(--slate); font: 400 17px/24px var(--font-sans); }
 .hg-payday__custom.is-on .hg-payday__unit { color: var(--ink); font-weight: 700; }
 .hg-payday__hint { margin: 0; font: var(--text-body); color: var(--slate); }  /* 29~31일 안내 한 줄 */
+.hg-payday__custom + .hg-help, .hg-payday__custom + .hg-payday__hint { margin-top: calc(var(--space-2) - var(--space-4)); }  /* 2026-11-25 오류·안내 줄은 직접 적기 칸에 붙여 8px(묶음 간격 16에서 당김) */
 /* 생년월일 휠(DateWheel): 연, 월, 일 세 줄. 한 줄 44px, 다섯 줄 보임. 가운데 회색 띠가 고른 줄, 위아래는 흐리게 */
 .hg-wheel { --wheel-row: 44px; position: relative; box-sizing: border-box; display: grid; grid-template-columns: 1.4fr 1fr 1fr; width: 100%; height: calc(var(--wheel-row) * 5); border-radius: var(--radius-xl); }  /* 2026-11-11 흐리게(mask)는 줄(hg-wheel__col)로 옮김: 휠 둘레 포커스 링이 잘리지 않게 */
 .hg-wheel__band { position: absolute; left: 0; right: 0; top: calc(var(--wheel-row) * 2); height: var(--wheel-row); background: var(--plate); border-radius: var(--radius-full); pointer-events: none; }
