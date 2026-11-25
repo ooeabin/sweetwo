@@ -16,10 +16,10 @@ import {
 import {
   Button,
   Chip,
-  DayWheel,
   FormAmount,
   FormScreen,
   FormSection,
+  PaydayPicker,
   QuestionSkeleton,
   Toggle,
   YearMonthInput,
@@ -226,7 +226,15 @@ export function S11cSalary() {
           </button>
         </FormSection>
         <FormSection title={copy.payday}>
-          <DayWheel label={copy.payday} value={payday} onChange={setDay} lastLabel={copy.lastDay} />
+          <PaydayPicker
+            label={copy.payday}
+            value={payday}
+            onChange={setDay}
+            lastLabel={copy.lastDay}
+            customLabel={copy.paydayCustom}
+            rangeError={copy.paydayRange}
+            hint={copy.paydayShortMonth}
+          />
         </FormSection>
         {/* 금액을 바꿨을 때만: 언제부터(2026-11-24 한 화면, 예전 두 번째 질문) */}
         {amountChanged && (

@@ -1141,17 +1141,24 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-datefield__seg::placeholder { color: var(--stone); }
 .hg-datefield__unit { margin-right: var(--space-2); font: 400 15px/22px var(--font-sans); color: var(--slate); }
 .hg-datefield__unit:last-child { margin-right: 0; }
-/* 월급날 날짜 칸(DayChips, 2026-11-25 구역 6 O-32·P-05b): 휠 대신 화면에 펼친 1~31 7칸, 판 없이 흰 바탕 위 숫자(17/400 고정폭 숫자).
-   고른 칸은 `brand` 채움 + `on-accent-app-text` 700(radius-lg). ‘말일’은 31 옆 두 칸을 차지하는 회색 칸(`choice-plate`), 고르면 같은 brand 채움. 칸 높이 44 이상 */
-.hg-daygrid { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-2); }
-.hg-daygrid.is-disabled { opacity: 0.4; }
-.hg-daygrid__days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); }
-.hg-daygrid__day, .hg-daygrid__last { display: inline-grid; place-items: center; box-sizing: border-box; min-height: 44px; margin: 0; padding: 0; border: 0; border-radius: var(--radius-lg); background: none; color: var(--ink); font: 400 17px/1 var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; }
-.hg-daygrid__day { width: 100%; height: 48px; }
-.hg-daygrid__last { grid-column: span 2; background: var(--choice-plate); color: var(--ink-2); }  /* 31 옆 두 칸(29 30 31 말일) */
-.hg-daygrid__day:hover { background: var(--surface-alt); }
-.hg-daygrid__day.is-on, .hg-daygrid__last.is-on { background: var(--accent-app); color: var(--on-accent-app-text); font-weight: 700; }
-.hg-daygrid__day:focus-visible, .hg-daygrid__last:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+/* 월급날 고르기(PaydayPicker, 2026-11-25 사용자 결정 A안 ‘자주 쓰는 날 칩 + 직접 입력’, O-32·P-05b·S-11c·W-01 금액 시트): 칩 10·15·20·21·25일 + 말일(회색 알약 `choice-plate`, 높이 48, 고르면 흰 칸 + 그림자 + 700 + 오렌지 글자) + 아래 ‘다른 날 직접 적기’ 숫자 칸(회색 판 radius 16, 뒤에 ‘일’).
+   칩과 직접 적기는 하나만 골라짐. 칸 높이 44 이상, 테두리 없음(오류만 danger 1px) */
+.hg-payday { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--space-4); width: 100%; }
+.hg-payday.is-disabled { opacity: 0.4; }
+.hg-payday__chips { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.hg-payday__chip { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-width: 44px; height: 48px; margin: 0; padding: 0 var(--space-5); border: 0; border-radius: var(--radius-full); background: var(--choice-plate); color: var(--ink-2); font: 400 17px/24px var(--font-sans); cursor: pointer; }
+.hg-payday__chip.is-on { background: var(--choice-on); box-shadow: var(--choice-on-shadow); color: var(--accent-app-text); font-weight: 700; }  /* 2026-11-25 A안: 고른 칩은 흰 칸 + 그림자 + 700 + 오렌지 글자(accent-app-text, 17px 700 짧은 말이라 대비 예외, axe 선택자 예외) */
+.hg-payday__chip:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.hg-payday__custom { display: flex; align-items: center; gap: var(--space-2); box-sizing: border-box; min-height: 56px; padding: 0 var(--space-4); border-radius: 16px; background: var(--choice-plate); cursor: text; }  /* 직접 적기 칸: 회색 판 + 오른쪽 ‘일’, 테두리 없음 */
+.hg-payday__custom.is-on { background: var(--choice-on); box-shadow: var(--choice-on-shadow); }
+.hg-payday__custom.is-error { box-shadow: inset 0 0 0 1px var(--danger); }
+.hg-payday__custom:focus-within { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.hg-payday__input { flex: 1 1 auto; min-width: 0; height: 52px; padding: 0; margin: 0; border: 0; outline: none; background: none; color: var(--ink); font: 400 17px/24px var(--font-sans); font-variant-numeric: tabular-nums; }
+.hg-payday__input::placeholder { color: var(--stone); font-weight: 400; }
+.hg-payday__custom.is-on .hg-payday__input { color: var(--accent-app-text); font-weight: 700; }  /* 17px 700 짧은 숫자(오렌지 글자 예외) */
+.hg-payday__unit { flex: none; color: var(--slate); font: 400 17px/24px var(--font-sans); }
+.hg-payday__custom.is-on .hg-payday__unit { color: var(--ink); font-weight: 700; }
+.hg-payday__hint { margin: 0; font: var(--text-body); color: var(--slate); }  /* 29~31일 안내 한 줄 */
 /* 생년월일 휠(DateWheel): 연, 월, 일 세 줄. 한 줄 44px, 다섯 줄 보임. 가운데 회색 띠가 고른 줄, 위아래는 흐리게 */
 .hg-wheel { --wheel-row: 44px; position: relative; box-sizing: border-box; display: grid; grid-template-columns: 1.4fr 1fr 1fr; width: 100%; height: calc(var(--wheel-row) * 5); border-radius: var(--radius-xl); }  /* 2026-11-11 흐리게(mask)는 줄(hg-wheel__col)로 옮김: 휠 둘레 포커스 링이 잘리지 않게 */
 .hg-wheel__band { position: absolute; left: 0; right: 0; top: calc(var(--wheel-row) * 2); height: var(--wheel-row); background: var(--plate); border-radius: var(--radius-full); pointer-events: none; }
@@ -1206,7 +1213,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 
 /* ── 앱 인터랙션(2026-11-06 점검, DESIGN.md ‘움직임’). transform만 움직이고 글자가 있는 것의 투명도는 바꾸지 않음(나타나는 동안에도 글자 대비 유지) ── */
 /* 색이 바뀌는 것: dur-fast */
-:is(.hg-btn, .hg-chip, .hg-tab, .hg-seg__item, .hg-nav, .hg-iconbtn, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-goaltile, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-check, .hg-listrow, .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, .hg-transfer__open, button.hg-rankrow, .hg-banner__main, .hg-cal__day, .hg-daygrid__day) { transition: background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
+:is(.hg-btn, .hg-chip, .hg-tab, .hg-seg__item, .hg-nav, .hg-iconbtn, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-goaltile, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-check, .hg-listrow, .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, .hg-transfer__open, button.hg-rankrow, .hg-banner__main, .hg-cal__day, .hg-payday__chip) { transition: background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
 .hg-transfer__label, .hg-transfer__amount, .hg-task__title { transition: color var(--dur-fast) var(--ease-out); }
 .hg-btn.is-loading { transition: none; }  /* 도는 원으로 바뀔 때 글자가 비쳐 보이지 않게 */
 /* 마우스 올림(마우스가 있는 기기만): 주 버튼은 누름색, 보조 버튼은 한 단계 진하게 */
@@ -1232,7 +1239,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-goaltile:has(> .hg-goaltile__main:active) { transform: scale(0.98); }
 :is(.hg-iconbtn, .hg-check):active:not(:disabled) { transform: scale(0.92); }
 :is(.hg-hubtile, .hg-hubline, .hg-hubbox__row, .hg-hubup, .hg-together__slide, .hg-together__more, .hg-hubband__main):active { transform: scale(0.98); }
-:is(.hg-listrow:is(button, a), .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, button.hg-rankrow, .hg-cal__day, .hg-daygrid__day):active { background: var(--hairline-soft); }
+:is(.hg-listrow:is(button, a), .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, button.hg-rankrow, .hg-cal__day, .hg-payday__chip):active { background: var(--hairline-soft); }
 :is(.hg-transfer__open, .hg-banner__main):active { transform: scale(0.99); }
 /* 들어옴: 화면 본문(앱 틀의 단, 질문 화면의 제목과 내용)은 6px 아래에서, 펼친 내용과 메뉴는 4px 위에서, 새로 넣은 입력 줄은 98%에서. dur-base, ease-out */
 @media (prefers-reduced-motion: no-preference) {
@@ -1244,7 +1251,7 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 @keyframes hg-drop { from { transform: translateY(-4px); } }
 @keyframes hg-grow { from { transform: scale(0.98); } }
 @media (prefers-reduced-motion: reduce) {
-  :is(.hg-btn, .hg-chip, .hg-tab, .hg-seg__item, .hg-nav, .hg-iconbtn, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-goaltile, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-check, .hg-listrow, .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, .hg-transfer__open, button.hg-rankrow, .hg-banner__main, .hg-cal__day, .hg-daygrid__day, .hg-transfer__label, .hg-transfer__amount, .hg-task__title) { transition: none; }
+  :is(.hg-btn, .hg-chip, .hg-tab, .hg-seg__item, .hg-nav, .hg-iconbtn, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-goaltile, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-check, .hg-listrow, .hg-noti__item, .hg-menu__item, .hg-person, .hg-result, .hg-goalrow, .hg-dayrow, .hg-transfer__open, button.hg-rankrow, .hg-banner__main, .hg-cal__day, .hg-payday__chip, .hg-transfer__label, .hg-transfer__amount, .hg-task__title) { transition: none; }
   :is(.hg-btn, .hg-chip, :is(button, a).hg-card, .hg-pick__item, .hg-artpick__item, .hg-option--card, .hg-recband, .hg-invite-code, .hg-foldrow, button.hg-stat, .hg-photos__add, .hg-tab, .hg-seg__item, .hg-iconbtn, .hg-check, .hg-transfer__open, .hg-banner__main,  .hg-hubtile, .hg-hubline, .hg-hubbox__row, .hg-hubup, .hg-together__slide, .hg-together__more, .hg-hubband__main):active, .hg-goaltile:has(> .hg-goaltile__main:active) { transform: none; }
 }
 

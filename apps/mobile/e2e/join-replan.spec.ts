@@ -784,10 +784,20 @@ test('P-05b 월급날: 펼친 날짜 칸(25일에서 시작), 10일을 고르고
   await expect(page.getByRole('heading', { name: '월급날은 며칠이에요?' })).toBeVisible();
   await expect(page.locator('.hg-wheel')).toHaveCount(0);
   const days = page.getByRole('radiogroup', { name: '월급날은 며칠이에요?' });
-  await expect(days.getByRole('radio')).toHaveCount(32);
+  await expect(days.getByRole('radio')).toHaveCount(6);
   await expect(days.getByRole('radio', { name: '25일' })).toBeChecked();
   await days.getByRole('radio', { name: '말일' }).click();
   await expect(days.getByRole('radio', { name: '말일' })).toBeChecked();
   await days.getByRole('radio', { name: '10일' }).click();
+  // 직접 적기(A안): 칩이 풀리고, 범위 밖이면 오류 + 다음 꺼짐
+  const custom = page.getByRole('textbox', { name: '다른 날 직접 적기' });
+  await custom.fill('40');
+  await expect(days.getByRole('radio', { name: '10일' })).not.toBeChecked();
+  await expect(page.getByText('1~31 사이로 적어 주세요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
+  await custom.fill('30');
+  await expect(page.getByText('그날이 없는 달은 말일로 계산해요')).toBeVisible();
+  await days.getByRole('radio', { name: '10일' }).click();
+  await expect(custom).toHaveValue('');
   await axe(page);
 });
