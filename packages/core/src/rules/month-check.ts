@@ -77,23 +77,18 @@ export function foldText(lines: readonly ConfirmLine[]): string {
 /**
  * 다 확인 상태(손 줄을 모두 체크 또는 건너뜀, 07 7장): 손 줄을 모두 계획대로 했으면 'all'(“이번 달도 계획대로!”),
  * 건너뜀이나 다른 금액이 섞였으면 'mixed'(“이번 달 확인 끝”). 아직이면 null.
- * 자동 줄뿐인 달(2026-11-23 사용자 결정): 자동 줄이 모두 확인됐으면 같은 규칙으로 'all' / 'mixed', 하나라도 나가는 날 전(대기)이면 null.
- * 줄이 하나도 없으면 null
+ * 손 줄이 하나도 없으면(자동 줄뿐, 2026-11-25 사용자 확정 첫 사용 화면) 자동 줄이 모두 확인됐어도 null: 아무것도 안 한 첫날에
+ * 축하 화면이 뜨던 것(합쳐서 엔진) → 다 확인 축하는 사용자가 손 줄을 확인했을 때만(이 달은 평소 목록 + “자동으로 나가요” 안내).
+ * 줄이 하나도 없어도 null
  */
 export function doneState(lines: readonly CheckLineLike[]): 'all' | 'mixed' | null {
-  if (lines.length === 0) return null;
-  const manual = lines.some((l) => !l.auto);
-  const f = manual ? confirmFinish(lines) : lines.some((l) => l.state === 'wait') ? null : 'all';
+  if (!lines.some((l) => !l.auto)) return null;
+  const f = confirmFinish(lines);
   if (!f) return null;
   const changed = lines.some(
-    (l) =>
-      (manual ? !l.auto : true) &&
-      l.state === 'checked' &&
-      l.actual != null &&
-      l.actual !== l.planned,
+    (l) => !l.auto && l.state === 'checked' && l.actual != null && l.actual !== l.planned,
   );
-  const skipped = !manual && lines.some((l) => l.state === 'skipped');
-  return f === 'all' && !changed && !skipped ? 'all' : 'mixed';
+  return f === 'all' && !changed ? 'all' : 'mixed';
 }
 
 /** 이번 사이클에 확인한 저축·투자 합(다른 금액이면 그 금액, 건너뜀은 0). 0이면 알약을 숨김 */

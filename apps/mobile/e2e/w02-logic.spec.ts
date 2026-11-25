@@ -105,7 +105,7 @@ test('파트너 보기만: 보이는 줄이 없으면(‘했어요만’ 공개 
   await axe(page);
 });
 
-test('자동 줄만 있는 달: 자동 줄이 모두 확인됐으면 다 확인 상태, 새 사이클 안내는 숨김 / 나가는 날 전이면 평소 목록', async ({
+test('자동 줄만 있는 달(손 줄 0개): 자동 줄이 모두 확인돼도 다 확인 상태(축하)가 아니라 평소 목록 + “자동으로 나가는 것뿐이에요”(2026-11-25 사용자 확정, 예전 2026-11-23은 다 확인 상태)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -125,8 +125,9 @@ test('자동 줄만 있는 달: 자동 줄이 모두 확인됐으면 다 확인 
   for (const l of lines)
     Object.assign(l, { auto: true, state: 'checked', checked_at: '2026-09-25T01:00:00Z' });
   await page.goto('/salary');
-  await expect(page.getByRole('heading', { name: '이번 달도 계획대로!' })).toBeVisible();
-  await expect(page.getByText(/계획대로 월급날 확인 목록을 만들었어요/)).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: '이번 달도 계획대로!' })).toHaveCount(0);
+  await expect(page.getByText('이번 달은 자동으로 나가는 것뿐이에요')).toBeVisible();
+  await expect(page.getByRole('tablist', { name: '보기 고르기' })).toBeVisible();
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
   await axe(page);
 });

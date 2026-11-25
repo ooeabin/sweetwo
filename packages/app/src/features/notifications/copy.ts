@@ -4,6 +4,7 @@ export const copy = {
   title: '알림',
   readAll: '모두 읽음',
   settings: '알림 설정',
+  pickKinds: '알림 종류 고르기', // [확인 필요] 2026-11-25 알림이 거의 없을 때 목록 아래 다음 행동 → 알림 설정
   close: '닫기', // [확인 필요] 화면 읽기용
   back: '뒤로',
   empty: '새 알림이 없어요',

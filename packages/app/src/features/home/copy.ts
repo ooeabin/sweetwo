@@ -124,7 +124,7 @@ export const copy = {
   /** H-08 보조 줄(2026-11-24 구역 4: 일정 이름 + D-day “{이름} D-2”, H-16과 같은 첫 항목, 당일 “{이름} 오늘”, 없음 null) [확인 필요] */
   nextSchedule: (next: { name: string; days: number } | null) =>
     next === null
-      ? '다가오는 일정이 없어요'
+      ? '기념일을 적어 두면 미리 알려 드려요' // 2026-11-25 사용자 확정(예전 “다가오는 일정이 없어요”)
       : next.days === 0
         ? `${next.name} 오늘`
         : `${next.name} D-${next.days}`,
@@ -137,6 +137,8 @@ export const copy = {
   weddingTile: (n: number) => (n === 0 ? '결혼 준비 메모' : `결혼 준비 메모 ${n}개`),
   weddingNext: (name: string, date: string) => `다음 ${name} ${formatMonthDay(date)}`,
   weddingAdd: '+ 쓸 곳 메모 추가',
+  /** 저축·투자가 하나도 없으면(쓸 곳 메모를 붙일 곳이 없음) 누르면 저축·투자 추가(W-11a)로 가므로 이름도 맞춤(2026-11-25, 예전엔 “+ 쓸 곳 메모 추가”인데 저축·투자 추가로 감) [확인 필요] */
+  weddingAddSaving: '+ 저축·투자 추가',
   /** 날짜가 지났는데 안 낸 메모가 있으면 그것 먼저(2026-11-14) */
   weddingOverdue: (name: string, date: string) => `${name}, ${formatMonthDay(date)}이 지났어요`,
 

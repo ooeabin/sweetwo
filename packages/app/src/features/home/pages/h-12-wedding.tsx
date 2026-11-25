@@ -4,15 +4,18 @@ import { copy } from '../copy';
 
 /**
  * H-12 결혼 준비 타일(19 ‘홈 v2.2’ 6번): 결혼 준비 중일 때만 넓은 상자. “결혼 준비 메모 4개” + 회색 “다음 {이름} 12월 3일”
- * (날짜가 지난 안 낸 메모가 있으면 “{이름}, 12월 3일이 지났어요”, 아니면 낼 날이 있는 안 낸 메모 중 가장 이른 것, 없으면 “+ 쓸 곳 메모 추가”) + 72px 그림 자리. → W-14(대표 저금 또는 묶음의 메모)
+ * (날짜가 지난 안 낸 메모가 있으면 “{이름}, 12월 3일이 지났어요”, 아니면 낼 날이 있는 안 낸 메모 중 가장 이른 것, 없으면 “+ 쓸 곳 메모 추가”, 저금이 하나도 없으면 메모를 붙일 곳이 없어 “+ 저축·투자 추가” → W-11a, 2026-11-25) + 72px 그림 자리. → W-14(대표 저금 또는 묶음의 메모)
  */
 export function H12Wedding({
   notes,
   today,
+  hasSaving,
   onClick,
 }: {
   notes: readonly SavingNoteRow[];
   today: string;
+  /** 쓸 곳 메모를 붙일 저금(또는 묶음)이 있는가. 없으면 메모를 만들 수 없어 보조 줄이 저축·투자 추가로 이름 붙음(2026-11-25) */
+  hasSaving: boolean;
   onClick: () => void;
 }) {
   const open = notes.filter((n) => !n.paid && !n.deleted_at);
@@ -27,7 +30,9 @@ export function H12Wedding({
     ? copy.weddingOverdue(overdue.name, overdue.due_on)
     : next
       ? copy.weddingNext(next.name, next.due_on)
-      : copy.weddingAdd;
+      : hasSaving
+        ? copy.weddingAdd
+        : copy.weddingAddSaving;
   return (
     <HubTile
       className="hg-hub__wide"

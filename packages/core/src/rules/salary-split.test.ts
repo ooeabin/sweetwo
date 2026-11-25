@@ -279,3 +279,21 @@ describe('sharedAccountSeed(06 3-1 Q9)', () => {
     expect(sharedAccountSeed('separate', null)).toEqual([]);
   });
 });
+
+describe('미계획 금액은 화면마다 같은 값(2026-11-25 첫 사용 화면 오류 c)', () => {
+  // 합쳐서 + 찬우 관리: 수입 350 + 300 = 650만, 용돈 35·30, 예빈 보내기 270(공동 수입 안의 이동). W-01 585만 원 = 저축·투자 추가 머리
+  const lines = [
+    { kind: 'allowance' as const, amount: 350_000 },
+    { kind: 'allowance' as const, amount: 300_000 },
+    { kind: 'send' as const, amount: 2_700_000 },
+  ];
+  it('보내기 줄은 셈하지 않아 585만 원(kind를 빼고 넘기면 315만 원으로 틀림)', () => {
+    expect(leftover(6_500_000, lines)).toBe(5_850_000);
+    expect(
+      leftover(
+        6_500_000,
+        lines.map((l) => ({ amount: l.amount })),
+      ),
+    ).toBe(3_150_000);
+  });
+});

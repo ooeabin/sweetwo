@@ -147,9 +147,11 @@ export function W11SavingAdd() {
   const income = joint
     ? (me.data.monthly_income ?? 0) + (partner.data?.monthly_income ?? 0)
     : (me.data.monthly_income ?? 0);
+  // 보내기 줄(한 사람 관리형, kind send)은 공동 수입 안의 이동이라 셈하지 않음 = W-01·홈과 같은 core leftover(2026-11-25: kind를 빼고 넘겨
+  // 합쳐서 엔진에서 W-01 585만 원이 이 머리에 315만 원으로 보이던 것)
   const left = leftover(
     income,
-    mine.split_line.map((l) => ({ amount: l.amount })),
+    mine.split_line.map((l) => ({ amount: l.amount, kind: l.kind })),
   );
   // 용돈은 이미 빠진 돈(2026-11-16 r6)
   const allowance = mine.split_line

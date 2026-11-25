@@ -209,11 +209,8 @@ export function W02PaydayConfirm() {
 
   // 수입 기본값(프로필 월급)은 W-20b 맨 위로 옮김(2026-11-23 바탕 기준). W-02는 한 줄 IncomeLine만
   const meIncome = me.data.monthly_income ?? 0;
-  const emptyPlan = (amount: number) => (
-    <EmptyPlan
-      lead={amount > 0 ? copy.emptyLeadPay(money(amount, masked)) : copy.emptyLeadNone}
-      onFill={() => nav(salaryPaths.plan, { state: { from: 'month' } })}
-    />
+  const emptyPlan = (tag: ReactNode) => (
+    <EmptyPlan tag={tag} onFill={() => nav(salaryPaths.plan, { state: { from: 'month' } })} />
   );
   const page = { title };
   const frame = (body: ReactNode) => (
@@ -354,19 +351,14 @@ export function W02PaydayConfirm() {
       );
     // 2026-11-19 확정 시안: 날짜 알약 → 큰 금액(계획 합) → “D-6, 5개” → 한 목록(상태 버튼 “25일” 비활성, 템플릿 순서) → 수입 상자
     const ordered = [...preview].sort((x, y) => x.sort - y.sort);
-    // 템플릿 줄이 하나도 없으면(월급 0원 포함) 날짜 알약 + 한 덩어리 안내 + 주 버튼만(2026-11-20 사용자 결정)
+    // 템플릿 줄이 하나도 없으면(월급 0원 포함) 3단계 안내 + 주 버튼만(2026-11-25 사용자 확정, 날짜는 작은 태그)
     if (ordered.length === 0)
       return frame(
-        <>
-          <MonthHero
-            pill={
-              <span className="hg-datepill">
-                {firstDay ? cycleName(firstDay) : copy.firstWaitNoDate}
-              </span>
-            }
-          />
-          {emptyPlan(incomeOf(owner, me.data, partner.data))}
-        </>,
+        emptyPlan(
+          <span className="hg-w02guide__tag">
+            {firstDay ? cycleName(firstDay) : copy.firstWaitNoDate}
+          </span>,
+        ),
       );
     // 보조 줄 날짜 = 그 줄이 실제로 나가는 날(자동 줄은 나가는 날, 손 줄은 월급날, 2026-11-23 C안)
     const noteOf = (l: (typeof preview)[number]) =>
@@ -639,6 +631,9 @@ export function W02PaydayConfirm() {
   const ownEmpty = noLines && ago === 0 && !partnerTab && !finished;
   // 수입 카드 기본값: 내 이번 달, 아직 자동 기록 전(지금 확인하면 이 월급이 자동 기록됨)
   const incomeDefault = ago === 0 && !partnerTab && !readOnly && !list.auto_income_at;
+  // 손 줄이 하나도 없고 자동 줄뿐인 이번 달(2026-11-25): 다 확인 축하 없이 평소 목록 + 회색 한 줄 “자동으로 나가요” 안내
+  const autoOnly =
+    ago === 0 && !partnerTab && !noLines && manual.length === 0 && othersManual.length === 0;
   const share = {
     received: start,
     people: ownerPeople,
@@ -694,39 +689,46 @@ export function W02PaydayConfirm() {
       <HeroWithBurst
         listId={list.id + ago}
         finished={!!finished}
-        render={(burst) => (
-          <MonthHero
-            pill={datePill}
-            // 파트너 탭은 월급 금액을 못 볼 때(‘저축·투자만’ 공개 등) “0원”을 큰 금액으로 두지 않고 줄 개수만(2026-11-23)
-            amount={noLines || (partnerTab && income <= 0) ? undefined : planned}
-            done={
-              finished
-                ? {
-                    title: pastView
-                      ? (finishedAll ? copy.heroTitleAllOf : copy.heroTitleMixedOf)(
-                          Number(start.slice(5, 7)),
-                        )
-                      : finishedAll
-                        ? copy.heroTitleAll
-                        : copy.heroTitleMixed,
-                    saved:
-                      saved > 0 ? (
-                        <>
-                          {copy.savedBefore} <b>{money(saved, masked)}</b> {copy.savedAfter}
-                        </>
+        render={(burst) =>
+          ownEmpty ? null : (
+            <MonthHero
+              pill={datePill}
+              // 파트너 탭은 월급 금액을 못 볼 때(‘저축·투자만’ 공개 등) “0원”을 큰 금액으로 두지 않고 줄 개수만(2026-11-23)
+              amount={noLines || (partnerTab && income <= 0) ? undefined : planned}
+              done={
+                finished
+                  ? {
+                      title: pastView
+                        ? (finishedAll ? copy.heroTitleAllOf : copy.heroTitleMixedOf)(
+                            Number(start.slice(5, 7)),
+                          )
+                        : finishedAll
+                          ? copy.heroTitleAll
+                          : copy.heroTitleMixed,
+                      saved:
+                        saved > 0 ? (
+                          <>
+                            {copy.savedBefore} <b>{money(saved, masked)}</b> {copy.savedAfter}
+                          </>
+                        ) : undefined,
+                      art: <Illustration name="w02-done" className="hg-sceneart" motion />,
+                      extra: share ? (
+                        <ShareLink list={shown} income={income} masked={masked} share={share} />
                       ) : undefined,
-                    art: <Illustration name="w02-done" className="hg-sceneart" motion />,
-                    extra: share ? (
-                      <ShareLink list={shown} income={income} masked={masked} share={share} />
-                    ) : undefined,
-                    burst,
-                  }
-                : undefined
-            }
-          />
-        )}
+                      burst,
+                    }
+                  : undefined
+              }
+            />
+          )
+        }
       />
       {late && !partnerTab && <LastMonthNote />}
+      {autoOnly && (
+        <p className="hg-q__help" style={{ margin: 0 }}>
+          {copy.autoOnly}
+        </p>
+      )}
       {showMade && (
         <div className="hg-row" style={{ gap: 'var(--space-2)', alignItems: 'center' }}>
           <p className="hg-q__help" style={{ flex: 1 }}>
@@ -773,7 +775,9 @@ export function W02PaydayConfirm() {
       ) : noLines ? (
         // 템플릿 줄이 하나도 없으면 칩·목록 없이 안내(2026-11-19 회귀 수정). 내 이번 달은 한 덩어리 안내 + 주 버튼(2026-11-20)
         ownEmpty ? (
-          emptyPlan(income)
+          emptyPlan(
+            cycles.length > 1 ? datePill : <span className="hg-w02guide__tag">{dateName}</span>,
+          )
         ) : partnerTab ? (
           // 상대 화면에 보이는 줄이 없을 때(‘했어요만’ 공개 등): 상대에게 줄을 추가하라는 안내가 아님(2026-11-23)
           <p className="hg-checklist__none">{copy.partnerNone}</p>
@@ -865,18 +869,43 @@ function HeroWithBurst({
 }
 
 /**
- * 템플릿 줄이 하나도 없을 때(20 W-02 0b, 2026-11-20 사용자 결정): 한 덩어리 안내 “350만 원을 나눠서 / 월급 계획 템플릿을 완성해 주세요”
- * (월급 0원이면 “월급을 적고 / …”) + 아래 고정 주 버튼 ‘월급 계획 템플릿 채우기’ → W-01. 그림 `w02-empty`는 파일이 올 때까지 숨김
+ * 월급 계획이 없어 템플릿 줄이 하나도 없을 때(20 W-02 0b, 2026-11-25 사용자 확정 ‘첫 사용 화면’): 작은 날짜 태그 + 큰 제목 + 보조 +
+ * 번호 3단계 + 회색 ‘이렇게 보여요(예시)’ 판 + 아래 고정 주 버튼 “월급 계획 세우기”(→ W-01). 그림 자리 없음, 오렌지는 주 버튼만
  */
-function EmptyPlan({ lead, onFill }: { lead: string; onFill: () => void }) {
+function EmptyPlan({ tag, onFill }: { tag: ReactNode; onFill: () => void }) {
   return (
     <>
-      <section className="hg-empty hg-empty--plan">
-        <Illustration name="w02-empty" className="hg-empty__art" />
-        <h2 className="hg-empty__title">
-          <span>{lead}</span>
-          <span>{copy.emptyTail}</span>
-        </h2>
+      <section className="hg-w02guide" aria-labelledby="w02-guide-title">
+        <div className="hg-w02guide__head">
+          {tag}
+          <h2 id="w02-guide-title" className="hg-w02guide__title">
+            {copy.guideTitle}
+          </h2>
+          <p className="hg-w02guide__sub">{copy.guideSub}</p>
+        </div>
+        <ol className="hg-w02guide__steps">
+          {copy.guideSteps.map((st, i) => (
+            <li key={st.title} className="hg-w02guide__step">
+              <span className="hg-w02guide__num" aria-hidden="true">
+                {i + 1}
+              </span>
+              <div>
+                <p className="hg-w02guide__step-title">{st.title}</p>
+                <p className="hg-w02guide__step-sub">{st.sub}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <div className="hg-w02guide__sample" role="group" aria-label={copy.guideSampleLabel}>
+          <p className="hg-w02guide__sample-label">{copy.guideSampleLabel}</p>
+          {copy.guideSample.map((r) => (
+            <div key={r.name} className="hg-w02guide__sample-row">
+              <i aria-hidden="true" />
+              <span>{r.name}</span>
+              {r.auto ? <span>{r.value}</span> : <b>{r.value}</b>}
+            </div>
+          ))}
+        </div>
       </section>
       <StickyBar>
         <Button variant="primary" block onClick={onFill}>

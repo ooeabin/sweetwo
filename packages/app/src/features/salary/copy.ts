@@ -199,11 +199,21 @@ export const copy = {
   failed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   retry: '다시 시도',
   emptyPlan: '월급 계획 템플릿에서 항목을 추가해 주세요', // [확인 필요] 2026-11-19 W-02 줄이 하나도 없을 때(월급 0원 포함)
-  // W-02 템플릿 줄이 0개일 때 한 덩어리 안내(2026-11-20 사용자 결정, 20 W-02 0b) [모두 확인 필요]
-  emptyLeadPay: (amount: string) => `${object(amount)} 나눠서`,
-  emptyLeadNone: '월급을 적고',
-  emptyTail: '월급 계획 템플릿을 완성해 주세요',
-  fillPlan: '월급 계획 템플릿 채우기',
+  // W-02 월급 계획이 없을 때 3단계 안내(2026-11-25 사용자 확정 첫 사용 화면, 20 W-02 0b) [모두 확인 필요]
+  guideTitle: '월급날마다 여기서 한 번에 확인해요',
+  guideSub: '월급 계획을 세우면 확인할 것이 생겨요',
+  guideSteps: [
+    { title: '월급을 어디에 나눌지 정해요', sub: '저축·투자, 매달 나가는 지출' },
+    { title: '월급날 이 화면에 목록이 생겨요', sub: '자동으로 나가는 건 앱이 알아서 확인해요' },
+    { title: '한 번에 ‘모두 계획대로 됐어요’', sub: '모은 금액이 바로 쌓여요' },
+  ],
+  guideSampleLabel: '이렇게 보여요(예시)',
+  guideSample: [
+    { name: '비상금', value: '30만 원', auto: false },
+    { name: '월세', value: '자동으로 나가요', auto: true },
+  ],
+  fillPlan: '월급 계획 세우기',
+  autoOnly: '이번 달은 자동으로 나가는 것뿐이에요', // [확인 필요] 2026-11-25 손 줄 0개(자동 줄뿐) 회색 한 줄, 홈 monthAutoOnly와 같은 말
   // W-02a 다른 금액
   howMuch: '얼마를 보냈어요?',
   howMuchFor: (line: string) => `${line}, 이번 달은 얼마였어요?`, // [확인 필요] 2026-11-13 W-02a
@@ -739,6 +749,8 @@ export const copy = {
   },
   archivePlanned: (amount: string) => `계획한 월급 ${amount}`, // 오른쪽 큰 숫자가 모은 금액이라 보조 줄에 계획 합
   archiveEmpty: '아직 지난 달 기록이 없어요',
+  archiveEmptyWait: '첫 월급날이 지나면 여기에 모여요', // [확인 필요] 2026-11-25 월급 계획이 있을 때 문구만
+  archiveEmptyPlan: '+ 월급 계획 세우기', // [확인 필요] 2026-11-25 월급 계획이 없을 때 → W-01
   /** 날짜 없는 사람: 줄 이름 “10월 3일 ~ 11월 1일”, 보조 “수입 2번” */
   archivePeriod: (start: string, end: string) => `${start} ~ ${end}`,
   archivePeriodCount: (n: number) => `수입 ${n}번`,
