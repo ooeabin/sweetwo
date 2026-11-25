@@ -60,7 +60,7 @@ test('온보딩에서 넣은 월급은 W-01 월급 줄에 그대로, 줄을 눌�
   await row.click();
   const sheet = page.getByRole('dialog', { name: '월급 금액' });
   // 월급날은 이미 있어 휠 없음
-  await expect(sheet.getByRole('group', { name: '월급날은 며칠이에요?' })).toHaveCount(0);
+  await expect(sheet.getByRole('radiogroup', { name: '월급날은 며칠이에요?' })).toHaveCount(0);
   await axe(page);
   await sheet.getByRole('textbox', { name: '월급 금액' }).fill('4000000');
   await expect(sheet.getByText(/^미계획 금액 /)).toBeVisible();
@@ -131,10 +131,17 @@ test('‘지금은 월급이 없어요’: W-01은 월급 0원 줄을 보여 주
   await page.getByRole('button', { name: '월급 0원, 금액 고치기' }).click();
   const sheet = page.getByRole('dialog', { name: '월급 금액' });
   await sheet.getByRole('textbox', { name: '월급 금액' }).fill('3000000');
-  await expect(sheet.getByRole('group', { name: '월급날은 며칠이에요?' })).toBeVisible();
+  await expect(sheet.getByRole('radiogroup', { name: '월급날은 며칠이에요?' })).toBeVisible();
+  // 월급날 고르기(A안): 25일 칩이 골라져 있고, 직접 적은 범위 밖 숫자는 확인을 막음
+  await expect(sheet.getByRole('radio', { name: '25일' })).toBeChecked();
+  const custom = sheet.getByRole('textbox', { name: '다른 날 직접 적기' });
+  await custom.fill('40');
+  await expect(sheet.getByText('1~31 사이로 적어 주세요')).toBeVisible();
+  await expect(sheet.getByRole('button', { name: '확인' })).toBeDisabled();
+  await custom.fill('17');
   await sheet.getByRole('button', { name: '확인' }).click();
   await expect(page.getByRole('button', { name: '월급 300만 원, 금액 고치기' })).toBeVisible();
-  expect(db.me).toMatchObject({ monthly_income: 3_000_000, payday: 25 });
+  expect(db.me).toMatchObject({ monthly_income: 3_000_000, payday: 17 });
 });
 
 test('월급 계획 템플릿이 아직 없는 사람(월급 0원)이 W-01·W-11을 열면 막지 않고 그 자리에서 만들어요', async ({

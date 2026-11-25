@@ -1,4 +1,4 @@
-import { Checkbox, DayGrid, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
+import { Checkbox, PaydayPicker, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
 import { copy } from '../copy';
 import { saveMe } from '../data';
@@ -26,6 +26,7 @@ export function P05bPayday() {
     <QuestionLayout
       chapter={s.chapter}
       title={copy.paydayTitle}
+      help={copy.paydayHelp}
       onBack={s.onBack}
       primary={{ label: copy.next, disabled: !noDate && payday === null, loading: s.saving }}
       onSubmit={() =>
@@ -43,7 +44,7 @@ export function P05bPayday() {
         )
       }
     >
-      <DayGrid
+      <PaydayPicker
         label={copy.paydayTitle}
         value={payday}
         onChange={(d) => {
@@ -51,6 +52,10 @@ export function P05bPayday() {
           setNone(false);
         }}
         lastLabel={copy.paydayLast}
+        customLabel={copy.paydayCustom}
+        rangeError={copy.paydayRange}
+        hint={copy.paydayShortMonth}
+        disabled={noDate}
       />
       {variable && <Checkbox label={copy.paydayNone} checked={noDate} onChange={setNone} />}
     </QuestionLayout>

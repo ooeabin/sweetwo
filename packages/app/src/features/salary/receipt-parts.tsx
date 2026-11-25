@@ -5,6 +5,7 @@ import {
   Button,
   Chip,
   DayWheel,
+  PaydayPicker,
   SegChoice,
   ShortText,
 } from '@sweetwo/ui';
@@ -283,7 +284,7 @@ export function IncomeSheet({
   amount: number;
   planned: number;
   others: number;
-  /** 월급날이 없을 때(금액이 0보다 크면 휠을 보임) */
+  /** 월급날이 없을 때(금액이 0보다 크면 월급날 고르기를 보임) */
   askDay: boolean;
   masked?: boolean;
   busy?: boolean;
@@ -291,7 +292,7 @@ export function IncomeSheet({
   onClose: () => void;
 }) {
   const [v, setV] = useState<number | null>(initial);
-  const [day, setDay] = useState<number | 'last'>(25);
+  const [day, setDay] = useState<number | 'last' | null>(25);
   const left = others + (v ?? 0) - planned;
   const needDay = askDay && (v ?? 0) > 0;
   const won = (x: number) => (masked ? MASKED : readWon(x));
@@ -304,9 +305,11 @@ export function IncomeSheet({
         <Button
           block
           variant="primary"
-          disabled={v === null}
+          disabled={v === null || (needDay && day === null)}
           loading={busy}
-          onClick={() => v !== null && onConfirm(v, needDay ? day : null)}
+          onClick={() =>
+            v !== null && !(needDay && day === null) && onConfirm(v, needDay ? day : null)
+          }
         >
           {copy.ok}
         </Button>
@@ -326,11 +329,14 @@ export function IncomeSheet({
           }
         />
         {needDay && (
-          <DayWheel
+          <PaydayPicker
             label={copy.incomeDay}
             value={day}
             onChange={setDay}
             lastLabel={copy.paydayLast}
+            customLabel={copy.paydayCustom}
+            rangeError={copy.paydayRange}
+            hint={copy.paydayShortMonth}
           />
         )}
       </div>

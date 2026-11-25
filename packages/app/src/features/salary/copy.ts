@@ -248,6 +248,9 @@ export const copy = {
   incomeRowLabel: (name: string, amount: string) => `${name} ${amount}, 금액 고치기`, // 머리 금액 “내 월급 고치기”(S-11)와 구분
   incomeByPartner: (name: string) => `${name}님이 입력해요`, // [확인 필요] 상대 월급이 0원일 때 보기만 줄 아래
   incomeDay: '월급날은 며칠이에요?',
+  paydayCustom: '다른 날 직접 적기', // 2026-11-25 A안(O-32와 같음)
+  paydayRange: '1~31 사이로 적어 주세요',
+  paydayShortMonth: '그날이 없는 달은 말일로 계산해요',
   incomeSaved: '월급을 바꿨어요', // 설정 S-11c와 같은 말
   tenThousandUnit: '1만 원 단위로 넣어 주세요', // [확인 필요]
   leftover: (amount: string) => `미계획 금액 ${amount}`,

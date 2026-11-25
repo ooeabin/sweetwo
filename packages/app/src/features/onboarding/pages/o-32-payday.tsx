@@ -1,4 +1,4 @@
-import { Checkbox, DayGrid, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
+import { Checkbox, PaydayPicker, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
 import { saveRecommendedSplit } from '../auto-split';
 import { copy } from '../copy';
@@ -7,7 +7,7 @@ import { useStep } from '../step';
 
 type Day = number | 'last';
 
-// O-32 월급날(17 온보딩 ② v2.2) → 추천 월급 계획 저장 → O-55 알림 허용. 펼친 날짜 칸(7열 1~31 + ‘말일’, 2026-11-25 구역 6 휠에서 바꿈), 처음 값 25일.
+// O-32 월급날(17 온보딩 ② v2.2) → 추천 월급 계획 저장 → O-55 알림 허용. 월급날 고르기(PaydayPicker: 칩 10·15·20·21·25일·말일 + 직접 적기, 2026-11-25 A안, 구역 6의 펼친 날짜 칸을 바꿈), 처음 값 25일.
 // ‘매달 금액이 달라요’(O-31)를 켰을 때만 칸 아래 선택지 ‘날짜가 정해져 있지 않아요’ = payday_none(확인 목록 없음, 07 6장).
 // ‘다음’마다 추천 월급 계획을 다시 만듦(2026-11-10 S2-01). 첫 확인 목록은 만들지 않음(소급 없음, 다음 월급날)
 export function O32Payday() {
@@ -38,11 +38,12 @@ export function O32Payday() {
     <QuestionLayout
       chapter={s.chapter}
       title={copy.payday}
+      help={copy.paydayHelp}
       onBack={s.onBack}
       primary={{ label: copy.next, disabled: !noDate && payday === null, loading: s.saving }}
       onSubmit={() => (noDate || payday !== null) && void save()}
     >
-      <DayGrid
+      <PaydayPicker
         label={copy.payday}
         value={payday}
         onChange={(d) => {
@@ -50,10 +51,12 @@ export function O32Payday() {
           setNone(false);
         }}
         lastLabel={copy.paydayLast}
+        customLabel={copy.paydayCustom}
+        rangeError={copy.paydayRange}
         // ‘날짜가 정해져 있지 않아요’를 고르면 날짜 칸은 끔(2026-11-13 UX B), 다시 풀면 켬
         disabled={noDate}
         // 29~31일은 없는 달이 있어 ‘말일’과 같아질 수 있음(2026-11-10 S2-24, 12 Q4 예외)
-        hint={typeof payday === 'number' && payday >= 29 ? copy.paydayShortMonth : undefined}
+        hint={copy.paydayShortMonth}
       />
       {variable && <Checkbox label={copy.paydayNone} checked={noDate} onChange={setNone} />}
     </QuestionLayout>

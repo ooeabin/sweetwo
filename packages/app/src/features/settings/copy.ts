@@ -67,6 +67,9 @@ export const copy = {
   salaryModeValue: { separate: '월급은 각자 써요', joint: '월급을 합쳐서 써요' }, // [확인 필요]
   planDay: '월급날 확인 목록 만드는 날',
   lastDay: '말일',
+  paydayCustom: '다른 날 직접 적기', // 2026-11-25 A안(O-32와 같음)
+  paydayRange: '1~31 사이로 적어 주세요',
+  paydayShortMonth: '그날이 없는 달은 말일로 계산해요',
   dayN: (n: number) => `${n}일`,
   laterPayday: '늦은 월급날',
   holidayShift: '월급날이 쉬는 날이면 앞당겨 보여 줘요',

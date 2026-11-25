@@ -163,6 +163,10 @@ export const copy = {
   payday: '월급날',
   paydayTitle: '월급날은 며칠이에요?',
   paydayLast: '말일',
+  paydayHelp: '회사마다 많이 쓰는 날을 먼저 보여 드려요', // O-32와 같음(2026-11-25 A안)
+  paydayCustom: '다른 날 직접 적기',
+  paydayRange: '1~31 사이로 적어 주세요',
+  paydayShortMonth: '그날이 없는 달은 말일로 계산해요', // O-32와 같음
   paydayNone: '날짜가 정해져 있지 않아요', // [확인 필요] O-32와 같음(2026-11-13)
   checkValue: '입력한 값이 맞나요?',
 

@@ -660,7 +660,7 @@ test('첫 저금 끝: 이미 합류했으면 초대 시트 없이 홈', async ({
   await expect(page.getByRole('dialog', { name: '같이 모을 사람을 초대할까요?' })).toHaveCount(0);
 });
 
-test('O-32 월급날은 펼친 날짜 칸: 25일에서 시작, 31일 안내, 말일, 날짜 없음은 칸을 끔(2026-11-25 구역 6)', async ({
+test('O-32 월급날 고르기(A안): 칩 + 직접 적기는 서로 하나만, 범위 오류, 31일 안내, 날짜 없음은 끔(2026-11-25)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -673,42 +673,121 @@ test('O-32 월급날은 펼친 날짜 칸: 25일에서 시작, 31일 안내, 말
   });
   await page.goto('/onboarding/o-32');
   await heading(page, '월급날은 며칠이에요?');
-  // 휠이 아니라 화면에 펼친 칸: 1~31 + 말일
+  await expect(page.getByText('회사마다 많이 쓰는 날을 먼저 보여 드려요')).toBeVisible();
+  // 휠도 1~31 판도 아님: 칩 6개(10 15 20 21 25 말일) + 직접 적기 칸
   await expect(page.locator('.hg-wheel')).toHaveCount(0);
-  const grid = page.getByRole('radiogroup', { name: '월급날은 며칠이에요?' });
-  await expect(grid.getByRole('radio')).toHaveCount(32);
-  const d25 = grid.getByRole('radio', { name: '25일' });
+  const chips = page.getByRole('radiogroup', { name: '월급날은 며칠이에요?' });
+  await expect(chips.getByRole('radio')).toHaveCount(6);
+  await expect(chips.getByRole('radio').allTextContents()).resolves.toEqual([
+    '10일',
+    '15일',
+    '20일',
+    '21일',
+    '25일',
+    '말일',
+  ]);
+  const custom = page.getByRole('textbox', { name: '다른 날 직접 적기' });
+  const d25 = chips.getByRole('radio', { name: '25일' });
   await expect(d25).toBeChecked();
-  // 고른 칸은 오렌지(brand) 채움, 누르는 칸 44px 이상
+  await expect(custom).toHaveValue('');
+  // 고른 칩은 흰 칸 + 700 + 오렌지 글자, 누르는 칸 44px 이상
   const box = await d25.boundingBox();
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
   expect(box?.width ?? 0).toBeGreaterThanOrEqual(44);
-  const bg = await d25.evaluate((el) => getComputedStyle(el).backgroundColor);
-  const brand = await page.evaluate(() => {
-    const s = document.createElement('i');
-    s.style.color = 'var(--accent-app)';
-    document.body.append(s);
-    const c = getComputedStyle(s).color;
-    s.remove();
-    return c;
+  expect(await d25.evaluate((el) => getComputedStyle(el).fontWeight)).toBe('700');
+  const css = await page.evaluate(() => {
+    const read = (v: string, prop: 'color' | 'backgroundColor') => {
+      const s = document.createElement('i');
+      s.style[prop] = `var(${v})`;
+      document.body.append(s);
+      const c = getComputedStyle(s)[prop];
+      s.remove();
+      return c;
+    };
+    return { text: read('--accent-app-text', 'color'), on: read('--choice-on', 'backgroundColor') };
   });
-  expect(bg).toBe(brand);
+  // 고르는 순간 색이 바뀌는 중일 수 있어 전환이 끝나길 기다림
+  await expect.poll(() => d25.evaluate((el) => getComputedStyle(el).color)).toBe(css.text);
+  await expect.poll(() => d25.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(css.on);
   await expect(page.getByText('그날이 없는 달은 말일로 계산해요')).toHaveCount(0);
-  await grid.getByRole('radio', { name: '31일' }).click();
-  await expect(grid.getByRole('radio', { name: '31일' })).toBeChecked();
+  // 직접 적기: 31 → 칩 해제 + 안내
+  await custom.fill('31');
+  await expect(chips.getByRole('radio', { name: '25일' })).not.toBeChecked();
   await expect(page.getByText('그날이 없는 달은 말일로 계산해요')).toBeVisible();
-  await grid.getByRole('radio', { name: '말일' }).click();
-  await expect(grid.getByRole('radio', { name: '말일' })).toBeChecked();
-  // 키보드: ←는 하루 앞
-  await grid.getByRole('radio', { name: '말일' }).press('ArrowLeft');
-  await expect(grid.getByRole('radio', { name: '31일' })).toBeChecked();
-  // ‘날짜가 정해져 있지 않아요’(매달 금액이 달라요일 때만) = 칸을 흐리게 끔
+  await expect(page.getByRole('button', { name: '다음' })).toBeEnabled();
+  // 칩을 고르면 직접 적기가 비워짐
+  await chips.getByRole('radio', { name: '말일' }).click();
+  await expect(chips.getByRole('radio', { name: '말일' })).toBeChecked();
+  await expect(custom).toHaveValue('');
+  await expect(page.getByText('그날이 없는 달은 말일로 계산해요')).toHaveCount(0);
+  // 범위 밖: 오류 + 칩 해제 + 다음 꺼짐
+  await custom.fill('32');
+  await expect(
+    page.getByRole('alert').filter({ hasText: '1~31 사이로 적어 주세요' }),
+  ).toBeVisible();
+  await expect(chips.getByRole('radio', { name: '말일' })).not.toBeChecked();
+  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
+  await custom.fill('0');
+  await expect(page.getByText('1~31 사이로 적어 주세요')).toBeVisible();
+  await custom.fill('');
+  await expect(page.getByText('1~31 사이로 적어 주세요')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
+  await custom.fill('7');
+  await expect(page.getByRole('button', { name: '다음' })).toBeEnabled();
+  // 키보드: 칩에서 →
+  await chips.getByRole('radio', { name: '10일' }).click();
+  await chips.getByRole('radio', { name: '10일' }).press('ArrowRight');
+  await expect(chips.getByRole('radio', { name: '15일' })).toBeChecked();
+  // ‘날짜가 정해져 있지 않아요’(매달 금액이 달라요일 때만) = 고르기를 흐리게 끔
   await page.getByRole('checkbox', { name: '날짜가 정해져 있지 않아요' }).click();
-  await expect(grid).toHaveAttribute('aria-disabled', 'true');
+  await expect(page.locator('.hg-payday')).toHaveAttribute('aria-disabled', 'true');
   await expect(page.getByRole('button', { name: '다음' })).toBeEnabled();
   await axe(page);
   await page.getByRole('checkbox', { name: '날짜가 정해져 있지 않아요' }).click();
-  await expect(grid).not.toHaveAttribute('aria-disabled', 'true');
+  await expect(page.locator('.hg-payday')).not.toHaveAttribute('aria-disabled', 'true');
+});
+
+test('O-32 직접 적은 날이 저장되고 다시 열면 칩 날짜는 칩으로, 아닌 날은 직접 적기 칸에 복원됨', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  Object.assign(db.me, {
+    nickname: '찬우',
+    onboarding_step: 'O-32',
+    monthly_income: 3_500_000,
+    payday: 17,
+    payday_last: false,
+  });
+  await page.goto('/onboarding/o-32');
+  await heading(page, '월급날은 며칠이에요?');
+  const chips = page.getByRole('radiogroup', { name: '월급날은 며칠이에요?' });
+  const custom = page.getByRole('textbox', { name: '다른 날 직접 적기' });
+  await expect(custom).toHaveValue('17');
+  await expect(chips.getByRole('radio', { checked: true })).toHaveCount(0);
+  await custom.fill('3');
+  await page.getByRole('button', { name: '다음' }).click();
+  await expect.poll(() => db.me.payday).toBe(3);
+  expect(db.me.payday_last).toBe(false);
+});
+
+test('O-32 저장된 월급날이 칩 날짜면 그 칩, 말일이면 말일 칩이 골라진 채로 열림', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  Object.assign(db.me, {
+    nickname: '찬우',
+    onboarding_step: 'O-32',
+    monthly_income: 3_500_000,
+    payday: 15,
+    payday_last: false,
+  });
+  await page.goto('/onboarding/o-32');
+  await heading(page, '월급날은 며칠이에요?');
+  const chips = page.getByRole('radiogroup', { name: '월급날은 며칠이에요?' });
+  await expect(chips.getByRole('radio', { name: '15일' })).toBeChecked();
+  await expect(page.getByRole('textbox', { name: '다른 날 직접 적기' })).toHaveValue('');
 });
 
 test('시작한 사람이 첫 저금·초대 시트에서 앱을 닫았다 열면 A-06 권장보다 그 단계부터, A-06은 끝난 뒤 한 번(r5)', async ({
@@ -816,7 +895,9 @@ test('O-31 월급 읽기 줄 자리를 미리 잡음(칩이 안 밀림), ‘지�
   const chip = page.locator('.hg-quick .hg-chip').first();
   // 들어오는 움직임(6px)이 끝난 뒤 잼
   const settled = () =>
-    page.evaluate(() => Promise.all(document.getAnimations().map((a) => a.finished.catch(() => null))));
+    page.evaluate(() =>
+      Promise.all(document.getAnimations().map((a) => a.finished.catch(() => null))),
+    );
   await settled();
   const before = (await chip.boundingBox())?.y ?? 0;
   await amount(page).fill('3500000');
@@ -843,7 +924,9 @@ test('질문 선택지 카드(O-11 등): 안 고르면 빈 원, 고르면 흰 �
   const first = cards.first();
   const box = await first.boundingBox();
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(56);
-  expect(await first.evaluate((el) => getComputedStyle(el).borderTopColor)).toBe('rgba(0, 0, 0, 0)');
+  expect(await first.evaluate((el) => getComputedStyle(el).borderTopColor)).toBe(
+    'rgba(0, 0, 0, 0)',
+  );
   expect(await first.evaluate((el) => getComputedStyle(el).borderRadius)).toBe('16px');
   const mark = first.locator('.hg-option__mark');
   const empty = await mark.evaluate((el) => getComputedStyle(el).backgroundColor);
@@ -859,9 +942,9 @@ test('질문 선택지 카드(O-11 등): 안 고르면 빈 원, 고르면 흰 �
     .evaluate((el) => getComputedStyle(el).backgroundColor);
   expect(filled).not.toBe(empty);
   expect(await on.evaluate((el) => getComputedStyle(el).fontWeight)).toBe('400');
-  expect(await on.locator('.hg-option__label').evaluate((el) => getComputedStyle(el).fontWeight)).toBe(
-    '700',
-  );
+  expect(
+    await on.locator('.hg-option__label').evaluate((el) => getComputedStyle(el).fontWeight),
+  ).toBe('700');
   await axe(page);
 });
 
