@@ -18,7 +18,7 @@
 | `HourField` / `HourSheet` | “밤 10시” | 4열 0~23시(칸 글자 = `hourLabel`: 새벽·아침·낮·오후·저녁·밤). 주 버튼 “밤 11시 선택” | S-14a 방해 금지 시작·끝(한 줄 둘을 나란히) |
 
 - 날짜 전체(연·월·일)는 달력 시트(`DateSheet.md`, `DateField`). S-11h 결혼한 날·예정일도 `DateField`(처음 적을 때는 자리표시, 직접 골라야 저장).
-- 글자·문구는 `pickLabels`(ui 기본값)로 한국어를 갖고 있고 `labels`로 바꿀 수 있음. 이름은 한 줄 필드의 `label`(질문 그대로) = 시트 제목 = 화면 읽기 이름. 한 줄 화면 읽기 이름은 “{질문}, {값}”.
+- 글자·문구는 `pickLabels`(ui 기본값)로 한국어를 갖고 있고 `labels`로 바꿀 수 있음. 이름은 한 줄 필드의 `label`(질문 그대로) = 시트 제목 = 화면 읽기 이름(질문 문장이 화면 제목에 이미 있으면 짧은 이름: 출생연도). 한 줄 화면 읽기 이름은 “{질문}, {값}”.
 - 다크 모드·좁은 창(768px 미만, 시트는 아래에 붙음, 넓은 창은 가운데 카드)·동작 줄이기(전환 없음)는 `BottomSheet`·토큰이 처리.
 - React: `DayField({ label, value, onChange, lastLabel? })`, `YearMonthField({ label, value, onChange, error?, minYear?, maxYear? })`, `YearField({ label, value, onChange, minYear, maxYear, initial? })`, `HourField({ label, value, onChange, format })`.
 - CSS: `hg-picksheet`, `__grid`(`.is-scroll`), `__cell`(`.is-on`), `__yearhead`, `__year`, `__nav`. 안 쓰게 된 `hg-wheel*`·휠 글자 예외 줄은 지움.

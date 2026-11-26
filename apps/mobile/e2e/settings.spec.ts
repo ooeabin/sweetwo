@@ -353,7 +353,7 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
 
   // 출생연도
   await page.getByRole('button', { name: /출생연도/ }).click();
-  await pickYear(page, '찬우님은 몇 년생이에요?', 1993);
+  await pickYear(page, '출생연도', 1993);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/settings\/me$/);
   expect(db.me.birth_year).toBe(1993);

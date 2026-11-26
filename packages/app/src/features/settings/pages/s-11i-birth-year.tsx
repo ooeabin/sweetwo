@@ -44,7 +44,7 @@ export function S11iBirthYear() {
       }}
     >
       <YearField
-        label={title}
+        label={copy.birthYearRow}
         value={y}
         onChange={setB}
         minYear={range.min}

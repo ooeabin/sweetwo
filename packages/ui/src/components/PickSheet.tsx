@@ -123,7 +123,11 @@ function PickGrid<V extends string | number>({
     const el = box.current;
     const cell = refs.current[tab];
     if (!el || !cell) return;
-    el.scrollTop = cell.offsetTop - el.offsetTop - el.clientHeight / 2 + cell.offsetHeight / 2;
+    // 시트가 올라오는 중이어도 같이 움직이니 두 상자의 화면 좌표 차로 계산(offsetTop은 기준 부모에 따라 어긋남).
+    // scrollTop을 직접 정해 바로 옮김(‘동작 줄이기’와 상관없이 애니메이션 없음)
+    const c = cell.getBoundingClientRect();
+    const b = el.getBoundingClientRect();
+    el.scrollTop += c.top - b.top - el.clientHeight / 2 + c.height / 2;
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {

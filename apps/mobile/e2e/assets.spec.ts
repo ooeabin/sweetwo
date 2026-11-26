@@ -638,7 +638,7 @@ test('자산 순위(F-08 (나)): 출생연도가 없으면 ‘출생연도 알�
   await expect(page.getByRole('heading', { name: '찬우님은 몇 년생이에요?' })).toBeVisible();
   // 처음 보이는 값(올해 − 30)으로 바로 저장할 수 있음(2026-11-13 실구동)
   await expect(page.getByRole('button', { name: '저장' })).toBeEnabled();
-  await pickYear(page, '찬우님은 몇 년생이에요?', 1993);
+  await pickYear(page, '출생연도', 1993);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/assets\/rank$/);
   expect(db.me.birth_year).toBe(1993);
