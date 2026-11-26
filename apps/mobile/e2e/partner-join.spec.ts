@@ -111,7 +111,7 @@ test('첫 실행 초대 코드 자동 입력: 시트 → 합류하기 한 번으
   // 이 기기에서는 한 번만
   await page.evaluate(() => localStorage.removeItem('sweetwo.started'));
   await page.goto('/start');
-  await heading(page, '둘이 구워서 더 달콤한 자산파이');
+  await heading(page, '둘이서 만든 달콤한 자산파이');
   await expect(sheet).toHaveCount(0);
 });
 
@@ -122,6 +122,6 @@ test('첫 실행 초대 코드: ‘아니요, 새로 시작할게요’면 시�
   const sheet = page.getByRole('dialog', { name: '받은 초대 코드로 합류할까요?' });
   await sheet.getByRole('button', { name: '아니요, 새로 시작할게요' }).click();
   await expect(sheet).toHaveCount(0);
-  await heading(page, '둘이 구워서 더 달콤한 자산파이');
+  await heading(page, '둘이서 만든 달콤한 자산파이');
   await expect(page.getByRole('button', { name: '시작하기' })).toBeVisible();
 });
