@@ -67,8 +67,8 @@ export const copy = {
   salaryModeValue: { separate: '월급은 각자 써요', joint: '월급을 합쳐서 써요' }, // [확인 필요]
   planDay: '월급날 확인 목록 만드는 날',
   lastDay: '말일',
-  paydayCustom: '다른 날 직접 적기', // 2026-11-25 A안(O-32와 같음)
-  paydayRange: '1~31 사이로 적어 주세요',
+  paydayCustom: '다른 날 직접 입력하기', // 2026-11-25 A안(O-32와 같음)
+  paydayRange: '1~31 사이로 입력해 주세요',
   paydayShortMonth: '그날이 없는 달은 말일로 계산해요',
   dayN: (n: number) => `${n}일`,
   laterPayday: '늦은 월급날',
@@ -86,7 +86,7 @@ export const copy = {
   // S-11c 내 월급(O-31과 같음)
   salaryQ: '한 달 실수령액은 얼마예요?',
   salaryHelp: '세금 떼고 통장에 들어오는 금액이에요', // [확인 필요] 2026-11-09 ‘들어오는 돈’ 대신
-  salaryVariableHelp: '가장 적게 들어온 달을 기준으로 적어 주세요',
+  salaryVariableHelp: '가장 적게 들어온 달을 기준으로 입력해 주세요',
   noSalary: '지금은 월급이 없어요',
   payday: '월급날',
   salarySaved: '월급을 바꿨어요', // [확인 필요]
@@ -197,7 +197,7 @@ export const copy = {
   reconnectGone: '지금은 받은 요청이 없어요',
   reconnectTooSoon: '다시 연결 요청은 7일에 한 번 보낼 수 있어요',
   reconnectClosed: '지금은 다시 연결할 수 없어요',
-  confirmQ: '확인을 위해 ‘연결 해제’라고 적어 주세요', // [확인 필요]
+  confirmQ: '확인을 위해 ‘연결 해제’라고 입력해 주세요', // [확인 필요]
   confirmWord: '연결 해제',
   send: '연결 해제 요청하기', // [확인 필요]
   sent: (name: string) => `${name}님에게 연결 해제를 요청했어요`, // [확인 필요]
@@ -374,7 +374,7 @@ export const copy = {
     etc: '기타',
   } as Record<string, string>,
   bodyLabel: '내용',
-  bodyHelp: '금액이나 계좌번호는 적지 않아도 돼요', // [확인 필요]
+  bodyHelp: '금액이나 계좌번호는 입력하지 않아도 돼요', // [확인 필요]
   attachApp: '앱 정보 함께 보내기',
   attachAppSub: '앱 버전, OS, 우리 둘 상태. 금액과 메모는 보내지 않아요', // [확인 필요]
   sendInquiry: '보내기',
@@ -670,7 +670,7 @@ export const copy = {
     sum: '항목은 안 보이고 총액에만 더해요',
     private: '파트너에게는 총액에도 안 더해요', // 2026-11-13 H3 [확인 필요]
   } as Record<string, string>,
-  assetDefaultNone: '아직 안 골랐어요', // [확인 필요] 처음 자산을 적기 전
+  assetDefaultNone: '아직 안 골랐어요', // [확인 필요] 처음 자산을 입력하기 전
   rankTitle: '자산 순위 같이 보기',
   rankToggle: '같이 보기', // [확인 필요] 2026-11-24 구역 5: 섹션 제목과 같던 줄 이름을 줄임
   rankHelp: '두 분 모두 켜면 둘의 합으로 순위를 봐요', // [확인 필요]

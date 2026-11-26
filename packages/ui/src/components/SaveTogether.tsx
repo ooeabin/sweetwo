@@ -3,7 +3,7 @@ import { AddRow } from './AddRow';
 import { cx } from './cx';
 
 // 같이 모으기 상자(docs/design/components/SaveTogether.md, 2026-11-13 ADR 0009). 홈 주인공 H-10.
-// SaveTogether(틀: 머리 “같이 모으기” + D-day 알약 → 가로 넘김 칸 최대 3 + ‘저금 모두 보기 ›’ + 점 → ‘+ 수입 적기’),
+// SaveTogether(틀: 머리 “같이 모으기” + D-day 알약 → 가로 넘김 칸 최대 3 + ‘저금 모두 보기 ›’ + 점 → ‘+ 수입 입력하기’),
 // 칸 하나 = SaveTogetherSlide(사람 + 이름 → 큰 숫자 → 막대 + 보조 줄들, 칸 전체가 버튼, 화면 읽기는 문장 하나).
 // 2026-11-18: 누를 수 없는 정보 상자(칸은 div, onClick 없음, ‘모두 보기’ 칸 없음). 같이 모으기가 0개면 홈이 상자를 그리지 않음.
 // 2026-11-26 사용자 결정: 홈 칸 왼쪽 자리는 그 저축·투자의 그림(`art`, 파일이 없으면 칸째 없음), 사람 원은 머리 제목 오른쪽
@@ -96,7 +96,7 @@ export function SaveTogether({
   head?: ReactNode;
   /** 칸마다 `owners` = 머리 제목 바로 오른쪽 작은 겹친 Avatar(지금 보이는 칸 기준, 2026-11-26) */
   slides: (SaveTogetherSlideProps & { owners?: ReactNode })[];
-  /** 맨 아래 회색 글자 버튼 “+ 수입 적기” */
+  /** 맨 아래 회색 글자 버튼 “+ 수입 입력하기” */
   moneyIn?: { label: string; onClick: () => void };
   /** 묶음 이름(화면 읽기) */
   label: string;

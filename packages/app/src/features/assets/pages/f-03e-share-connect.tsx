@@ -8,7 +8,7 @@ import { copy } from '../copy';
 import { F03eShare, type ShareVis } from './f-03e-share';
 
 /**
- * F-03e 연결할 때(23 ‘F-03e 연결할 때’, 2026-11-16 5차 검토 B5) [확인 필요]: 혼자 쓸 때 ‘모두’로 적은 내 명의 자산은 연결
+ * F-03e 연결할 때(23 ‘F-03e 연결할 때’, 2026-11-16 5차 검토 B5) [확인 필요]: 혼자 쓸 때 ‘모두’로 입력한 내 명의 자산은 연결
  * 순간 서버가 숨겨 둠(asset.share_pending). 홈 띠 5a → 이 화면에서 한 번 고름(미리 고른 값 없음, F-03e와 같은 선택지) →
  * answer_asset_share(숨겨 둔 자산을 고른 값으로, 기본값이 없으면 기본값도) → 홈 + Toast. 주소 /assets/share
  */

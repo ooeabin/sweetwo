@@ -141,7 +141,7 @@ test('F-04 투자: 시세 바꾸기, 팔았어요(일부) → 받은 통장 → 
     .getByRole('button', { name: /입출금 통장/ })
     .click();
   await expect(page.getByText('입출금 통장 3,000,000원 > 8,000,000원')).toBeVisible();
-  await page.getByRole('button', { name: '적기', exact: true }).click();
+  await page.getByRole('button', { name: '입력하기', exact: true }).click();
   await expect(page.getByText('입출금 통장 +5,000,000원')).toBeVisible();
   await expect(page.getByText('판 수익 +1,000,000원')).toBeVisible();
   await axe(page);
@@ -176,7 +176,7 @@ test('F-04 투자: 전부 팔았어요 → 받은 통장 → 결과(F-04d)가 �
     .getByRole('group', { name: '어느 통장에 들어왔어요?' })
     .getByRole('button', { name: /입출금 통장/ })
     .click();
-  await page.getByRole('button', { name: '적기', exact: true }).click();
+  await page.getByRole('button', { name: '입력하기', exact: true }).click();
   await expect(page.getByRole('heading', { name: '팔았어요' }).first()).toBeVisible();
   await expect(page.getByText('입출금 통장 +11,000,000원')).toBeVisible();
   await expect(page.getByText('판 수익 +3,000,000원')).toBeVisible();
@@ -187,7 +187,7 @@ test('F-04 투자: 전부 팔았어요 → 받은 통장 → 결과(F-04d)가 �
   await expect(page.getByRole('button', { name: /찬우 주식/ })).toHaveCount(0);
 });
 
-test('F-04b 팔았어요: 통장 “안 적을게요” → 통장 금액은 그대로, 판 항목만 정리(2026-11-24)', async ({
+test('F-04b 팔았어요: 통장 “입력하지 않을게요” → 통장 금액은 그대로, 판 항목만 정리(2026-11-24)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -207,9 +207,9 @@ test('F-04b 팔았어요: 통장 “안 적을게요” → 통장 금액은 그
   });
   await page.goto('/assets/a-stock/sold');
   await fillAmount(page, '받은 금액', 11_000_000);
-  await page.getByRole('button', { name: '안 적을게요', exact: true }).click();
+  await page.getByRole('button', { name: '입력하지 않을게요', exact: true }).click();
   await expect(page.getByText(/입출금 통장 .* > /)).toHaveCount(0);
-  await page.getByRole('button', { name: '적기', exact: true }).click();
+  await page.getByRole('button', { name: '입력하기', exact: true }).click();
   await expect(page.getByText('판 수익 +3,000,000원')).toBeVisible();
   expect(db.assets.find((a) => a.id === 'a-stock')?.status).toBe('sold');
   expect(db.assets.find((a) => a.id === 'a-bank')?.amount).toBe(3_000_000);

@@ -52,8 +52,8 @@ export const copy = {
     ok: '확인',
     next: '다음',
     tooLong: '20자까지 쓸 수 있어요',
-    unit: '1만 원 단위로 적어 주세요',
-    overTotal: '한 달 금액보다 적게 적어 주세요',
+    unit: '1만 원 단위로 입력해 주세요',
+    overTotal: '한 달 금액보다 적게 입력해 주세요',
   },
   // W-01 월급 계획
   splitTitle: '월급 계획',
@@ -69,7 +69,7 @@ export const copy = {
   refill: '추천값으로 다시 채우기',
   refillTitle: '추천값으로 다시 채울까요?', // [확인 필요]
   // 2026-11-12 QA 5구간 D1: 직접 추가한 지출은 그대로라 무엇이 바뀌는지 적음 [확인 필요]
-  refillBody: '용돈과 기한 있는 저축·투자가 추천값으로 바뀌어요. 이미 적은 지출은 그대로예요', // 2026-11-15 추천 고정지출·생활비 줄 없앰
+  refillBody: '용돈과 기한 있는 저축·투자가 추천값으로 바뀌어요. 이미 입력한 지출은 그대로예요', // 2026-11-15 추천 고정지출·생활비 줄 없앰
   refillOk: '다시 채우기', // [확인 필요]
   cancel: '취소',
   // W-01 영수증(2026-11-09) [확인 필요]
@@ -92,8 +92,8 @@ export const copy = {
   summaryPct: (n: number) => `${n}%`,
   summaryNoSaving: '월급을 어떻게 나눌지 정해 보세요', // 2026-11-26 사용자 결정: 화면 요약에서는 없앰(저축·투자 0원이면 문장 없음), 공유 이미지에만 남김
   // 계획이 월급보다 큼(미계획 < 0)이면 굵은 문장은 overPlan “계획이 월급보다 250,000원 많아요”(2026-11-26 금액만 빨강) [확인 필요]
-  summaryEmpty: ['월급을 적으면', '나눌 수 있어요'] as const, // 월급 0원 상태 굵은 문장(두 줄)
-  summaryEmptyAction: '월급 적기',
+  summaryEmpty: ['월급을 입력하면', '나눌 수 있어요'] as const, // 월급 0원 상태 굵은 문장(두 줄)
+  summaryEmptyAction: '월급 입력하기',
   allocated: '계획 금액',
   leftoverLabel: '미계획 금액',
   addSpend: '+ 지출 추가',
@@ -120,7 +120,7 @@ export const copy = {
     ] as const,
     other: '직접 정하기',
   },
-  addMyShareHint: '내가 내는 몫만 적어요', // [확인 필요] 2026-11-16 r6 ‘매달 나가는 지출’ 금액 시트 아래 회색 한 줄(월세를 둘이 나눠 내면 내 몫)
+  addMyShareHint: '내가 내는 몫만 입력해요', // [확인 필요] 2026-11-16 r6 ‘매달 나가는 지출’ 금액 시트 아래 회색 한 줄(월세를 둘이 나눠 내면 내 몫)
   sharedAccountChip: '같이 쓰는 통장', // [확인 필요] 2026-11-16 R4-4 ‘+ 지출 추가’ 칩 끝(통장 줄을 숨겼을 때)
   ownName: '직접 입력',
   editShort: '편집', // [확인 필요] 2026-11-26 사용자 결정: W-01 머리 오른쪽 글자 버튼(토스 내 소비 ‘편집’처럼, 예전 맨 아래 ‘편집하기’ editPlan은 없앰). 좁은 창 hg-headaction
@@ -261,8 +261,8 @@ export const copy = {
   incomeRowLabel: (name: string, amount: string) => `${name} ${amount}, 금액 고치기`, // 머리 금액 “내 월급 고치기”(S-11)와 구분
   incomeByPartner: (name: string) => `${name}님이 입력해요`, // [확인 필요] 상대 월급이 0원일 때 보기만 줄 아래
   incomeDay: '월급날은 며칠이에요?',
-  paydayCustom: '다른 날 직접 적기', // 2026-11-25 A안(O-32와 같음)
-  paydayRange: '1~31 사이로 적어 주세요',
+  paydayCustom: '다른 날 직접 입력하기', // 2026-11-25 A안(O-32와 같음)
+  paydayRange: '1~31 사이로 입력해 주세요',
   paydayShortMonth: '그날이 없는 달은 말일로 계산해요',
   incomeSaved: '월급을 바꿨어요', // 설정 S-11c와 같은 말
   tenThousandUnit: '1만 원 단위로 넣어 주세요', // [확인 필요]
@@ -445,7 +445,7 @@ export const copy = {
   previewAuto: '자동으로 나가요',
   previewWhen: '월급날에 확인해요', // 미리 보기 줄 화면 읽기 이름 끝(금액 뒤)
   previewCheck: (name: string) => `${name}, 월급날에 확인해요`, // 미리 보기 줄 체크 원의 화면 읽기 이름(누를 수 없음)
-  moneyInGo: '수입 적기',
+  moneyInGo: '수입 입력하기',
   // W-02 새 구조(2026-11-19) [모두 확인 필요]
   // W-02 수입 카드(2026-11-19 사용자 결정, 20 W-02 6번) [확인 필요]
   incomeCardLabel: '이번 달 수입',
@@ -514,7 +514,7 @@ export const copy = {
   autoPickEmpty: '고를 지출이나 저축·투자가 없어요',
   autoPickLine: (name: string) => `${name} 자동으로 나가요`,
   // H-13 기간 한 줄(07 6장, 홈 H-11 자리와 월급 탭 ‘이번 달’ 자리가 같이 씀) [모두 확인 필요]
-  periodNone: '아직 적은 수입이 없어요', // 2026-11-26 제목 한 줄(행동은 오른쪽 “수입 적기 ›”)
+  periodNone: '아직 입력한 수입이 없어요', // 2026-11-26 제목 한 줄(행동은 오른쪽 “수입 입력하기 ›”)
   periodEarly: (amount: string) => `이번 기간 수입 ${amount}`,
   periodIn: (amount: string) => `수입 ${amount}`,
   periodNeed: (amount: string) => `월급 계획 ${amount}`,
@@ -533,7 +533,7 @@ export const copy = {
   historyAdjustName: '바로잡기', // [확인 필요]
   historyReconcileName: '잔액 맞추기', // [확인 필요]
   historyNotePaidName: '쓸 곳 메모', // [확인 필요]
-  moneyIn: '수입 적기', // AddRow 글자(+ 아이콘이 ‘+’를 대신)
+  moneyIn: '수입 입력하기', // AddRow 글자(+ 아이콘이 ‘+’를 대신)
   menuAdjust: '모은 금액 바로잡기', // [확인 필요]
   menuNotes: '쓸 곳 메모', // [확인 필요]
   menuBundle: '같이 모으기 시작하기',
@@ -575,7 +575,7 @@ export const copy = {
   adjusted: '모은 금액을 바로잡았어요', // [확인 필요]
   // W-10c 실제 잔액 맞추기
   reconcileQ: '통장 잔액과 모은 금액을 맞춰 볼까요?',
-  reconcileHelp: '통장에 실제로 모인 금액을 적어 주세요', // [확인 필요] 2026-11-16 “비우면 그대로 둬요” 뺌
+  reconcileHelp: '통장에 실제로 모인 금액을 입력해 주세요', // [확인 필요] 2026-11-16 “비우면 그대로 둬요” 뺌
   reconcileNow: (amount: string) => `지금 모은 금액 ${amount}`, // [확인 필요]
   reconcileActual: '실제로 모인 금액', // [확인 필요]
   reconcileSave: '맞추기', // [확인 필요]
@@ -622,7 +622,7 @@ export const copy = {
   }, // 19 ‘이름 칩 표’ [확인 필요]
   // W-14 쓸 곳 메모, W-14a
   notesTitle: (name: string) => `쓸 곳 메모 ${name}`, // [확인 필요] 제목 “쓸 곳 메모” + 저금 이름
-  notesHelp: '모은 금액을 어디에 쓸지 적어 두면 캘린더에도 보여요', // [확인 필요]
+  notesHelp: '모은 금액을 어디에 쓸지 입력해 두면 캘린더에도 보여요', // [확인 필요]
   notesEmpty: '아직 메모가 없어요', // [확인 필요]
   noteAdd: '메모 추가', // [확인 필요] AddRow(+ 아이콘)
   notePaid: '냈어요', // [확인 필요]
@@ -637,12 +637,12 @@ export const copy = {
   noteNameQ: '모은 금액을 어디에 쓸 거예요?', // W-14a 이름
   noteNamePlaceholder: '예: 예식장 잔금', // [확인 필요]
   noteAmountQ: '얼마쯤 들어요?', // [확인 필요] 예상 금액(선택)
-  noteNoAmount: '금액 없이 적을게요', // [확인 필요]
+  noteNoAmount: '금액 없이 입력할게요', // [확인 필요]
   noteTitleNew: '쓸 곳 메모 추가', // [확인 필요] 한 화면 머리 제목
   noteTitleEdit: '쓸 곳 메모 고치기', // [확인 필요]
-  noteOptional: '안 적어도 돼요', // [확인 필요]
+  noteOptional: '입력하지 않아도 돼요', // [확인 필요]
   noteDateQ: '언제 내요?', // [확인 필요]
-  noteNoDate: '날짜 없이 적을게요', // [확인 필요]
+  noteNoDate: '날짜 없이 입력할게요', // [확인 필요]
   noteSave: '저장',
   noteSaved: '메모를 저장했어요', // [확인 필요]
   noteDeleted: '메모를 지웠어요', // [확인 필요]
@@ -696,7 +696,7 @@ export const copy = {
         ? '목표 금액을 바꿨어요'
         : '기한을 바꿨어요', // [확인 필요]
   bundleNameQ: '이름을 뭐라고 할까요?', // [확인 필요]
-  // W-20 수입 적기, W-20a
+  // W-20 수입 입력하기, W-20a
   moneyInQ: '얼마를 받았어요?',
   moneyInDate: '받은 날', // [확인 필요]
   moneyInFuture: '오늘이나 지난 날만 고를 수 있어요',
@@ -713,12 +713,12 @@ export const copy = {
   moneyInLeft: (total: string, left: string) => `수입 ${total} 중 아직 안 넣은 ${left}`, // 2026-11-16 r6 (예전 “…중 남은 …”)
   moneyInOver: '수입보다 많이 넣을 수 없어요',
   moneyInPut: '넣기', // [확인 필요]
-  /** W-20a 적기만(2026-11-16 R4-7: 수입 적기가 저금 나누기로만 끝났음) [확인 필요] */
+  /** W-20a 입력하기만(2026-11-16 R4-7: 수입 입력하기가 저금 나누기로만 끝났음) [확인 필요] */
   moneyInSkip: '저축·투자에 안 넣을게요',
-  /** W-02 ‘수입’ 묶음(이번 달에 적은 기록, 2026-11-16 R4-7) */
+  /** W-02 ‘수입’ 묶음(이번 달에 입력한 기록, 2026-11-16 R4-7) */
   moneyInRow: (date: string, kind: string) => `${date}, ${kind}`,
   moneyInNoSaving: '넣을 저축·투자가 없어요', // 2026-11-26 제목 한 줄
-  moneyInLogged: '수입을 적었어요',
+  moneyInLogged: '수입을 입력했어요',
   moneyInPutDone: (n: number, amount: string) => `저축·투자 ${n}개에 ${amount} 넣었어요`, // [확인 필요]
   amountOf: (name: string) => `${name} 금액`, // 화면 읽기
   wonUnit: '원',
@@ -732,7 +732,7 @@ export const copy = {
   moneyInAll: '나머지 모두 넣기', // W-20a
   moneyInAllLabel: (name: string) => `${name}에 나머지 모두 넣기`, // 화면 읽기
   moneyInList: '수입 기록', // W-20b
-  moneyInListEmpty: '아직 적은 수입이 없어요',
+  moneyInListEmpty: '아직 입력한 수입이 없어요',
   moneyInPutOf: (amount: string) => `저축·투자에 ${amount} 넣었어요`, // [확인 필요] W-20b 줄 보조
   moneyInRowMenu: (amount: string) => `${amount} 기록 메뉴`, // 화면 읽기
   moneyInEdit: '고치기',

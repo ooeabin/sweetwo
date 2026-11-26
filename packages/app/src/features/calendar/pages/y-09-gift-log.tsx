@@ -84,7 +84,7 @@ export function Y09GiftLog() {
           list
           title={copy.giftedEmpty}
           action={
-            // 다음 행동 하나(2026-11-25 사용자 확정): 기념일을 먼저 적어 두면 그날 한 일이 여기에 모임 → Y-07
+            // 다음 행동 하나(2026-11-25 사용자 확정): 기념일을 먼저 입력해 두면 그날 한 일이 여기에 모임 → Y-07
             // 화면 일부 빈 상태라 제자리 회색 보조 버튼, 보통 크기(2026-11-26 ‘빈 상태 A안’, 예전 sm)
             <Button
               variant="secondary"

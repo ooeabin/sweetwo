@@ -137,7 +137,7 @@ export function financialPct(
 
 /**
  * 우리 연령대(7-1처럼 두 사람 출생연도로 계산한 평균 나이 = 올해 − 출생연도, 내림).
- * 한 사람만 적었으면 그 사람 나이. 아무도 안 적었으면 null(연령대 비교를 숨김)
+ * 한 사람만 입력했으면 그 사람 나이. 아무도 안 입력했으면 null(연령대 비교를 숨김)
  */
 export function rankAgeBand(
   birthYears: (number | null | undefined)[],

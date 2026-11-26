@@ -15,7 +15,7 @@ const RELATIONS = ['married', 'engaged', 'dating', 'living_together'] as const;
 
 // O-11 두 사람 사이(Q1, 16, 2026-11-13 4지선다) → O-30. 미리 고른 값 없음.
 // 예전 ‘아직 안 정했어요’(undecided)는 DB에 그대로 두고 고른 값으로 보이지 않음(다시 고르게 함, 2026-11-16).
-// 상태를 바꾸면 전에 적은 날짜는 지움(결혼했어요가 아니게 되면 서버가 자동 결혼기념일도 지움)
+// 상태를 바꾸면 전에 입력한 날짜는 지움(결혼했어요가 아니게 되면 서버가 자동 결혼기념일도 지움)
 export function O11Relation() {
   const s = useStep('o-11');
   if (!s.ready)

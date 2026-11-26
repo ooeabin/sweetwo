@@ -213,7 +213,7 @@ export const copy = {
   giftedViews: { care: '경조사별', year: '연도별' },
   giftedViewsLabel: '보기', // [확인 필요] 화면 읽기용
   giftedEmpty: '아직 선물 기록이 없어요', // [확인 필요]
-  giftedEmptyAdd: '+ 기념일 적기', // [확인 필요] 2026-11-25 빈 상태 다음 행동 → Y-07
+  giftedEmptyAdd: '+ 기념일 입력하기', // [확인 필요] 2026-11-25 빈 상태 다음 행동 → Y-07
   giftedYear: (y: number) => `${y}년`,
   /** 경조사별 보기 줄 이름(묶음 머리가 경조사 이름이라 줄은 연도 + 드린 것, 띄운 가운데 점 없음, 2026-11-24 구역 4) [확인 필요] */
   giftedYearWhat: (y: number, what: string) => (what ? `${y}년, ${what}` : `${y}년`),

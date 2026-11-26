@@ -18,7 +18,7 @@ import { useNoteTarget } from './w-14-notes';
 import { useSavingNotes } from '../together';
 
 /**
- * W-14a 쓸 곳 메모 추가·고치기(20 v2.2): 2026-11-24 한 화면 입력(FormScreen) 이름(Q5, 20자) + 예상 금액(Q3, 선택) + 날짜(Q4, 선택 “날짜 없이 적을게요”).
+ * W-14a 쓸 곳 메모 추가·고치기(20 v2.2): 2026-11-24 한 화면 입력(FormScreen) 이름(Q5, 20자) + 예상 금액(Q3, 선택) + 날짜(Q4, 선택 “날짜 없이 입력할게요”).
  * 저장 = saving_note 넣기·고치기(고칠 수 있는 사람만, 열 권한). 고칠 때는 날짜 화면 아래 ‘메모 지우기’(Toast ‘되돌리기’)
  */
 export function W14aNoteEdit({ kind }: { kind: 'goal' | 'bundle' }) {

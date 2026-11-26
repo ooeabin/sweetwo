@@ -531,7 +531,7 @@ test('추가(합류 전): 파트너 명의는 대신 입력(모두 보여 주기
   await page.getByRole('button', { name: /금리/ }).click();
   const rate = page.getByRole('textbox', { name: '금리' });
   await rate.fill('45');
-  await expect(page.getByText('0~30% 사이로 적어 주세요')).toBeVisible();
+  await expect(page.getByText('0~30% 사이로 입력해 주세요')).toBeVisible();
   await rate.fill('4.2');
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByRole('button', { name: /금리/ })).toContainText('4.2%');
@@ -610,12 +610,12 @@ test('자산 관리 빈 상태(F-01): 순위 줄 + 묶음 타일로 항목별 �
   db.assets.length = 0;
   db.partnerSums.length = 0;
   await page.goto('/assets');
-  await expect(page.getByRole('button', { name: '자산 적고 순위 보기' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: '무엇부터 적어 볼까요?' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '자산 입력하고 순위 보기' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '무엇부터 입력해 볼까요?' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '부채도 있나요?' })).toBeVisible();
   await axe(page);
   await page
-    .getByRole('group', { name: '무엇부터 적어 볼까요?' })
+    .getByRole('group', { name: '무엇부터 입력해 볼까요?' })
     .getByRole('button', { name: '예금·적금' })
     .click();
   await heading(page, '자산 추가');
@@ -850,12 +850,12 @@ test('금리는 0~30% 소수 1자리(D5, F-03g와 F-04 같음), 보증금은 팔
   const dlg = await openFold(page, '금리');
   const rate = dlg.getByLabel('금리', { exact: true });
   await rate.fill('30.5');
-  await expect(dlg.getByText('0~30% 사이로 적어 주세요')).toBeVisible();
+  await expect(dlg.getByText('0~30% 사이로 입력해 주세요')).toBeVisible();
   await expect(dlg.getByRole('button', { name: '확인' })).toBeDisabled();
   await rate.fill('4.25');
-  await expect(dlg.getByText('0~30% 사이로 적어 주세요')).toBeVisible();
+  await expect(dlg.getByText('0~30% 사이로 입력해 주세요')).toBeVisible();
   await rate.fill('4.5');
-  await expect(dlg.getByText('0~30% 사이로 적어 주세요')).toHaveCount(0);
+  await expect(dlg.getByText('0~30% 사이로 입력해 주세요')).toHaveCount(0);
 });
 
 test('F-04 맨 위는 W-10 모양(오렌지 채움 버튼 없음), 값 고치기는 시트, 만기일은 달력 시트(type=date 없음)', async ({

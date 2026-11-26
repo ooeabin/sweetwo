@@ -411,7 +411,7 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
       </FormScreen>
     );
   }
-  // 목표 금액 + 기한을 한 화면에(기한은 목표 금액을 적었을 때만)
+  // 목표 금액 + 기한을 한 화면에(기한은 목표 금액을 입력했을 때만)
   if (step === 'target') {
     const ym = dv ?? defaultDeadline();
     const err = tv && ym < thisMonth() ? copy.notBeforeThisMonth : undefined;

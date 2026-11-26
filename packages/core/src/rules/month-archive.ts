@@ -53,7 +53,7 @@ export interface PastPeriod {
   end: string;
   /** [S, E] 안 수입 합 */
   received: Won;
-  /** 수입 적은 기록 수 */
+  /** 수입 입력한 기록 수 */
   count: number;
 }
 

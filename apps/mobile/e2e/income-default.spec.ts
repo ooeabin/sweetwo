@@ -19,7 +19,7 @@ async function open(page: Page, tweak?: (db: Awaited<ReturnType<typeof mockOnboa
 
 const LIST = /\/salary\/money-in\/list$/;
 
-// W-02는 한 줄 “이번 달 수입 350만 원 ›”만(2026-11-23 바탕 기준), 기본값 연필·‘+ 수입 적기’·기록은 W-20b 맨 위
+// W-02는 한 줄 “이번 달 수입 350만 원 ›”만(2026-11-23 바탕 기준), 기본값 연필·‘+ 수입 입력하기’·기록은 W-20b 맨 위
 async function openList(page: Page) {
   await page.getByRole('group', { name: '이번 달 수입' }).getByRole('button').click();
   await expect(page).toHaveURL(LIST);

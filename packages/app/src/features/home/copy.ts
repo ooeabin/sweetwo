@@ -86,8 +86,8 @@ export const copy = {
     `${whoDid(name)} 생활비 관리를 ${nim(me)}에게 맡기자고 해요`,
   taskSplit: (name: string, account: string) => `${whoDid(name)} ‘${account}’ 나누기를 알렸어요`,
   taskRank: (name: string) => `${whoDid(name)} 자산 순위를 같이 보자고 해요`,
-  // [확인 필요] 19 띠 5a(2026-11-16 5차 검토 B5): 혼자 쓸 때 적은 자산을 연결할 때 숨겨 두고 한 번 물음
-  taskAssetShare: (name: string) => `혼자 쓸 때 적은 자산을 ${nim(name)}에게 어떻게 보여 줄까요?`,
+  // [확인 필요] 19 띠 5a(2026-11-16 5차 검토 B5): 혼자 쓸 때 입력한 자산을 연결할 때 숨겨 두고 한 번 물음
+  taskAssetShare: (name: string) => `혼자 쓸 때 입력한 자산을 ${nim(name)}에게 어떻게 보여 줄까요?`,
   taskSalaryChanged: '월급이 바뀌었어요. 월급 계획을 다시 맞춰 볼까요?',
   taskFirstSaving: '무엇을 같이 모을지 정해 볼까요?',
   taskSplitSuggest: '같이 쓰는 생활비를 나눠 볼까요?',
@@ -126,7 +126,7 @@ export const copy = {
   /** H-08 보조 줄(2026-11-24 구역 4: 일정 이름 + D-day “{이름} D-2”, H-16과 같은 첫 항목, 당일 “{이름} 오늘”, 없음 null) [확인 필요] */
   nextSchedule: (next: { name: string; days: number } | null) =>
     next === null
-      ? '기념일을 적어 보세요' // 2026-11-25 사용자 확정(예전 “다가오는 일정이 없어요”)
+      ? '기념일을 입력해 보세요' // 2026-11-25 사용자 확정(예전 “다가오는 일정이 없어요”)
       : next.days === 0
         ? `${next.name} 오늘`
         : `${next.name} D-${next.days}`,
@@ -148,9 +148,9 @@ export const copy = {
   assetsTile: '자산 관리',
   /** H-04 값 이름표와 값 아래 작은 줄(2026-11-20) [확인 필요] */
   netLabel: '순자산',
-  // 2026-11-18 빈 타일에서 자산을 적고 싶게(궁금함, 파트너 소식) [확인 필요]
-  assetsEmpty: '아직 적은 자산이 없어요', // 2026-11-26 빈 상태 규칙(예전 “…또래 중 어디쯤일까요?” 둘/나 두 문구를 하나로)
-  assetsPartner: (name: string) => `${name}님이 자산을 적었어요`,
+  // 2026-11-18 빈 타일에서 자산을 입력하고 싶게(궁금함, 파트너 소식) [확인 필요]
+  assetsEmpty: '아직 입력한 자산이 없어요', // 2026-11-26 빈 상태 규칙(예전 “…또래 중 어디쯤일까요?” 둘/나 두 문구를 하나로)
+  assetsPartner: (name: string) => `${name}님이 자산을 입력했어요`,
   rankBadge: (pct: number) => `상위 ${pct}%`,
   assetsTileLabel: (net: string, rank: string | null) =>
     `자산 관리, 순자산 ${net}${rank ? `, ${rank}` : ''}`, // 화면 읽기용
@@ -178,7 +178,7 @@ export const copy = {
   zeroSalaryShort: '월급 0원', // [확인 필요] 2026-11-19 H-15 ‘월급 계획 템플릿’ 줄 값(월급 0원이고 월급날도 없을 때)
   nonManagerShort: '자동으로 정해져요',
   // 날짜 없는 사람(H-13 기간)을 이 줄에 담음
-  periodNoneShort: '수입 적기',
+  periodNoneShort: '수입 입력하기',
   periodEarlyShort: (won: string) => `수입 ${won}`,
   periodBarShort: (inn: string, need: string) => `${inn} / ${need}`,
   periodBarSub: '수입 / 월급 계획',

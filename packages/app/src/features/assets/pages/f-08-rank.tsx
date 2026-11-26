@@ -114,7 +114,7 @@ export function F08Rank() {
   if (!r || d.loading || needFirst) return <LoadingFrame sub="detail" current="assets" />;
   const header = <PageHeader title={copy.rankTitle} backLabel={copy.back} onBack={() => nav(-1)} />;
 
-  // 자산이 하나도 없으면 순위를 만들지 않음(2026-11-24, F-01 순위 줄과 같은 안내 + 자산 적으러 가기). 직접 주소로 열어도 같음
+  // 자산이 하나도 없으면 순위를 만들지 않음(2026-11-24, F-01 순위 줄과 같은 안내 + 자산 입력하러 가기). 직접 주소로 열어도 같음
   if (r.state.kind === 'empty' && r.pair.mode === 'pair') {
     const body = (
       <div key="r" className="hg-stack hg-detail" style={{ gap: 0 }}>

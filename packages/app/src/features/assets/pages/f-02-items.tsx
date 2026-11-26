@@ -110,7 +110,7 @@ export function F02Items() {
     }))
     .filter((x) => x.rows.length || x.partner);
   const ready = !d.loading && !d.failed;
-  // 2026-11-18 쉬운 첫 입력: 내 것(자산·부채)이 하나도 없으면 종류 칩, 파트너가 적었으면 맨 위 회색 한 줄.
+  // 2026-11-18 쉬운 첫 입력: 내 것(자산·부채)이 하나도 없으면 종류 칩, 파트너가 입력했으면 맨 위 회색 한 줄.
   // 첫 자산을 막 저장했으면(첫 저장 직후 한 번) 맨 위에 순자산 + 순위 이동 줄
   const own = assetOwnership(d.items, d.sums, d.me?.id);
   const joined = !!d.couple?.joined;

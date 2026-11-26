@@ -74,9 +74,9 @@ describe('다음 칸, 지난달 대비, 부채·금융자산 비율(F-08)', () =
 describe('연령대(7-1처럼 두 사람 평균 나이)', () => {
   it('1993년생 + 1995년생, 2026년 → 평균 32세 → 30대', () =>
     expect(rankAgeBand([1993, 1995], 2026)).toBe('30s'));
-  it('한 사람만 적었으면 그 사람 나이', () => expect(rankAgeBand([1998, null], 2026)).toBe('20s'));
+  it('한 사람만 입력했으면 그 사람 나이', () => expect(rankAgeBand([1998, null], 2026)).toBe('20s'));
   it('평균 39.5세는 내려서 30대', () => expect(rankAgeBand([1986, 1987], 2026)).toBe('30s'));
-  it('아무도 안 적었으면 없음', () => expect(rankAgeBand([null, null], 2026)).toBeNull());
+  it('아무도 안 입력했으면 없음', () => expect(rankAgeBand([null, null], 2026)).toBeNull());
   it('60세 이상', () => expect(rankAgeBand([1960], 2026)).toBe('60s'));
 });
 

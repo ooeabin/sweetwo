@@ -139,7 +139,7 @@ export function W10SavingItem() {
     .sort((a, b) =>
       (a.pay_checklist?.cycle_start ?? '') < (b.pay_checklist?.cycle_start ?? '') ? 1 : -1,
     );
-  // 돈 움직임(수입 적기, 자동 넣기, 바로잡기, 잔액 맞추기, 냈어요 −, 2026-11-13). 사유 글은 넣은 사람에게만(goal_move_reasons)
+  // 돈 움직임(수입 입력하기, 자동 넣기, 바로잡기, 잔액 맞추기, 냈어요 −, 2026-11-13). 사유 글은 넣은 사람에게만(goal_move_reasons)
   // 모은 내역 줄(2026-11-23 바탕 기준): 이름 + 날짜, 오른쪽 “+30만 원”(빼기는 −)
   const moveRow = (x: NonNullable<typeof moves.data>[number]) => {
     const sign = x.kind === 'in' ? '+' : '−';
@@ -188,7 +188,7 @@ export function W10SavingItem() {
         sub: [formatDateFull(kstDay(x.created_at)), reasons.data?.[x.id]]
           .filter(Boolean)
           .join(', '),
-        // 내가 적은 수입 적기 줄은 수입 기록(W-20b)에서 고치기·지우기(2026-11-14 M6)
+        // 내가 입력한 수입 입력하기 줄은 수입 기록(W-20b)에서 고치기·지우기(2026-11-14 M6)
         to: x.money_in_id && x.created_by === d.meId ? togetherPaths.moneyInList : undefined,
       })),
   ].sort((a, b) => (a.at < b.at ? 1 : -1));

@@ -13,7 +13,7 @@ export const shareOptions = (): Choice<ShareVis>[] => [
 /**
  * F-03e 공개 범위(2026-11-13 고친 점): “파트너에게 어떻게 보여 줄까요?”. 미리 고른 값 없음(asset_share_default가 null이면
  * value = null, 고르기 전에는 주 버튼 비활성). 처음 고른 값은 저장할 때 내 새 항목 기본값(set_asset_share_default),
- * 다음부터는 그 값이 골라진 채로. 대출도 같은 질문. F-03 항목 추가와 F-03q 빠르게 적기가 같이 씀
+ * 다음부터는 그 값이 골라진 채로. 대출도 같은 질문. F-03 항목 추가와 F-03q 빠르게 입력하기가 같이 씀
  */
 export function F03eShare({
   value,

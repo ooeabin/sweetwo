@@ -21,9 +21,9 @@ import { soldFormReady, soldHero } from '../form-logic';
 
 // F-04b~d 팔았어요(23, 2026-11-24 한 화면 입력 FormScreen): 투자·부동산만.
 // 입력(F-04b·c)은 한 화면: 맨 위 요약 문장(“미국 ETF를 팔고 / 840만 원 받았어요”) + “얼마나 팔았어요?”(전부 / 일부, 일부면 남은 평가금액 섹션)
-//   + “받은 금액”(보조 “지금 금액 n원”) + “어느 통장에 들어왔어요?”(통장 칩 + ‘안 적을게요’, 고르면 “{통장} n원 > m원” 한 줄) + 아래 “적기”.
+//   + “받은 금액”(보조 “지금 금액 n원”) + “어느 통장에 들어왔어요?”(통장 칩 + ‘입력하지 않을게요’, 고르면 “{통장} n원 > m원” 한 줄) + 아래 “입력하기”.
 // 결과(F-04d)는 예전 그대로 “입출금 통장 +1,130만 원” / “판 수익 +150만 원”(원금 없으면 없음) + ‘목록으로 가기’ → F-02.
-// 다 팔면 ‘매도 완료’로 보관(목록에서 빠짐, 과거 순자산 기록 유지). 저장 즉시 반영 + 상대 알림(서버). ‘안 적을게요’는 통장을 건드리지 않고 판 것만 기록(sell_asset p_to null)
+// 다 팔면 ‘매도 완료’로 보관(목록에서 빠짐, 과거 순자산 기록 유지). 저장 즉시 반영 + 상대 알림(서버). ‘입력하지 않을게요’는 통장을 건드리지 않고 판 것만 기록(sell_asset p_to null)
 export function F04bSold() {
   const { id = '' } = useParams();
   const nav = useNavigate();
@@ -34,7 +34,7 @@ export function F04bSold() {
   const [received, setReceived] = useState<number | null>(null);
   const [part, setPart] = useState(false);
   const [remain, setRemain] = useState<number | null>(null);
-  // 받은 통장: 통장 id, ‘none’ = 안 적을게요, null = 아직(첫 통장이 미리 골라져 있음)
+  // 받은 통장: 통장 id, ‘none’ = 입력하지 않을게요, null = 아직(첫 통장이 미리 골라져 있음)
   const [toSel, setToSel] = useState<string | null>(null);
   const [result, setResult] = useState<{ to: string | null; gain: number | null } | null>(null);
   const [busy, setBusy] = useState(false);

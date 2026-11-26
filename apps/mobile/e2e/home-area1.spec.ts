@@ -133,7 +133,7 @@ test('H-04 자산 관리 타일: 이름표 “순자산”, 마이너스 그대�
 test('H-04 자산 0개면 기존 동기 문구 그대로(이름표·작은 줄 없음)', async ({ page }) => {
   await open(page);
   const tile = page.getByRole('button', { name: /^자산 관리/ });
-  await expect(tile).toContainText('아직 적은 자산이 없어요');
+  await expect(tile).toContainText('아직 입력한 자산이 없어요');
   await expect(tile.locator('.hg-hubtile__foot')).toHaveCount(0);
 });
 
@@ -180,11 +180,11 @@ test('H-16 다가오는 날 상자(최대 2개, D-n) → 달력, H-08 타일 보
   await expect(page).toHaveURL(/\/calendar$/);
 });
 
-test('H-16 일정이 없으면 상자를 안 그림, 캘린더 타일은 “기념일을 적어 보세요”', async ({
+test('H-16 일정이 없으면 상자를 안 그림, 캘린더 타일은 “기념일을 입력해 보세요”', async ({
   page,
 }) => {
   await open(page);
-  await expect(page.getByRole('button', { name: /^캘린더/ })).toContainText('기념일을 적어 보세요');
+  await expect(page.getByRole('button', { name: /^캘린더/ })).toContainText('기념일을 입력해 보세요');
   await expect(page.locator('.hg-hubup')).toHaveCount(0);
 });
 

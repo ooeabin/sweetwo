@@ -47,7 +47,7 @@ export function DevUiGallery() {
         ]}
       />
       <Card label="이번 달 남은 생활비" value="62" unit="만 원" meta="10월 31일까지" />
-      <Field label="월 소득" help="세후 금액으로 적어요" inputMode="numeric" />
+      <Field label="월 소득" help="세후 금액으로 입력해요" inputMode="numeric" />
       <List>
         <ListRow label="주택청약" sub="매달 25일" value="20만 원" />
         <ListRow label="넷플릭스" sub="구독료" value="1.7만 원" />

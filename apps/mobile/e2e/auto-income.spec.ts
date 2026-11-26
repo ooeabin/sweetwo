@@ -36,11 +36,11 @@ test('첫 확인 → 수입 카드에 “월급 +3,500,000원 자동”, 지우�
   await expect(page.getByText(/, 자동/)).toBeVisible();
   await page.getByRole('button', { name: '3,500,000원 기록 메뉴' }).click();
   await page.getByRole('menuitem', { name: '지우기' }).click();
-  await expect(page.getByText('아직 적은 수입이 없어요')).toBeVisible();
-  // 화면 전체가 빈 상태: “수입 적기”는 아래 고정 주 버튼 하나(요약의 “+ 수입 적기”는 숨김, 2026-11-26 빈 상태 A안)
-  await expect(page.getByRole('button', { name: '수입 적기' })).toHaveCount(1);
+  await expect(page.getByText('아직 입력한 수입이 없어요')).toBeVisible();
+  // 화면 전체가 빈 상태: “수입 입력하기”는 아래 고정 주 버튼 하나(요약의 “+ 수입 입력하기”는 숨김, 2026-11-26 빈 상태 A안)
+  await expect(page.getByRole('button', { name: '수입 입력하기' })).toHaveCount(1);
   await expect(
-    page.locator('.hg-stickybar').getByRole('button', { name: '수입 적기' }),
+    page.locator('.hg-stickybar').getByRole('button', { name: '수입 입력하기' }),
   ).toBeVisible();
   // 같은 사이클에서 다시 확인(한 번에 모두)해도 다시 안 생김
   await page.goto('/salary');

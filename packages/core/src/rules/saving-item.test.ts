@@ -238,7 +238,7 @@ describe('v2.2 모은 금액·남은 금액(06 4-1, 5-3b)', () => {
     expect(savedTotal('h', { start: 2_000 * MAN, lines, moves: [put] })).toBe(2_145 * MAN);
   });
 
-  it('이번 달 +(06 5-6): 확인·자동·수입 적기만, 바로잡기 빼고', () => {
+  it('이번 달 +(06 5-6): 확인·자동·수입 입력하기만, 바로잡기 빼고', () => {
     const lines = [
       { goal_id: 'h', kind: 'saving', state: 'checked', planned: 95 * MAN, actual: 90 * MAN },
       { goal_id: 'x', kind: 'saving', state: 'checked', planned: 10 * MAN, actual: null },

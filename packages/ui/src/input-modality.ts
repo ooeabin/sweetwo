@@ -22,12 +22,12 @@ export function trackInputModality(root: HTMLElement = document.documentElement)
     if (root.dataset.input !== 'pointer') root.dataset.input = 'pointer';
   };
   const key = (e: KeyboardEvent) => {
-    // 글자 입력(입력 칸에 적기)은 바꾸지 않음: 손가락으로 칸을 누르고 적는 중에 테두리가 생기지 않게
+    // 글자 입력(입력 칸에 입력하기)은 바꾸지 않음: 손가락으로 칸을 누르고 입력하는 중에 테두리가 생기지 않게
     if (!NAV_KEYS.has(e.key) || e.metaKey || e.ctrlKey || e.altKey) return;
     const t = e.target;
     const typing =
       t instanceof HTMLElement && (t.isContentEditable || t.matches('input, textarea, select'));
-    // 칸에서 띄어쓰기·Enter·화살표는 적는 중(화면 키보드 포함). Tab·Esc만 키보드 이동으로 봄
+    // 칸에서 띄어쓰기·Enter·화살표는 입력하는 중(화면 키보드 포함). Tab·Esc만 키보드 이동으로 봄
     if (typing && e.key !== 'Tab' && e.key !== 'Escape') return;
     if (root.dataset.input !== 'keyboard') root.dataset.input = 'keyboard';
   };

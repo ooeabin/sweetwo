@@ -3,8 +3,8 @@ import { cx } from '../cx';
 import type { PayDay } from '../PickSheet';
 
 // 월급날 고르기(O-32, P-05b, S-11c, W-01 월급 금액 시트, 2026-11-25 사용자 결정 A안 ‘자주 쓰는 날 칩 + 직접 입력’).
-// 칩 10·15·20·21·25일 + 말일, 아래 ‘다른 날 직접 적기’ 숫자 칸(1~31, 뒤에 ‘일’). 칩과 직접 적기는 서로 하나만 골라짐.
-// 값이 칩 날짜가 아니면(예: 31일) 직접 적기 칸에 숫자로 보임. 값이 없으면 initial(25일)을 바로 알려 줌.
+// 칩 10·15·20·21·25일 + 말일, 아래 ‘다른 날 직접 입력하기’ 숫자 칸(1~31, 뒤에 ‘일’). 칩과 직접 입력하기는 서로 하나만 골라짐.
+// 값이 칩 날짜가 아니면(예: 31일) 직접 입력하기 칸에 숫자로 보임. 값이 없으면 initial(25일)을 바로 알려 줌.
 
 export const PAYDAY_CHIPS: readonly PayDay[] = [10, 15, 20, 21, 25, 'last'];
 
@@ -22,12 +22,12 @@ export function PaydayPicker({
   /** 묶음 이름(화면 읽기, 질문 문장) */
   label: string;
   value: PayDay | null;
-  /** 직접 적은 숫자가 1~31 밖이거나 비면 null */
+  /** 직접 입력한 숫자가 1~31 밖이거나 비면 null */
   onChange: (v: PayDay | null) => void;
   lastLabel: string;
-  /** 직접 적기 칸 이름이자 자리표시(“다른 날 직접 적기”) */
+  /** 직접 입력하기 칸 이름이자 자리표시(“다른 날 직접 입력하기”) */
   customLabel: string;
-  /** 범위 밖 숫자 오류 문장(“1~31 사이로 적어 주세요”) */
+  /** 범위 밖 숫자 오류 문장(“1~31 사이로 입력해 주세요”) */
   rangeError: string;
   /** 29~31일을 고르면 칸 아래 한 줄(“그날이 없는 달은 말일로 계산해요”) */
   hint?: ReactNode;
@@ -38,7 +38,7 @@ export function PaydayPicker({
   const id = useId();
   const box = useRef<HTMLDivElement>(null);
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
-  // 직접 적기 글자: 처음 값이 칩 날짜가 아닌 숫자면 그 숫자
+  // 직접 입력하기 글자: 처음 값이 칩 날짜가 아닌 숫자면 그 숫자
   const [text, setText] = useState(() =>
     typeof value === 'number' && !PAYDAY_CHIPS.includes(value) ? String(value) : '',
   );

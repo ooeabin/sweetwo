@@ -91,7 +91,7 @@ export const usePreviousChecklist = (owner: string | null | undefined, before: s
     select: (rows) => rows[0] ?? null,
   });
 
-/** 대표 저금들의 돈 움직임(H-10 ‘이번 달 +’: 수입 적기·자동 넣기) */
+/** 대표 저금들의 돈 움직임(H-10 ‘이번 달 +’: 수입 입력하기·자동 넣기) */
 export function useHeroMoves(goalIds: string[]) {
   return useQueries({
     queries: goalIds.map((id) => ({
@@ -106,7 +106,7 @@ export function useHeroMoves(goalIds: string[]) {
 }
 
 /**
- * 홈 Realtime(19 ‘갱신’): 묶음, 수입 적기, 쓸 곳 메모, 분담, 관리 형태 요청, 월급 변경이 바뀌면 같은 키를 다시 읽음.
+ * 홈 Realtime(19 ‘갱신’): 묶음, 수입 입력하기, 쓸 곳 메모, 분담, 관리 형태 요청, 월급 변경이 바뀌면 같은 키를 다시 읽음.
  * 확인 목록·월급 계획·저금은 salary의 useCheckRealtime·useSplitRealtime·useGoalRealtime
  */
 export function useHomeRealtime(spaceId: string | null | undefined) {

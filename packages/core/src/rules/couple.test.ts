@@ -25,7 +25,7 @@ const space: CoupleSpace = {
 };
 
 describe('두 사람 기준(18 예시값)', () => {
-  it('합류 전 찬우: 파트너 이름은 찬우가 적은 호칭, 수입은 모름', () => {
+  it('합류 전 찬우: 파트너 이름은 찬우가 입력한 호칭, 수입은 모름', () => {
     const c = coupleOf(chanwoo, space, null);
     expect(c).toMatchObject({
       joined: false,
