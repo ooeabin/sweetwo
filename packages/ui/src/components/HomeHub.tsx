@@ -108,13 +108,13 @@ export function HubLine({
 
 export interface HubBoxRow {
   key: string;
-  /** 왼쪽 이름(메뉴 서랍 하위 줄과 같음) */
+  /** 이름표(메뉴 서랍 하위 줄과 같음). 값이 있으면 위 작은 회색 13/400, 없으면 이동 줄 15/400 `ink-2` */
   name: string;
-  /** 오른쪽 값(짧게) */
+  /** 상태 값(짧게). 이름표 아래 17/700 `ink`(2026-11-26 ‘홈 A안’) */
   value?: ReactNode;
-  /** 값 아래 회색 보조 */
+  /** 값 아래 회색 보조 13 */
   sub?: ReactNode;
-  /** 확인할 게 있음: 값을 굵은 ink로 */
+  /** 확인할 게 있음(2026-11-26부터 값은 늘 굵게라 생김새 차이 없음, 클래스만 남김) */
   alert?: boolean;
   /** 화면 읽기 이름(“이번 달 월급 체크, 2개 남음”) */
   label?: string;
@@ -124,7 +124,9 @@ export interface HubBoxRow {
 
 /**
  * 월급 상자(H-15, 2026-11-17 홈 순서를 메뉴 서랍과 같게, 2026-11-18 줄마다 따로 이동):
- * 흰 넓은 상자. 머리 “월급”(글자만, 누를 수 없음) + 줄 둘(button.hg-hubbox__row: 이름 + 짧은 값 + 꺾쇠 하나).
+ * 흰 넓은 상자. 머리 “월급”(15/700, 글자만, 누를 수 없음) + 줄 둘(button.hg-hubbox__row).
+ * 2026-11-26 ‘홈 A안’(DESIGN.md ‘강약 기준 2026-11-26’): 줄은 두 줄 — 위 이름표 13/400 `slate` + 아래 값 17/700 `ink` + 오른쪽 ›(높이 64).
+ * 값이 없는 줄은 이동 줄(`hg-hubbox__row--nav`): 이름 한 줄 15/400 `ink-2` + ›(높이 56).
  * 줄 전체가 눌리고(44px 이상), Tab은 줄마다 한 번. 상자 전체 버튼과 “자세히 보기 ›”는 없음
  */
 export function HubBox({ title, rows }: { title: string; rows: HubBoxRow[] }) {
@@ -132,28 +134,31 @@ export function HubBox({ title, rows }: { title: string; rows: HubBoxRow[] }) {
     <div className="hg-hubbox hg-hub__wide" role="group" aria-label={title}>
       <span className="hg-hubbox__title">{title}</span>
       <div className="hg-hubbox__list">
-        {rows.map((r) => (
-          <button
-            key={r.key}
-            type="button"
-            className="hg-hubbox__row"
-            aria-label={r.label}
-            onClick={r.onClick}
-          >
-            <span className="hg-hubbox__name">{r.name}</span>
-            <span className="hg-hubbox__val">
-              {r.value !== undefined && (
-                <span className={cx('hg-hubbox__main', r.alert && 'hg-hubbox__main--alert')}>
-                  {r.value}
-                </span>
-              )}
-              {r.sub && <span className="hg-hubbox__sub">{r.sub}</span>}
-            </span>
-            <span className="hg-hubbox__go" aria-hidden="true">
-              <Icon name="chevron-right" size={16} />
-            </span>
-          </button>
-        ))}
+        {rows.map((r) => {
+          const hasValue = r.value !== undefined && r.value !== null && r.value !== '';
+          return (
+            <button
+              key={r.key}
+              type="button"
+              className={cx('hg-hubbox__row', !hasValue && 'hg-hubbox__row--nav')}
+              aria-label={r.label}
+              onClick={r.onClick}
+            >
+              <span className="hg-hubbox__val">
+                <span className="hg-hubbox__name">{r.name}</span>
+                {hasValue && (
+                  <span className={cx('hg-hubbox__main', r.alert && 'hg-hubbox__main--alert')}>
+                    {r.value}
+                  </span>
+                )}
+                {r.sub && <span className="hg-hubbox__sub">{r.sub}</span>}
+              </span>
+              <span className="hg-hubbox__go" aria-hidden="true">
+                <Icon name="chevron-right" size={16} />
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -162,6 +167,7 @@ export function HubBox({ title, rows }: { title: string; rows: HubBoxRow[] }) {
 export function HubTile({
   title,
   sub,
+  hint,
   sub2,
   value,
   foot,
@@ -173,7 +179,10 @@ export function HubTile({
   className,
 }: {
   title: string;
+  /** 값 위 작은 이름표(13/400 `slate`, “순자산”) */
   sub?: ReactNode;
+  /** 값이 없을 때 sub를 이동 안내 글자로(15/400 `ink-2`, “+ 쓸 곳 메모 추가”, “기념일을 적어 보세요”, 2026-11-26 ‘홈 A안’) */
+  hint?: boolean;
   /** 보조 둘째 줄 */
   sub2?: ReactNode;
   value?: ReactNode;
@@ -211,7 +220,7 @@ export function HubTile({
           <span className="hg-hubtile__badge">{badge}</span>
         </span>
       ) : (
-        sub && <span className="hg-hubtile__sub">{sub}</span>
+        sub && <span className={cx('hg-hubtile__sub', hint && 'hg-hubtile__sub--hint')}>{sub}</span>
       )}
       {sub2 && <span className="hg-hubtile__sub">{sub2}</span>}
       {value !== undefined && <span className="hg-hubtile__value">{value}</span>}

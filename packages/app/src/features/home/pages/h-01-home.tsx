@@ -846,6 +846,7 @@ export function H01Home() {
           point
           title={copy.assetsTile}
           sub={showNet ? copy.netLabel : tileSub}
+          hint={!showNet}
           value={showNet && nw ? m(nw.nw.net) : undefined}
           badge={rankPct === null || !showNet ? undefined : copy.rankBadge(rankPct)}
           label={
@@ -861,7 +862,10 @@ export function H01Home() {
         />
         <HubTile
           title={copy.calendarTile}
-          sub={calReady ? copy.nextSchedule(nextUp) : undefined}
+          // 2026-11-26 ‘홈 A안’: 다가오는 일정은 값 줄(17/700), 없으면 안내 글자(15/400 ink-2)
+          value={calReady && nextUp ? copy.nextSchedule(nextUp) : undefined}
+          sub={calReady && !nextUp ? copy.nextSchedule(null) : undefined}
+          hint
           onClick={() => go('calendar', '/calendar')}
         />
       </Fragment>
