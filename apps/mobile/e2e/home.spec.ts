@@ -61,9 +61,11 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   await expect(page.locator('.hg-hubhero, .hg-hubsave')).toHaveCount(0);
   const h = together(page);
   await expect(h.getByRole('heading', { name: '같이 모으기' })).toBeVisible();
-  // 미합류면 내 Avatar 하나(빈 원 없음)
+  // 미합류면 내 Avatar 하나(빈 원 없음). 2026-11-26: 사람 원은 머리 제목 오른쪽(작은 sm), 칸 안에는 없음
   const first = h.locator('.hg-together__slide').first();
-  await expect(first.locator('.hg-avatar')).toHaveCount(1);
+  await expect(h.locator('.hg-together__owners .hg-avatar')).toHaveCount(1);
+  await expect(h.locator('.hg-together__owners .hg-avatar--sm')).toHaveCount(1);
+  await expect(first.locator('.hg-avatar')).toHaveCount(0);
   await expect(first).toHaveAccessibleName(
     '같이 모으기, 내 집 마련, 0원, 목표 금액의 0%, 2031년 10월까지 150,000,000원 더 필요해요',
   );
@@ -534,7 +536,7 @@ test('각자 계열 묶음(찬우·예빈): 묶음이 맨 앞, 합계 + 둘 다 
     if (d.v22) d.v22.bundles.push(bundle);
   });
   const first = together(page).locator('.hg-together__slide').first();
-  await expect(first.locator('.hg-avatar')).toHaveCount(2);
+  await expect(together(page).locator('.hg-together__owners .hg-avatar')).toHaveCount(2);
   await expect(first).toHaveAccessibleName(
     '같이 모으기, 결혼 비용, 31,000,000원, 목표 금액의 62%, 2027년 5월까지 19,000,000원 더 필요해요',
   );
@@ -780,9 +782,7 @@ test('Realtime(S4-02): 파트너가 합류하면 초대 띠가 사라지고 H-10
   });
   await expect(page.getByText('같이 모을 사람을 초대해 보세요')).toHaveCount(0);
   // 각자 계열의 묶이지 않은 내 저금 칸은 내 얼굴만(2026-11-14 ‘묶기 전 두 얼굴’), 묶음·공동 저금 칸이 둘
-  await expect(
-    together(page).locator('.hg-together__slide').first().locator('.hg-avatar'),
-  ).toHaveCount(1);
+  await expect(together(page).locator('.hg-together__owners .hg-avatar')).toHaveCount(1);
 });
 
 test('Realtime(S4-02): P-WAIT 대기 중 시작한 사람이 월급 계획을 만들면 바로 다음 화면', async ({

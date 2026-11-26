@@ -74,12 +74,15 @@ export function PersonDot({
   starter,
   userId,
   className,
+  size,
 }: {
   name: string;
   starter: boolean;
   userId?: string | null;
   className?: string;
+  /** Avatar 크기 단계(홈 H-10 머리는 sm 24, 2026-11-26) */
+  size?: 'sm' | 'md' | 'lg';
 }) {
   const src = usePeopleArt()(userId);
-  return <Avatar name={name} no={starter ? 1 : 2} src={src} className={className} />;
+  return <Avatar name={name} no={starter ? 1 : 2} src={src} size={size} className={className} />;
 }

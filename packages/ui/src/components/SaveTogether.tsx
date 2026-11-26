@@ -6,10 +6,14 @@ import { cx } from './cx';
 // SaveTogether(틀: 머리 “같이 모으기” + D-day 알약 → 가로 넘김 칸 최대 3 + ‘저금 모두 보기 ›’ + 점 → ‘+ 수입 적기’),
 // 칸 하나 = SaveTogetherSlide(사람 + 이름 → 큰 숫자 → 막대 + 보조 줄들, 칸 전체가 버튼, 화면 읽기는 문장 하나).
 // 2026-11-18: 누를 수 없는 정보 상자(칸은 div, onClick 없음, ‘모두 보기’ 칸 없음). 같이 모으기가 0개면 홈이 상자를 그리지 않음.
+// 2026-11-26 사용자 결정: 홈 칸 왼쪽 자리는 그 저축·투자의 그림(`art`, 파일이 없으면 칸째 없음), 사람 원은 머리 제목 오른쪽
+// 작은 겹친 Avatar(`owners`, 지금 보이는 칸 기준). W-10 묶음 카드(머리 없음)는 `people`을 칸 안에 그대로.
 
 export interface SaveTogetherSlideProps {
-  /** 이름 왼쪽 겹친 Avatar(hg-avatars) */
+  /** 이름 왼쪽 겹친 Avatar(hg-avatars). W-10 묶음 카드(머리 없음)만, 홈은 머리 `owners` */
   people?: ReactNode;
+  /** 이름 왼쪽 그림(2026-11-26 홈 H-10, `Illustration`이 파일이 없으면 null을 돌려주면 자리도 없음) */
+  art?: ReactNode;
   name: string;
   /** 큰 숫자(모은 금액, 퍼센트만이면 “62%”) */
   amount: ReactNode;
@@ -30,6 +34,7 @@ export interface SaveTogetherSlideProps {
 
 export function SaveTogetherSlide({
   people,
+  art,
   name,
   amount,
   bar,
@@ -49,6 +54,7 @@ export function SaveTogetherSlide({
   const inner = (
     <>
       <span className="hg-together__people">
+        {art}
         {people}
         <span className="hg-together__name">{name}</span>
         {done && <span className="hg-badge hg-badge--achieved">{done}</span>}
@@ -88,7 +94,8 @@ export function SaveTogether({
   title: string;
   /** 머리 오른쪽(D-day 알약 또는 글자 버튼 “결혼식 날짜 알려 주기”) */
   head?: ReactNode;
-  slides: SaveTogetherSlideProps[];
+  /** 칸마다 `owners` = 머리 제목 바로 오른쪽 작은 겹친 Avatar(지금 보이는 칸 기준, 2026-11-26) */
+  slides: (SaveTogetherSlideProps & { owners?: ReactNode })[];
   /** 맨 아래 회색 글자 버튼 “+ 수입 적기” */
   moneyIn?: { label: string; onClick: () => void };
   /** 묶음 이름(화면 읽기) */
@@ -98,10 +105,14 @@ export function SaveTogether({
   const track = useRef<HTMLDivElement>(null);
   const [at, setAt] = useState(0);
   const count = slides.length;
+  const owners = slides[Math.min(at, count - 1)]?.owners;
   return (
     <section className={cx('hg-together', className)} aria-label={label}>
       <div className="hg-together__head">
-        <h2 className="hg-together__title">{title}</h2>
+        <span className="hg-together__titlerow">
+          <h2 className="hg-together__title">{title}</h2>
+          {owners && <span className="hg-together__owners">{owners}</span>}
+        </span>
         {head}
       </div>
       <div

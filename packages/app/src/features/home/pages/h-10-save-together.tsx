@@ -4,6 +4,7 @@ import {
   kstDateOf,
   savingMonthGain,
   savingPct,
+  savingArtKey,
   savingRemain,
   savingBar,
   type BundleViewResponse,
@@ -11,7 +12,7 @@ import {
   type HeroItem,
   type MarriageStatus,
 } from '@sweetwo/core';
-import { SaveTogether, type SaveTogetherSlideProps } from '@sweetwo/ui';
+import { Illustration, SaveTogether, type SaveTogetherSlideProps } from '@sweetwo/ui';
 import type { ReactNode } from 'react';
 import { money, useMask } from '../../../shared/mask';
 import { spoken } from '../../../shared/masked-text';
@@ -23,6 +24,8 @@ import { copy } from '../copy';
  * → 보조 한 줄(목표 금액이 있으면 “62%, 5,000만 원 중”, 없으면 “이번 달 +190만 원”, 2026-11-20) → 각자 금액(둘 다 켰을 때만) → 해제 대기 멈춤.
  * 기한 “…까지 n원 더 필요해요”는 카드에서 빼고 화면 읽기에만 남김.
  * 결혼 준비 중이면 머리 D-day 알약(예정일 없으면 “결혼식 날짜 알려 주기” → S-11h).
+ * 2026-11-26 사용자 결정: 칸 왼쪽 = 그 저축·투자의 그림(core `savingArtKey`, 파일이 없으면 자리째 없음),
+ * 사람 원은 머리 “같이 모으기” 바로 오른쪽 작은 겹친 Avatar(sm 24, 지금 보이는 칸 기준: 연결이면 둘, 미합류·각자 계열 내 저금 칸이면 나).
  * 2026-11-18: 누를 수 없는 정보 상자(칸·‘모두 보기’ 이동 없음). 같이 모으기 항목이 하나도 없으면 홈이 이 상자를 그리지 않음
  * (빈 상태 질문·칩·버튼은 W-01 저축·투자 묶음 빈 상태로 옮김, 상대 권유는 띠 13번)
  */
@@ -82,7 +85,13 @@ export function H10SaveTogether({
     </button>
   ) : undefined;
 
-  const bundleSlide = (b: BundleViewResponse): SaveTogetherSlideProps => {
+  type Slide = SaveTogetherSlideProps & { owners?: ReactNode };
+  // 칸 왼쪽 그림 40px(파일이 없으면 Illustration이 null → 자리 없음, 2026-11-26)
+  const art = (name: string) => (
+    <Illustration name={savingArtKey(name, copy.chips)} className="hg-together__art" />
+  );
+
+  const bundleSlide = (b: BundleViewResponse): Slide => {
     const done = b.status === 'achieved' || (b.pct !== null && b.pct >= 100);
     const lines: string[] = [];
     const say: string[] = [b.name];
@@ -119,7 +128,8 @@ export function H10SaveTogether({
     }
     if (b.paused) lines.push(copy.paused);
     return {
-      people,
+      owners: people,
+      art: art(b.name),
       name: b.name,
       amount: b.percent_only ? `${b.pct ?? 0}%` : won(b.total ?? 0),
       bar: b.target !== null || b.percent_only ? (b.pct ?? 0) : null,
@@ -131,7 +141,7 @@ export function H10SaveTogether({
     };
   };
 
-  const goalSlide = (g: Extract<HeroItem, { kind: 'goal' }>['goal']): SaveTogetherSlideProps => {
+  const goalSlide = (g: Extract<HeroItem, { kind: 'goal' }>['goal']): Slide => {
     const saved = savedOf(g.id);
     const pct = savingPct(saved, g.target_amount);
     const lines: string[] = [];
@@ -149,7 +159,8 @@ export function H10SaveTogether({
     const r = savingRemain({ target: g.target_amount, saved, deadline: g.deadline });
     if (r) say.push(copy.remain(r.deadline, won(r.remain)));
     return {
-      people: solo ? (peopleMine ?? people) : people,
+      owners: solo ? (peopleMine ?? people) : people,
+      art: art(g.name),
       name: g.name,
       amount: won(saved),
       bar: g.target_amount !== null ? savingBar(saved, g.target_amount) : null,

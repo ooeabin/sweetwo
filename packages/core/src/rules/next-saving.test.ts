@@ -4,7 +4,11 @@ import {
   nextSavingOptions,
   nextSavingReason,
   nextSavingTaskOpen,
+  SAVING_ART,
+  SAVING_ART_CUSTOM,
+  SAVING_ART_KEYS,
   SAVING_CHIPS,
+  savingArtKey,
   savingChips,
   savingStartChips,
   type SavingChip,
@@ -100,4 +104,31 @@ it('다음 저금 띠(H-06 11번): 기한 다음 달 1일부터 14일', () => {
   expect(nextSavingTaskOpen(trip, '2027-01-14')).toBe(true);
   expect(nextSavingTaskOpen(trip, '2027-01-15')).toBe(false);
   expect(nextSavingTaskOpen(trip, '2026-12-31')).toBe(false);
+});
+
+it('저축·투자 그림 키(2026-11-26): 이름 칩마다 하나 + 직접 정한 이름은 공통 키', () => {
+  const names = {
+    wedding: '결혼 비용',
+    newlywed_home: '신혼집',
+    honeymoon: '신혼여행',
+    dowry: '혼수',
+    emergency: '비상금',
+    home: '내 집 마련',
+    travel: '여행',
+    car: '차',
+    childcare: '출산·육아',
+    retire: '노후',
+    moving: '이사',
+    appliance: '가전·가구',
+    anniv_gift: '기념일 선물',
+    date: '데이트 비용',
+    lump: '목돈',
+  } satisfies Record<SavingChip, string>;
+  // 모든 칩(네 사이 표의 칩 전부)에 키가 있고 서로 다름
+  const all = new Set(Object.values(SAVING_CHIPS).flat());
+  for (const c of all) expect(SAVING_ART[c]).toMatch(/^saving-/);
+  expect(new Set(SAVING_ART_KEYS).size).toBe(SAVING_ART_KEYS.length);
+  expect(savingArtKey('결혼 비용', names)).toBe('saving-wedding');
+  expect(savingArtKey(' 신혼여행 ', names)).toBe('saving-honeymoon');
+  expect(savingArtKey('우리 강아지', names)).toBe(SAVING_ART_CUSTOM);
 });
