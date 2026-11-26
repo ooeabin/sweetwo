@@ -495,8 +495,16 @@ test('O-60에서 뒤로 → 생활비 답을 바꾸면(각자 → 합쳐서) 월
   await salary(page);
   expect(db.splits.map((s) => s.owner_user_id)).toEqual([chanwoo.id]);
   // O-55 → O-32 → O-31 → O-30b → O-30
-  for (let i = 0; i < 4; i++) await back(page);
-  await heading(page, '같이 쓰는 생활비가 있어요?');
+  // 화면이 바뀐 걸 보고 다음 뒤로를 누른다(연속 클릭하면 앞 화면의 뒤로를 또 눌러 건너뜀)
+  for (const h of [
+    '월급날은 며칠이에요?',
+    '한 달 실수령액은 얼마예요?',
+    '같이 모으는 저축·투자가 있어요?',
+    '같이 쓰는 생활비가 있어요?',
+  ]) {
+    await back(page);
+    await heading(page, h);
+  }
   await expect(page.getByRole('radio', { name: '아니요' })).toBeChecked();
   await radio(page, '네');
   await heading(page, '같이 모으는 저축·투자가 있어요?');
@@ -506,7 +514,9 @@ test('O-60에서 뒤로 → 생활비 답을 바꾸면(각자 → 합쳐서) 월
   await radio(page, '둘이 같이 해요');
   // 이어하기 기록도 다음 화면으로 되돌림(바꾼 답으로 다시 만들게)
   await expect.poll(() => db.me.onboarding_step).toBe('O-31');
+  await heading(page, '한 달 실수령액은 얼마예요?');
   await next(page);
+  await heading(page, '월급날은 며칠이에요?');
   await next(page);
   await heading(page, '10월 23일 월급날 아침에 알려 드릴까요?');
   expect(db.space).toMatchObject({ salary_mode: 'joint', shared_living: true });

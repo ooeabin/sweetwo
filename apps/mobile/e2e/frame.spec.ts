@@ -222,7 +222,7 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
   await expect(menuBtn).toHaveAttribute('aria-expanded', 'true');
   // 2026-11-16 2단: 월급·자산 관리·캘린더 + 늘 펼친 하위 줄 / 초대하기(합류 전) / 도움말(보여 줄 공지가 없으면 ‘공지’ 줄 없음).
   // ‘홈’·‘문의’·버전·알림 종은 없음. 묶음 3개
-  expect(await drawer.locator('.hg-drawer__item').allTextContents()).toEqual([
+  await expect(drawer.locator('.hg-drawer__item')).toHaveText([
     '월급',
     '이번 달 월급 체크',
     '월급 계획 템플릿',
@@ -328,9 +328,11 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
   await expect(page.locator('.hg-together')).toBeVisible();
   await menuBtn.click();
   // 안 읽은 노출 중 공지가 있으면 새 알림 점(화면 읽기 글자 “새 공지”)
-  expect(
-    await drawer.locator('.hg-drawer__group').last().locator('.hg-drawer__item').allTextContents(),
-  ).toEqual(['공지 새 공지', '도움말']);
+  // 공지는 서랍을 연 뒤에 받아 오므로 올 때까지 기다림(한 번 읽고 비교하지 않음)
+  await expect(drawer.locator('.hg-drawer__group').last().locator('.hg-drawer__item')).toHaveText([
+    '공지 새 공지',
+    '도움말',
+  ]);
   await expect(drawer.locator('.hg-drawer__dot')).toHaveCount(1);
   // 누르면 앱 안 공지 화면 N-04(웹사이트 릴리스 노트가 아님)
   await drawer.getByRole('button', { name: /^공지/ }).click();

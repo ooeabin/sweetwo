@@ -81,6 +81,7 @@ test('합쳐서: 상대가 줄을 끝내면 바로 바뀌고 2초 강조, 마지
 test('달성 되돌린 뒤 같은 화면에서 다시 체크하면 다시 W-12(배경 있음), W-12a 고른 뒤 W-02로', async ({
   page,
 }) => {
+  test.setTimeout(60_000); // 체크, 되돌리기, 다시 체크로 15~20초 걸려 병렬 부하에선 30초를 넘김
   const { db } = await open(page);
   const home = db.goals.find((g) => g.id === 'goal-h');
   if (!home) throw new Error('seed');
