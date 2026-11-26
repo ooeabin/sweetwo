@@ -212,7 +212,7 @@ test('L-01 머리(S12-09·10): canonical, og:url·type, 메타 설명, 파비콘
   );
 });
 
-test('L-01(S12-01·12·13): 좁은 창 가로 스크롤 없음, 기능 2열 2줄, 사업자 정보는 값이 없으면 숨김', async ({
+test('L-01(S12-01·12·13): 좁은 창 가로 스크롤 없음, 기능 2열 2줄, 사업자 정보는 값이 있는 줄만(주소 없음)', async ({
   page,
 }) => {
   await outside(page);
@@ -230,7 +230,10 @@ test('L-01(S12-01·12·13): 좁은 창 가로 스크롤 없음, 기능 2열 2줄
     .evaluate((e) => getComputedStyle(e).gridTemplateColumns.split(' ').length);
   expect(cols).toBe(2);
   await expect(page.getByText('[확인 필요]')).toHaveCount(0);
-  await expect(page.locator('footer')).not.toContainText('사업자등록번호');
+  const foot = page.locator('footer');
+  await expect(foot).toContainText('상호 누름');
+  await expect(foot).toContainText('사업자등록번호 503-32-92524');
+  await expect(foot.locator('.hg-meta', { hasText: /^주소/ })).toHaveCount(0);
   // 하단 메일 링크는 토큰 색(ink-2), 브라우저 기본 파랑 아님
   const mail = page.getByRole('link', { name: '고객센터 help@sweetwo.kr' });
   const [link, ink2] = await mail.evaluate((e) => [
