@@ -1,6 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { cx } from '../cx';
-import { DateWheel } from './DateWheel';
 import { Chip } from '../Chip';
 
 // Q4 날짜·월 선택(docs/spec/12-question-pattern.md Q4). 칸이 차면 다음 칸으로.
@@ -200,92 +199,6 @@ export function DateInput({
         />
         <span className="hg-datefield__unit">일</span>
       </div>
-      {error && (
-        <span className="hg-help is-error" role="alert">
-          {error}
-        </span>
-      )}
-    </div>
-  );
-}
-
-/** 연·월·일 휠(2026-11-23, W-20 받은 날 바꾸기, W-14a 언제 내요): 글자 칸 대신 W-11d 기한과 같은 휠(DateWheel). 값이 없으면 오늘에서 시작하고 그 값을 바로 알려 줌 */
-export function DateWheelInput({
-  label,
-  value,
-  onChange,
-  error,
-  today,
-  minYear,
-  maxYear,
-}: {
-  label: string;
-  value: string | null; // 'YYYY-MM-DD'
-  onChange: (v: string | null) => void;
-  error?: string;
-  /** 처음 값(오늘, 'YYYY-MM-DD', KST는 부르는 쪽이 core todayKst로) */
-  today: string;
-  minYear?: number;
-  maxYear?: number;
-}) {
-  const ymd = (t: string) => ({
-    y: Number(t.slice(0, 4)),
-    m: Number(t.slice(5, 7)),
-    d: Number(t.slice(8, 10)),
-  });
-  const t = ymd(today);
-  return (
-    <div className="hg-field">
-      <DateWheel
-        label={label}
-        value={value ? ymd(value) : null}
-        initial={t}
-        minYear={minYear ?? t.y - 5}
-        maxYear={maxYear ?? t.y + 10}
-        onChange={(n) => onChange(`${n.y}-${pad(n.m)}-${pad(n.d)}`)}
-      />
-      {error && (
-        <span className="hg-help is-error" role="alert">
-          {error}
-        </span>
-      )}
-    </div>
-  );
-}
-
-/** 연·월(예정 연·월, 여행 가는 달, 기한). 연·월 2열 휠(2026-11-02, 카카오페이 월 고르기처럼).
- * 값이 없으면 다음 달에서 시작하고 그 값을 바로 알려 줌. 범위 밖은 소비자가 error로 알림 */
-export function YearMonthInput({
-  label,
-  value,
-  onChange,
-  error,
-  minYear,
-  maxYear,
-}: {
-  label: string;
-  value: string | null; // 'YYYY-MM'
-  onChange: (v: string | null) => void;
-  error?: string;
-  minYear?: number;
-  maxYear?: number;
-}) {
-  const now = new Date();
-  const y0 = now.getFullYear();
-  const nextM = now.getMonth() + 2; // 다음 달(1~13)
-  const start = nextM > 12 ? { y: y0 + 1, m: 1, d: 1 } : { y: y0, m: nextM, d: 1 };
-  const v = value ? { y: Number(value.slice(0, 4)), m: Number(value.slice(5, 7)), d: 1 } : null;
-  return (
-    <div className="hg-field">
-      <DateWheel
-        label={label}
-        value={v}
-        initial={start}
-        minYear={minYear ?? y0 - 50}
-        maxYear={maxYear ?? y0 + 40}
-        yearMonth
-        onChange={(n) => onChange(`${n.y}-${pad(n.m)}`)}
-      />
       {error && (
         <span className="hg-help is-error" role="alert">
           {error}

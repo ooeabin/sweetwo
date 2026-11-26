@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { chanwoo, type MemDb, mockOnboarding, mockRealtime, seed, YEBIN } from './mocks';
-import { setYearMonth } from './wheel';
+import { pickYearMonth } from './wheel';
 
 // QA 7구간 저금(2026-11-12): D1 합쳐서 모드 주인 있는 저금은 두 사람 모두(찬우·예빈 두 계정), Realtime(S7-02),
 // 저금 내역 다시 읽기(S7-03), 오류 다시 시도(S7-04), W-10a 기한(S7-07), 회색 한 줄(S7-08·S7-09), 모은 금액 → 저금 내역(S7-10),
@@ -279,7 +279,7 @@ test('S7-11: 충돌에서 ‘내 값’을 고르면 그 칸의 문장(기한을
     updated_by: 'yebin-id',
     updated_at: new Date(NOW.getTime() - 30_000).toISOString(),
   });
-  await setYearMonth(page, 2033, 6);
+  await pickYearMonth(page, 2033, 6);
   await page.getByRole('button', { name: '저장' }).click();
   const choice = page.getByRole('group', { name: '어느 쪽으로 할까요?' });
   await expect(choice).toBeVisible();

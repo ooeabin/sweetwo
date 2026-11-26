@@ -63,6 +63,7 @@ export * from './components/Menu';
 export * from './components/Modal';
 export * from './components/BottomSheet';
 export * from './components/DateSheet';
+export * from './components/PickSheet';
 export * from './components/Drawer';
 export * from './components/HomeHub';
 export * from './components/SaveTogether';

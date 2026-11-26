@@ -4,7 +4,7 @@ import {
   BottomSheet,
   Button,
   Chip,
-  DayWheel,
+  DayField,
   PaydayPicker,
   SegChoice,
   ShortText,
@@ -26,7 +26,7 @@ export interface LineSettings {
 }
 
 /**
- * 나가는 날 고르기(20 W-01 7a, W-01d): 칩 ‘월급날’·‘다음 날’ + 휠(1~31, 말일). null = 월급날(날짜 없음은 1일), 31 = 말일
+ * 나가는 날 고르기(20 W-01 7a, W-01d): 칩 ‘월급날’·‘다음 날’ + 한 줄 “매달 25일” → 1~31 + 말일 칸 시트(DayField, 2026-11-26 휠에서 바꿈). null = 월급날(날짜 없음은 1일), 31 = 말일
  */
 export function AutoDayPick({
   value,
@@ -60,10 +60,9 @@ export function AutoDayPick({
           )}
         </div>
       )}
-      <DayWheel
+      <DayField
         label={label}
         value={shownDay}
-        initial={shownDay}
         lastLabel={copy.paydayLast}
         onChange={(d) => {
           const n = d === 'last' ? 31 : d;

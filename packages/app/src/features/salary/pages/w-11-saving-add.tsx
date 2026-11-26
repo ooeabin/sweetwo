@@ -33,7 +33,7 @@ import {
   FormSection,
   QuestionSkeleton,
   ShortText,
-  YearMonthInput,
+  YearMonthField,
 } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -546,7 +546,7 @@ function DeadlineSheet({
         </>
       }
     >
-      <YearMonthInput
+      <YearMonthField
         label={copy.foldDeadline}
         value={ym}
         onChange={(x) => x && setYm(x as YearMonth)}

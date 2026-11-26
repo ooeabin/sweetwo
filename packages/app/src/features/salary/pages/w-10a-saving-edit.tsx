@@ -29,7 +29,7 @@ import {
   QuestionLayout,
   QuestionSkeleton,
   ShortText,
-  YearMonthInput,
+  YearMonthField,
 } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
@@ -378,7 +378,7 @@ export function W10aSavingEdit() {
         </button>
       )}
       {f === 'deadline' && (
-        <YearMonthInput
+        <YearMonthField
           label={title}
           value={curYm}
           onChange={(v) => setYm((v as YearMonth | null) ?? null)}

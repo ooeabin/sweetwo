@@ -25,7 +25,7 @@ import {
   QuestionSkeleton,
   SegChoice,
   ShortText,
-  YearMonthInput,
+  YearMonthField,
   type StepDone,
 } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
@@ -226,7 +226,9 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
   // 스테퍼(2026-11-24, FormScreen step): 앞 답이 뒤 질문을 정하는 분기 흐름이라 한 화면으로 못 합침. 새 저금의 이름·매달 금액, 목표 금액·기한은 각각 한 화면
   const flow: Step[] = join
     ? [
-        ...(d.live.some((i) => i.owner === 'mine' && free(i)) && !given ? (['mine'] as Step[]) : []),
+        ...(d.live.some((i) => i.owner === 'mine' && free(i)) && !given
+          ? (['mine'] as Step[])
+          : []),
         ...(mineGoal === NEW ? (['newName'] as Step[]) : []),
         'notice',
       ]
@@ -472,7 +474,7 @@ export function W15Bundle({ join = false }: { join?: boolean }) {
                 {copy.bundleDeadlineQ}
               </button>
             ) : (
-              <YearMonthInput
+              <YearMonthField
                 label={copy.bundleDeadlineQ}
                 value={ym}
                 onChange={(x) => setDeadline(x as YearMonth | null)}

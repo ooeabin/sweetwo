@@ -747,7 +747,7 @@ test('달력 시트(Y-07, 2026-11-24): 날짜는 한 줄 → 시트 → 날 고�
   await page.goto('/calendar');
   await addEntry(page, '+ 일정 추가').click();
   await page.getByLabel('어떤 날이에요?').fill('어머니 생신');
-  // 폼 안에는 휠이 없고 날짜 한 줄(처음 값 오늘, 보조 ‘양력’)
+  // 폼 안에는 휠·격자가 없고 날짜 한 줄(처음 값 오늘, 보조 ‘양력’)
   await expect(page.getByRole('spinbutton')).toHaveCount(0);
   const line = page.getByRole('button', { name: /^언제예요\?, 2026년 10월 7일 \(수\), 양력/ });
   await expect(line).toBeVisible();
@@ -772,7 +772,7 @@ test('달력 시트(Y-07, 2026-11-24): 날짜는 한 줄 → 시트 → 날 고�
     'true',
   );
   await expect(sheet.getByRole('button', { name: '10월 15일 (목) 선택' })).toBeVisible();
-  // ⌄ 연·월 휠로 먼 달 이동 → 다시 격자
+  // ⌄ 연·월 칸(연도 ‹ › + 12개월)으로 먼 달 이동 → 다시 격자
   await sheet.getByRole('button', { name: /연·월 고르기/ }).click();
   await setYearMonth(page, 2029, 3);
   await sheet.getByRole('button', { name: '2029년 3월 보기' }).click();

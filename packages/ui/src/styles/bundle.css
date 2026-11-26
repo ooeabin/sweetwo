@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (af744886). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (efe89bd). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 /* 2026-11-24 구역 5 설정 검토: 사용자 앱 글자 바탕값 15/22. 클래스 없는 b·p·li가 브라우저 기본 16px로 나오던 것(기준 17/15 밖). 어드민·웹사이트는 data-platform이 없어 그대로 */
@@ -1165,24 +1165,6 @@ input.hg-amount__value { border: 0; outline: 0; background: transparent; width: 
 .hg-payday__custom.is-on .hg-payday__unit { color: var(--ink); font-weight: 700; }
 .hg-payday__hint { margin: 0; font: var(--text-body); color: var(--slate); }  /* 29~31일 안내 한 줄 */
 .hg-payday__custom + .hg-help, .hg-payday__custom + .hg-payday__hint { margin-top: calc(var(--space-2) - var(--space-4)); }  /* 2026-11-25 오류·안내 줄은 직접 적기 칸에 붙여 8px(묶음 간격 16에서 당김) */
-/* 생년월일 휠(DateWheel): 연, 월, 일 세 줄. 한 줄 44px, 다섯 줄 보임. 가운데 회색 띠가 고른 줄, 위아래는 흐리게 */
-.hg-wheel { --wheel-row: 44px; position: relative; box-sizing: border-box; display: grid; grid-template-columns: 1.4fr 1fr 1fr; width: 100%; height: calc(var(--wheel-row) * 5); border-radius: var(--radius-xl); }  /* 2026-11-11 흐리게(mask)는 줄(hg-wheel__col)로 옮김: 휠 둘레 포커스 링이 잘리지 않게 */
-.hg-wheel__band { position: absolute; left: 0; right: 0; top: calc(var(--wheel-row) * 2); height: var(--wheel-row); background: var(--plate); border-radius: var(--radius-full); pointer-events: none; }
-.hg-wheel__col { position: relative; height: 100%; overflow-y: auto; scroll-snap-type: y mandatory; padding-block: calc(var(--wheel-row) * 2); box-sizing: border-box; scrollbar-width: none; overscroll-behavior: contain; border-radius: var(--radius-full); -webkit-mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent); }
-.hg-wheel__col::-webkit-scrollbar { display: none; }
-.hg-wheel__col:focus, .hg-wheel__col:focus-visible { outline: none; }
-.hg-wheel:has(.hg-wheel__col[data-kbd]:focus) { outline: 2px solid var(--focus-ring); outline-offset: 4px; }  /* 2026-11-11 고른 줄은 늘 회색 알약(plate) + ink 700 한 모양. 키보드로 왔을 때만(Tab, 화살표, data-kbd) 휠 전체 둘레 링. 손가락·마우스로 고르거나 화면이 열리며 초점이 와도 링 없음 */
-.hg-wheel--year { grid-template-columns: 1fr; }  /* 연도만(S-11i 출생연도): 한 줄이 판 너비 */
-.hg-wheel--year .hg-wheel__col { border-radius: var(--radius-xl); }
-.hg-wheel--day { grid-template-columns: 1fr; }  /* 월급날 ‘매달 N일’ 1열(DayWheel, 2026-11-03) */
-.hg-wheel--day .hg-wheel__col { border-radius: var(--radius-xl); }
-.hg-wheel.is-disabled { opacity: 0.4; pointer-events: none; }  /* 2026-11-13 O-32 ‘날짜가 정해져 있지 않아요’: 휠 끔(DayWheel disabled, inert) */
-.hg-wheel--ym { grid-template-columns: 1.2fr 1fr; }  /* 연·월(YearMonthInput) */
-.hg-wheel__item { display: flex; align-items: center; justify-content: center; gap: 2px; height: var(--wheel-row); scroll-snap-align: center; color: var(--slate); font: 400 18px/1 var(--font-sans); font-variant-numeric: tabular-nums; cursor: pointer; user-select: none; }
-.hg-wheel__item.is-on { color: var(--ink); font-weight: 700; font-size: 20px; }
-.hg-wheel__unit { font-size: 15px; }
-.hg-wheel__age { margin: 0; text-align: center; font: var(--text-body); color: var(--slate); }
-@media (prefers-reduced-motion: reduce) { .hg-wheel__col { scroll-behavior: auto; } }
 .hg-quick { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 /* Q6 목록 입력(ListInput): 항목마다 둥근 판. 좁은 창은 두 줄(이름 + 지우기 / 월 + 금액), 넓은 창은 한 줄 */
 .hg-listin { display: flex; flex-direction: column; gap: var(--space-3); }
@@ -2160,8 +2142,6 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   .hg-q .hg-input { height: 56px; font-size: 17px; line-height: 26px; }
   .hg-q .hg-amountin { max-width: none; }
   .hg-q .hg-amountin > .hg-quick > .hg-chip { height: 48px; }
-  .hg-q .hg-wheel__item { font-size: 17px; }  /* 휠 줄 높이(44px)는 그대로(DateWheel 굴리기 셈과 같음) */
-  .hg-q .hg-wheel__item.is-on { font-size: 22px; }
   .hg-q__foot :is(.hg-btn--primary, .hg-btn--danger, button[type="submit"].hg-btn--secondary, .hg-q__second) { height: 56px; }
   .hg-auth { gap: var(--space-8); }
   .hg-auth__actions, .hg-auth__alert { max-width: 480px; }
@@ -3181,3 +3161,19 @@ button.hg-datepill { cursor: pointer; }
 .hg-empty .hg-btn--sm, .hg-noti__after .hg-btn--sm { min-height: 44px; }
 .hg-empty > .hg-btn--sm { margin-top: var(--space-2); }
 .hg-noti__after { display: flex; padding: var(--space-4) var(--space-3) 0; }  /* N-01 알림이 거의 없을 때 목록 아래 ‘알림 종류 고르기’(왼쪽 줄 글자와 같은 시작) */
+
+/* ── 칸 고르기 시트(PickSheet, 2026-11-26 사용자 결정 “남은 휠을 시안으로 통일”, 시안 work/w02-design/wheelalt.png) ──
+   휠을 없애고 한 줄 필드(`hg-dline`) + 아래 시트. 시트 안은 칸 격자: 일(7열, 1~31 + 말일 3칸), 연·월(연도 ‹ › + 4열 12개월), 연도(4열, 스크롤), 시(4열).
+   칸 높이 48(44 이상), radius 12, 17/400 고정폭 숫자, 고른 칸 `accent-app` 채움 + `on-accent-app-text` 700(달력 시트 고른 날과 같음). 주 버튼을 눌러야 값이 바뀜. */
+.hg-picksheet { display: flex; flex-direction: column; gap: var(--space-2); }
+.hg-picksheet__grid { display: grid; gap: var(--space-1); }
+.hg-picksheet__grid.is-scroll { max-height: 264px; overflow-y: auto; overscroll-behavior: contain; position: relative; }
+.hg-picksheet__cell { box-sizing: border-box; display: flex; align-items: center; justify-content: center; min-width: 0; height: 48px; margin: 0; padding: 0; border: 0; border-radius: 12px; background: none; color: var(--ink); font: var(--text-value); font-variant-numeric: tabular-nums; cursor: pointer; }
+.hg-picksheet__cell[style*="span"] { background: var(--surface-alt); font: var(--text-body); }  /* 말일 칸 */
+.hg-picksheet__cell.is-on { background: var(--accent-app); color: var(--on-accent-app-text); font-weight: 700; }
+.hg-picksheet__cell:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.hg-picksheet__yearhead { display: flex; align-items: center; justify-content: space-between; min-height: 44px; }
+.hg-picksheet__year { font: var(--text-amount); font-variant-numeric: tabular-nums; color: var(--ink); }
+.hg-picksheet__nav { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: 0; padding: 0; border: 0; border-radius: var(--radius-full); background: none; color: var(--slate); cursor: pointer; }
+.hg-picksheet__nav:disabled { color: var(--hairline); cursor: default; }
+.hg-picksheet__nav:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }

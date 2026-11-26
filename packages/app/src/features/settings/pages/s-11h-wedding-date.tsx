@@ -1,6 +1,6 @@
 import { qk, updateSpace } from '@sweetwo/api';
 import { todayKst } from '@sweetwo/core';
-import { Button, DateWheel, QuestionLayout, YearMonthInput, QuestionSkeleton } from '@sweetwo/ui';
+import { Button, DateField, QuestionLayout, YearMonthField, QuestionSkeleton } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -10,13 +10,6 @@ import { useSettingsData } from '../data';
 
 type Status = 'married' | 'engaged';
 
-const wheelOf = (s: string) => ({
-  y: Number(s.slice(0, 4)),
-  m: Number(s.slice(5, 7)),
-  d: Number(s.slice(8, 10)),
-});
-const textOf = (v: { y: number; m: number; d: number }) =>
-  `${v.y}-${String(v.m).padStart(2, '0')}-${String(v.d).padStart(2, '0')}`;
 const addDay = (s: string) => {
   const t = new Date(`${s}T00:00:00Z`);
   t.setUTCDate(t.getUTCDate() + 1);
@@ -105,7 +98,7 @@ export function S11hWeddingDate() {
           void save({ wedding_date: null, wedding_month: `${mv}-01`, wedding_date_estimated: true })
         }
       >
-        <YearMonthInput
+        <YearMonthField
           label={copy.whenPlanned}
           value={mv}
           onChange={setMonth}
@@ -122,16 +115,16 @@ export function S11hWeddingDate() {
         dv && void save({ wedding_date: dv, wedding_month: null, wedding_date_estimated: false })
       }
     >
-      {/* 2026-11-04 다른 날짜 질문과 같은 휠. 처음 값: 했어요 = 오늘, 준비 중 = 내일 */}
-      <DateWheel
+      {/* 2026-11-24 날짜는 한 줄 + 달력 시트(DateField). 처음 값: 했어요 = 오늘, 준비 중 = 내일에서 시작하고, 처음 넣는 날짜는 직접 골라야 저장 */}
+      <DateField
         label={title}
-        value={dv ? wheelOf(dv) : null}
-        initial={wheelOf(engaged ? addDay(today) : today)}
+        value={dv}
+        today={today}
+        initial={engaged ? addDay(today) : today}
         minYear={engaged ? Number(today.slice(0, 4)) : 1950}
         maxYear={Number(today.slice(0, 4)) + (engaged ? 5 : 0)}
-        onChange={(v) => setDate(textOf(v))}
-        // 2026-11-10 QA 2구간: 처음 넣는 날짜면 처음 값(오늘·내일)이 그대로 답이 되지 않게 휠을 움직여야 저장
-        commitInitial={!!dv}
+        invalid={!!rangeError}
+        onChange={(v) => setDate(v)}
       />
       {rangeError && (
         <p className="hg-help is-error" role="alert">

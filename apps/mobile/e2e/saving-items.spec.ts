@@ -1,5 +1,5 @@
 import { fillAmount, foldAmount, pickName } from './form';
-import { setYearMonth } from './wheel';
+import { pickYearMonth } from './wheel';
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { chanwoo, mockOnboarding, seed } from './mocks';
@@ -118,7 +118,7 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await expect(page.getByText('기한까지 매달 16만 원이면 돼요')).toBeVisible();
   await expect(page.getByText(/지금 속도면/)).toHaveCount(0);
   // 2027년 6월(9개월) → 23만 > 20만 → 10개월째 2027년 7월, 1개월 늦어요
-  await setYearMonth(page, 2027, 6);
+  await pickYearMonth(page, 2027, 6, /^기한, \d{4}년/);
   await expect(page.getByText('기한까지 매달 23만 원이면 돼요')).toBeVisible();
   await expect(page.getByText('지금 속도면 2027년 7월에 다 모아요')).toBeVisible();
   await page.getByRole('dialog').getByRole('button', { name: '확인' }).click();

@@ -15,7 +15,7 @@ import {
   QuestionSkeleton,
   ShortText,
   Toggle,
-  YearMonthInput,
+  YearMonthField,
 } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -238,7 +238,7 @@ export function W15aBundleField() {
           : undefined
       }
     >
-      <YearMonthInput
+      <YearMonthField
         label={copy.bundleDeadlineQ}
         value={ym}
         onChange={(x) => setDeadline((x ?? undefined) as YearMonth | undefined)}

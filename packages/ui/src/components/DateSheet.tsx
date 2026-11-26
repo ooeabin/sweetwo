@@ -12,13 +12,13 @@ import { Button } from './Button';
 import { Chip } from './Chip';
 import { cx } from './cx';
 import { Icon } from './Icon';
-import { DateWheel } from './question/DateWheel';
+import { YearMonthPanel } from './PickSheet';
 import { SegChoice } from './Tabs';
 
 // 달력 시트와 폼 날짜 한 줄(docs/design/components/DateSheet.md, 2026-11-24 사용자 결정).
-// 폼 안에 연·월·일 휠을 펼쳐 두지 않고 날짜는 한 줄(DateField) → 누르면 아래에서 달력 시트(DateSheet).
+// 폼 안에 연·월·일 칸을 펼쳐 두지 않고 날짜는 한 줄(DateField) → 누르면 아래에서 달력 시트(DateSheet).
 // 시트: 제목(질문) → (양력/음력) → 월 머리 “‹ 2026년 11월 ⌄ ›” → 요일 → 날짜 → 아래 주 버튼 “11월 26일 (목) 선택”.
-// ⌄를 누르면 연·월 휠로 바뀌어 먼 연·월로 바로 이동. 키보드: ←→ 하루, ↑↓ 한 주, PageUp/PageDown 한 달, Home/End 그 달 처음·끝, Enter 고름.
+// ⌄를 누르면 연·월 칸(연도 ‹ › + 12개월)으로 바뀌어 먼 연·월로 바로 이동. 키보드: ←→ 하루, ↑↓ 한 주, PageUp/PageDown 한 달, Home/End 그 달 처음·끝, Enter 고름.
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const isoOf = (y: number, m: number, d: number) => `${y}-${pad(m)}-${pad(d)}`;
@@ -34,15 +34,15 @@ export interface DateCal {
 export interface DateSheetLabels {
   prevMonth: string;
   nextMonth: string;
-  /** 월 머리(연·월 휠 열고 닫기) */
+  /** 월 머리(연·월 칸 열고 닫기) */
   pickMonth: string;
   /** 고른 날이 없을 때 주 버튼 */
   none: string;
   /** 주 버튼(고른 날 “11월 26일 (목)”) */
   confirm: (day: string) => string;
-  /** 연·월 휠을 열었을 때 주 버튼 */
+  /** 연·월 칸을 열었을 때 주 버튼 */
   goMonth: (y: number, m: number) => string;
-  /** 연·월 휠 이름 */
+  /** 연·월 칸 이름(미사용 자리표시) */
   wheel: string;
   solar: string;
   lunar: string;
@@ -74,7 +74,7 @@ export interface DateSheetProps {
   /** 고를 수 있는 처음·끝 날(양력). 밖은 흐리게 + 못 누름 */
   min?: string;
   max?: string;
-  /** 연·월 휠과 달 이동 범위(기본 min·max의 해, 없으면 오늘 −100 ~ +50년) */
+  /** 연·월 칸과 달 이동 범위(기본 min·max의 해, 없으면 오늘 −100 ~ +50년) */
   minYear?: number;
   maxYear?: number;
   /** 양력/음력 고르기가 필요한 곳만. 값이 있으면 시트 맨 위에 고르기 */
@@ -127,7 +127,7 @@ export function DateSheet({
     const y = Math.min(Math.max(Number(base.slice(0, 4)), lo), hi);
     return { y, m: Number(base.slice(5, 7)) };
   });
-  const [wheel, setWheel] = useState(false);
+  const [ymOpen, setYmOpen] = useState(false);
   const [focusDay, setFocusDay] = useState<number | null>(null);
   const kbd = useRef(false);
   const cellRefs = useRef<Record<number, HTMLButtonElement | null>>({});
@@ -174,7 +174,7 @@ export function DateSheet({
   // 키보드로 옮긴 날로 포커스
   const tab = focusDay ?? selHere ?? todayHere ?? 1;
   useEffect(() => {
-    if (!kbd.current || wheel) return;
+    if (!kbd.current || ymOpen) return;
     kbd.current = false;
     cellRefs.current[tab]?.focus();
   });
@@ -240,8 +240,8 @@ export function DateSheet({
       onClose={onClose}
       actions={
         <>
-          {wheel ? (
-            <Button variant="primary" block onClick={() => setWheel(false)}>
+          {ymOpen ? (
+            <Button variant="primary" block onClick={() => setYmOpen(false)}>
               {labels.goMonth(view.y, view.m)}
             </Button>
           ) : (
@@ -249,7 +249,7 @@ export function DateSheet({
               {sel ? labels.confirm(confirmText) : labels.none}
             </Button>
           )}
-          {clearLabel && onClear && !wheel && (
+          {clearLabel && onClear && !ymOpen && (
             <button
               type="button"
               className="hg-btn hg-btn--link"
@@ -291,13 +291,13 @@ export function DateSheet({
             type="button"
             className="hg-calsheet__month"
             aria-label={`${view.y}년 ${view.m}월, ${labels.pickMonth}`}
-            aria-expanded={wheel}
-            onClick={() => setWheel((w) => !w)}
+            aria-expanded={ymOpen}
+            onClick={() => setYmOpen((w) => !w)}
           >
             <span aria-hidden="true">
               {view.y}년 {view.m}월
             </span>
-            <Icon name={wheel ? 'chevron-up' : 'chevron-down'} size={16} />
+            <Icon name={ymOpen ? 'chevron-up' : 'chevron-down'} size={16} />
           </button>
           <button
             type="button"
@@ -309,15 +309,14 @@ export function DateSheet({
             <Icon name="chevron-right" size={20} />
           </button>
         </div>
-        {wheel ? (
+        {ymOpen ? (
           <div className="hg-calsheet__body">
-            <DateWheel
-              label={labels.wheel}
-              yearMonth
-              value={{ y: view.y, m: view.m, d: 1 }}
+            <YearMonthPanel
+              y={view.y}
+              m={view.m}
               minYear={lo}
               maxYear={hi}
-              onChange={(v) => setView({ y: v.y, m: v.m })}
+              onChange={(y, m) => setView({ y, m })}
             />
           </div>
         ) : (
@@ -475,8 +474,8 @@ export function DateField({
 }
 
 /**
- * 달력 머리 “12월 ⌄”에서 여는 연·월 시트(Y-04, 2026-11-24 K안): 연·월 휠만. 주 버튼 “2029년 3월 보기”를 누르면 그 달로 이동.
- * DateSheet의 연·월 휠(DateWheel yearMonth)을 그대로 씀
+ * 달력 머리 “12월 ⌄”에서 여는 연·월 시트(Y-04, 2026-11-24 K안): 연·월 칸만. 주 버튼 “2029년 3월 보기”를 누르면 그 달로 이동.
+ * DateSheet의 연·월 칸(YearMonthPanel)을 그대로 씀
  */
 export function MonthSheet({
   title,
@@ -512,13 +511,12 @@ export function MonthSheet({
       }
     >
       <div className="hg-calsheet__body">
-        <DateWheel
-          label={labels.wheel}
-          yearMonth
-          value={{ y: view.y, m: view.m, d: 1 }}
+        <YearMonthPanel
+          y={view.y}
+          m={view.m}
           minYear={minYear}
           maxYear={maxYear}
-          onChange={(v) => setView({ y: v.y, m: v.m })}
+          onChange={(y, m) => setView({ y, m })}
         />
       </div>
     </BottomSheet>

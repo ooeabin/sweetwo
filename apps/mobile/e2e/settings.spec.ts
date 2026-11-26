@@ -2,7 +2,7 @@ import { goOffline, goOnline } from './offline';
 import { test, expect, type Page } from '@playwright/test';
 import { axe as runAxe } from './axe';
 import { type MemDb, mockOnboarding, mockV22Settings } from './mocks';
-import { setWheel } from './wheel';
+import { pickDate, pickYear } from './wheel';
 import { homeTaskTexts } from './home-tasks';
 import { fillAmount } from './form';
 
@@ -232,12 +232,16 @@ test('알림 설정(S-14, S-14a): 푸시 하나, 묶음 토글, 경조사 체크
   await expect(
     page.getByRole('heading', { name: '알림을 받지 않을 시간을 정해 주세요' }),
   ).toBeVisible();
-  // 시작·끝 휠(2026-11-03 기본 드롭다운 대신)
-  const start = page.getByRole('spinbutton', { name: '시작' });
-  await expect(start).toHaveAttribute('aria-valuetext', '밤 10시');
-  await start.focus();
-  await start.press('ArrowDown');
-  await expect(start).toHaveAttribute('aria-valuenow', '23');
+  // 시작·끝 한 줄 + 시(0~23) 칸 시트(2026-11-26 휠에서 바꿈)
+  await expect(page.getByRole('button', { name: '시작, 밤 10시' })).toBeVisible();
+  await page.getByRole('button', { name: '시작, 밤 10시' }).click();
+  const hours = page.getByRole('dialog', { name: '시작' });
+  await expect(hours.getByRole('radio', { name: '밤 10시' })).toBeChecked();
+  await hours.getByRole('radio', { name: '밤 10시' }).press('ArrowRight');
+  await expect(hours.getByRole('radio', { name: '밤 11시' })).toBeChecked();
+  await axe(page);
+  await hours.getByRole('button', { name: '밤 11시 선택' }).click();
+  await expect(page.getByRole('button', { name: '시작, 밤 11시' })).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/settings\/notifications$/);
@@ -341,7 +345,7 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
   await page.getByRole('button', { name: /두 사람 사이/ }).click();
   await page.getByRole('radio', { name: '결혼 준비 중이에요' }).click();
   await expect(page.getByRole('heading', { name: '결혼 예정일은 언제예요?' })).toBeVisible();
-  await setWheel(page, '결혼 예정일은 언제예요?', 2027, 5, 15);
+  await pickDate(page, '결혼 예정일은 언제예요?', '2027-05-15');
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/settings\/me$/);
   expect(db.space).toMatchObject({ marriage_status: 'engaged', wedding_date: '2027-05-15' });
@@ -349,7 +353,7 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
 
   // 출생연도
   await page.getByRole('button', { name: /출생연도/ }).click();
-  await setWheel(page, '찬우님은 몇 년생이에요?', 1993);
+  await pickYear(page, '출생연도', 1993);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/settings\/me$/);
   expect(db.me.birth_year).toBe(1993);
