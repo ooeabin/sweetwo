@@ -140,9 +140,9 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
     await expect(
       page.locator('.hg-frame__mhead .hg-mhead__action').getByRole('button'),
     ).toBeVisible();
-    // 머리 오른쪽 글자 동작(hg-headaction): 13/400 ink-2, 높이 44, 글자 끝 = 화면 오른쪽 24
+    // 머리 오른쪽 글자 동작(hg-headaction): 15/400 ink-2, 높이 44, 글자 끝 = 화면 오른쪽 24
     await expect(editBtn).toHaveClass(/hg-headaction/);
-    await expect(editBtn).toHaveCSS('font-size', '13px');
+    await expect(editBtn).toHaveCSS('font-size', '15px');
     await expect(editBtn).toHaveCSS('font-weight', '400');
     const eb = await editBtn.boundingBox();
     expect(eb?.height).toBeGreaterThanOrEqual(44);

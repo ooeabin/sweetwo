@@ -40,7 +40,7 @@
 
 - React 래퍼 `AppFrame`(packages/ui). 바깥 `hg-frame`(흰 바탕, `tone="alt"`면 `hg-frame--alt` 회색, 넓은 창 두 칸 그리드) 안에 사이드바, `hg-frame__main`(좁은 창 머리, 인사 카드 또는 제목 줄, 본문). 2026-11-09 `onMenu`(☰), `menuOpen`, `onHome`(‹), `labels.menu`·`labels.home` 더함, `onAdd`·`labels.add`(+ 버튼) 없앰. 서랍은 소비자(`MainFrame`)가 Drawer로 그림.
 - 맨 바깥 카드(Card, ListRow 묶음, Checklist, Calendar, 차트)와 인사 카드는 `hairline-soft` 테두리 + 아주 옅은 그림자(`shadow-1`). 카드 안의 카드는 원래 모양 그대로(그림자 없음).
-- **머리 오른쪽 글자 동작**(2026-11-26 사용자 결정, 클래스 `hg-headaction`): 좁은 창 머리 오른쪽 글자 버튼은 모두 한 규칙 — 글자 13/400(`--text-note`) `ink-2`(꺼짐 `muted`), 누르는 칸 높이 44, 글자 끝 = 화면 오른쪽 24(본문 끝: 머리 옆 16 + 버튼 안쪽 16 − 음수 margin 8). 지금 W-01 ‘편집’(`AppFrame narrowAction`)과 N-02 ‘모두 읽음’(NotificationPanel.md). 넓은 창은 제목 줄 `page.actions`에 같은 동작(글자 버튼 `hg-btn--link`, `hg-wide-only`로 좁은 창에서는 숨김).
+- **머리 오른쪽 글자 동작**(2026-11-26 사용자 결정, 클래스 `hg-headaction`): 좁은 창 머리 오른쪽 글자 버튼은 모두 한 규칙 — 글자 15/400(`--text-body`, 2026-11-26 13에서 되돌림: 작으니 어색하다는 사용자 결정) `ink-2`(꺼짐 `muted`), 누르는 칸 높이 44, 글자 끝 = 화면 오른쪽 24(본문 끝: 머리 옆 16 + 버튼 안쪽 16 − 음수 margin 8). 지금 W-01 ‘편집’(`AppFrame narrowAction`)과 N-02 ‘모두 읽음’(NotificationPanel.md). 넓은 창은 제목 줄 `page.actions`에 같은 동작(글자 버튼 `hg-btn--link`, `hg-wide-only`로 좁은 창에서는 숨김).
 - 좁은 창 머리는 넓은 창에서 숨김. (2026-11-09 좁은 창 탭 막대·+ 버튼 없앰)
 - 아직 없는 메뉴·도구는 `aria-disabled`(탭) 또는 `disabled`(버튼)로 자리만.
 
