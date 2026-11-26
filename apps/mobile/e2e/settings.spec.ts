@@ -1061,6 +1061,22 @@ test('새 기기 알림(A-08): 나예요 → 홈, 내가 아니에요 → 그 �
   await expect(page.getByText('Chrome(Windows)')).toHaveCount(0);
 });
 
+// 로그인한 그 기기에서 A-08을 열면(지금 세션) 응답 버튼 대신 안내 + ‘확인’ 하나 → 홈(2026-11-26)
+test('새 기기 알림(A-08): 지금 쓰고 있는 이 기기면 안내 + 확인 하나 → 홈', async ({ page }) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/new-device/s-this');
+  await expect(page.getByRole('heading', { name: '새 기기에서 로그인했어요' })).toBeVisible();
+  await expect(page.getByText('지금 쓰고 있는 이 기기예요')).toBeVisible();
+  await expect(page.getByRole('button', { name: '내가 아니에요' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '나예요' })).toHaveCount(0);
+  await axe(page);
+  await page.getByRole('button', { name: '확인', exact: true }).click();
+  await expect(page).toHaveURL(/\/$/);
+  expect(db.sessions.map((x) => x.id)).toContain('s-this');
+});
+
 test('약관 개정 재동의(A-05r): 바뀐 필수 항목만 → 들어오려던 화면으로, 마케팅 2년 재확인', async ({
   page,
 }) => {

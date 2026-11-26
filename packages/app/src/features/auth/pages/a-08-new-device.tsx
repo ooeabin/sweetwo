@@ -11,6 +11,8 @@ import { prefs } from '../prefs';
 // A-08 4·5번 새 기기 알림(15). 알림 ‘새 기기에서 로그인했어요’를 누르면 옴(:session = 새 기기 세션).
 // ‘나예요’ → 홈. ‘내가 아니에요’ → 그 기기 로그아웃 → S-15 기기 목록 + “{제공자} 계정 보안도 확인해 주세요”.
 // 이미 로그아웃된 기기면 안내 + ‘기기 목록 보기’ 버튼 하나(S-15, 2026-11-10). 시각은 “10월 7일 10:00”.
+// 그 알림은 로그인한 그 기기에서는 서버가 숨김(noti_hidden_here, 2026-11-26). 그래도 그 기기에서 열면(지금 세션)
+// 안내 “지금 쓰고 있는 이 기기예요” + 주 버튼 ‘확인’ 하나(→ 홈).
 export function A08NewDevice() {
   const { session = '' } = useParams();
   const nav = useNavigate();
@@ -19,6 +21,7 @@ export function A08NewDevice() {
   const sessions = useQuery({ queryKey: qk.sessions, queryFn: fetchSessions });
   const s = sessions.data?.find((x) => x.id === session);
   const gone = sessions.isSuccess && !s;
+  const thisDevice = s?.current === true;
   const notMe = async () => {
     if (busy) return;
     setBusy(true);
@@ -55,6 +58,12 @@ export function A08NewDevice() {
               {copy.newDeviceGone}
             </>
           )}
+          {thisDevice && (
+            <>
+              <br />
+              {copy.newDeviceThis}
+            </>
+          )}
         </>
       }
       actions={
@@ -66,18 +75,16 @@ export function A08NewDevice() {
           >
             {copy.deviceList}
           </Button>
+        ) : thisDevice ? (
+          <Button variant="primary" block onClick={() => nav('/', { replace: true })}>
+            {copy.newDeviceOk}
+          </Button>
         ) : (
           <>
             <Button variant="primary" block onClick={() => nav('/', { replace: true })}>
               {copy.itsMe}
             </Button>
-            <Button
-              variant="secondary"
-              block
-              disabled={s?.current}
-              loading={busy}
-              onClick={() => void notMe()}
-            >
+            <Button variant="secondary" block loading={busy} onClick={() => void notMe()}>
               {copy.notMe}
             </Button>
           </>

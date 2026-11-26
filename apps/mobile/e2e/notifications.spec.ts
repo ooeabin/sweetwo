@@ -342,3 +342,69 @@ test('이전 값으로 돌리기(14 N-01·N-02, R-08): 돌릴 수 있는 변경 
   // 줄 자체는 그대로(누르면 그 화면)
   await expect(page.getByText('예빈님이 내 집 마련 저축·투자를 바꿨어요')).toBeVisible();
 });
+
+// 새 기기 로그인 알림(2026-11-26 사용자 결정, 15 A-08 5번): 로그인한 그 기기(링크 세션 = 지금 세션)에서는 목록·종 점에서 숨김,
+// 다른 기기에서 로그인한 알림은 그대로(서버 RLS noti_hidden_here, 목업도 같은 규칙)
+test('새 기기 알림: 로그인한 그 기기에서는 목록·점에 없음, 다른 기기 로그인 알림은 보임', async ({
+  page,
+}, info) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  const narrow = info.project.name === 'narrow';
+  db.notifications.push(
+    noti({
+      id: '00000000-0000-4000-8000-0000000000d1',
+      kind: 'new_device',
+      title: '새 기기에서 로그인했어요',
+      body: '본인이 아니면 바로 로그아웃해 주세요',
+      target: '/new-device/s-this', // 지금 이 기기(my_sessions current)
+      icon: 'shield-warning',
+      created_at: '2026-10-07T00:50:00Z',
+    }),
+  );
+  await page.goto(narrow ? '/' : '/calendar/list');
+  const bell = page
+    .locator(narrow ? '.hg-frame__mhead' : '.hg-appside')
+    .getByRole('button', { name: /^알림/ });
+  await expect(bell).toHaveAccessibleName('알림');
+  await expect(bell).not.toHaveClass(/hg-iconbtn--dot/);
+  await page.goto('/notifications');
+  const panel = page.getByRole('complementary', { name: '알림' });
+  await expect(panel.getByText('새 알림이 없어요')).toBeVisible();
+  await expect(panel.getByText('새 기기에서 로그인했어요')).toHaveCount(0);
+  // 다른 기기에서 로그인한 알림은 이 기기에 보임 + 점
+  db.sessions.push({
+    id: 's-new',
+    user_agent: 'Mozilla/5.0 (Windows NT 10.0) Chrome/130 Safari/537',
+    created_at: '2026-10-07T00:55:00Z',
+    last_used_at: '2026-10-07T00:55:00Z',
+    current: false,
+  });
+  db.notifications.push(
+    noti({
+      id: '00000000-0000-4000-8000-0000000000d2',
+      kind: 'new_device',
+      title: '새 기기에서 로그인했어요',
+      body: '본인이 아니면 바로 로그아웃해 주세요',
+      target: '/new-device/s-new',
+      icon: 'shield-warning',
+      created_at: '2026-10-07T00:55:00Z',
+    }),
+  );
+  await page.goto(narrow ? '/' : '/calendar/list');
+  await expect(bell).toHaveClass(/hg-iconbtn--dot/);
+  await page.goto('/notifications');
+  await expect(panel.getByText('새 기기에서 로그인했어요')).toHaveCount(1);
+  await panel.getByRole('button', { name: '모두 읽음' }).click();
+  await expect(panel.getByRole('button', { name: '모두 읽음' })).toBeDisabled();
+  expect(
+    db.notifications.find((n) => n.id === '00000000-0000-4000-8000-0000000000d2')?.read_at,
+  ).toBeTruthy();
+  expect(
+    db.notifications.find((n) => n.id === '00000000-0000-4000-8000-0000000000d1')?.read_at,
+  ).toBeNull();
+  await panel.getByText('새 기기에서 로그인했어요').click();
+  await expect(page).toHaveURL(/\/new-device\/s-new$/);
+  await expect(page.getByRole('button', { name: '내가 아니에요' })).toBeEnabled();
+});
