@@ -42,6 +42,7 @@ import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { track, type AnalyticsEvent } from '../../../shared/analytics';
 import { money, useMask } from '../../../shared/mask';
+import { speakMasked } from '../../../shared/masked-text';
 import { PersonDot } from '../../../shared/person';
 import { toast } from '../../../shared/toast';
 import { sharedCopy } from '../../../shared/copy';
@@ -758,14 +759,23 @@ export function H01Home() {
   );
 
   // ── H-15 ‘월급 계획 템플릿’ 줄(예전 H-07 타일 내용): 값은 한 줄만(2026-11-23 바탕 기준, “매달 25일” 삭제) —
-  // 미계획 금액, 모자라면 “30만 원이 모자라요” ──
+  // 미계획 금액, 넘으면 “월급보다 300,000원 많아요”(2026-11-26 사용자 결정, 금액만 danger `hg-over`, 가리기 따름) ──
   const income = joint
     ? (me.data.monthly_income ?? 0) + (partner.data?.monthly_income ?? 0)
     : (me.data.monthly_income ?? 0);
   const left = mySplit ? leftover(income, mySplit.split_line) : null;
-  const plan: { value?: string; sub?: string } =
+  const plan: { value?: string; sub?: string; node?: ReactNode } =
     left !== null && left < 0
-      ? { value: copy.short(m(-left)) }
+      ? {
+          value: copy.overText(m(-left)),
+          node: (
+            <>
+              {copy.over[0]}
+              <span className="hg-over">{speakMasked(m(-left))}</span>
+              {copy.over[1]}
+            </>
+          ),
+        }
       : left !== null
         ? { value: copy.leftover(m(left)) }
         : {

@@ -118,3 +118,20 @@ test('W-11 매달 금액이 넘으면 ‘추가하기’ 막힘, ‘월급 고�
   await expect(page).toHaveURL(/\/salary\/plan$/);
   await expect(page.getByRole('dialog', { name: '월급 금액' })).toBeVisible();
 });
+
+test('홈 H-15 ‘월급 계획 템플릿’ 줄: 넘으면 “월급보다 500,000원 많아요”(금액만 빨강, 2026-11-26)', async ({
+  page,
+}) => {
+  const db = await open(page);
+  Object.assign(db.me, { monthly_income: 3_000_000 });
+  await page.goto('/');
+  const row = page.locator('.hg-hubbox__row', { hasText: '월급 계획 템플릿' });
+  await expect(row.locator('.hg-hubbox__main')).toHaveText('월급보다 500,000원 많아요');
+  const amt = row.locator('.hg-over');
+  await expect(amt).toHaveText('500,000원');
+  expect(await amt.evaluate((el) => getComputedStyle(el).color)).toBe(await danger(page));
+  const rest = await row.locator('.hg-hubbox__main').evaluate((el) => getComputedStyle(el).color);
+  expect(rest).not.toBe(await danger(page));
+  await expect(row).toHaveAttribute('aria-label', '월급 계획 템플릿, 월급보다 500,000원 많아요');
+  await axe(page);
+});
