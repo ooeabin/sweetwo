@@ -134,16 +134,6 @@ export const copy = {
   upcomingTitle: '다가오는 날',
   ddayShort: (n: number) => (n === 0 ? 'D-day' : `D-${n}`), // [확인 필요]
 
-  // H-12 결혼 준비 타일 [모두 확인 필요]
-  // 0개일 때는 개수 없이 “결혼 준비 메모”(2026-11-20) [확인 필요]
-  weddingTile: (n: number) => (n === 0 ? '결혼 준비 메모' : `결혼 준비 메모 ${n}개`),
-  weddingNext: (name: string, date: string) => `다음 ${name} ${formatMonthDay(date)}`,
-  weddingAdd: '+ 쓸 곳 메모 추가',
-  /** 저축·투자가 하나도 없으면(쓸 곳 메모를 붙일 곳이 없음) 누르면 저축·투자 추가(W-11a)로 가므로 이름도 맞춤(2026-11-25, 예전엔 “+ 쓸 곳 메모 추가”인데 저축·투자 추가로 감) [확인 필요] */
-  weddingAddSaving: '+ 저축·투자 추가',
-  /** 날짜가 지났는데 안 낸 메모가 있으면 그것 먼저(2026-11-14) */
-  weddingOverdue: (name: string, date: string) => `${name}, ${formatMonthDay(date)}이 지났어요`,
-
   // H-04, H-09 작은 타일 [확인 필요]
   assetsTile: '자산 관리',
   /** H-04 값 이름표와 값 아래 작은 줄(2026-11-20) [확인 필요] */

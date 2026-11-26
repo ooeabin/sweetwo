@@ -3,7 +3,7 @@ import { axe as runAxe } from './axe';
 import { chanwoo, emptyV22, type MemDb, mockOnboarding, seed } from './mocks';
 
 // 첫 사용 화면 확정(2026-11-25 사용자): W-02 빈 상태 3단계, 빈 화면 다음 행동(Y-09, W-21, N-01), 홈 캘린더 타일,
-// 합쳐서 엔진 오류 a(W-02 첫날 다 확인 안 뜸)·b(H-12 쓸 곳 메모 이동)·c(미계획 금액 일치). 찬우 350만 원 25일, 10월 7일.
+// 합쳐서 엔진 오류 a(W-02 첫날 다 확인 안 뜸)·b(H-12 쓸 곳 메모 이동, 2026-11-26 H-12를 홈에서 없애 테스트도 지움)·c(미계획 금액 일치). 찬우 350만 원 25일, 10월 7일.
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 const axe = async (page: Page) => {
   const r = await runAxe(page);
@@ -132,7 +132,9 @@ test('W-02 빈 상태: 휴대폰 크기(390x844)에서 주 버튼이 화면 아�
   await axe(page);
 });
 
-test('W-02 월급 0원 + 계획 없음도 같은 3단계 안내(예전 “월급을 입력하고 …” 없음)', async ({ page }) => {
+test('W-02 월급 0원 + 계획 없음도 같은 3단계 안내(예전 “월급을 입력하고 …” 없음)', async ({
+  page,
+}) => {
   await open(
     page,
     (db) => {
@@ -234,44 +236,6 @@ test('알림이 거의 없을 때: 목록 아래 “알림 종류 고르기” �
   await page.goto('/notifications');
   await expect(page.getByText('알림 4')).toBeVisible();
   await expect(page.getByRole('button', { name: '알림 종류 고르기' })).toHaveCount(0);
-});
-
-test('H-12: 쓸 곳 메모가 0개면 쓸 곳 메모 추가(W-14a)로, 있으면 목록(W-14)으로', async ({
-  page,
-}) => {
-  const db = await open(page, (d) => {
-    Object.assign(d.space ?? {}, { marriage_status: 'engaged', wedding_date: '2027-03-01' });
-  });
-  // 2026-11-26 ‘빈 상태 A안’ 보충: 상자 일부만 빈 상태 → 상자는 묶음, 다음 행동은 회색 보조 버튼(보통 크기)
-  const tile = page.getByRole('group', { name: '결혼 준비 메모' });
-  const add = tile.getByRole('button', { name: '+ 쓸 곳 메모 추가' });
-  await expect(add).toHaveClass(/hg-btn--secondary/);
-  await expect(add).not.toHaveClass(/hg-btn--sm/);
-  await page.waitForLoadState('networkidle');
-  await add.click();
-  await expect(page).toHaveURL(/\/salary\/items\/[^/]+\/notes\/new$/);
-  await expect(page.getByRole('heading', { name: '쓸 곳 메모 추가' })).toBeVisible();
-  await axe(page);
-  // 메모가 하나 있으면 홈에서 목록으로
-  const goal = db.goals.find((g) => g.id === 'goal-h');
-  (db.v22?.notes ?? []).push({
-    id: 'note-1',
-    space_id: 'space-1',
-    goal_id: goal?.id,
-    bundle_id: null,
-    name: '예식장 계약금',
-    amount: 3_000_000,
-    due_on: '2026-12-03',
-    paid: false,
-    paid_at: null,
-    deleted_at: null,
-    created_by: chanwoo.id,
-    created_at: '2026-10-05T00:00:00Z',
-  });
-  await page.goto('/');
-  await expect(page.getByRole('button', { name: /^결혼 준비 메모 1개/ })).toBeVisible();
-  await page.getByRole('button', { name: /^결혼 준비 메모 1개/ }).click();
-  await expect(page).toHaveURL(/\/salary\/items\/[^/]+\/notes$/);
 });
 
 test('합쳐서 엔진 첫날: 손 줄이 없고 자동 줄만이면 “이번 달도 계획대로!” 다 확인 상태가 아니라 평소 목록 + “자동으로 나가는 것뿐이에요”', async ({

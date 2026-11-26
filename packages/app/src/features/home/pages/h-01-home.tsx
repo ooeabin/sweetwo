@@ -69,7 +69,6 @@ import {
   useShownPayday,
   myChecklist,
   salaryChangedDay,
-  togetherPaths,
   useChecklists,
   useCheckRealtime,
   useGoalRealtime,
@@ -82,7 +81,6 @@ import {
   useBundles,
   useGoals,
   useHeroMoves,
-  useHeroNotes,
   useHomeRealtime,
   useHomeTasks,
   useMe,
@@ -99,12 +97,11 @@ import {
 import { H10SaveTogether } from './h-10-save-together';
 import { useWidgetSettings, widgetSettingsAvailable } from '../../../shared/widget-settings';
 import { useWidgetSync, widgetHero, widgetNext, widgetSave } from '../widget-sync';
-import { H12Wedding } from './h-12-wedding';
 import { H15SalaryBox } from './h-15-salary-box';
 
 // 홈 v2.2(19 ‘홈 v2.2’, ADR 0009 결정 1): 회색 바탕 위 흰 상자.
 // 좁은 창(2026-11-17, 메뉴 서랍과 같은 이름·순서, core homeOrder): H-06 할 일 띠(월급날 확인할 게 있으면 5b 띠) → H-10 같이 모으기
-// (결혼 준비 중이면 바로 아래 H-12) → H-15 월급 상자(이번 달 월급 체크·월급 계획 템플릿)
+// → H-15 월급 상자(2026-11-26 H-12 결혼 준비 상자는 없앰)(이번 달 월급 체크·월급 계획 템플릿)
 // → 반 칸 타일 둘 H-04 자산 관리(오렌지 포인트 상자)·H-08 캘린더. H-02·H-03·H-07·H-09·H-11·H-13·H-14는 홈에서 없앰.
 // 넓은 창(1100px 이상 4열)은 CSS 격자가 띠를 맨 위, H-10을 두 칸 두 줄로, 월급 상자 두 칸(HomeHub v2.2).
 // 본문 맨 위 띠(해제 대기, 공지, 메일 반송)는 하나만(core pickTopBanner). 상대가 바꾸면 Realtime으로 바로 다시 읽음.
@@ -207,15 +204,6 @@ export function H01Home() {
   );
   const moves = useHeroMoves(heroIds);
   const first = heroes[0];
-  const engaged = sp?.marriage_status === 'engaged';
-  const heroNotes = useHeroNotes(
-    engaged && first
-      ? first.kind === 'bundle'
-        ? { bundleId: first.bundle.id }
-        : { goalId: first.goal.id }
-      : null,
-  );
-  const noNotes = !!heroNotes.data && !heroNotes.data.some((n) => !n.paid && !n.deleted_at);
 
   // 홈 화면 위젯(26 v2.2): H-10 첫 칸과 H-08 다가오는 날을 금액 없이 브리지로(모바일 앱만, 값이 바뀔 때만)
   useWidgetSync(
@@ -802,7 +790,7 @@ export function H01Home() {
   // 2026-11-13 H-04 배지는 (가) + ‘홈에 보여 주기’를 켰을 때만(기본 끔, 23 F-08 v2.2, frame useRank)
   const rankPct = rank?.homeBadge ?? null;
 
-  // 홈 순서(19 ‘홈 순서’, 2026-11-17, core homeOrder): 할 일 띠 → H-10 → H-12 → H-15 월급 상자 → 반 칸 타일 둘
+  // 홈 순서(19 ‘홈 순서’, 2026-11-17, core homeOrder): 할 일 띠 → H-10 → H-15 월급 상자 → 반 칸 타일 둘(2026-11-26 H-12 없앰)
   const order = homeOrder({ heroNone });
   // 2026-11-18 H-04 빈 타일 문구(core assetTileHint): 내 자산 있음 = 순자산 값, 없으면 파트너 소식 > 궁금함
   const tileHint = nw ? assetTileHint({ together: joined, ...nw.own }) : 'value';
@@ -816,29 +804,6 @@ export function H01Home() {
   const blocks: Record<HomeBlock, ReactNode> = {
     tasks: todoBands.length ? <Fragment key="tasks">{todoBands}</Fragment> : null,
     hero: <Fragment key="hero">{hero}</Fragment>,
-    wedding: engaged ? (
-      <H12Wedding
-        key="wedding"
-        notes={heroNotes.data ?? []}
-        today={today}
-        hasSaving={!!first}
-        onClick={() =>
-          go(
-            'wedding',
-            // 안 낸 쓸 곳 메모가 0개면 바로 쓸 곳 메모 추가(W-14a), 있으면 목록(W-14). 저금이 하나도 없으면 메모를 붙일 곳이 없어 저축·투자 추가(2026-11-25)
-            first?.kind === 'bundle'
-              ? noNotes
-                ? togetherPaths.bundleNote(first.bundle.id, 'new')
-                : `/salary/bundles/${first.bundle.id}/notes`
-              : first
-                ? noNotes
-                  ? togetherPaths.note(first.goal.id, 'new')
-                  : `/salary/items/${first.goal.id}/notes`
-                : '/salary/items/new?from=home',
-          )
-        }
-      />
-    ) : null,
     salary: (
       <H15SalaryBox
         key="salary"

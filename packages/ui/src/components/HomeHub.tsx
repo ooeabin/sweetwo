@@ -123,7 +123,7 @@ export interface HubBoxRow {
   onClick: () => void;
   /**
    * 이 줄이 빈 상태일 때 다음 행동(2026-11-26 사용자 결정 ‘빈 상태 A안’ 보충: 화면 일부만 빈 상태 = 보조 버튼).
-   * 있으면 줄은 버튼이 아니라 묶음(`hg-hubbox__row--action`): 이름표 + 그 아래 회색 보조 버튼(보통 크기)이 onClick. value·›는 그리지 않음
+   * 있으면 줄은 버튼이 아니라 묶음(`hg-hubbox__row--action`): 이름표 왼쪽 + 오른쪽 작은 회색 보조 버튼(sm, 보이는 높이 32, 2026-11-26 ‘홈 상자 안은 작은 보조 버튼’)이 onClick. value·›는 그리지 않음
    */
   action?: string;
 }
@@ -150,7 +150,7 @@ export function HubBox({ title, rows }: { title: string; rows: HubBoxRow[] }) {
                 aria-label={r.name}
               >
                 <span className="hg-hubbox__name">{r.name}</span>
-                <Button variant="secondary" onClick={r.onClick}>
+                <Button variant="secondary" size="sm" onClick={r.onClick}>
                   {r.action}
                 </Button>
               </div>
@@ -223,7 +223,7 @@ export function HubTile({
   className?: string;
   /**
    * 상자가 빈 상태일 때 다음 행동(2026-11-26 사용자 결정 ‘빈 상태 A안’ 보충, H-12 “+ 쓸 곳 메모 추가”):
-   * 있으면 상자는 버튼이 아니라 묶음(`hg-hubtile--action`): 제목 + 그 아래 회색 보조 버튼(보통 크기)이 onClick. sub·value는 그리지 않음
+   * 있으면 상자는 버튼이 아니라 묶음(`hg-hubtile--action`): 제목 + 그 아래 작은 회색 보조 버튼(sm, 보이는 높이 32, 2026-11-26 ‘홈 상자 안은 작은 보조 버튼’)이 onClick. sub·value는 그리지 않음. 2026-11-26 H-12가 홈에서 없어져 지금 쓰는 곳 없음
    */
   action?: string;
 }) {
@@ -235,7 +235,7 @@ export function HubTile({
         aria-label={title}
       >
         <span className="hg-hubtile__title">{title}</span>
-        <Button variant="secondary" onClick={onClick}>
+        <Button variant="secondary" size="sm" onClick={onClick}>
           {action}
         </Button>
       </div>
