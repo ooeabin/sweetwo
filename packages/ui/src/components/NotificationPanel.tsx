@@ -150,7 +150,14 @@ export function NotificationPanel(p: {
         ) : (
           <h2 className="hg-noti__title">{p.labels.title}</h2>
         )}
-        <Button variant="ghost" size="sm" disabled={!unread} onClick={p.onReadAll}>
+        {/* 좁은 창 머리 오른쪽 글자 동작은 W-01 ‘편집’과 같은 hg-headaction(13/400 ink-2, 높이 44, 글자 끝 = 본문 끝, 2026-11-26) */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className={p.variant === 'page' ? 'hg-headaction' : undefined}
+          disabled={!unread}
+          onClick={p.onReadAll}
+        >
           {p.labels.readAll}
         </Button>
         {p.variant === 'sheet' && (

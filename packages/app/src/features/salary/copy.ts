@@ -86,11 +86,11 @@ export const copy = {
   legendSpend: (n: number) => `지출 ${n}%`,
   legendFree: (n: number) => `미계획 ${n}%`,
   legendShort: (amount: string) => `미계획 ${amount}`,
-  legendFreeName: '미계획', // 2026-11-19 요약 카드 ● 범례 셋째 줄 이름(막대 막대 범례 줄 이름은 짧게, 금액은 오른쪽)
+  legendFreeName: '미계획', // 2026-11-19 요약 카드 ● 범례 셋째 줄 이름(범례 줄 이름은 짧게, 금액은 오른쪽). 2026-11-26 도넛 오른쪽 범례, 이름 뒤 회색 퍼센트
   /** W-01 요약 카드(2026-11-19 사용자 결정) [모두 확인 필요]: 굵은 한 문장 “월급의 40%를 모으고 있어요”(숫자만 accent-app-text) */
   summarySaving: ['월급의 ', '를 모으고 있어요'] as const,
   summaryPct: (n: number) => `${n}%`,
-  summaryNoSaving: '월급을 어떻게 나눌지 정해 보세요',
+  summaryNoSaving: '월급을 어떻게 나눌지 정해 보세요', // 2026-11-26 사용자 결정: 화면 요약에서는 없앰(저축·투자 0원이면 문장 없음), 공유 이미지에만 남김
   // 계획이 월급보다 큼(미계획 < 0)이면 굵은 문장은 core planOverText “계획이 월급보다 25만 원 많아요”(오류 빨강) [확인 필요]
   summaryEmpty: ['월급을 적으면', '나눌 수 있어요'] as const, // 월급 0원 상태 굵은 문장(두 줄)
   summaryEmptyAction: '월급 적기',
@@ -109,7 +109,7 @@ export const copy = {
   allowanceRows: '용돈', // 화면 읽기: W-01 지출 묶음 맨 위 용돈 줄 목록(2026-11-16 R4-3)
   /** W-01 빈 지출 카드(2026-11-19 사용자 결정: 예전 맨 위 ‘매달 나가는 지출이 있어요?’ 칩 카드가 지출 카드 안으로, 칩은 그대로) [확인 필요] */
   spendEmpty: {
-    ask: '매달 나가는 지출을 골라 보세요',
+    ask: '매달 나가는 지출을 골라 보세요', // 2026-11-26 사용자 결정: 보이는 안내 한 줄은 없앰, 칩 묶음 화면 읽기 이름(aria-label)으로만
     chips: [
       { name: '월세', code: 'rent' },
       { name: '관리비', code: 'maintenance' },
@@ -123,7 +123,7 @@ export const copy = {
   addMyShareHint: '내가 내는 몫만 적어요', // [확인 필요] 2026-11-16 r6 ‘매달 나가는 지출’ 금액 시트 아래 회색 한 줄(월세를 둘이 나눠 내면 내 몫)
   sharedAccountChip: '같이 쓰는 통장', // [확인 필요] 2026-11-16 R4-4 ‘+ 지출 추가’ 칩 끝(통장 줄을 숨겼을 때)
   ownName: '직접 입력',
-  editPlan: '편집하기',
+  editShort: '편집', // [확인 필요] 2026-11-26 사용자 결정: W-01 머리 오른쪽 글자 버튼(토스 내 소비 ‘편집’처럼, 예전 맨 아래 ‘편집하기’ editPlan은 없앰). 좁은 창 hg-headaction
   share: '공유하기',
   editTitle: '월급 계획 편집',
   editDone: '완료',
@@ -595,7 +595,7 @@ export const copy = {
   nextQ: '다음엔 뭘 같이 모을까요?', // [확인 필요]
   nextRedeadline: (name: string) => `‘${name}’ 기한을 새로 정할게요`, // [확인 필요]
   nextCustom: '직접 정할게요', // [확인 필요]
-  savingEmptyAsk: '무엇을 모을지 골라 보세요', // [확인 필요] 2026-11-18 W-01 저축·투자 묶음 빈 상태 한 줄(홈 H-10 빈 상태가 옮겨 옴)
+  savingEmptyAsk: '무엇을 모을지 골라 보세요', // [확인 필요] 2026-11-18 W-01 저축·투자 묶음 빈 상태 한 줄(홈 H-10 빈 상태가 옮겨 옴). 2026-11-26 사용자 결정: 보이는 한 줄은 없앰, 칩 묶음 화면 읽기 이름(aria-label)으로만
   savingEmptyCustom: '직접 정하기', // [확인 필요] 같은 칩 끝(W-11a를 이름 칸 빈 채로 엶)
   addNameChips: '이름 고르기', // [확인 필요] W-11a 칩 묶음 화면 읽기 이름
   chipNames: {

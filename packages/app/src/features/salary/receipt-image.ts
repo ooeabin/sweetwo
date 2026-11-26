@@ -43,6 +43,7 @@ type Tokens = Record<
   | 'hairline'
   | 'hairlineSoft'
   | 'spend'
+  | 'chartSpend'
   | 'accent'
   | 'accentSoft'
   | 'accentText'
@@ -75,6 +76,7 @@ function readTokens(): Tokens {
     hairlineSoft: v('--hairline-soft'),
     // 지출 칸(2026-11-12 S5-15, 다크는 hairline보다 한 단계 밝게)
     spend: v('--spend'),
+    chartSpend: v('--chart-spend'),
     accent: v('--accent-app'),
     accentSoft: v('--accent-app-soft'),
     accentText: v('--accent-app-text'),
@@ -332,17 +334,24 @@ export async function renderReceiptPng(m: ReceiptImageModel): Promise<Blob> {
   );
 }
 
-/** 요약 카드 모양 공유 이미지(W-01, 2026-11-19) */
+/** 요약 카드 모양 공유 이미지(W-01, 2026-11-19. 2026-11-26 막대 대신 화면과 같은 도넛) */
 export interface PlanImageModel {
   /** 카드 위 이름표 “월급” */
   label: string;
   amount: string;
   /** 굵은 한 문장. pct가 있으면 앞·뒤 글자 사이에 퍼센트를 accent-app-text로 */
   sentence: { before: string; pct?: string; after: string };
-  /** 막대·범례를 그림(월급 0원이면 false) */
+  /** 도넛·범례를 그림(월급 0원이거나 줄이 없으면 false) */
   chart: boolean;
   bar: { kind: 'saving' | 'spend' | 'free'; percent: number }[];
-  legend: { kind: 'saving' | 'spend' | 'free'; name: string; amount: string; short?: boolean }[];
+  /** percent = 이름 뒤 회색 퍼센트(모자람의 미계획은 없음, 2026-11-26 도넛 범례) */
+  legend: {
+    kind: 'saving' | 'spend' | 'free';
+    name: string;
+    percent?: number;
+    amount: string;
+    short?: boolean;
+  }[];
   /** 저축·투자, 지출 줄 목록(줄이 없는 묶음은 부르는 쪽에서 뺌). sub = 목표 금액이 있으면 “목표 금액의 62%” */
   sections: {
     title: string;
@@ -401,8 +410,9 @@ function layoutPlan(
     ctx.roundRect(x0, top, x1 - x0, bottom - top, CARD_R);
     ctx.fill();
   };
+  // 2026-11-26: 지출 조각은 chart-spend(라이트 코코아), 화면 도넛과 같은 토큰
   const color = (k: 'saving' | 'spend' | 'free') =>
-    k === 'saving' ? t.accent : k === 'spend' ? t.ink2 : t.barTrack;
+    k === 'saving' ? t.accent : k === 'spend' ? t.chartSpend : t.barTrack;
 
   // ── 요약 카드 ──
   let y = PAD;
@@ -440,46 +450,63 @@ function layoutPlan(
     }
     yy += 30;
     if (m.chart) {
+      // 2026-11-26 사용자 결정(카카오페이 자산 구성형): 왼쪽 굵은 파이 도넛(지름 112, 구멍 약 30%, 가운데 글자 없음,
+      // 12시부터 시계 방향 저축·투자 → 지출 → 미계획, 틈 없음, 0%는 안 그림) + 오른쪽(간격 20) 범례 세 줄
       yy += 20;
+      const D = 112;
+      const ringR = (D * 13) / 42;
+      const ringW = (D * 14) / 42;
+      const cx = left + D / 2;
+      const cy = yy + D / 2;
       if (d) {
-        const shown = m.bar.filter((b) => b.percent > 0);
-        const width = right - left - 3 * Math.max(shown.length - 1, 0);
-        let x = left;
-        for (const b of shown) {
-          const w = Math.max((width * b.percent) / 100, 16);
-          ctx.fillStyle = color(b.kind);
+        let a = -Math.PI / 2;
+        for (const b of m.bar.filter((x) => x.percent > 0)) {
+          const sweep = (Math.PI * 2 * b.percent) / 100;
+          ctx.strokeStyle = color(b.kind);
+          ctx.lineWidth = ringW;
           ctx.beginPath();
-          ctx.roundRect(x, yy, w, 16, 8);
-          ctx.fill();
-          x += w + 3;
+          ctx.arc(cx, cy, ringR, a, a + sweep);
+          ctx.stroke();
+          a += sweep;
         }
       }
-      yy += 16 + 16;
+      const lx = left + D + 20;
+      const rowsH = m.legend.length * 22 + Math.max(m.legend.length - 1, 0) * 12;
+      let ly = yy + (D - rowsH) / 2;
       for (const l of m.legend) {
         if (d) {
           ctx.fillStyle = color(l.kind);
           ctx.beginPath();
-          ctx.arc(left + 4, yy + 11, 4, 0, Math.PI * 2);
+          ctx.arc(lx + 4, ly + 11, 4, 0, Math.PI * 2);
           ctx.fill();
           if (l.kind === 'free') {
             // 미계획 점: 흰 카드 위에서 보이게 slate 1px 테두리(화면 hg-plansum__dot과 같음)
             ctx.strokeStyle = t.slate;
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.arc(left + 4, yy + 11, 3.5, 0, Math.PI * 2);
+            ctx.arc(lx + 4, ly + 11, 3.5, 0, Math.PI * 2);
             ctx.stroke();
           }
+          ctx.font = font(400, 15);
+          const nameW = ctx.measureText(`${l.name} `).width;
+          put(l.name, lx + 20, ly + 11, { weight: 400, size: 15, color: t.ink2 });
+          if (l.percent !== undefined)
+            // 퍼센트는 13/400 slate(화면 범례와 같음, 이름과 기준선을 맞추려 1px 아래)
+            put(`${l.percent}%`, lx + 20 + nameW, ly + 12, {
+              weight: 400,
+              size: 13,
+              color: t.slate,
+            });
         }
-        put(l.name, left + 20, yy + 11, { weight: 500, size: 15, color: t.ink2 });
-        put(l.amount, right, yy + 11, {
-          weight: 600,
+        put(l.amount, right, ly + 11, {
+          weight: 700,
           size: 15,
           color: l.short ? t.danger : t.ink,
           align: 'right',
         });
-        yy += 22 + 12;
+        ly += 22 + 12;
       }
-      yy -= 12;
+      yy += D;
     }
     return yy + CARD_PAD;
   };

@@ -32,18 +32,21 @@ async function expectDockWidth(page: Page, name: string) {
   expect(Math.abs((box?.width ?? 0) - (vw - 48))).toBeLessThanOrEqual(2);
 }
 
-test('W-01 b: 줄이 하나도 없으면 막대·범례 없이 문장만(월급이 있어도)', async ({ page }) => {
+test('W-01 b: 줄이 하나도 없으면 도넛·범례 없음, 문장도 없음(월급이 있어도, 2026-11-26)', async ({
+  page,
+}) => {
   const db = await open(page);
   for (const s of db.splits) s.split_line = [];
   await page.goto('/salary/plan');
   await expect(page.getByRole('button', { name: '월급 350만 원, 금액 고치기' })).toBeVisible();
-  await expect(page.getByText('월급을 어떻게 나눌지 정해 보세요')).toBeVisible();
-  await expect(page.locator('.hg-plansum__bar')).toHaveCount(0);
-  await expect(page.locator('.hg-plansum__legend')).toHaveCount(0);
+  // 2026-11-26 사용자 결정: 저축·투자 0원일 때 “월급을 어떻게 나눌지 정해 보세요”는 없앰
+  await expect(page.getByText('월급을 어떻게 나눌지 정해 보세요')).toHaveCount(0);
+  await expect(page.locator('.hg-plansum__title')).toHaveCount(0);
+  await expect(page.locator('.hg-plansum__donut, .hg-plansum__legend')).toHaveCount(0);
   await axe(page);
 });
 
-test('W-01 e: 계획이 월급보다 많으면 “계획이 월급보다 150만 원 많아요”(오류 빨강), 줄이 있으면 막대·범례는 그대로', async ({
+test('W-01 e: 계획이 월급보다 많으면 “계획이 월급보다 150만 원 많아요”(오류 빨강), 줄이 있으면 도넛·범례는 그대로', async ({
   page,
 }) => {
   const db = await open(page);
@@ -62,7 +65,7 @@ test('W-01 e: 계획이 월급보다 많으면 “계획이 월급보다 150만 
     return c;
   });
   expect(color).toBe(danger);
-  await expect(page.locator('.hg-plansum__bar')).toBeVisible();
+  await expect(page.locator('.hg-plansum__donut')).toBeVisible();
   await expect(page.locator('.hg-plansum__legend li')).toHaveCount(3);
   await axe(page);
 });

@@ -23,6 +23,8 @@ export interface ReceiptLine {
   note?: string;
   /** note 아래 진행 막대(4px, 140px, 그래픽이라 뜻은 note 글자로도. 2026-11-19 시안에서 글자는 note로 합침) */
   progress?: { percent: number };
+  /** 누르면 다른 화면으로 감(오른쪽 ›, 2026-11-26 W-01 저축·투자 줄 → W-10). 시트만 여는 줄은 없음 */
+  go?: boolean;
   /** 새로 만든 줄 잠깐 강조(2026-11-18, ‘동작 줄이기’면 없음) */
   fresh?: boolean;
 }
@@ -123,6 +125,7 @@ export function ReceiptRows({
                 )}
               </span>
               <span className="hg-receipt__amt">{l.amount}</span>
+              {l.go && !edit && <Icon name="chevron-right" size={16} className="hg-receipt__go" />}
             </>
           );
           return (

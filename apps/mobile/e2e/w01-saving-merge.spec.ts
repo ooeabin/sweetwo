@@ -38,7 +38,7 @@ test('옛 주소 넘김: /salary?view=plan(who·line 유지), /salary/split, /sa
   await expect(page.getByRole('heading', { name: '월급 계획 템플릿', level: 1 })).toBeVisible();
 });
 
-test('W-01 저축·투자 묶음: 줄마다 매달 금액 + 모은 금액 + 목표 금액 진행, 줄 → W-10', async ({
+test('W-01 저축·투자 묶음: 줄마다 매달 금액 + 모은 금액 + 목표 금액 진행(0%면 막대 없음), 줄 › → W-10', async ({
   page,
 }) => {
   await open(page);
@@ -54,7 +54,10 @@ test('W-01 저축·투자 묶음: 줄마다 매달 금액 + 모은 금액 + 목�
   const sub = group.getByRole('button', { name: /^청약/ });
   await expect(sub).not.toContainText('모은 금액');
   await expect(sub).not.toContainText('목표 금액');
-  await expect(group.locator('.hg-receipt__progbar')).toHaveCount(1);
+  // 2026-11-26 사용자 결정: 목표 진행이 0%면 막대를 그리지 않음(보조 줄 “목표 금액 …”은 그대로)
+  await expect(group.locator('.hg-receipt__progbar')).toHaveCount(0);
+  // W-10으로 가는 줄은 금액 오른쪽 ›
+  await expect(home.locator('.hg-receipt__go')).toBeVisible();
   await axe(page);
   await home.click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h$/);

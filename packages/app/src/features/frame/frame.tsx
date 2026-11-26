@@ -9,7 +9,7 @@ import {
 } from '@sweetwo/ui';
 import { isSaving, subscribeSaving, touchApp } from '@sweetwo/api';
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { create } from 'zustand';
 import { track } from '../../shared/analytics';
@@ -94,6 +94,8 @@ export function MainFrame(
      * 없으면 홈으로
      */
     onBack?: () => void;
+    /** 좁은 창 머리 오른쪽 동작 하나(AppFrame narrowAction, 2026-11-26 W-01 ‘편집’) */
+    narrowAction?: ReactNode;
   },
 ) {
   const nav = useNavigate();
@@ -289,6 +291,7 @@ export function MainFrame(
         onMenu={() => setMenu(true)}
         menuOpen={menu}
         onHome={p.onBack ?? goHome}
+        narrowAction={p.narrowAction}
         hasNewNoti={!!unread.data}
         onNoti={() => (narrow ? nav('/notifications') : panel.set(!panel.open))}
         onSettings={() => nav('/settings')}

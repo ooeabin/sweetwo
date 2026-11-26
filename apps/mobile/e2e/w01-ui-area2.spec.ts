@@ -126,7 +126,7 @@ test('편집 모드 지우기는 회색 아이콘 버튼(44px, “{이름} 지�
   page,
 }) => {
   await open(page, '/salary/plan');
-  await page.getByRole('button', { name: '편집하기' }).click();
+  await page.getByRole('button', { name: '편집', exact: true }).click();
   const del = page.getByRole('button', { name: '고정지출 지우기', exact: true });
   await expect(del).toBeVisible();
   await expect(del).not.toHaveText(/지우기/);

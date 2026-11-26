@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (7e2136a). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (289746b2). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 /* 2026-11-24 구역 5 설정 검토: 사용자 앱 글자 바탕값 15/22. 클래스 없는 b·p·li가 브라우저 기본 16px로 나오던 것(기준 17/15 밖). 어드민·웹사이트는 data-platform이 없어 그대로 */
@@ -3189,6 +3189,60 @@ button.hg-datepill { cursor: pointer; }
   .hg-body:has(> .hg-body__col:first-child > .hg-noti--page:first-child) { padding-top: 0; }
   .hg-noti--page .hg-noti__head { margin-inline: calc(var(--space-6) * -1); padding: 0 var(--space-4); }
   .hg-noti--page .hg-noti__head > .hg-back { margin-left: -8px; }
-  .hg-noti--page .hg-noti__head > .hg-btn { margin-right: -8px; padding-inline: var(--space-4); min-height: 44px; font: var(--text-note); color: var(--ink-2); }
-  .hg-noti--page .hg-noti__head > .hg-btn:disabled { color: var(--muted); }
+  /* ‘모두 읽음’ 글자·자리는 아래 ‘머리 오른쪽 글자 동작’(hg-headaction) 공통 규칙 */
+}
+
+/* ── W-01 월급 계획 템플릿 다듬기(2026-11-26 사용자 결정, 토스 ‘내 소비’ 레퍼런스) ──
+   묶음 머리: 작은 이름(15 slate) 위 + 큰 합계(22/700 ink) 아래. 머리 아래 첫 줄까지 8.
+   ⋯는 누르는 칸 44x44, 큰 합계 줄(30)과 세로 가운데(머리 아래 끝 맞춤 + 아래 −7), 아이콘(20) 오른쪽 끝 = 본문 끝(−12).
+   줄: 이름과 보조 줄 사이 2(위아래 안쪽 12 그대로). PlanCard는 W-01만, ‘+ … 추가’(PlanAdd)는 W-20b도 같음.
+   ‘+ … 추가’: 회색 판 버튼 대신 목록 한 줄. 높이 48, 회색 원 32(왼쪽 = 본문 시작) 안 + 16, 원과 글자 사이 12, 글자 15 ink-2, 아래 묶음 끝까지 8.
+   저축·투자 줄 → W-10은 금액 오른쪽 ›(stone 16, 금액과 4). 사용자 앱만 */
+.hg-plancard__head { align-items: flex-end; min-height: 0; padding-bottom: var(--space-2); }
+.hg-plancard__headl { flex-direction: column; align-items: flex-start; gap: 0; }
+.hg-plancard__title { font: var(--text-value); color: var(--slate); }
+.hg-plancard__sum { font: var(--text-amount-lg); color: var(--ink); }
+.hg-plancard__head > :last-child:not(.hg-plancard__headl) { flex: none; margin: 0 -12px -7px 0; }
+.hg-plancard__head > :last-child:not(.hg-plancard__headl) > .hg-iconbtn { width: 44px; height: 44px; }
+.hg-plancard .hg-receipt__note { margin-top: 2px; }
+.hg-plan__block:not(.hg-plan__block--soft) { position: relative; justify-content: flex-start; gap: 0; height: 48px; margin: 0 0 var(--space-2); padding: 0; border-radius: 0; background: none; font: var(--text-value); color: var(--ink-2); }
+.hg-plan__block:not(.hg-plan__block--soft)::before { content: ""; position: absolute; left: 0; top: 50%; width: 32px; height: 32px; margin-top: -16px; border-radius: var(--radius-full); background: var(--surface-alt); }
+.hg-plan__block:not(.hg-plan__block--soft) .hg-addtext { position: relative; gap: var(--space-5); }
+.hg-plan__block:not(.hg-plan__block--soft) .hg-plusic { margin-left: var(--space-2); color: var(--slate); }
+.hg-plancard > * + .hg-plan__block:not(.hg-plan__block--soft) { margin-top: 0; }
+.hg-receipt__name { flex: 1; }
+.hg-receipt__go { flex: none; align-self: flex-start; margin: 4px 0 0 calc(var(--space-2) * -1); color: var(--stone); }
+.hg-receipt__main:not(:has(.hg-receipt__note)) .hg-receipt__go { align-self: center; margin-top: 0; }
+/* W-01 요약 도넛(2026-11-26 사용자 결정, 카카오페이 자산 구성형, 예전 알약 막대 + 아래 범례를 대체): 굵은 문장 아래 24에 한 줄.
+   왼쪽 도넛 SVG 지름 112(viewBox 42, r 13 + 선 14 → 구멍 지름 약 30%, 가운데 글자 없음, 틈 없음, 0% 조각 없음), 오른쪽 20 띄워 범례 세 줄.
+   범례 줄: 점 8 + 이름 15/400 ink-2 + 한 칸 + 퍼센트 15/400 slate(안 꺾임) + 오른쪽 금액 15/700 ink. 모자람은 미계획 금액 − 빨강.
+   조각 색: 저축·투자 brand, 지출 chart-spend(라이트 코코아, 다크 밝은 회색), 미계획 bar-track. 태블릿도 같은 배치(가운데 열 480) */
+.hg-plansum__chart { display: flex; align-items: center; gap: var(--space-5); margin-top: var(--gap-box-in); }
+.hg-plansum__donut { display: block; flex: 0 1 112px; min-width: 96px; height: auto; aspect-ratio: 1; }  /* 범례가 길면(일곱 자리 금액 “1,830,000원” + “저축·투자 46%”) 375에서 범례를 한 줄로 두려고 도넛이 96까지 줄어듦 */
+.hg-plansum__slice { fill: none; stroke-width: 14; }
+.hg-plansum__slice--saving { stroke: var(--brand); }
+.hg-plansum__slice--spend { stroke: var(--chart-spend); }
+.hg-plansum__slice--free { stroke: var(--bar-track); }
+.hg-plansum__chart .hg-plansum__legend { flex: 1 0 auto; max-width: calc(100% - 116px); gap: var(--space-3); }
+.hg-plansum__chart .hg-plansum__legend li { gap: 0; font: var(--text-value); white-space: nowrap; }
+.hg-plansum__chart .hg-plansum__lname { flex: 1; min-width: 0; color: var(--ink-2); white-space: nowrap; }
+.hg-plansum__lpct { font: var(--text-note); color: var(--slate); }  /* 2026-11-26 사용자 결정: 퍼센트는 13/400 slate로 작게, 이름(15)과 같은 줄 기준선 */
+.hg-plansum__chart .hg-plansum__lamt { flex: none; margin-left: var(--space-2); font-weight: 700; color: var(--ink); }
+.hg-plansum__chart .hg-plansum__legend li.is-short .hg-plansum__lamt { color: var(--danger); }
+.hg-plansum__dot.hg-plansum__seg--spend { background: var(--chart-spend); }
+/* 요약 연필(2026-11-26 사용자 결정 ‘토스형’, 토스 상세 내역): 큰 금액 옆·합쳐서 사람 줄 연필 18px, 옅게. muted는 흰·다크 바탕에서 3:1이 안 돼(2.5·2.7) 그래픽 3:1을 넘는 stone. 누르는 칸은 금액 버튼 그대로(44 이상) */
+.hg-plansum__pen.hg-ico { width: 18px; height: 18px; color: var(--stone); }  /* Icon 크기 단계(16·20·24) 밖이라 CSS로 */
+/* 범례 줄은 어떤 너비에서도 한 줄(2026-11-26 사용자 결정). 금액이 길어도(“1,830,000원” 표기 대비) 375에서 도넛 왼쪽 + 범례 오른쪽 한 줄(도넛이 112→96까지 줄어 자리를 내줌).
+   360 미만(320)은 도넛을 위 가운데(112), 범례를 그 아래 전체 너비로 */
+@media (max-width: 359px) {
+  .hg-plansum__chart { flex-direction: column; align-items: center; gap: var(--space-5); }
+  .hg-plansum__donut { flex: none; width: 112px; }
+  .hg-plansum__chart .hg-plansum__legend { flex: none; align-self: stretch; max-width: none; }
+}
+/* 머리 오른쪽 글자 동작(2026-11-26 사용자 결정, hg-headaction): 좁은 창 앱 머리(W-01 ‘편집’)와 N-02 머리(‘모두 읽음’)가 한 규칙.
+   글자 13/400 ink-2(꺼짐 muted), 누르는 칸 높이 44, 글자 끝 = 화면 오른쪽 24(본문 끝: 머리 옆 16 + 안쪽 16 − 8). 넓은 창은 제목 줄 글자 버튼 그대로 */
+@media (max-width: 767px) {
+  .hg-frame__mhead--back .hg-mhead__action { grid-column: 3; justify-self: end; display: flex; align-items: center; }
+  :is(.hg-frame__mhead--back .hg-mhead__action, .hg-noti--page .hg-noti__head) > .hg-btn.hg-headaction { height: auto; min-height: 44px; margin: 0 -8px 0 0; padding: 0 var(--space-4); border: 0; background: transparent; font: var(--text-note); color: var(--ink-2); }
+  :is(.hg-frame__mhead--back .hg-mhead__action, .hg-noti--page .hg-noti__head) > .hg-btn.hg-headaction:disabled { background: transparent; color: var(--muted); }
 }
