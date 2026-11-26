@@ -4397,6 +4397,10 @@ export type Database = {
       note_login: { Args: Record<PropertyKey, never>; Returns: boolean }
       note_mail_event: { Args: { p_email: string; p_kind: string }; Returns: number }
       noti_always_mail: { Args: { p_kind: string }; Returns: boolean }
+      noti_hidden_here: {
+        Args: { p_kind: string; p_target: string }
+        Returns: boolean
+      }
       noti_inapp_only: { Args: { p_kind: string }; Returns: boolean }
       noti_lock_generic: { Args: { p_kind: string }; Returns: boolean }
       noti_mail_body: {

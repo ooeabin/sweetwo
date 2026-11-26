@@ -120,6 +120,10 @@ export interface MemDb {
 }
 
 const eqId = (url: URL) => url.searchParams.get('id')?.replace(/^eq\./, '');
+/** 서버 noti_hidden_here(20270103090000): 링크가 지금 세션(my_sessions current)인 새 기기 알림 */
+const notiHiddenHere = (db: MemDb, r: Record<string, unknown>) =>
+  r.kind === 'new_device' &&
+  r.target === `/new-device/${String(db.sessions.find((x) => x.current)?.id ?? '')}`;
 
 /** PATCH·GET 조건(열=eq.값, 열=is.null)이 행과 맞는지(id·select·order·limit 빼고) */
 function matchesFilters(row: Record<string, unknown>, url: URL) {
@@ -1940,7 +1944,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
         const ids = (body().p_ids as string[] | undefined) ?? null;
         let n = 0;
         for (const r of db.notifications)
-          if (!r.read_at && (!ids || ids.includes(String(r.id)))) {
+          if (!r.read_at && (!ids || ids.includes(String(r.id))) && !notiHiddenHere(db, r)) {
             r.read_at = new Date().toISOString();
             n++;
           }
@@ -2951,15 +2955,18 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
     if (path === '/rest/v1/invite' && method === 'GET') return json(route, db.invites.slice(0, 1));
     // 알림: 최신순(같은 시각이면 id 내림차순), (만든 때, id) 커서(더 불러오기), id 하나, 읽지 않은 것 하나(점)
     if (path === '/rest/v1/notification') {
-      const rows = [...db.notifications].sort((a, b) =>
-        String(a.created_at) === String(b.created_at)
-          ? String(a.id) < String(b.id)
-            ? 1
-            : -1
-          : String(a.created_at) < String(b.created_at)
-            ? 1
-            : -1,
-      );
+      // 서버 RLS noti_hidden_here 흉내(2026-11-26): 지금 세션이 로그인한 그 기기의 새 기기 알림은 안 보임
+      const rows = db.notifications
+        .filter((r) => !notiHiddenHere(db, r))
+        .sort((a, b) =>
+          String(a.created_at) === String(b.created_at)
+            ? String(a.id) < String(b.id)
+              ? 1
+              : -1
+            : String(a.created_at) < String(b.created_at)
+              ? 1
+              : -1,
+        );
       if (method === 'GET') {
         if (url.searchParams.get('read_at') === 'is.null')
           return json(route, rows.filter((r) => !r.read_at).slice(0, 1));
