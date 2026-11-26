@@ -16,13 +16,13 @@ export function PlanStage({ children, label }: { children: ReactNode; label?: st
   );
 }
 
-/** 도넛 조각·범례 점 종류: 저축·투자 brand, 지출 chart-spend, 미계획 bar-track */
+/** 도넛 조각·범례 점 종류: 저축·투자 chart-save, 지출 chart-spend(그래프 전용 초록, 2026-11-26), 미계획 bar-track */
 export type PlanPartKind = 'saving' | 'spend' | 'free';
 
 /**
- * 요약 도넛(2026-11-26 사용자 결정, 카카오페이 자산 구성형): 굵은 파이형 고리(구멍 지름 약 30%), 가운데 글자 없음,
+ * 요약 도넛(2026-11-26 사용자 결정 ‘W-01 도넛 그린 L1 + 세로 목록’): 굵은 파이형 고리(구멍 지름 약 30%), 가운데 글자 없음,
  * 12시부터 시계 방향으로 받은 순서(저축·투자 → 지출 → 미계획), 조각 사이 틈 없음, 0%는 그리지 않음.
- * 크기는 CSS(.hg-plansum__donut, 좁은 창 112px). 그래픽이라 뜻은 화면 읽기 이름과 범례 글자로 전함
+ * 크기는 CSS(.hg-plansum__donut, 가운데 지름 140px). 그래픽이라 뜻은 화면 읽기 이름과 범례 글자로 전함
  */
 export function PlanDonut({
   parts,
@@ -107,8 +107,8 @@ export function PlanSummary({
   /** 도넛 화면 읽기 이름(“저축·투자 40%, 지출 52%, 미계획 8%”) */
   barLabel?: string;
   /**
-   * 범례 줄(2026-11-26 ‘W-01 정리 A안’: 금액 없음). 이름 뒤 회색 13 한 값: percent(저축·투자·지출, 금액 가리기에도 그대로)
-   * 또는 amount(미계획: 퍼센트 대신 금액 “0원”, short면 “−300,000원” danger)
+   * 범례 줄(2026-11-26 ‘W-01 도넛 그린 L1 + 세로 목록’: 도넛 아래 전체 폭 세로 목록, 줄 높이 40). 이름 15/400 왼쪽 + 오른쪽 값 15/700:
+   * percent(저축·투자·지출, 금액 가리기에도 그대로) 또는 amount(미계획: 퍼센트 대신 금액 “0원”, short면 “−300,000원” danger)
    */
   legend?: {
     kind: PlanPartKind;
@@ -201,7 +201,7 @@ export function PlanSummary({
             <div className="hg-plansum__chart">
               {bar && <PlanDonut parts={bar} label={barLabel} />}
               {legend && legend.length > 0 && (
-                <ul className="hg-plansum__legend">
+                <ul className="hg-plansum__legend" role="list">
                   {legend.map((l) => (
                     <li key={l.kind} className={cx(l.short && 'is-short')}>
                       <i

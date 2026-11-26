@@ -43,6 +43,7 @@ type Tokens = Record<
   | 'hairline'
   | 'hairlineSoft'
   | 'spend'
+  | 'chartSave'
   | 'chartSpend'
   | 'accent'
   | 'accentSoft'
@@ -76,6 +77,7 @@ function readTokens(): Tokens {
     hairlineSoft: v('--hairline-soft'),
     // 지출 칸(2026-11-12 S5-15, 다크는 hairline보다 한 단계 밝게)
     spend: v('--spend'),
+    chartSave: v('--chart-save'),
     chartSpend: v('--chart-spend'),
     accent: v('--accent-app'),
     accentSoft: v('--accent-app-soft'),
@@ -339,7 +341,7 @@ export interface PlanImageModel {
   /** 카드 위 이름표 “월급” */
   label: string;
   amount: string;
-  /** 굵은 한 문장. pct가 있으면 앞·뒤 글자 사이에 퍼센트를 accent-app-text로 */
+  /** 굵은 한 문장. pct가 있으면 앞·뒤 글자 사이에 퍼센트를 chart-save 초록으로(2026-11-26) */
   sentence: { before: string; pct?: string; after: string };
   /** 도넛·범례를 그림(월급 0원이거나 줄이 없으면 false) */
   chart: boolean;
@@ -410,9 +412,9 @@ function layoutPlan(
     ctx.roundRect(x0, top, x1 - x0, bottom - top, CARD_R);
     ctx.fill();
   };
-  // 2026-11-26: 지출 조각은 chart-spend(라이트 코코아), 화면 도넛과 같은 토큰
+  // 2026-11-26 ‘W-01 도넛 그린’: 저축·투자 chart-save, 지출 chart-spend(그래프 전용 초록), 화면 도넛과 같은 토큰
   const color = (k: 'saving' | 'spend' | 'free') =>
-    k === 'saving' ? t.accent : k === 'spend' ? t.chartSpend : t.barTrack;
+    k === 'saving' ? t.chartSave : k === 'spend' ? t.chartSpend : t.barTrack;
 
   // ── 요약 카드 ──
   let y = PAD;
@@ -427,7 +429,7 @@ function layoutPlan(
     yy += 20 + 4;
     put(m.amount, left, yy + 19, { weight: 700, size: 30, color: t.ink });
     yy += 38 + 12;
-    // 굵은 한 문장(숫자만 accent-app-text). 너무 길면 글자 크기를 줄임
+    // 굵은 한 문장(숫자만 chart-save 초록, 2026-11-26 화면과 같음). 너무 길면 글자 크기를 줄임
     const full = `${m.sentence.before}${m.sentence.pct ?? ''}${m.sentence.after}`;
     let size = 20;
     ctx.font = font(700, size);
@@ -439,7 +441,7 @@ function layoutPlan(
       let x = left;
       const parts: [string, string][] = [
         [m.sentence.before, t.ink],
-        ...(m.sentence.pct ? ([[m.sentence.pct, t.accentText]] as [string, string][]) : []),
+        ...(m.sentence.pct ? ([[m.sentence.pct, t.chartSave]] as [string, string][]) : []),
         [m.sentence.after, t.ink],
       ];
       for (const [str, c] of parts) {

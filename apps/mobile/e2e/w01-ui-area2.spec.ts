@@ -107,14 +107,16 @@ test('새 항목 강조: ‘동작 줄이기’면 전환 없이 오렌지 글�
   expect(ink).not.toBe(orange);
 });
 
-test('요약 문장의 퍼센트는 accent-app-text 오렌지(brand-ink 아님)', async ({ page }) => {
+test('요약 문장의 퍼센트는 도넛 저축·투자와 같은 chart-save 초록(2026-11-26, 오렌지 아님)', async ({
+  page,
+}) => {
   await open(page, '/salary/plan');
   const r = await page.locator('.hg-plansum__title em').evaluate((el) => {
     const probe = document.createElement('i');
     document.body.append(probe);
-    probe.style.color = 'var(--accent-app-text)';
+    probe.style.color = 'var(--chart-save)';
     const a = getComputedStyle(probe).color;
-    probe.style.color = 'var(--brand-ink)';
+    probe.style.color = 'var(--accent-app-text)';
     const b = getComputedStyle(probe).color;
     probe.remove();
     return { c: getComputedStyle(el).color, a, b };

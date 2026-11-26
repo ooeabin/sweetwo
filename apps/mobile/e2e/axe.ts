@@ -16,7 +16,6 @@ const ORANGE_TEXT = [
   '.hg-form__val', // 한 화면 입력 요약 문장의 금액(22px 700, 2026-11-23 사용자 결정: 이름은 ink, 금액 자리만 오렌지)
   '.hg-payday__chip.is-on, .hg-payday__custom.is-on', // 월급날 고르기 고른 칩·직접 입력한 숫자의 오렌지 글자(PaydayPicker, 2026-11-25 사용자 결정 A안, 17px 700 짧은 말)
   '.hg-chip--sm.is-selected', // 고른 작은 칩의 오렌지 글자(S-20 묶음 칩, 기간·필터 칩, 2026-11-20 사용자 결정, 13px 600)
-  '.hg-plansum__title em', // W-01 요약 문장 “월급의 31%를 모으고 있어요”의 퍼센트(2026-11-23 사용자 결정, 20px 700)
   '.hg-receipt__row.is-new', // W-01 새 항목 강조 2초 동안 이름·금액 글자(2026-11-23, 16px 600·700)
   '.hg-badge--brand, .hg-badge--done', // 옅은 오렌지 판 위 배지의 오렌지 글자(2026-11-23 사용자 결정, 2026-11-24부터 13px 700. 달성 배지는 BRAND_FILL)
   '.hg-celebrate__eyebrow', // 축하 머리글(W-12, O-60, P-10, 2026-11-23 사용자 결정, 14px 600)
