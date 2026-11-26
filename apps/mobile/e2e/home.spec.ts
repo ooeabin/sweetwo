@@ -69,8 +69,9 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   await expect(first).toHaveAccessibleName(
     '같이 모으기, 내 집 마련, 0원, 목표 금액의 0%, 2031년 10월까지 150,000,000원 더 필요해요',
   );
-  // 보조 줄은 한 줄(2026-11-20): 목표 금액이 있으면 “0%, 1억 5,000만 원 중”
-  await expect(first.locator('.hg-together__line')).toHaveText(['0%, 150,000,000원 중']);
+  // 2026-11-26 C안: 막대·보조 줄 없이 문장 한 줄 “목표까지 n원 남았어요”
+  await expect(first.locator('.hg-together__say')).toHaveText('목표까지 150,000,000원 남았어요');
+  await expect(first.locator('.hg-together__bar, .hg-together__line')).toHaveCount(0);
   await expect(h.locator('.hg-together__slide')).toHaveCount(2);
   // 2026-11-18 누를 수 없는 정보 상자: 칸은 버튼이 아니고 ‘모두 보기’ 칸도 없음
   await expect(h.getByRole('button')).toHaveCount(0);
@@ -117,9 +118,9 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
   await page.goto('/');
   await expect(monthLine(page)).toContainText('계획대로 됐어요');
-  // 체크한 저금 줄이 모은 금액에. 보조 줄은 한 줄이라 목표 금액이 있으면 ‘이번 달 +’ 대신 “0%, … 중”(2026-11-20)
-  await expect(first).toContainText('950,000원');
-  await expect(first.locator('.hg-together__line')).toHaveText(['0%, 150,000,000원 중']);
+  // 체크한 저금 줄이 모은 금액에. 목표 금액이 있으면 ‘이번 달 +’ 대신 남은 금액 문장(2026-11-26 C안)
+  await expect(first.locator('.hg-together__amount')).toHaveText('950,000원');
+  await expect(first.locator('.hg-together__say')).toHaveText('목표까지 149,050,000원 남았어요');
 });
 
 test('홈 상자 → 화면: 월급 줄마다 W-02·W-01, 캘린더, 자산 관리(같이 모으기 H-10은 누를 수 없음, 2026-11-18)', async ({
@@ -531,7 +532,7 @@ test('띠 8번 생활비 나누기(각자 + 생활비 ‘네’): 글자 버튼 
   await expect(band(page)).toHaveCount(0);
 });
 
-test('각자 계열 묶음(찬우·예빈): 묶음이 맨 앞, 합계 + 둘 다 켰을 때만 각자 금액, 퍼센트만이면 % 하나', async ({
+test('각자 계열 묶음(찬우·예빈): 묶음이 맨 앞, 합계 + 문장 한 줄(각자 금액 줄은 홈 칸에 없음, 2026-11-26 C안), 멈춤 문장, 퍼센트만이면 % 하나', async ({
   page,
 }) => {
   const bundle = {
@@ -565,10 +566,18 @@ test('각자 계열 묶음(찬우·예빈): 묶음이 맨 앞, 합계 + 둘 다 
   await expect(first).toHaveAccessibleName(
     '같이 모으기, 결혼 비용, 31,000,000원, 목표 금액의 62%, 2027년 5월까지 19,000,000원 더 필요해요',
   );
-  await expect(first).toContainText('찬우 21,000,000원, 예빈 10,000,000원');
-  // 큰 숫자는 묶음 합계라는 이름(2026-11-14 R4)
-  await expect(first).toContainText('둘이 모은 금액');
+  // 2026-11-26 C안: 칸 = 이름표(묶음 이름) + 합계 + 문장 한 줄. 각자 금액 줄·“둘이 모은 금액” 줄은 칸에서 뺌(각자 금액은 W-10 묶음 카드)
+  await expect(first.locator('.hg-together__name')).toHaveText('결혼 비용');
+  await expect(first.locator('.hg-together__amount')).toHaveText('31,000,000원');
+  await expect(first.locator('.hg-together__say')).toHaveText('목표까지 19,000,000원 남았어요');
+  await expect(first).not.toContainText('찬우 21,000,000원');
+  await expect(first).not.toContainText('둘이 모은 금액');
   await axe(page);
+  // 해제 대기(멈춤): 문장은 “같이 모으기를 잠시 멈췄어요”
+  Object.assign(db.v22?.bundles[0] ?? {}, { paused: true });
+  await page.reload();
+  await expect(first.locator('.hg-together__say')).toHaveText('같이 모으기를 잠시 멈췄어요');
+  Object.assign(db.v22?.bundles[0] ?? {}, { paused: false });
   // 퍼센트만(G1)
   Object.assign(db.v22?.bundles[0] ?? {}, {
     percent_only: true,
@@ -580,8 +589,10 @@ test('각자 계열 묶음(찬우·예빈): 묶음이 맨 앞, 합계 + 둘 다 
   });
   await page.reload();
   await expect(first.locator('.hg-together__amount')).toHaveText('62%');
-  await expect(first).toContainText('2027년 5월까지');
-  await expect(first).not.toContainText('만 원');
+  // 퍼센트만: 금액 문장 대신 “목표 금액의 62%”, 기한(달만)은 화면 읽기에만
+  await expect(first.locator('.hg-together__say')).toHaveText('목표 금액의 62%');
+  await expect(first).toHaveAccessibleName('같이 모으기, 결혼 비용, 62%, 2027년 5월까지');
+  await expect(first).not.toContainText('원');
 });
 
 test('한 사람 관리형 관리하지 않는 쪽: 월급 상자 첫 줄 “자동으로 정해져요”, W-01 보내기 줄은 자물쇠 + “월급 − 용돈”', async ({

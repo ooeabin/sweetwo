@@ -8,6 +8,11 @@ import { cx } from './cx';
 // 2026-11-18: 누를 수 없는 정보 상자(칸은 div, onClick 없음, ‘모두 보기’ 칸 없음). 같이 모으기가 0개면 홈이 상자를 그리지 않음.
 // 2026-11-26 사용자 결정: 홈 칸 왼쪽 자리는 그 저축·투자의 그림(`art`, 파일이 없으면 칸째 없음), 사람 원은 머리 제목 오른쪽
 // 작은 겹친 Avatar(`owners`, 지금 보이는 칸 기준). W-10 묶음 카드(머리 없음)는 `people`을 칸 안에 그대로.
+// 2026-11-26 사용자 결정 ‘같이 모으기 C안’(홈 H-10, `variant="sentence"`): 막대·보조 줄 없이 칸 = 그림 + 이름표 13 slate
+// → 4 → 금액 22/700 → 8 → 문장 한 줄 15/400 ink(`say`, 강조 금액만 accent-app-text 700). W-10 묶음 카드는 그대로.
+
+/** C안 문장 한 줄. 글자 하나, 또는 가운데 금액만 강조(“목표까지 {em} 남았어요”) */
+export type SaveTogetherSay = string | { lead: string; em: string; tail: string };
 
 export interface SaveTogetherSlideProps {
   /** 이름 왼쪽 겹친 Avatar(hg-avatars). W-10 묶음 카드(머리 없음)만, 홈은 머리 `owners` */
@@ -26,6 +31,8 @@ export interface SaveTogetherSlideProps {
   /** 해제 대기: 막대를 slate로 */
   paused?: boolean;
   percentOnly?: boolean;
+  /** C안 문장 한 줄(홈 H-10, `variant="sentence"`일 때만 그림. 없으면 문장 줄 없음) */
+  say?: SaveTogetherSay;
   /** 화면 읽기 문장 하나 */
   label: string;
   /** 없으면 누를 수 없는 칸(2026-11-18 H-10은 정보 상자) */
@@ -42,16 +49,42 @@ export function SaveTogetherSlide({
   done,
   paused,
   percentOnly,
+  say,
   label,
   onClick,
-}: SaveTogetherSlideProps) {
+  sentence,
+}: SaveTogetherSlideProps & {
+  /** C안 문장형(SaveTogether `variant="sentence"`가 넘김) */
+  sentence?: boolean;
+}) {
   const cls = cx(
     'hg-together__slide',
     !onClick && 'hg-together__slide--info',
     paused && 'hg-together--paused',
     percentOnly && 'hg-together--percent',
   );
-  const inner = (
+  const inner = sentence ? (
+    <>
+      {art}
+      <span className="hg-together__body">
+        <span className="hg-together__name">{name}</span>
+        <span className="hg-together__amount">{amount}</span>
+        {say !== undefined && (
+          <span className="hg-together__say">
+            {typeof say === 'string' ? (
+              say
+            ) : (
+              <>
+                {say.lead}
+                <strong className="hg-together__em">{say.em}</strong>
+                {say.tail}
+              </>
+            )}
+          </span>
+        )}
+      </span>
+    </>
+  ) : (
     <>
       <span className="hg-together__people">
         {art}
@@ -90,6 +123,7 @@ export function SaveTogether({
   moneyIn,
   label,
   className,
+  variant,
 }: {
   title: string;
   /** 머리 오른쪽(D-day 알약 또는 글자 버튼 “결혼식 날짜 알려 주기”) */
@@ -101,13 +135,18 @@ export function SaveTogether({
   /** 묶음 이름(화면 읽기) */
   label: string;
   className?: string;
+  /** 'sentence' = 홈 H-10 C안(2026-11-26): 막대·보조 줄 없이 이름표 + 금액 + 문장 한 줄 */
+  variant?: 'sentence';
 }) {
   const track = useRef<HTMLDivElement>(null);
   const [at, setAt] = useState(0);
   const count = slides.length;
   const owners = slides[Math.min(at, count - 1)]?.owners;
   return (
-    <section className={cx('hg-together', className)} aria-label={label}>
+    <section
+      className={cx('hg-together', variant === 'sentence' && 'hg-together--sentence', className)}
+      aria-label={label}
+    >
       <div className="hg-together__head">
         <span className="hg-together__titlerow">
           <h2 className="hg-together__title">{title}</h2>
@@ -126,7 +165,7 @@ export function SaveTogether({
         }}
       >
         {slides.map((s, i) => (
-          <SaveTogetherSlide key={i} {...s} />
+          <SaveTogetherSlide key={i} {...s} sentence={variant === 'sentence'} />
         ))}
       </div>
       {count > 1 && (
