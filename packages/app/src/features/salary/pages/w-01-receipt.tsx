@@ -694,7 +694,7 @@ export function W01Receipt() {
       ? { kind: 'free' as const, text: copy.legendShort(won(left)), short: true }
       : { kind: 'free' as const, text: copy.legendFree(ratio.free) },
   ];
-  // 공유 이미지(2026-11-19, 2026-11-26 도넛): W-01 요약 카드 모양(월급, 한 문장, 도넛 + ● 범례) + 저축·투자·지출 줄 목록 + 워드마크.
+  // 공유 이미지(2026-11-19, 2026-11-26 화면과 같은 가운데 도넛 + 아래 세로 목록): W-01 요약 카드 모양(월급, 한 문장, 도넛 + ● 범례) + 저축·투자·지출 줄 목록 + 워드마크.
   // 금액 가리기·공개 범위는 화면과 같은 값(won, nameOf)을 그대로 씀
   // 저축·투자 줄 보조 줄은 화면과 같은 글(“모은 금액 1,140만 원, 목표 금액의 22%”, 금액 가리기 포함): rowsOf의 note
   const share = async () => {
@@ -704,33 +704,33 @@ export function W01Receipt() {
     const model: PlanImageModel = {
       label: copy.incomeRow,
       amount: won(income),
+      // 2026-11-26 화면과 같은 문장: 퍼센트만 700 chart-save, 넘친 금액만 danger(나머지 ink)
       sentence: summary.empty
-        ? { before: `${copy.summaryEmpty[0]} ${copy.summaryEmpty[1]}`, after: '' }
+        ? [{ text: `${copy.summaryEmpty[0]} ${copy.summaryEmpty[1]}` }]
         : summary.over
-          ? { before: `${copy.overPlan[0]}${won(-summary.left)}${copy.overPlan[1]}`, after: '' }
+          ? [
+              { text: copy.overPlan[0] },
+              { text: won(-summary.left), tone: 'over' },
+              { text: copy.overPlan[1] },
+            ]
           : summary.noSaving
-            ? { before: copy.summaryNoSaving, after: '' }
-            : {
-                before: copy.summarySaving[0],
-                pct: copy.summaryPct(summary.share),
-                after: copy.summarySaving[1],
-              },
+            ? [{ text: copy.summaryNoSaving }]
+            : [
+                { text: copy.summarySaving[0] },
+                { text: copy.summaryPct(summary.share), tone: 'save' },
+                { text: copy.summarySaving[1] },
+              ],
       chart: summary.chart,
       bar: [
         { kind: 'saving', percent: summary.bar.saving },
         { kind: 'spend', percent: summary.bar.spend },
         { kind: 'free', percent: summary.bar.free },
       ],
+      // 2026-11-26 화면과 같은 범례: 금액 열 없이 오른쪽 값 하나(저축·투자·지출 퍼센트, 미계획은 금액, 넘치면 금액만 danger)
       legend: [
-        { kind: 'saving', name: copy.savingGroup, percent: ratio.saving, amount: won(savingSum) },
-        { kind: 'spend', name: copy.spendGroup, percent: ratio.spend, amount: won(spendSum) },
-        {
-          kind: 'free',
-          name: copy.legendFreeName,
-          percent: ratio.free ?? undefined,
-          amount: won(left),
-          short: summary.over,
-        },
+        { kind: 'saving', name: copy.savingGroup, value: `${ratio.saving}%` },
+        { kind: 'spend', name: copy.spendGroup, value: `${ratio.spend}%` },
+        { kind: 'free', name: copy.legendFreeName, value: won(left), short: summary.over },
       ],
       sections: [
         { title: copy.savingGroup, subtotal: won(savingSum), ls: savingLines },

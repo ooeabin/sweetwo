@@ -923,4 +923,9 @@ test('공유 이미지: 저축·투자 줄 보조 줄이 화면과 같은 글(�
   await dl;
   const drawn = await page.evaluate(() => (window as unknown as { __drawn: string[] }).__drawn);
   expect(drawn).toContain(note);
+  // 2026-11-26 요약은 화면과 같은 세로 목록 범례: 이름 + 오른쪽 값(퍼센트, 미계획은 금액), 범례 금액 열은 없음
+  expect(drawn).toEqual(
+    expect.arrayContaining(['저축·투자', '40%', '지출', '60%', '미계획', '0원']),
+  );
+  expect(drawn.filter((t) => t === '1,390,000원')).toHaveLength(1); // 묶음 머리 합계만(범례 금액 없음)
 });
