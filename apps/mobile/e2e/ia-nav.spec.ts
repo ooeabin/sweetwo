@@ -47,3 +47,38 @@ test('알림 화면 제목은 h1, 알림 설정에서 ‹는 알림으로, 설�
   await page.goto('/settings');
   await expect(page.getByRole('button', { name: /^내 정보/ })).toBeVisible();
 });
+
+test('머리 B안(2026-11-26): ‹는 Regular 선·같은 자리, 제목 17/500, N-02 ‘모두 읽음’ 글자 끝은 화면 오른쪽 24', async ({
+  page,
+}, info) => {
+  test.skip(info.project.name !== 'narrow', '좁은 창 머리');
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  const icoX = async () => {
+    const ico = page.locator('.hg-back:visible > .hg-ico').first();
+    return (await ico.boundingBox())?.x;
+  };
+  await page.goto('/salary/plan');
+  const title = page.getByRole('heading', { level: 1, name: '월급 계획 템플릿' });
+  await expect(title).toBeVisible();
+  expect(await title.evaluate((e) => getComputedStyle(e).fontWeight)).toBe('500');
+  const backMask = await page
+    .locator('.hg-back:visible > .hg-ico')
+    .first()
+    .evaluate((e) => getComputedStyle(e).getPropertyValue('--ico'));
+  expect(backMask).toContain('M165.66'); // Phosphor Regular caret-left
+  const x1 = await icoX();
+
+  await page.goto('/notifications');
+  const noti = page.getByRole('heading', { level: 1, name: '알림' });
+  await expect(noti).toBeVisible();
+  expect(await noti.evaluate((e) => getComputedStyle(e).fontWeight)).toBe('500');
+  expect(await icoX()).toBe(x1);
+  const all = page.getByRole('button', { name: '모두 읽음' });
+  const end = await all.evaluate((e) => {
+    const r = e.getBoundingClientRect();
+    return Math.round(r.right - parseFloat(getComputedStyle(e).paddingRight));
+  });
+  expect(end).toBe((page.viewportSize()?.width ?? 0) - 24);
+});

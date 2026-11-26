@@ -6,6 +6,7 @@
 
 - 모든 뒤로 꺾쇠를 하나로: 로그인(A-02 `hg-auth__back`), 앱 틀 ‹ 홈으로(`hg-mhead__back`), PageHeader(`hg-pagehead__icon`), 질문 화면(`hg-q__back`, ChapterBar), 좁은 창 알림 화면.
 - 40×40px 누르는 자리(테두리·바탕 없음, 누르면 `surface-alt`), Phosphor `chevron-left` 24px `ink`, 포커스 링 `focus-ring`.
+- 꺾쇠 선(2026-11-26 사용자 결정 ‘머리 B안’): `hg-back` 안의 `chevron-left`만 Phosphor **Regular**(굵기 16/256, 24px에서 1.5px). 다른 아이콘은 Bold 그대로. `bundle.css` ‘머리 B안’ 묶음.
 - 좁은 창에서 아이콘 칸 왼쪽 = 화면 왼쪽 16px(누르는 자리는 8px부터). 넓은 창의 글자 뒤로(“‹ 이전”, “‹ 설정”)는 그대로.
 
 - 소비자가 주는 것: 아이콘, `aria-label`(필수), 크기, 변형.
