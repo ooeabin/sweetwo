@@ -70,6 +70,12 @@ test('W-01 e: 계획이 월급보다 많으면 “계획이 월급보다 1,500,0
   expect(rest).not.toBe(danger);
   await expect(page.locator('.hg-plansum__donut')).toBeVisible();
   await expect(page.locator('.hg-plansum__legend li')).toHaveCount(3);
+  // 2026-11-26 그린 + 세로 목록: 넘치면 미계획 값(금액)만 danger
+  const freeVal = page.locator('.hg-plansum__legend li.is-short .hg-plansum__lpct');
+  await expect(freeVal).toHaveText('−1,500,000원');
+  expect(await freeVal.evaluate((el) => getComputedStyle(el).color)).toBe(danger);
+  const savePct = page.locator('.hg-plansum__legend li').first().locator('.hg-plansum__lpct');
+  expect(await savePct.evaluate((el) => getComputedStyle(el).color)).not.toBe(danger);
   await axe(page);
 });
 
