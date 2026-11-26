@@ -123,43 +123,42 @@ test('요약 문장의 퍼센트는 accent-app-text 오렌지(brand-ink 아님)'
   expect(r.c).not.toBe(r.b);
 });
 
-test('편집 모드 지우기는 회색 아이콘 버튼(44px, “{이름} 지우기”), 금액 줄 가운데·카드 오른쪽 끝', async ({
+test('순서 바꾸기(2026-11-26): 줄 지우기 버튼 없음, 머리 오른쪽 ‘완료’는 ⋯와 같은 자리·높이·글자 모양', async ({
   page,
 }) => {
   await open(page, '/salary/plan');
-  await planAction(page, '편집');
-  const del = page.getByRole('button', { name: '고정지출 지우기', exact: true });
-  await expect(del).toBeVisible();
-  await expect(del).not.toHaveText(/지우기/);
-  const r = await del.evaluate((el) => {
-    const b = el.getBoundingClientRect();
-    const row = el.closest('.hg-receipt__row') as HTMLElement;
-    const amt = row.querySelector('.hg-receipt__amt')?.getBoundingClientRect();
-    const card = el.closest('.hg-plancard')?.getBoundingClientRect();
-    const cs = getComputedStyle(el);
-    const ink2 = document.createElement('i');
-    document.body.append(ink2);
-    ink2.style.color = 'var(--ink-2)';
-    const g = getComputedStyle(ink2).color;
-    ink2.remove();
-    return {
-      w: b.width,
-      h: b.height,
-      cy: b.top + b.height / 2,
-      ay: amt ? amt.top + amt.height / 2 : 0,
-      right: b.right - 12,
-      cardRight: card?.right ?? 0,
-      color: cs.color,
-      g,
-      hasIcon: !!el.querySelector('.hg-ico--minus-circle'),
-    };
-  });
-  expect(r.w).toBeGreaterThanOrEqual(44);
-  expect(r.h).toBeGreaterThanOrEqual(44);
-  expect(r.color).toBe(r.g);
-  expect(r.hasIcon).toBe(true);
-  expect(Math.abs(r.cy - r.ay)).toBeLessThanOrEqual(2);
-  expect(r.right).toBeLessThanOrEqual(r.cardRight);
+  const narrow = (page.viewportSize()?.width ?? 1280) < 768;
+  const more = page.getByRole('button', { name: '더 보기', exact: true });
+  const mb = await more.boundingBox();
+  await planAction(page, '순서 바꾸기');
+  await expect(page.locator('.hg-receipt__del')).toHaveCount(0);
+  await expect(more).toHaveCount(0);
+  const done = page.getByRole('button', { name: '완료', exact: true });
+  await expect(done).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const db = await done.boundingBox();
+  if (!mb || !db) throw new Error('no box');
+  // 오른쪽 끝·세로 가운데·높이가 같아 버튼이 튀거나 옮겨지지 않음
+  expect(Math.round(db.x + db.width)).toBe(Math.round(mb.x + mb.width));
+  expect(Math.abs(db.y + db.height / 2 - (mb.y + mb.height / 2))).toBeLessThanOrEqual(1);
+  if (narrow) {
+    expect(Math.round(db.height)).toBe(Math.round(mb.height));
+    // 머리 오른쪽 글자 동작(hg-headaction): 15/400 ink-2, 글자 끝 = 화면 오른쪽 24
+    await expect(done).toHaveClass(/hg-headaction/);
+    await expect(done).toHaveCSS('font-size', '15px');
+    await expect(done).toHaveCSS('font-weight', '400');
+    const end = await done.evaluate((b) => {
+      const r = document.createRange();
+      r.selectNodeContents(b);
+      return Math.round(r.getBoundingClientRect().right);
+    });
+    expect(end).toBe((page.viewportSize()?.width ?? 0) - 24);
+  }
+  await done.click();
+  await expect(more).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const mb2 = await more.boundingBox();
+  expect(mb2).toEqual(mb);
 });
 
 test('금액 시트의 빨간 버튼은 “항목 지우기”', async ({ page }) => {

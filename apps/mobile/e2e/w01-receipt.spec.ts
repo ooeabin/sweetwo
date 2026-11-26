@@ -150,7 +150,7 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
   }
   await more.click();
   await expect(page.getByRole('menu', { name: '더 보기' }).getByRole('menuitem')).toHaveText([
-    '편집',
+    '순서 바꾸기',
     '통장 잔액과 맞추기',
     '수입 기록',
     '공유하기',
@@ -400,16 +400,16 @@ test('기본 줄 지우기 + 되돌리기(같은 자리), 저금 줄 지우기�
   await expect(page.getByRole('button', { name: '그만 모은 것 1개' })).toBeVisible();
 });
 
-test('편집 모드: 키보드 위·아래로 순서 → ‘완료’에서 한 번에 저장 + 되돌리기, 줄마다 지우기', async ({
+test('순서 바꾸기(2026-11-26, 예전 편집 모드): 키보드 위·아래로 순서 → 머리 ‘완료’에서 한 번에 저장 + 되돌리기, 줄 지우기 버튼 없음', async ({
   page,
 }) => {
   const { db, go } = await open(page);
   await go();
-  await planAction(page, '편집');
-  await expect(page.getByRole('heading', { name: '월급 계획 편집' })).toBeVisible();
+  await planAction(page, '순서 바꾸기');
   await expect(page.getByRole('link', { name: '이번 달 월급 체크' })).toHaveCount(0);
-  // 기본 줄도 지우기(마우스 기기는 늘 보임)
-  await expect(page.getByRole('button', { name: '고정지출 지우기' })).toBeVisible();
+  // 지우기는 줄 금액 시트 ‘항목 지우기’에서만
+  await expect(page.locator('.hg-receipt__del')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '고정지출 지우기' })).toHaveCount(0);
   await axe(page);
   // 용돈 줄은 지출 맨 위에 고정(2026-11-16 R4-3), 나머지 지출끼리 순서를 바꿈
   await expect(page.getByRole('button', { name: '용돈 위로' })).toHaveCount(0);
@@ -433,9 +433,9 @@ test('편집 모드: 키보드 위·아래로 순서 → ‘완료’에서 한 
   await page.goto('/salary'); // 2026-11-19 W-01 머리 링크 없앰
   await expect(page.locator('.hg-transfer__label').nth(2)).toHaveText('용돈');
   await page.goto('/salary/plan');
-  await planAction(page, '편집');
+  await planAction(page, '순서 바꾸기');
   await page.getByRole('button', { name: '완료' }).click();
-  expect(await planItems(page)).toContain('편집');
+  expect(await planItems(page)).toContain('순서 바꾸기');
 });
 
 test('파트너 탭(각자): 보기만(자물쇠), 편집·추가·추천값 없음, 공유는 있음', async ({ page }) => {
@@ -456,7 +456,7 @@ test('파트너 탭(각자): 보기만(자물쇠), 편집·추가·추천값 없
   expect(await planItems(page)).toEqual(['공유하기']);
   // 내 탭으로
   await page.getByRole('tab', { name: '찬우' }).click();
-  expect(await planItems(page)).toContain('편집');
+  expect(await planItems(page)).toContain('순서 바꾸기');
 });
 
 test('합쳐서: 두 사람 Avatar 겹침, 수입 합, 월급날 둘, 용돈 줄은 지울 수 없음', async ({
@@ -497,10 +497,13 @@ test('합쳐서: 두 사람 Avatar 겹침, 수입 합, 월급날 둘, 용돈 줄
   await expect(page.getByRole('button', { name: /예빈 월급/ })).toHaveCount(0);
   await expect(page.locator('.hg-plansum__person').nth(1)).toContainText('예빈 월급2,700,000원');
   expect(await names(page, '지출')).toEqual(['찬우 용돈', '예빈 용돈', '고정지출']);
-  await planAction(page, '편집');
-  await expect(page.getByRole('button', { name: '고정지출 지우기' })).toBeVisible();
-  await expect(page.getByRole('button', { name: '찬우 용돈 지우기' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: '예빈 용돈 지우기' })).toHaveCount(0);
+  // 합쳐서 용돈 줄은 지울 수 없음: 줄 금액 시트에 ‘항목 지우기’ 없음(2026-11-26 순서 바꾸기에는 지우기 버튼 없음)
+  await page.getByRole('button', { name: /^고정지출/ }).click();
+  await expect(page.getByRole('button', { name: '고정지출 항목 지우기' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: /^찬우 용돈/ }).click();
+  await expect(page.getByRole('dialog', { name: '찬우 용돈 금액' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /항목 지우기/ })).toHaveCount(0);
   await axe(page);
 });
 
@@ -598,7 +601,7 @@ test('W-10 ‘매달 금액 바꾸기’ 주소(?line=): 그 저금 줄 시트�
 test('오프라인: 줄을 눌러도 시트 없이 “인터넷에 연결되면 할 수 있어요”', async ({ page }) => {
   const { go } = await open(page);
   await go();
-  expect(await planItems(page)).toContain('편집');
+  expect(await planItems(page)).toContain('순서 바꾸기');
   await goOffline(page);
   await page.getByRole('button', { name: '생활비 880,000원' }).click();
   await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
@@ -682,7 +685,7 @@ test('못 불러오면 오류 카드 + 다시 시도, 구간 탭은 그대로(S5
 test('오프라인: ‘+ 저금 추가’도 W-11로 가지 않음(S5-08)', async ({ page }) => {
   const { go } = await open(page);
   await go();
-  expect(await planItems(page)).toContain('편집');
+  expect(await planItems(page)).toContain('순서 바꾸기');
   await goOffline(page);
   await page.getByRole('button', { name: '+ 저축·투자 추가' }).click();
   await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
@@ -773,7 +776,7 @@ test('빈 지출 카드(2026-11-19, 예전 첫 달 묻기): 칩 → 금액 직�
   await expect.poll(() => names(page, '지출')).toEqual(['용돈', '월세', '생활비']);
   await axe(page);
   await page.reload();
-  expect(await planItems(page)).toContain('편집');
+  expect(await planItems(page)).toContain('순서 바꾸기');
   await expect(page.getByRole('group', { name: '매달 나가는 지출을 골라 보세요' })).toHaveCount(0);
 });
 
@@ -792,7 +795,7 @@ test('지출 줄이 있으면 빈 지출 카드 없음, 같이 쓰는 생활비 
   const { db, go } = await open(page);
   Object.assign(db.space ?? {}, { shared_living: false });
   await go();
-  expect(await planItems(page)).toContain('편집');
+  expect(await planItems(page)).toContain('순서 바꾸기');
   await expect(page.getByRole('group', { name: '매달 나가는 지출을 골라 보세요' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '+ 같이 쓰는 통장 추가' })).toHaveCount(0);
   await page.getByRole('button', { name: '+ 지출 추가' }).click();
@@ -830,7 +833,7 @@ test('빈 상태(저축·투자도 지출도 0줄): 머리 ‘편집’·아래 
   await expect(page.getByRole('group', { name: '무엇을 모을지 골라 보세요' })).toBeVisible();
   await expect(page.getByRole('group', { name: '매달 나가는 지출을 골라 보세요' })).toBeVisible();
   // 줄이 없으면 머리 ⋯에 편집·공유하기·추천값 없음(수입 기록 등은 그대로)
-  for (const n of ['편집', '공유하기', '추천값으로 다시 채우기'])
+  for (const n of ['순서 바꾸기', '공유하기', '추천값으로 다시 채우기'])
     expect(await planItems(page)).not.toContain(n);
   await axe(page);
   // 줄 하나(칩 → 금액)가 생기면 셋 다 보임
@@ -842,7 +845,7 @@ test('빈 상태(저축·투자도 지출도 0줄): 머리 ‘편집’·아래 
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page.getByRole('region', { name: '지출', exact: true }).getByText('월세')).toBeVisible();
   expect(await planItems(page)).toEqual(
-    expect.arrayContaining(['편집', '공유하기', '추천값으로 다시 채우기']),
+    expect.arrayContaining(['순서 바꾸기', '공유하기', '추천값으로 다시 채우기']),
   );
 });
 
@@ -854,7 +857,7 @@ test('월급 0원이어도 줄이 0개면 아래 버튼 숨김', async ({ page }
   await go();
   await expect(page.getByRole('button', { name: '월급 입력하기' })).toBeVisible();
   // 줄이 없으면 머리 ⋯에 편집·공유하기·추천값 없음(수입 기록 등은 그대로)
-  for (const n of ['편집', '공유하기', '추천값으로 다시 채우기'])
+  for (const n of ['순서 바꾸기', '공유하기', '추천값으로 다시 채우기'])
     expect(await planItems(page)).not.toContain(n);
 });
 

@@ -228,5 +228,5 @@ test('W-01 연결 해제 대기 중이면 보기만', async ({ page }) => {
   for (const n of ['+ 지출 추가', '+ 저축·투자 추가'])
     await expect(page.getByRole('button', { name: n, exact: true })).toHaveCount(0);
   const items = await planItems(page);
-  for (const n of ['편집', '추천값으로 다시 채우기']) expect(items).not.toContain(n);
+  for (const n of ['순서 바꾸기', '추천값으로 다시 채우기']) expect(items).not.toContain(n);
 });

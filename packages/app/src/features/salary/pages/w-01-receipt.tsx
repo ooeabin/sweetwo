@@ -42,7 +42,6 @@ import {
   PlanStage,
   PlanSummary,
   ReceiptRows,
-  SectionHeader,
   Tabs,
   type ReceiptLine,
 } from '@sweetwo/ui';
@@ -870,6 +869,8 @@ export function W01Receipt() {
         onDelete: deletable && !send ? () => remove(l, 'edit') : undefined,
       };
     });
+  // 순서 바꾸기 상태(2026-11-26, 예전 편집 모드)에는 줄 지우기 버튼이 없음: 지우기는 줄 금액 시트 ‘항목 지우기’에서만
+  const orderRows = (ls: SplitLine[]) => rowsOf(ls).map((r) => ({ ...r, onDelete: undefined }));
   const rowLabels = {
     handle: copy.handle,
     up: copy.moveUp,
@@ -1034,21 +1035,8 @@ export function W01Receipt() {
   const limited = theirs && !!pv && !pv.hidden && pv.mode === 'separate' && pv.share !== 'all';
   const column = (
     <div key="l" className="hg-stack">
-      {edit ? (
-        <SectionHeader
-          title={copy.editTitle}
-          action={
-            <button
-              type="button"
-              className="hg-btn hg-btn--link"
-              aria-busy={busy || undefined}
-              onClick={finish}
-            >
-              {copy.editDone}
-            </button>
-          }
-        />
-      ) : (
+      {/* 2026-11-26 사용자 결정: ‘편집’ 모드 대신 ‘순서 바꾸기’ 상태. ‘완료’는 머리 오른쪽(⋯ 자리), 본문 머리 줄은 없음 */}
+      {edit ? null : (
         <>
           {tabs && p && (
             <Tabs
@@ -1198,7 +1186,7 @@ export function W01Receipt() {
           <PlanCard id="saving" title={copy.savingGroup} sum={shown(won(savingSum))}>
             <ReceiptRows
               label={copy.savingGroup}
-              lines={rowsOf(savingLines)}
+              lines={orderRows(savingLines)}
               edit={edit}
               onMove={edit ? moveIn(savingLines) : undefined}
               labels={rowLabels}
@@ -1301,7 +1289,7 @@ export function W01Receipt() {
             {allowanceLines.length > 0 && (
               <ReceiptRows
                 label={copy.allowanceRows}
-                lines={rowsOf(allowanceLines)}
+                lines={orderRows(allowanceLines)}
                 edit={edit}
                 onMove={edit ? moveIn(allowanceLines) : undefined}
                 labels={rowLabels}
@@ -1309,7 +1297,7 @@ export function W01Receipt() {
             )}
             <ReceiptRows
               label={copy.spendGroup}
-              lines={proposalRow ? [...rowsOf(otherSpend), proposalRow] : rowsOf(otherSpend)}
+              lines={proposalRow ? [...orderRows(otherSpend), proposalRow] : orderRows(otherSpend)}
               edit={edit}
               onMove={edit ? moveIn(otherSpend) : undefined}
               labels={rowLabels}
@@ -1396,7 +1384,7 @@ export function W01Receipt() {
         ...(!planEmpty && canEdit
           ? [
               {
-                label: copy.editShort,
+                label: copy.reorder,
                 onSelect: () => {
                   if (offline()) return;
                   setOrder(null);
@@ -1418,15 +1406,30 @@ export function W01Receipt() {
             ]
           : []),
       ];
-  const headMenu =
-    headActions.length > 0 ? <Menu label={copy.headMore} actions={headActions} /> : undefined;
+  // 순서 바꾸기 중 머리 오른쪽은 ‘완료’: ⋯와 같은 자리(버튼 끝 = 화면 오른쪽 8, 높이 44), 글자는 머리 오른쪽 글자 동작(hg-headaction)
+  const doneAction = (cls: string) =>
+    edit ? (
+      <button type="button" className={cls} aria-busy={busy || undefined} onClick={finish}>
+        {copy.editDone}
+      </button>
+    ) : undefined;
+  const headMenu = edit ? (
+    doneAction('hg-btn hg-headaction')
+  ) : headActions.length > 0 ? (
+    <Menu label={copy.headMore} actions={headActions} />
+  ) : undefined;
+  const wideHead = edit ? (
+    doneAction('hg-btn hg-btn--link')
+  ) : headActions.length > 0 ? (
+    <Menu label={copy.headMore} actions={headActions} />
+  ) : undefined;
   return (
     <>
       <MainFrame
         current="salary"
         page={{
           title: copy.planTitle,
-          actions: headMenu ? <span className="hg-wide-only">{headMenu}</span> : undefined,
+          actions: wideHead ? <span className="hg-wide-only">{wideHead}</span> : undefined,
         }}
         narrowAction={headMenu}
         // W-02 링크로 열었으면 ‹ = W-02(2026-11-18), 서랍·홈에서 열었으면 홈

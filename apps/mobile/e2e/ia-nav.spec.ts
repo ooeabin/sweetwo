@@ -62,7 +62,7 @@ test('머리 B안(2026-11-26): ‹는 Regular 선·같은 자리, 제목 17/500,
   await page.goto('/salary/plan');
   const title = page.getByRole('heading', { level: 1, name: '월급 계획 템플릿' });
   await expect(title).toBeVisible();
-  expect(await title.evaluate((e) => getComputedStyle(e).fontWeight)).toBe('500');
+  await expect(title).toHaveCSS('font-weight', '500'); // 머리가 다시 그려져도 다시 찾음(evaluate는 떨어진 요소에서 빈 값)
   const backMask = await page
     .locator('.hg-back:visible > .hg-ico')
     .first()
@@ -73,7 +73,7 @@ test('머리 B안(2026-11-26): ‹는 Regular 선·같은 자리, 제목 17/500,
   await page.goto('/notifications');
   const noti = page.getByRole('heading', { level: 1, name: '알림' });
   await expect(noti).toBeVisible();
-  expect(await noti.evaluate((e) => getComputedStyle(e).fontWeight)).toBe('500');
+  await expect(noti).toHaveCSS('font-weight', '500');
   expect(await icoX()).toBe(x1);
   // 머리 오른쪽 글자 동작(hg-headaction, 2026-11-26): N-02 ‘모두 읽음’. W-01은 2026-11-26 ‘W-01 정리 A안’으로 글자 ‘편집’ 대신 ⋯(“더 보기”)
   // 15/400 ink-2, 누르는 칸 높이 44, 글자 끝 = 화면 오른쪽 24
