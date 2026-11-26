@@ -42,9 +42,9 @@ test.describe('PC', () => {
   }) => {
     await outside(page);
     await page.goto('/');
-    await expect(page).toHaveTitle('sweeTwo | 둘이 구워서 더 달콤한 자산파이');
+    await expect(page).toHaveTitle('sweeTwo | 둘이서 만든 달콤한 자산파이');
     await expect(
-      page.getByRole('heading', { level: 1, name: '둘이 구워서 더 달콤한 자산파이' }),
+      page.getByRole('heading', { level: 1, name: '둘이서 만든 달콤한 자산파이' }),
     ).toBeVisible();
     const hero = page.locator('[data-download]').first();
     await expect(hero.getByRole('link', { name: 'App Store에서 받기' })).toBeVisible();
@@ -191,7 +191,7 @@ test('L-01 머리(S12-09·10): canonical, og:url·type, 메타 설명, 파비콘
   await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'website');
   await expect(page.locator('meta[name="description"]')).toHaveAttribute(
     'content',
-    /^둘이 구워서 더 달콤한 자산파이\. /,
+    /^둘이서 만든 달콤한 자산파이\. /,
   );
   for (const [sel, href] of [
     ['link[rel="icon"][sizes="32x32"]', '/favicon-32.png'],

@@ -159,7 +159,7 @@ test('가입 취소(S1-11): A-04 뒤로, A-05 하드웨어 뒤로 = 로그아웃
     .locator('visible=true')
     .first()
     .click();
-  await expect(page.getByRole('heading', { name: '둘이 구워서 더 달콤한 자산파이' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '둘이서 만든 달콤한 자산파이' })).toBeVisible();
   expect(await page.evaluate(() => localStorage.getItem('sb-session'))).toBeNull();
 });
 

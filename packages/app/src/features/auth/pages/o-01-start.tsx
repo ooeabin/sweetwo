@@ -11,7 +11,7 @@ import { session } from '../session';
 const CODE = /^[A-HJ-NP-Z2-9]{6}$/;
 type Found = { code: string; source: 'clipboard' | 'referrer' };
 
-// O-01 시작 화면. 첫 실행에만(로그아웃 뒤 실행은 A-02). 2026-11-16: 캐치프레이즈 “둘이 구워서 더 달콤한 자산파이” + 회색 작은 줄 2줄(15 O-01).
+// O-01 시작 화면. 첫 실행에만(로그아웃 뒤 실행은 A-02). 2026-11-16: 캐치프레이즈 “둘이서 만든 달콤한 자산파이” + 회색 작은 줄 2줄(15 O-01).
 // 첫 실행에 설치 리퍼러(Android)·클립보드(iOS, L-07이 복사)에 초대 코드가 있으면 시트 “받은 초대 코드로 합류할까요?”
 // ‘합류하기’ → P-01을 거쳐 바로 로그인(A-02 초대 문구, 한 번만 누름) / ‘아니요, 새로 시작할게요’. 브리지(window.sweetwo.inviteCode)가 없으면 묻지 않음
 export function O01Start() {
