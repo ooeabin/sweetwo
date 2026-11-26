@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (efe89bd). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (9c23c69). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 /* 2026-11-24 구역 5 설정 검토: 사용자 앱 글자 바탕값 15/22. 클래스 없는 b·p·li가 브라우저 기본 16px로 나오던 것(기준 17/15 밖). 어드민·웹사이트는 data-platform이 없어 그대로 */
@@ -3177,3 +3177,18 @@ button.hg-datepill { cursor: pointer; }
 .hg-picksheet__nav { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: 0; padding: 0; border: 0; border-radius: var(--radius-full); background: none; color: var(--slate); cursor: pointer; }
 .hg-picksheet__nav:disabled { color: var(--hairline); cursor: default; }
 .hg-picksheet__nav:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* ── 머리 B안(2026-11-26 사용자 결정): 레퍼런스 앱(토스·카카오뱅크·당근)처럼 머리를 한 단계 가볍게 ──
+   ‹ 꺾쇠는 Phosphor Regular 선(굵기 16/256, 24px에서 1.5px, 예전 Bold 2.25px). 모든 뒤로(hg-back)에 같게.
+   ‹ 옆 머리 제목은 17/600(--text-nav-title, 굵기 400·700 기준의 하나뿐인 예외). 사용자 앱만, 어드민·웹사이트는 그대로 */
+.hg-back > .hg-ico--chevron-left { --ico: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 256 256%22 fill=%22%23000%22%3E%3Cpath d=%22M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z%22/%3E%3C/svg%3E"); }
+:is(.hg-mhead__title, .hg-pagehead__title, .hg-noti--page .hg-noti__title):not(.hg-admin *, .hg-adminauth *, .hg-site *) { font: var(--text-nav-title); letter-spacing: 0; }
+/* N-02 좁은 창 알림 화면 머리: 본문 안쪽(위 8, 옆 24)에 들어가 있어 ‹가 다른 화면보다 8px 오른쪽·8px 아래였고 ‘모두 읽음’ 글자 끝이 화면 오른쪽에서 44px였음.
+   앱 머리(hg-frame__mhead--back)와 같은 자리로: 머리를 화면 끝까지(옆 16 안쪽, 위 0), ‹ 아이콘 왼쪽 18, ‘모두 읽음’ 글자 끝은 본문 오른쪽 끝(화면에서 24)에 맞춤, 글자 15/400 ink-2(글자 버튼과 같게) */
+@media (max-width: 767px) {
+  .hg-body:has(> .hg-body__col:first-child > .hg-noti--page:first-child) { padding-top: 0; }
+  .hg-noti--page .hg-noti__head { margin-inline: calc(var(--space-6) * -1); padding: 0 var(--space-4); }
+  .hg-noti--page .hg-noti__head > .hg-back { margin-left: -8px; }
+  .hg-noti--page .hg-noti__head > .hg-btn { margin-right: -8px; padding-inline: var(--space-4); min-height: 44px; font: var(--text-value); color: var(--ink-2); }
+  .hg-noti--page .hg-noti__head > .hg-btn:disabled { color: var(--muted); }
+}
