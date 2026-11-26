@@ -324,6 +324,8 @@ test('H-12 결혼 준비 메모 상자는 없앰(2026-11-26 사용자 결정): �
 test('H-10 세로 간격(C안): 제목 줄 → 이름표 12, 이름표 → 금액 4, 금액 → 문장 8, 문장 → 넘김 점 12, 상자 위아래 24', async ({
   page,
 }) => {
+  // 좁은 창 기준(넓은 창 4열은 H-10이 두 줄 높이라 아래가 늘어남)
+  await page.setViewportSize({ width: 375, height: 812 });
   await open(page, (d) => {
     Object.assign(d.space ?? {}, { couple_state: 'connected', partner_nickname: '예빈' });
     d.partner = PARTNER;
