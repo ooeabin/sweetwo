@@ -27,7 +27,7 @@ import { copy } from '../copy';
  * 2026-11-26 사용자 결정 ‘같이 모으기 C안’(문장형): 진행 막대·보조 줄 없음. 칸 = 그림(core `savingArtKey`, 파일이 없으면 자리째 없음)
  * + 이름표(저금 이름) → 큰 숫자 모은 금액(퍼센트만이면 %) → 문장 한 줄: 목표 금액이 있으면 “목표까지 n원 남았어요”(금액만 오렌지),
  * 다 모았으면 “다 모았어요”, 목표 금액이 없으면 “이번 달 +n원 모았어요”, 둘 다 없으면 문장 없음, 해제 대기면 “같이 모으기를 잠시 멈췄어요”,
- * 퍼센트만이면 “목표 금액의 n%”. 기한 “…까지 n원 더 필요해요”는 화면 읽기에만.
+ * 퍼센트만이면 문장 없음(금액 자리 “n%”). 기한 “…까지 n원 더 필요해요”는 화면 읽기에만.
  * 결혼 준비 중이면 머리 D-day 알약(예정일 없으면 “결혼식 날짜 알려 주기” → S-11h).
  * 사람 원은 머리 “같이 모으기” 바로 오른쪽 작은 겹친 Avatar(sm 24, 지금 보이는 칸 기준: 연결이면 둘, 미합류·각자 계열 내 저금 칸이면 나).
  * 2026-11-18: 누를 수 없는 정보 상자. 같이 모으기 항목이 하나도 없으면 홈이 이 상자를 그리지 않음
@@ -92,7 +92,7 @@ export function H10SaveTogether({
     <Illustration name={savingArtKey(name, copy.chips)} className="hg-together__art" />
   );
 
-  // C안 문장 한 줄(2026-11-26 사용자 결정 ‘같이 모으기 C안’): 멈춤 → 다 모음 → 목표 금액까지 남은 금액(퍼센트만이면 목표 금액의 %)
+  // C안 문장 한 줄(2026-11-26 사용자 결정 ‘같이 모으기 C안’): 멈춤 → 다 모음 → 목표 금액까지 남은 금액(퍼센트만이면 문장 없음)
   // → 목표 금액이 없으면 이번 달 + → 둘 다 없으면 문장 없음
   const sayOf = (o: {
     paused?: boolean;
@@ -105,7 +105,8 @@ export function H10SaveTogether({
   }): SaveTogetherSay | undefined => {
     if (o.paused) return copy.paused;
     if (o.done) return copy.doneBadge;
-    if (o.percentOnly) return o.pct !== null ? copy.targetPctLabel(o.pct) : undefined;
+    // 퍼센트만이면 금액 자리가 이미 “62%”라 문장 없음(2026-11-26 사용자 결정, 같은 숫자 두 번 안 보임)
+    if (o.percentOnly) return undefined;
     if (o.target !== null)
       return { lead: copy.leftLead, em: won(Math.max(0, o.target - o.saved)), tail: copy.leftTail };
     return o.gain > 0 ? copy.monthSaved(won(o.gain)) : undefined;

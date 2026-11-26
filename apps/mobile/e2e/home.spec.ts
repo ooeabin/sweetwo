@@ -589,8 +589,8 @@ test('각자 계열 묶음(찬우·예빈): 묶음이 맨 앞, 합계 + 문장 �
   });
   await page.reload();
   await expect(first.locator('.hg-together__amount')).toHaveText('62%');
-  // 퍼센트만: 금액 문장 대신 “목표 금액의 62%”, 기한(달만)은 화면 읽기에만
-  await expect(first.locator('.hg-together__say')).toHaveText('목표 금액의 62%');
+  // 퍼센트만: 금액 자리 “62%”만, 문장 없음(2026-11-26), 기한(달만)은 화면 읽기에만
+  await expect(first.locator('.hg-together__say')).toHaveCount(0);
   await expect(first).toHaveAccessibleName('같이 모으기, 결혼 비용, 62%, 2027년 5월까지');
   await expect(first).not.toContainText('원');
 });
