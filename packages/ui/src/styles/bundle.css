@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (4524b4db). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (3495794d). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 /* 2026-11-24 구역 5 설정 검토: 사용자 앱 글자 바탕값 15/22. 클래스 없는 b·p·li가 브라우저 기본 16px로 나오던 것(기준 17/15 밖). 어드민·웹사이트는 data-platform이 없어 그대로 */
@@ -3353,3 +3353,12 @@ button.hg-plansum__sal { cursor: pointer; }
   .hg-frame__mhead--back .hg-mhead__action .hg-iconbtn { width: 44px; height: 44px; color: var(--ink); }
   .hg-frame__mhead--back .hg-mhead__action .hg-iconbtn.is-on { background: var(--surface-alt); color: var(--ink); }  /* 열린 동안: 회색 원(검은 원 안 ink 글리프가 안 보여서) */
 }
+/* 2026-11-26 사용자 결정 ‘같이 모으기 C안’(홈 H-10 문장형, SaveTogether variant="sentence"): 진행 막대·보조 줄 없음.
+   칸 = 왼쪽 그림 40(파일이 없으면 자리째 없음) + 이름표 13/400 slate → 4 → 금액 22/700 → 8 → 문장 15/400 ink(강조 금액만 accent-app-text 700,
+   대비 예외라 axe 선택자 예외). 머리 → 12 → 칸 → 12 → 넘김 점, 상자 위아래 24는 위 ‘홈 상자 세로 간격’ 그대로 */
+.hg-together--sentence .hg-together__slide { flex-direction: row; align-items: center; gap: var(--space-3); }
+.hg-together__body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.hg-together__body > .hg-together__name { flex: none; font: var(--text-note); color: var(--slate); }
+.hg-together__body > .hg-together__amount { margin-top: var(--space-1); }
+.hg-together__say { margin-top: var(--space-2); font: var(--text-value); color: var(--ink); word-break: keep-all; overflow-wrap: anywhere; }
+.hg-together__em { font-weight: 700; color: var(--accent-app-text); }

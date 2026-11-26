@@ -72,7 +72,7 @@ const asset = (o: Record<string, unknown>) => ({
   ...o,
 });
 
-test('H-10 보조 줄은 한 줄(목표 금액 있으면 “0%, 150,000,000원 중”). “…님은 아직 같이 모으기에 없어요”는 카드에 없음', async ({
+test('H-10 C안 문장 한 줄(목표 금액 있으면 “목표까지 150,000,000원 남았어요”, 금액만 오렌지 700), 막대 없음. “…님은 아직 같이 모으기에 없어요”는 카드에 없음', async ({
   page,
 }) => {
   await open(page, (d) => {
@@ -81,11 +81,17 @@ test('H-10 보조 줄은 한 줄(목표 금액 있으면 “0%, 150,000,000원 �
   });
   const slide = page.locator('.hg-together__slide').first();
   await expect(slide).toBeVisible();
-  await expect(slide.locator('.hg-together__line')).toHaveText(['0%, 150,000,000원 중']);
+  await expect(slide.locator('.hg-together__say')).toHaveText('목표까지 150,000,000원 남았어요');
+  await expect(slide.locator('.hg-together__em')).toHaveText('150,000,000원');
+  expect(
+    await slide.locator('.hg-together__em').evaluate((el) => getComputedStyle(el).fontWeight),
+  ).toBe('700');
+  await expect(slide.locator('.hg-together__bar')).toHaveCount(0);
+  await expect(slide.locator('.hg-together__line')).toHaveCount(0);
   await expect(page.locator('.hg-together')).not.toContainText('같이 모으기에 없어요');
 });
 
-test('H-10 목표 금액이 없으면 보조 한 줄은 “이번 달 +950,000원”', async ({ page }) => {
+test('H-10 목표 금액이 없으면 문장은 “이번 달 +950,000원 모았어요”', async ({ page }) => {
   await open(page, (d) => {
     for (const g of d.goals) Object.assign(g, { target_amount: null, deadline: null });
     const c = d.checklists[0];
@@ -97,7 +103,8 @@ test('H-10 목표 금액이 없으면 보조 한 줄은 “이번 달 +950,000�
       });
   });
   const slide = page.locator('.hg-together__slide').first();
-  await expect(slide.locator('.hg-together__line')).toHaveText(['이번 달 +950,000원']);
+  await expect(slide.locator('.hg-together__say')).toHaveText('이번 달 +950,000원 모았어요');
+  await expect(slide.locator('.hg-together__em')).toHaveCount(0);
   await expect(slide.locator('.hg-together__bar')).toHaveCount(0);
 });
 
@@ -287,7 +294,7 @@ test('같이 모으기 모은 금액이 0원이어도 홈 순서는 고정: 띠 
   await open(page, (d) => {
     d.cares.push(care({ id: 'c-mom' }));
   });
-  await expect(page.locator('.hg-together__slide').first()).toContainText('0%');
+  await expect(page.locator('.hg-together__slide').first()).toContainText('0원');
   const top = (sel: string) =>
     page
       .locator(sel)
@@ -314,33 +321,36 @@ test('H-12 결혼 준비 메모 상자는 없앰(2026-11-26 사용자 결정): �
 });
 
 // 2026-11-26 사용자 결정(“같이 모으기 박스도 빈 공간이 너무 많은 듯”): 홈 상자 세로 간격(DESIGN.md 강약 기준 ‘홈 상자 세로 간격’)
-test('H-10 세로 간격: 제목 줄 → 이름표 12, 이름표 → 금액 4, 금액 → 막대 12, 막대 → 보조 줄 8, 상자 위아래 24', async ({
+test('H-10 세로 간격(C안): 제목 줄 → 이름표 12, 이름표 → 금액 4, 금액 → 문장 8, 문장 → 넘김 점 12, 상자 위아래 24', async ({
   page,
 }) => {
+  // 좁은 창 기준(넓은 창 4열은 H-10이 두 줄 높이라 아래가 늘어남)
+  await page.setViewportSize({ width: 375, height: 812 });
   await open(page, (d) => {
     Object.assign(d.space ?? {}, { couple_state: 'connected', partner_nickname: '예빈' });
     d.partner = PARTNER;
     for (const g of d.goals) g.owner_user_id = null;
   });
   const box = page.locator('.hg-together');
-  await expect(box.locator('.hg-together__bar').first()).toBeVisible();
+  await expect(box.locator('.hg-together__say').first()).toBeVisible();
   const r = await box.evaluate((el) => {
     const q = (s: string) => el.querySelector(s)?.getBoundingClientRect() ?? null;
     const b = el.getBoundingClientRect();
     const head = q('.hg-together__head');
     const name = q('.hg-together__name');
     const amt = q('.hg-together__amount');
-    const bar = q('.hg-together__bar');
-    const line = q('.hg-together__line');
+    const say = q('.hg-together__say');
+    const dots = q('.hg-together__dots');
     return {
       top: Math.round((head?.top ?? 0) - b.top),
       headName: Math.round((name?.top ?? 0) - (head?.bottom ?? 0)),
       nameAmt: Math.round((amt?.top ?? 0) - (name?.bottom ?? 0)),
-      amtBar: Math.round((bar?.top ?? 0) - (amt?.bottom ?? 0)),
-      barLine: Math.round((line?.top ?? 0) - (bar?.bottom ?? 0)),
+      amtSay: Math.round((say?.top ?? 0) - (amt?.bottom ?? 0)),
+      sayDots: dots ? Math.round(dots.top - (say?.bottom ?? 0)) : 12,
+      bottom: Math.round(b.bottom - (dots?.bottom ?? say?.bottom ?? 0)),
     };
   });
-  expect(r).toEqual({ top: 24, headName: 12, nameAmt: 4, amtBar: 12, barLine: 8 });
+  expect(r).toEqual({ top: 24, headName: 12, nameAmt: 4, amtSay: 8, sayDots: 12, bottom: 24 });
 });
 
 test('목표 달성: 홈을 열어도 W-12로 넘어가지 않고 띠 “{이름} 다 모았어요”가 뜸 → W-12(머리글 없음) → 고르면 띠가 사라짐', async ({
@@ -406,6 +416,7 @@ test('홈 A안 강약(2026-11-26): 상자 제목 15/700, 월급 줄은 이름표
   expect(await font('.hg-hubbox__row .hg-hubbox__name')).toBe('13px/400');
   expect(await font('.hg-hubbox__row .hg-hubbox__main')).toBe('17px/700');
   expect(await font('.hg-together__name')).toBe('13px/400');
+  expect(await font('.hg-together__say')).toBe('15px/400'); // 2026-11-26 C안 문장 한 줄
   const month = page.locator('.hg-hubbox__row').first();
   await expect(month.locator('.hg-hubbox__name')).toHaveText('이번 달 월급 체크');
   await expect(month.locator('.hg-hubbox__main')).toHaveText('5개 남음');

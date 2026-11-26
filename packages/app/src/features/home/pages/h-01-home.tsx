@@ -735,7 +735,6 @@ export function H01Home() {
       people={people}
       peopleMine={peopleMine}
       joint={joint}
-      names={{ me: myName, partner: partnerName }}
       marriage={marriage}
       weddingDate={sp.wedding_date}
       today={today}

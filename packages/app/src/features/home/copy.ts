@@ -19,23 +19,19 @@ export const copy = {
   dday: (n: number) => `결혼식 D-${n}`,
   ddayToday: '결혼식 D-day',
   weddingDateAsk: '결혼식 날짜 알려 주기',
-  targetOf: (target: string, pct: number) => `목표 금액 ${target}의 ${pct}%`,
-  /** 목표 금액이 있을 때 보조 한 줄(2026-11-20) */
-  pctOfTarget: (pct: number, target: string) => `${pct}%, ${target} 중`, // [확인 필요]
-  thisMonthGain: (amount: string) => `이번 달 +${amount}`,
-  /** 아직 안 들어간 묶음(상대가 만듦) 칸 첫 줄(2026-11-14 H1) */
-  togetherInvite: (name: string) => `${name}님이 같이 모으자고 해요. 눌러서 볼 수 있어요`,
   remain: (deadline: string, amount: string) => `${ym(deadline)}까지 ${amount} 더 필요해요`,
   remainPercent: (deadline: string) => `${ym(deadline)}까지`,
-  each: (a: string, x: string, b: string, y: string) => `${a} ${x}, ${b} ${y}`,
   paused: '같이 모으기를 잠시 멈췄어요',
+  /** C안 문장 한 줄(2026-11-26 사용자 결정 ‘같이 모으기 C안’): “목표까지 {남은 금액} 남았어요”, 금액만 강조 */
+  leftLead: '목표까지 ',
+  leftTail: ' 남았어요',
+  /** C안 목표 금액이 없을 때 문장(2026-11-26) */
+  monthSaved: (amount: string) => `이번 달 +${amount} 모았어요`,
   doneBadge: '다 모았어요',
   seeAll: '저축·투자 모두 보기',
   emptyAsk: '무엇을 같이 모을까요?',
   /** 빈 상태에 상대 저금 권유가 있을 때 칩(2026-11-14 R4) */
   inviteJoin: '같이 모을게요', // [확인 필요]
-  /** 같이 모으기 큰 숫자 아래 이름(묶음 합계, W-02 저금 줄 ‘내 몫’과 나눔, R4) */
-  bothSaved: '둘이 모은 금액', // [확인 필요]
   emptyAdd: '모으기 시작하기', // [확인 필요] 2026-11-18 H-10 빈 상태 버튼(예전 ‘+ 저축·투자 추가’, O-60과 같은 말)
   emptyCustom: '직접 정하기', // [확인 필요] 2026-11-18 H-10 빈 상태 맨 끝 칩(W-11a를 이름 칸 빈 채로 엶)
   widgetAmount: (won: string) => `${won} 모았어요`, // [확인 필요] 26 WG-01 S-22 ‘위젯에 금액 보이기’를 켰을 때 한 줄

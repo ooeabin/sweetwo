@@ -11,9 +11,10 @@ describe('홈 보조 줄', () => {
     expect(copy.nextSchedule({ name: '어머니 생신', days: 0 })).toBe('어머니 생신 오늘');
     expect(copy.nextSchedule(null)).toBe('기념일을 입력해 보세요');
   });
-  it('H-10 보조 한 줄: 목표 금액이 있으면 “10%, 3,000,000원 중”', () => {
-    expect(copy.pctOfTarget(10, '3,000,000원')).toBe('10%, 3,000,000원 중');
-    expect(copy.thisMonthGain('300,000원')).toBe('이번 달 +300,000원');
+  it('H-10 C안 문장 한 줄(2026-11-26): 목표까지 남은 금액, 목표 금액이 없으면 이번 달 +', () => {
+    expect(`${copy.leftLead}19,000,000원${copy.leftTail}`).toBe('목표까지 19,000,000원 남았어요');
+    expect(copy.monthSaved('300,000원')).toBe('이번 달 +300,000원 모았어요');
+    expect(copy.targetPctLabel(62)).toBe('목표 금액의 62%');
   });
   it('H-16 머리, 할 일 시트 알약', () => {
     expect(copy.upcomingTitle).toBe('다가오는 날');
