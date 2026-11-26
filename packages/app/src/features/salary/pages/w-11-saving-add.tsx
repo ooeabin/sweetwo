@@ -10,6 +10,7 @@ import {
   defaultDeadline,
   formatYm,
   leftover,
+  planInputCheck,
   quickChips,
   savingChips,
   savingItemInput,
@@ -48,7 +49,7 @@ import { salaryPaths, savingPaths } from '../paths';
 import { readDraft, writeDraft, type SavingDraft } from '../saving-draft';
 import { baseDayOf } from '../cycle';
 import { formHero, savingFormReady } from '../form-logic';
-import { LineModeBody } from '../receipt-parts';
+import { LineModeBody, PlanLeftHint } from '../receipt-parts';
 import { trackSharedGoal, useSavingItems } from '../saving';
 import { useHardwareBack } from '../../auth';
 import {
@@ -210,7 +211,7 @@ export function W11SavingAdd() {
           qc.invalidateQueries({ queryKey: k }),
         ),
       );
-      carryToast(left - v.monthly < 0 ? copy.addShort : copy.added);
+      carryToast(copy.added);
       // O-60 ‘첫 저금 만들기’로 왔으면 끝에 미합류 초대 시트(O-07) → A-06 → 홈(16 v2.2, onboarding AFTER_FIRST_SAVING_PATH)
       // 그 밖(20 W-11 고친 점): 미합류면 초대, 각자 계열 연결이면 “{이름}님과 같이 모을까요?”(→ W-15). W-10이 시트로 물음
       const st = space.data?.couple_state;
@@ -250,7 +251,12 @@ export function W11SavingAdd() {
   const unit = monthly !== null && monthly % 10_000 !== 0;
   const start = draft.hasStart ? (draft.start ?? 0) : 0;
   const ym = (draft.deadline?.slice(0, 7) as YearMonth | undefined) ?? defaultDeadline();
-  const ready = savingFormReady(name, monthly) && !(draft.target !== null && start >= draft.target);
+  // 매달 금액이 월급을 넘으면 ‘추가하기’를 막음(06 3-3, 2026-11-26 사용자 결정, 새 줄이라 바꾸기 전 0원, 0원은 추가 가능)
+  const over = planInputCheck({ left0: left, before: 0, after: monthly });
+  const ready =
+    savingFormReady(name, monthly) &&
+    !over.blocked &&
+    !(draft.target !== null && start >= draft.target);
   const shown = (v: number) => money(v, masked);
   const closeFold = () => setFold(null);
 
@@ -320,22 +326,28 @@ export function W11SavingAdd() {
             invalid={unit}
             below={
               <>
-                {left <= 0 && (
-                  <p className="hg-help">
-                    {copy.addMonthlyHelp(
-                      shown(Math.max(left, 0)),
-                      allowance > 0 ? shown(allowance) : undefined,
-                      false,
-                    )}
-                  </p>
+                {monthly !== null && over.left < 0 ? (
+                  // 월급을 넘으면 “월급보다 300,000원 많아요”(금액만 빨강) + ‘월급 고치기’ → W-01 월급 금액 시트(입력값은 기기에 남아 이어서).
+                  // 첫 저축·투자 흐름(O-60 뒤)은 흐름을 벗어나지 않게 문구만
+                  <PlanLeftHint
+                    left={over.left}
+                    text={shown}
+                    onFixIncome={
+                      entry === 'onboarding' ? undefined : () => nav(`${salaryPaths.plan}?income=1`)
+                    }
+                  />
+                ) : (
+                  left <= 0 && (
+                    <p className="hg-help">
+                      {copy.addMonthlyHelp(
+                        shown(Math.max(left, 0)),
+                        allowance > 0 ? shown(allowance) : undefined,
+                        false,
+                      )}
+                    </p>
+                  )
                 )}
                 {unit && <p className="hg-help is-error">{copy.tenThousandUnit}</p>}
-                {/* 매달 금액이 미계획 금액보다 크면 사실 한 줄(막지 않음, 2026-11-14) */}
-                {monthly !== null && monthly > 0 && monthly > Math.max(left, 0) && (
-                  <p className="hg-help" role="status">
-                    {copy.monthlyOverLeft(shown(Math.max(left, 0)))}
-                  </p>
-                )}
               </>
             }
           />

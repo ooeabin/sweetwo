@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { monthLineUrgent, type HomeMonthLine } from '@sweetwo/core';
 import { HubBox, type HubBoxRow } from '@sweetwo/ui';
 import { sharedCopy } from '../../../shared/copy';
@@ -21,8 +22,8 @@ export function H15SalaryBox({
 }: {
   line: HomeMonthLine;
   won: (v: number) => string;
-  /** H-07 내용: 값(“매달 25일”, 모자라면 “30만 원이 모자라요”)과 보조(“미계획 금액 20만 원”) */
-  plan: { value?: string; sub?: string };
+  /** H-07 내용: 값(“미계획 200,000원”, 넘으면 “월급보다 300,000원 많아요”)과 보조. node = 보이는 값(금액만 빨강), value = 화면 읽기 글 */
+  plan: { value?: string; sub?: string; node?: ReactNode };
   go: (box: 'salary_month' | 'salary_plan', to: string) => void;
   onRetry: () => void;
 }) {
@@ -41,7 +42,8 @@ export function H15SalaryBox({
     {
       key: 'plan',
       name: copy.rowPlan,
-      ...plan,
+      value: plan.node ?? plan.value,
+      sub: plan.sub,
       label: label(copy.rowPlan, plan),
       onClick: () => go('salary_plan', '/salary/plan'),
     },

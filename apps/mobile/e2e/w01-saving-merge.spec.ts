@@ -93,7 +93,9 @@ test('W-02 ↔ W-01: W-02 머리 링크 없음, 구간 탭 없음, 저금 묶음
 test('W-11 만들기 → W-01 저축·투자 묶음: 새 줄 강조 + Toast, 첫 질문 안내 줄은 없음', async ({
   page,
 }) => {
-  await open(page);
+  const db = await open(page);
+  // 2026-11-26: 월급을 넘는 매달 금액은 입력에서 막힘(06 3-3). 시드는 미계획 0원이라 월급을 늘려 둠
+  Object.assign(db.me, { monthly_income: 5_000_000 });
   await page.goto('/salary/items/new?from=split');
   // 2026-11-18: 첫 질문 안내 줄은 뺌(미리 보기 단계 W-11f도 없앰)
   await expect(
@@ -103,8 +105,7 @@ test('W-11 만들기 → W-01 저축·투자 묶음: 새 줄 강조 + Toast, 첫
   await fillAmount(page, '매달 얼마씩?', 10000);
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page).toHaveURL(/\/salary\/plan/);
-  // 시드는 미계획 금액이 모자라 “모자라요” Toast(addShort), 넉넉하면 ‘월급 계획 템플릿에 넣었어요’
-  await expect(page.locator('.hg-toasts')).toBeVisible();
+  await expect(page.getByText('월급 계획 템플릿에 넣었어요')).toBeVisible();
   const fresh = page.locator('.hg-receipt__row.is-new');
   await expect(fresh).toContainText('제주 여행');
   await expect(fresh).toContainText('10,000원');

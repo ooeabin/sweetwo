@@ -46,7 +46,7 @@ test('W-01 b: 줄이 하나도 없으면 도넛·범례 없음, 문장도 없음
   await axe(page);
 });
 
-test('W-01 e: 계획이 월급보다 많으면 “계획이 월급보다 1,500,000원 많아요”(오류 빨강), 줄이 있으면 도넛·범례는 그대로', async ({
+test('W-01 e: 계획이 월급보다 많으면 “계획이 월급보다 1,500,000원 많아요”(금액만 빨강, 2026-11-26), 줄이 있으면 도넛·범례는 그대로', async ({
   page,
 }) => {
   const db = await open(page);
@@ -54,8 +54,10 @@ test('W-01 e: 계획이 월급보다 많으면 “계획이 월급보다 1,500,0
   await page.goto('/salary/plan');
   const title = page.locator('.hg-plansum__title');
   await expect(title).toHaveText('계획이 월급보다 1,500,000원 많아요');
-  await expect(title).toHaveClass(/hg-plansum__title--error/);
-  const color = await title.evaluate((el) => getComputedStyle(el).color);
+  await expect(title).not.toHaveClass(/hg-plansum__title--error/);
+  await expect(title.locator('.hg-over')).toHaveText('1,500,000원');
+  const color = await title.locator('.hg-over').evaluate((el) => getComputedStyle(el).color);
+  const rest = await title.evaluate((el) => getComputedStyle(el).color);
   const danger = await page.evaluate(() => {
     const d = document.createElement('i');
     d.style.color = 'var(--danger)';
@@ -65,6 +67,7 @@ test('W-01 e: 계획이 월급보다 많으면 “계획이 월급보다 1,500,0
     return c;
   });
   expect(color).toBe(danger);
+  expect(rest).not.toBe(danger);
   await expect(page.locator('.hg-plansum__donut')).toBeVisible();
   await expect(page.locator('.hg-plansum__legend li')).toHaveCount(3);
   await axe(page);

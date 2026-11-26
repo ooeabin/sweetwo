@@ -1,4 +1,4 @@
-import { formatWon, type BaseDay } from '@sweetwo/core';
+import { planInputCheck, formatWon, type BaseDay } from '@sweetwo/core';
 import {
   AmountInput,
   BottomSheet,
@@ -142,9 +142,51 @@ export function LineSettingsFields({
 }
 
 /**
+ * 줄 금액 입력 아래 미계획 금액 한 줄(06 3-3, 2026-11-26 사용자 결정): 0 이상이면 “미계획 금액 80,000원”, 월급을 넘으면
+ * “월급보다 300,000원 많아요”(금액만 danger, 나머지는 평소 색) + 회색 글자 버튼 ‘월급 고치기’(onFixIncome이 있을 때만).
+ * text = 금액 표기(가리기면 “•••”). 막을지는 부르는 화면이 core planInputCheck로 정함
+ */
+export function PlanLeftHint({
+  left,
+  text,
+  onFixIncome,
+}: {
+  left: number;
+  text: (v: number) => string;
+  onFixIncome?: () => void;
+}) {
+  if (left >= 0)
+    return (
+      <p className="hg-help" aria-live="polite">
+        {speakMasked(copy.leftover(text(left)))}
+      </p>
+    );
+  return (
+    <>
+      <p className="hg-help" aria-live="polite">
+        {copy.overIncome[0]}
+        <span className="hg-over">{speakMasked(text(-left))}</span>
+        {copy.overIncome[1]}
+      </p>
+      {onFixIncome && (
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
+          onClick={onFixIncome}
+        >
+          {copy.fixIncome}
+        </button>
+      )}
+    </>
+  );
+}
+
+/**
  * W-01 금액 시트(20 W-01 7번): 이름(직접 추가 줄만) + 금액(1만 원 단위, 0원 가능, 좁은 창 키패드)
  * + 바뀐 뒤 여유 자금. 주 버튼(확인/추가하기), 저금 줄은 회색 글자 버튼 ‘저금 보기’, 지울 수 있으면 danger 글자 ‘지우기’.
  * left0 = 이 줄을 뺀 여유 자금(수입 − 다른 줄 합). masked면 바뀐 뒤 여유 자금도 “•••”(금액 칸은 그대로, 11 8장)
+ * 2026-11-26: 늘려서 월급을 넘으면 주 버튼을 막고 “월급보다 n 많아요” + ‘월급 고치기’(onFixIncome, core planInputCheck)
  */
 export function PlanSheet({
   title,
@@ -162,6 +204,7 @@ export function PlanSheet({
   masked,
   settings,
   notify,
+  onFixIncome,
 }: {
   title: string;
   amount: number;
@@ -181,13 +224,15 @@ export function PlanSheet({
   settings?: { value: LineSettings; showInChecklist: boolean; payday: BaseDay | null };
   /** 시트 아래 회색 한 줄(5f 관리하는 사람의 상대 용돈 “{이름}님께 알려 드려요”) */
   notify?: string;
+  /** 월급을 넘을 때 ‘월급 고치기’(W-01 3b 월급 금액 시트). 없으면 문구만 */
+  onFixIncome?: () => void;
 }) {
   const [v, setV] = useState<number | null>(initial);
   const [set, setSet] = useState<LineSettings | null>(settings?.value ?? null);
   const [name, setName] = useState(initialName ?? '');
-  const left = left0 - (v ?? 0);
+  const check = planInputCheck({ left0, before: initial, after: v });
   const unit = v !== null && v % 10_000 !== 0;
-  const valid = v !== null && !unit && (!renamable || name.trim().length > 0);
+  const valid = v !== null && !unit && !check.blocked && (!renamable || name.trim().length > 0);
   const won = (x: number) => (masked ? MASKED : formatWon(x));
   return (
     <BottomSheet
@@ -243,9 +288,7 @@ export function PlanSheet({
           extra={
             <>
               {unit && <p className="hg-help is-error">{copy.tenThousandUnit}</p>}
-              <p className={left < 0 ? 'hg-help is-error' : 'hg-help'} aria-live="polite">
-                {speakMasked(left >= 0 ? copy.leftover(won(left)) : copy.short(won(-left)))}
-              </p>
+              <PlanLeftHint left={check.left} text={won} onFixIncome={onFixIncome} />
             </>
           }
         />
@@ -321,9 +364,18 @@ export function IncomeSheet({
           onChange={setV}
           monthly
           allowZero
+          // 월급 고치기는 막지 않음(2026-11-26): 넘으면 “계획이 월급보다 n 많아요”(금액만 빨강)만
           extra={
-            <p className={left < 0 ? 'hg-help is-error' : 'hg-help'} aria-live="polite">
-              {speakMasked(left >= 0 ? copy.leftover(won(left)) : copy.short(won(-left)))}
+            <p className="hg-help" aria-live="polite">
+              {left >= 0 ? (
+                speakMasked(copy.leftover(won(left)))
+              ) : (
+                <>
+                  {copy.overPlan[0]}
+                  <span className="hg-over">{speakMasked(won(-left))}</span>
+                  {copy.overPlan[1]}
+                </>
+              )}
             </p>
           }
         />

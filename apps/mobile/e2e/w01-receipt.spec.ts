@@ -323,6 +323,8 @@ test('금액 바꾸기: 시트(미계획 금액 미리보기) → 바로 저장 
 
 test('지출 추가: 이름 칩 → 금액 → 추가하기, 직접 추가 줄은 이름 바꾸기', async ({ page }) => {
   const { db, go } = await open(page);
+  // 2026-11-26: 월급을 넘는 매달 금액은 입력에서 막힘(06 3-3). 시드는 미계획 0원이라 월급을 늘려 둠
+  Object.assign(db.me, { monthly_income: 5_000_000 });
   await go();
   await addSpend(page);
   const chips = page.getByRole('group', { name: '지출 이름' });

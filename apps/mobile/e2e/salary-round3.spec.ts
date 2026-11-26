@@ -73,9 +73,14 @@ test('W-10 ‘매달 950,000원씩’ 바꾸기: 이 줄 금액만 열고 바로
   await expect(page.getByText('미계획 금액 0원')).toBeVisible();
   await expect(page.getByLabel('매달 얼마씩 모을까요?')).toHaveValue('950,000');
   await axe(page);
+  // 2026-11-26: 늘려서 월급을 넘으면 ‘저장’을 막고 “월급보다 50,000원 많아요”(금액만 빨강) + ‘월급 고치기’(06 3-3)
   await page.getByLabel('매달 얼마씩 모을까요?').fill('1000000');
-  await expect(page.getByText('50,000원이 모자라요')).toBeVisible();
+  await expect(page.getByText('월급보다 50,000원 많아요')).toBeVisible();
+  await expect(page.locator('.hg-q__help .hg-over')).toHaveText('50,000원');
+  await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
+  await expect(page.getByRole('button', { name: '월급 고치기' })).toBeVisible();
   await page.getByLabel('매달 얼마씩 모을까요?').fill('800000');
+  await expect(page.getByRole('button', { name: '월급 고치기' })).toHaveCount(0);
   await expect(page.getByText('미계획 금액 150,000원')).toBeVisible();
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('매달 금액을 바꿨어요')).toBeVisible();

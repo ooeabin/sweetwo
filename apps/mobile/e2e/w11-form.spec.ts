@@ -19,6 +19,8 @@ test('필수가 비면 추가하기 비활성, 1만 원 단위, 직접 정하기
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
+  // 2026-11-26: 월급을 넘는 매달 금액은 입력에서 막힘(06 3-3). 시드는 미계획 0원이라 월급을 늘려 둠
+  Object.assign(db.me, { monthly_income: 5_000_000 });
   await page.goto('/salary/items/new');
   const add = page.getByRole('button', { name: '추가하기' });
   await expect(add).toBeDisabled();
@@ -48,6 +50,8 @@ test('자동으로 나가요 → 나가는 날(월급날 / 다음 날 / 한 줄 
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
+  // 2026-11-26: 월급을 넘는 매달 금액은 입력에서 막힘(06 3-3). 시드는 미계획 0원이라 월급을 늘려 둠
+  Object.assign(db.me, { monthly_income: 5_000_000 });
   await page.goto('/salary/items/new');
   await page.getByRole('button', { name: '여행', exact: true }).click();
   await fillAmount(page, '매달 얼마씩?', 100000);

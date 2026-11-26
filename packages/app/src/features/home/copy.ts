@@ -119,7 +119,9 @@ export const copy = {
   paydayLast: '말일',
   noPaydayTile: '수입이 들어올 때', // 2026-11-13 날짜 없음
   leftover: (amount: string) => `미계획 ${amount}`, // 2026-11-13 H-07, 2026-11-17 월급 상자 ‘월급 계획 템플릿’ 줄 보조, 2026-11-23 짧은 자리 규칙 ‘미계획’(예전 “미계획 금액 20만 원”)
-  short: (amount: string) => `${amount}이 모자라요`,
+  // 2026-11-26 사용자 결정: 계획이 월급을 넘으면 “월급보다 300,000원 많아요”(금액만 danger, W-01 요약 문장과 같은 말, 예전 “…이 모자라요”)
+  over: ['월급보다 ', ' 많아요'] as const,
+  overText: (amount: string) => `월급보다 ${amount} 많아요`,
   calendarTile: '캘린더',
   /** H-08 보조 줄(2026-11-24 구역 4: 일정 이름 + D-day “{이름} D-2”, H-16과 같은 첫 항목, 당일 “{이름} 오늘”, 없음 null) [확인 필요] */
   nextSchedule: (next: { name: string; days: number } | null) =>

@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { largestRemainder, planOverText, planRatio, planSummary, splitShares } from './plan-ratio';
+import {
+  largestRemainder,
+  planInputCheck,
+  planOverText,
+  planRatio,
+  planSummary,
+  splitShares,
+} from './plan-ratio';
 
 // 기획서 06 3-5 예시 표 그대로
 const man = (n: number) => n * 10_000;
@@ -175,5 +182,49 @@ describe('W-01 요약 카드: 줄 없음·계획 초과(2026-11-19)', () => {
     expect(r.over).toBe(true);
     expect(r.left).toBe(-250_000);
     expect(planOverText(r.left)).toBe('계획이 월급보다 250,000원 많아요');
+  });
+});
+
+describe('planInputCheck(06 3-3, 2026-11-26 입력할 때만 막음)', () => {
+  it('바꾼 뒤 미계획이 0 이상이면 막지 않음', () => {
+    expect(planInputCheck({ left0: 500_000, before: 200_000, after: 500_000 })).toEqual({
+      left: 0,
+      over: 0,
+      blocked: false,
+    });
+  });
+  it('늘려서 월급을 넘으면 막고 넘는 금액을 줌(“월급보다 300,000원 많아요”)', () => {
+    expect(planInputCheck({ left0: 500_000, before: 200_000, after: 800_000 })).toEqual({
+      left: -300_000,
+      over: 300_000,
+      blocked: true,
+    });
+  });
+  it('이미 넘친 상태에서 줄이면 아직 넘어도 막지 않음', () => {
+    const r = planInputCheck({ left0: 100_000, before: 500_000, after: 300_000 });
+    expect(r.over).toBe(200_000);
+    expect(r.blocked).toBe(false);
+  });
+  it('이미 넘친 상태에서 그대로 두면 막지 않음, 조금이라도 늘리면 막음', () => {
+    expect(planInputCheck({ left0: 100_000, before: 500_000, after: 500_000 }).blocked).toBe(false);
+    expect(planInputCheck({ left0: 100_000, before: 500_000, after: 510_000 }).blocked).toBe(true);
+  });
+  it('새 줄(before 0): 0원은 넘쳐 있어도 추가 가능, 0원보다 크면 막음', () => {
+    expect(planInputCheck({ left0: -250_000, before: 0, after: 0 }).blocked).toBe(false);
+    expect(planInputCheck({ left0: 300_000, before: 0, after: 400_000 }).blocked).toBe(true);
+  });
+  it('월급 0원이면 0원보다 큰 새 줄은 곧 막힘', () => {
+    expect(planInputCheck({ left0: 0, before: 0, after: 10_000 })).toEqual({
+      left: -10_000,
+      over: 10_000,
+      blocked: true,
+    });
+  });
+  it('아직 안 넣었으면(null) 바꾸기 전 값으로 셈', () => {
+    expect(planInputCheck({ left0: 100_000, before: 300_000, after: null })).toEqual({
+      left: -200_000,
+      over: 200_000,
+      blocked: false,
+    });
   });
 });
