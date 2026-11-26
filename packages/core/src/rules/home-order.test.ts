@@ -100,25 +100,19 @@ describe('monthCheck: 할 일 띠 5b 재료', () => {
 });
 
 describe('homeOrder(2026-11-20 고정)', () => {
-  it('띠 → 같이 모으기 → 결혼 준비 → 월급 상자 → 반 칸 타일 둘 → 다가오는 날', () => {
-    expect(homeOrder()).toEqual(['tasks', 'hero', 'wedding', 'salary', 'tiles', 'upcoming']);
+  it('띠 → 같이 모으기 → 월급 상자 → 반 칸 타일 둘 → 다가오는 날(2026-11-26 H-12 결혼 준비 상자 없앰)', () => {
+    expect(homeOrder()).toEqual(['tasks', 'hero', 'salary', 'tiles', 'upcoming']);
   });
   it('같이 모으기 모은 금액이 0원이어도 순서는 그대로(월급 상자가 H-10 위로 올라가지 않음)', () => {
     // 항목이 있으면 모은 금액과 상관없이 heroNone이 아니니 같은 순서
     expect(homeOrder({ heroNone: false })).toEqual(homeOrder());
     expect(homeOrder().indexOf('hero')).toBeLessThan(homeOrder().indexOf('salary'));
   });
-  it('같이 모으기 항목이 없으면 H-10을 안 그림(결혼 준비·월급 상자·타일은 그대로)', () => {
-    expect(homeOrder({ heroNone: true })).toEqual([
-      'tasks',
-      'wedding',
-      'salary',
-      'tiles',
-      'upcoming',
-    ]);
+  it('같이 모으기 항목이 없으면 H-10을 안 그림(월급 상자·타일은 그대로)', () => {
+    expect(homeOrder({ heroNone: true })).toEqual(['tasks', 'salary', 'tiles', 'upcoming']);
   });
   it('H-11·H-14·큰 반 칸 타일(월급 계획)·저금 타일은 홈 블록에 없음', () => {
     const all = homeOrder() as string[];
-    for (const gone of ['month', 'month_us', 'small']) expect(all).not.toContain(gone);
+    for (const gone of ['month', 'month_us', 'small', 'wedding']) expect(all).not.toContain(gone);
   });
 });

@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (525be990). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (50e37d9b). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 /* 2026-11-24 구역 5 설정 검토: 사용자 앱 글자 바탕값 15/22. 클래스 없는 b·p·li가 브라우저 기본 16px로 나오던 것(기준 17/15 밖). 어드민·웹사이트는 data-platform이 없어 그대로 */
@@ -3288,3 +3288,30 @@ button.hg-datepill { cursor: pointer; }
 @media (max-width: 359px) {
   .hg-hub .hg-hubtile { padding-inline: var(--space-2); }
 }
+/* 2026-11-26 사용자 결정 ‘빈 상태 A안’ 보충: 화면 일부만 빈 상태의 다음 행동은 모두 회색 보조 버튼(hg-btn--secondary, 보통 크기, 글자 700).
+   상자·줄 전체 버튼이던 자리는 버튼이 아닌 묶음(role=group)이 되고 안의 보조 버튼만 눌림: H-12 결혼 준비 상자(hg-hubtile--action “+ 쓸 곳 메모 추가”),
+   H-15 ‘이번 달 월급 체크’ 줄의 날짜 없음·기간 없음(hg-hubbox__row--action “수입 입력하기”), F-04a 만기 정리 통장 없음(hg-form__emptyact “통장 추가하기”).
+   제목(이름표)과 버튼 사이 12, 버튼은 왼쪽 정렬(글자 길이만큼) */
+.hg-hubtile--action, .hg-hubbox__row--action { cursor: default; }
+.hg-hubtile--action > .hg-btn { margin-top: var(--space-3); }
+.hg-hubbox__row--action { flex-direction: column; align-items: flex-start; gap: var(--space-3); padding-block: var(--space-4); }
+.hg-hubbox__row--action .hg-hubbox__name { font: var(--text-value); color: var(--ink-2); }
+:is(.hg-hubtile--action, .hg-hubbox__row--action):active { transform: none; }
+@media (hover: hover) { .hg-hubtile--action:hover { box-shadow: none; } }
+.hg-form__emptyact { align-self: flex-start; }
+/* 2026-11-26 사용자 결정(“홈에서 굳이 보조버튼이 왜 저렇게 크게 들어가?”, 레퍼런스 토스 홈·Neo Financial·Lightyear 상자 안 작은 알약):
+   홈 상자 안 빈 상태 보조 버튼은 작은 크기(Button sm). 보이는 높이 32, 15/700, 회색 판 surface-alt + ink-2 글자, 누르는 칸은 hg-btn--sm ::after 44 그대로.
+   H-15 ‘이번 달 월급 체크’ 기간 없음 줄은 이름표 왼쪽 + 작은 버튼 오른쪽 한 줄(높이 56). 홈 밖(F-04a, F-02, Y-09)은 보통 크기 그대로 */
+.hg-hub :is(.hg-hubtile--action, .hg-hubbox__row--action) .hg-btn--sm { height: 32px; padding: 0 var(--space-3); border-radius: var(--radius-btn-sm); background: var(--surface-alt); color: var(--ink-2); font: var(--text-value); font-weight: 700; }
+.hg-hub .hg-hubtile--action > .hg-btn--sm { margin-top: var(--space-2); }
+.hg-hub .hg-hubbox__row--action { flex-direction: row; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 56px; padding-block: var(--space-3); }
+.hg-hub .hg-hubbox__row--action .hg-btn--sm { flex: none; }
+/* 2026-11-26 사용자 결정(“같이 모으기 박스도 빈 공간이 너무 많은 듯”) 홈 상자 세로 간격(DESIGN.md 강약 기준 ‘홈 상자 세로 간격’): 홈 H-10만.
+   제목 줄 → 이름표 12, 이름표 → 금액 4, 금액 → 막대 12, 막대 → 보조 줄 8, 보조 줄 → 넘김 점 12, 상자 위아래 24(다른 홈 상자와 같음). 글자 크기·굵기 그대로.
+   이름표 줄의 min-height 32(W-10 Avatar 자리)를 홈에서만 풀어 위아래 7씩 남던 빈 곳을 없앰(그림 40이 들어오면 그 높이) */
+.hg-hub .hg-together__people { min-height: 0; }
+.hg-hub .hg-together__track { margin-top: var(--space-3); }
+.hg-hub .hg-together__amount { margin-top: var(--space-1); }
+.hg-hub .hg-together__bar { margin-top: var(--space-3); }
+.hg-hub .hg-together__line, .hg-hub .hg-together__line:first-of-type { margin-top: var(--space-2); }
+.hg-hub .hg-together__dots { margin-top: var(--space-3); }

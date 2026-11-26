@@ -8,7 +8,7 @@ import { homeTask, homeTaskTexts } from './home-tasks';
 import { doneRow } from './w02-row';
 
 // 홈 v2.2(19 ‘홈 v2.2’, ADR 0009): H-10 같이 모으기, H-11 이번 달 한 줄(날짜 없는 사람 H-13), H-06 할 일 띠 16순서,
-// H-15 월급 상자(이번 달 월급 체크·월급 계획 템플릿, 2026-11-17, 2026-11-18 저축·투자 줄 없앰), H-12 결혼 준비, H-04 자산 관리·H-08 캘린더 타일.
+// H-15 월급 상자(이번 달 월급 체크·월급 계획 템플릿, 2026-11-17, 2026-11-18 저축·투자 줄 없앰), H-04 자산 관리(H-12 결혼 준비는 2026-11-26 없앰)·H-08 캘린더 타일.
 // 찬우 혼자(예빈 미합류), 각자, 실수령 350만, 월급날 25일.
 // 9월 25일 월급 사이클 = 9월 25일 ~ 10월 24일, 월급 전 확인은 10월 22일부터.
 
@@ -152,7 +152,7 @@ test('홈 상자 → 화면: 월급 줄마다 W-02·W-01, 캘린더, 자산 관�
   await expect(page).toHaveURL(/\/salary\/plan$/);
 });
 
-test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 저축·투자 빈 묶음 칩 → W-11 한 화면 → 저장 → W-01 새 줄 강조 → H-10이 생기고 누를 수 없음, H-12 결혼 준비', async ({
+test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 저축·투자 빈 묶음 칩 → W-11 한 화면 → 저장 → W-01 새 줄 강조 → H-10이 생기고 누를 수 없음, 결혼 준비 중이어도 H-12 없음', async ({
   page,
 }) => {
   await open(page, (db) => {
@@ -175,7 +175,8 @@ test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 �
     '이번 달 월급 체크',
     '월급 계획 템플릿',
   ]);
-  // H-12(결혼 준비 중)도 hubtile이라 세 칸: 결혼 준비 → 자산 관리 → 캘린더
+  // 반 칸 타일 둘(2026-11-26 H-12 결혼 준비 상자는 없앰)
+  await expect(page.locator('.hg-hubtile')).toHaveCount(2);
   await expect(page.locator('.hg-hubtile').filter({ hasText: /^자산 관리/ })).toBeVisible();
   await expect(page.locator('.hg-hubtile').filter({ hasText: /^캘린더/ })).toBeVisible();
   // 띠 5b(월급날 확인할 게 있음)는 두 칸에 세지 않음(2026-11-17): 확인 + 첫 저금(7번) + 초대. 초대는 가려지지 않음(19 ‘띠 두 칸’). 2026-11-16 띠는 하나 “할 일 3개” → 시트
@@ -191,11 +192,8 @@ test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 �
   await expect(tl.locator('.hg-listrow').nth(2)).toContainText('같이 모을 사람을 초대해 보세요');
   await axe(page);
   await page.keyboard.press('Escape');
-  // H-12: 저축·투자가 하나도 없으면 쓸 곳 메모를 붙일 곳이 없어 “+ 저축·투자 추가”(2026-11-25, 예전엔 “+ 쓸 곳 메모 추가”인데 저축·투자 추가로 감)
-  await expect(page.getByRole('button', { name: /^결혼 준비 메모,/ })).toContainText(
-    '+ 저축·투자 추가',
-  );
-  await axe(page);
+  // H-12 결혼 준비 상자는 없앰(2026-11-26): 결혼 준비 중이어도 홈에 없음
+  await expect(page.getByText(/결혼 준비 메모|\+ 저축·투자 추가/)).toHaveCount(0);
   // 띠 → W-01 저축·투자 묶음 빈 상태
   await band(page).click();
   await page.getByRole('dialog', { name: '할 일' }).locator('.hg-listrow').nth(1).click();
@@ -433,12 +431,39 @@ test('날짜 없는 사람(H-13): 16일째부터 월급 상자 첫 줄에 “3,4
   await expect(page.getByRole('heading', { name: /\d+일 월급$/ })).toHaveCount(0);
 });
 
-test('날짜 없는 사람: 첫 수입 전 “수입 입력하기”, 빈 날 “마지막 수입 41일 전”', async ({ page }) => {
+test('날짜 없는 사람: 첫 수입 전 “수입 입력하기”, 빈 날 “마지막 수입 41일 전”', async ({
+  page,
+}) => {
   const db = await open(page, (d) => {
     Object.assign(d.me, { payday: null, payday_none: true });
     d.checklists.length = 0;
   });
-  await expect(monthLine(page)).toContainText('수입 입력하기');
+  // 2026-11-26 ‘빈 상태 A안’ 보충: 기간 없음은 줄만 빈 상태 → 줄은 묶음, 이름표 오른쪽 작은 회색 보조 버튼 “수입 입력하기”(→ W-20)
+  // 2026-11-26 사용자 결정 ‘홈 상자 안은 작은 보조 버튼’: sm, 보이는 높이 32, 15/700, 줄 높이 56
+  const row = page.getByRole('group', { name: '이번 달 월급 체크' });
+  const moneyIn = row.getByRole('button', { name: '수입 입력하기' });
+  await expect(moneyIn).toHaveClass(/hg-btn--secondary/);
+  await expect(moneyIn).toHaveClass(/hg-btn--sm/);
+  expect(
+    await moneyIn.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return `${Math.round(el.getBoundingClientRect().height)}/${s.fontSize}/${s.fontWeight}`;
+    }),
+  ).toBe('32/15px/700');
+  // 누르는 칸은 44 이상(::after)
+  expect(
+    await moneyIn.evaluate((el) => parseFloat(getComputedStyle(el, '::after').height)),
+  ).toBeGreaterThanOrEqual(44);
+  expect(Math.round((await row.boundingBox())?.height ?? 0)).toBe(56);
+  // 이름표 왼쪽, 버튼 오른쪽 한 줄
+  const nameBox = await row.locator('.hg-hubbox__name').boundingBox();
+  const btnBox = await moneyIn.boundingBox();
+  expect((btnBox?.x ?? 0) > (nameBox?.x ?? 0) + (nameBox?.width ?? 0)).toBe(true);
+  await expect(page.getByRole('button', { name: /^이번 달 월급 체크/ })).toHaveCount(0);
+  await axe(page);
+  await row.getByRole('button', { name: '수입 입력하기' }).click();
+  await expect(page).toHaveURL(/\/salary\/money-in(\?|$)/);
+  await page.goto('/');
   if (db.v22)
     db.v22.period = {
       status: 'gap',

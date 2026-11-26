@@ -422,9 +422,8 @@ export type AnalyticsEvent =
       name: 'home_box_tapped';
       props: {
         // 2026-11-18: H-10은 누를 수 없는 정보 상자라 together·more·chip(빈 상태)을 없앰.
-        // wedding = H-12, money_in = ‘+ 수입 입력하기’, dday = H-10 머리 ‘결혼식 날짜 알려 주기’
+        // money_in = ‘+ 수입 입력하기’(2026-11-26 wedding = H-12는 홈에서 없앰), dday = H-10 머리 ‘결혼식 날짜 알려 주기’
         box:
-          | 'wedding'
           | 'money_in'
           | 'dday'
           | 'band'

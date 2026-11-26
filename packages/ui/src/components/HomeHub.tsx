@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Button } from './Button';
 import { cx } from './cx';
 import { Icon } from './Icon';
 
@@ -120,6 +121,11 @@ export interface HubBoxRow {
   label?: string;
   /** 이 줄을 누르면 */
   onClick: () => void;
+  /**
+   * 이 줄이 빈 상태일 때 다음 행동(2026-11-26 사용자 결정 ‘빈 상태 A안’ 보충: 화면 일부만 빈 상태 = 보조 버튼).
+   * 있으면 줄은 버튼이 아니라 묶음(`hg-hubbox__row--action`): 이름표 왼쪽 + 오른쪽 작은 회색 보조 버튼(sm, 보이는 높이 32, 2026-11-26 ‘홈 상자 안은 작은 보조 버튼’)이 onClick. value·›는 그리지 않음
+   */
+  action?: string;
 }
 
 /**
@@ -135,6 +141,20 @@ export function HubBox({ title, rows }: { title: string; rows: HubBoxRow[] }) {
       <span className="hg-hubbox__title">{title}</span>
       <div className="hg-hubbox__list">
         {rows.map((r) => {
+          if (r.action)
+            return (
+              <div
+                key={r.key}
+                className="hg-hubbox__row hg-hubbox__row--action"
+                role="group"
+                aria-label={r.name}
+              >
+                <span className="hg-hubbox__name">{r.name}</span>
+                <Button variant="secondary" size="sm" onClick={r.onClick}>
+                  {r.action}
+                </Button>
+              </div>
+            );
           const hasValue = r.value !== undefined && r.value !== null && r.value !== '';
           return (
             <button
@@ -177,6 +197,7 @@ export function HubTile({
   label,
   onClick,
   className,
+  action,
 }: {
   title: string;
   /** 값 위 작은 이름표(13/400 `slate`, “순자산”) */
@@ -200,7 +221,25 @@ export function HubTile({
   onClick: () => void;
   /** 격자 자리(H-12 두 칸 hg-hub__wide, 2026-11-13) */
   className?: string;
+  /**
+   * 상자가 빈 상태일 때 다음 행동(2026-11-26 사용자 결정 ‘빈 상태 A안’ 보충, H-12 “+ 쓸 곳 메모 추가”):
+   * 있으면 상자는 버튼이 아니라 묶음(`hg-hubtile--action`): 제목 + 그 아래 작은 회색 보조 버튼(sm, 보이는 높이 32, 2026-11-26 ‘홈 상자 안은 작은 보조 버튼’)이 onClick. sub·value는 그리지 않음. 2026-11-26 H-12가 홈에서 없어져 지금 쓰는 곳 없음
+   */
+  action?: string;
 }) {
+  if (action)
+    return (
+      <div
+        className={cx('hg-hubtile hg-hubtile--action', small && 'hg-hubtile--sm', className)}
+        role="group"
+        aria-label={title}
+      >
+        <span className="hg-hubtile__title">{title}</span>
+        <Button variant="secondary" size="sm" onClick={onClick}>
+          {action}
+        </Button>
+      </div>
+    );
   return (
     <button
       type="button"

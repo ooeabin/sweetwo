@@ -11,7 +11,6 @@ import {
   fetchPartner,
   fetchPastChecklists,
   fetchSalaryChanges,
-  fetchSavingNotes,
   fetchSharedAccounts,
   fetchSpace,
   fetchUpcomingNotes,
@@ -73,14 +72,6 @@ export const useSalaryChanges = () =>
 /** 다가오는 쓸 곳 메모(띠 14번, H-08 캘린더 타일): 오늘부터 7일 */
 export const useUpcomingNotes = (from: string, to: string) =>
   useQuery({ queryKey: qk.upcomingNotes(from, to), queryFn: () => fetchUpcomingNotes(from, to) });
-
-/** 대표 저금(또는 묶음)의 쓸 곳 메모(H-12) */
-export const useHeroNotes = (o: { goalId?: string; bundleId?: string } | null) =>
-  useQuery({
-    queryKey: qk.savingNotes(o ?? {}),
-    queryFn: () => fetchSavingNotes(o ?? {}),
-    enabled: !!o,
-  });
 
 /** 내 지난 사이클 확인 목록(늦은 확인, H-11). owner null = 공동 */
 export const usePreviousChecklist = (owner: string | null | undefined, before: string | null) =>

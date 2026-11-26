@@ -1024,22 +1024,17 @@ export function monthCheck(l: HomeMonthLine): MonthCheck | null {
 
 /**
  * 홈 상자 묶음 순서(좁은 창 위에서 아래, 2026-11-17 메뉴 서랍과 같은 이름·순서).
- * tasks = H-06 띠, hero = H-10, wedding = H-12, salary = H-15 월급 상자, tiles = 반 칸 타일 둘(H-04 자산 관리, H-08 캘린더),
+ * tasks = H-06 띠, hero = H-10, salary = H-15 월급 상자, tiles = 반 칸 타일 둘(H-04 자산 관리, H-08 캘린더),
  * upcoming = H-16 다가오는 날 상자(2026-11-20, 타일 아래. 일정이 없으면 홈이 안 그림)
  */
-export type HomeBlock = 'tasks' | 'hero' | 'wedding' | 'salary' | 'tiles' | 'upcoming';
+export type HomeBlock = 'tasks' | 'hero' | 'salary' | 'tiles' | 'upcoming';
 
 /**
- * 홈 순서(19 ‘홈 순서’, 2026-11-20 고정): 할 일 띠(H-06) → 같이 모으기 H-10 → (결혼 준비 중이면 바로 아래 H-12) → 월급 상자 H-15 → 반 칸 타일 둘 → H-16.
+ * 홈 순서(19 ‘홈 순서’, 2026-11-20 고정): 할 일 띠(H-06) → 같이 모으기 H-10 → 월급 상자 H-15(2026-11-26 H-12 결혼 준비 상자는 없앰) → 반 칸 타일 둘 → H-16.
  * 예전엔 H-10 모은 금액이 0원이면 월급 상자가 H-10 위로 올라갔으나(2026-11-17) 없앰: 같은 홈이 상태마다 다른 순서로 보이던 것을 고정.
  * 확인할 게 있으면 H-11을 맨 위로 올리던 예전 규칙(2026-11-15)도 없앰: 할 일 띠 5b가 대신함
  */
 export function homeOrder(o: { heroNone?: boolean } = {}): HomeBlock[] {
-  // 같이 모으기 항목이 하나도 없으면 H-10을 안 그림(2026-11-18). H-12는 그대로 월급 상자 위
-  return [
-    'tasks',
-    ...(o.heroNone ? (['wedding', 'salary'] as const) : (['hero', 'wedding', 'salary'] as const)),
-    'tiles',
-    'upcoming',
-  ];
+  // 같이 모으기 항목이 하나도 없으면 H-10을 안 그림(2026-11-18)
+  return ['tasks', ...(o.heroNone ? [] : (['hero'] as const)), 'salary', 'tiles', 'upcoming'];
 }

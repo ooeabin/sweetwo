@@ -184,7 +184,9 @@ test('H-16 일정이 없으면 상자를 안 그림, 캘린더 타일은 “기�
   page,
 }) => {
   await open(page);
-  await expect(page.getByRole('button', { name: /^캘린더/ })).toContainText('기념일을 입력해 보세요');
+  await expect(page.getByRole('button', { name: /^캘린더/ })).toContainText(
+    '기념일을 입력해 보세요',
+  );
   await expect(page.locator('.hg-hubup')).toHaveCount(0);
 });
 
@@ -257,7 +259,7 @@ test('S-20 도움말: 기본 탭 “자주 묻는 질문” 대표 5개 + 묶음
   await expect(page.getByRole('button', { name: '버전' })).toBeVisible();
 });
 
-// 구역 1 홈 케이스 점검(2026-11-20, 19 H-06 5c·11a, H-10, H-12, H-16, W-12)
+// 구역 1 홈 케이스 점검(2026-11-20, 19 H-06 5c·11a, H-10, H-12(2026-11-26 없앰), H-16, W-12)
 test('H-06 묶음 띠: 가장 앞선 할 일 문장 + 오른쪽 “+n” + ›, 읽기 이름 “할 일 n개”, 누르면 시트', async ({
   page,
 }) => {
@@ -298,16 +300,47 @@ test('같이 모으기 모은 금액이 0원이어도 홈 순서는 고정: 띠 
   expect(await top('.hg-hubtile')).toBeLessThan(await top('.hg-hubup'));
 });
 
-test('H-12 결혼 준비 메모가 0개면 제목은 “결혼 준비 메모”(개수 없음) + “+ 쓸 곳 메모 추가”', async ({
+test('H-12 결혼 준비 메모 상자는 없앰(2026-11-26 사용자 결정): 결혼 준비 중이어도 홈에 그리지 않음, 결혼식 D-day는 H-10 머리 그대로', async ({
   page,
 }) => {
   await open(page, (d) => {
     Object.assign(d.space ?? {}, { marriage_status: 'engaged', wedding_date: '2027-03-01' });
   });
-  const tile = page.getByRole('button', { name: /^결혼 준비 메모/ });
-  await expect(tile.locator('.hg-hubtile__title')).toHaveText('결혼 준비 메모');
-  await expect(tile.locator('.hg-hubtile__sub')).toHaveText('+ 쓸 곳 메모 추가');
-  await expect(page.getByText('결혼 준비 메모 0개')).toHaveCount(0);
+  await expect(page.locator('.hg-hubbox')).toBeVisible();
+  await expect(page.getByText(/결혼 준비 메모/)).toHaveCount(0);
+  await expect(page.getByText('+ 쓸 곳 메모 추가')).toHaveCount(0);
+  await expect(page.locator('.hg-hubtile.hg-hub__wide')).toHaveCount(0);
+  await expect(page.locator('.hg-together .hg-hubtile__badge')).toContainText('결혼식 D-');
+});
+
+// 2026-11-26 사용자 결정(“같이 모으기 박스도 빈 공간이 너무 많은 듯”): 홈 상자 세로 간격(DESIGN.md 강약 기준 ‘홈 상자 세로 간격’)
+test('H-10 세로 간격: 제목 줄 → 이름표 12, 이름표 → 금액 4, 금액 → 막대 12, 막대 → 보조 줄 8, 상자 위아래 24', async ({
+  page,
+}) => {
+  await open(page, (d) => {
+    Object.assign(d.space ?? {}, { couple_state: 'connected', partner_nickname: '예빈' });
+    d.partner = PARTNER;
+    for (const g of d.goals) g.owner_user_id = null;
+  });
+  const box = page.locator('.hg-together');
+  await expect(box.locator('.hg-together__bar').first()).toBeVisible();
+  const r = await box.evaluate((el) => {
+    const q = (s: string) => el.querySelector(s)?.getBoundingClientRect() ?? null;
+    const b = el.getBoundingClientRect();
+    const head = q('.hg-together__head');
+    const name = q('.hg-together__name');
+    const amt = q('.hg-together__amount');
+    const bar = q('.hg-together__bar');
+    const line = q('.hg-together__line');
+    return {
+      top: Math.round((head?.top ?? 0) - b.top),
+      headName: Math.round((name?.top ?? 0) - (head?.bottom ?? 0)),
+      nameAmt: Math.round((amt?.top ?? 0) - (name?.bottom ?? 0)),
+      amtBar: Math.round((bar?.top ?? 0) - (amt?.bottom ?? 0)),
+      barLine: Math.round((line?.top ?? 0) - (bar?.bottom ?? 0)),
+    };
+  });
+  expect(r).toEqual({ top: 24, headName: 12, nameAmt: 4, amtBar: 12, barLine: 8 });
 });
 
 test('목표 달성: 홈을 열어도 W-12로 넘어가지 않고 띠 “{이름} 다 모았어요”가 뜸 → W-12(머리글 없음) → 고르면 띠가 사라짐', async ({
@@ -352,7 +385,6 @@ test('홈 A안 강약(2026-11-26): 상자 제목 15/700, 월급 줄은 이름표
   page,
 }) => {
   await open(page, (d) => {
-    Object.assign(d.space ?? {}, { marriage_status: 'engaged', wedding_date: '2027-03-01' });
     d.cares.push(care({}));
     d.assets.push(asset({}));
   });
@@ -391,14 +423,6 @@ test('홈 A안 강약(2026-11-26): 상자 제목 15/700, 월급 줄은 이름표
   ).toBe('700');
   const cal = page.getByRole('button', { name: /^캘린더/ });
   await expect(cal.locator('.hg-hubtile__value')).toHaveText('어머니 생신 D-7');
-  // 결혼 준비: 추가 안내는 15/400
-  const wed = page.getByRole('button', { name: /^결혼 준비 메모/ });
-  expect(
-    await wed.locator('.hg-hubtile__sub').evaluate((el) => {
-      const s = getComputedStyle(el);
-      return `${s.fontSize}/${s.fontWeight}`;
-    }),
-  ).toBe('15px/400');
   await axe(page);
 });
 
