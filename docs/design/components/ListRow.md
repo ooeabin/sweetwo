@@ -21,7 +21,7 @@
 
 ## Lead 종류 표 (2026-11-09)
 
-2026-11-10부터 줄 앞 칸은 회색 빈 원이고, 아래 표는 종류와 나중 2D 그림(Illustrations 4·6·7번)의 짝이다. 아이콘 열은 그림 주제 이름. (2026-11-09 기록: Phosphor 아이콘 + 영역 색 원(`hg-lead--together`·`family`·`goal`·`safety`·`invest`, 원은 틴트 바탕, 아이콘은 짝 `*-ink`). 영역 색이 없는 종류는 회색 원(`surface-alt` + `ink-2`).) 한 종류 = 아이콘 하나, 표는 코드 한 곳(`packages/ui/src/components/lead-kinds.ts`, `leadOf(묶음, 종류)`)에만 두고 화면은 그 표로만 그림. 새 종류는 표에 한 줄 더하고 여기도 고침. 모르는 종류는 묶음의 기본(맨 아래 ‘모를 때’).
+2026-11-15 3차 검토부터 그림 파일이 없는 종류 자리는 그리지 않고 칸도 비운다(`Lead`가 `null`, `shownLead`). 아래 표는 종류와 나중 2D 그림(Illustrations 4·6·7번)의 짝이다. 아이콘 열은 그림 주제 이름. (2026-11-09 기록: Phosphor 아이콘 + 영역 색 원(`hg-lead--together`·`family`·`goal`·`safety`·`invest`, 원은 틴트 바탕, 아이콘은 짝 `*-ink`). 영역 색이 없는 종류는 회색 원(`surface-alt` + `ink-2`).) 한 종류 = 아이콘 하나, 표는 코드 한 곳(`packages/ui/src/components/lead-kinds.ts`, `leadOf(묶음, 종류)`)에만 두고 화면은 그 표로만 그림. 새 종류는 표에 한 줄 더하고 여기도 고침. 모르는 종류는 묶음의 기본(맨 아래 ‘모를 때’).
 
 | 묶음 | 종류 | 아이콘 | 영역 색 | 쓰는 곳 |
 | --- | --- | --- | --- | --- |

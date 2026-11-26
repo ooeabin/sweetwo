@@ -2,7 +2,7 @@
 
 2026-11-13 v2.2: 홈 주인공 H-10 같이 모으기(SaveTogether), H-11 이번 달 한 줄, H-12 결혼 준비, 띠 글자 버튼 둘 → 맨 아래 ‘v2.2’ 장. H-02 저금 상자·H-03 큰 상자는 없앰.
 
-홈 허브(2026-11-09, GCOO 앱 홈처럼, 사용자 승인한 그림 기준). 회색 바탕(`surface-alt`, AppFrame `tone="alt"`) 위에 크기가 다른 흰 상자를 쌓아 각 화면으로 잇는 홈(19 H-02~H-09).
+홈 허브(2026-11-09, GCOO 앱 홈처럼, 사용자 승인한 그림 기준). 회색 바탕(`surface-alt`, AppFrame `tone="alt"`) 위에 크기가 다른 흰 상자를 쌓아 각 화면으로 잇는 홈(19 H-04·H-06·H-08·H-10·H-12·H-15. H-02·H-03·H-07·H-09는 없앰).
 
 - 격자(`hg-hub`): 상자 사이 12px(`space-3`). 좁은 창·중간 창은 2열(`hg-hub__wide`·`hg-hub__full`은 두 칸), 넓은 창(1100px 이상)은 4열(`hg-hub__wide` = 두 칸, `hg-hub__full` = 한 줄, 할 일 띠는 맨 위로 `order`). 상자는 모두 흰색 `radius-xl`, 테두리·그림자 없음(마우스 올림만 `shadow-2`), 누름 98%, 키보드 포커스 ink 링 2px.
 - 큰 상자(`hg-hubhero`, HubHero, 두 칸): 안쪽 20px. 위 줄 작은 캡션(13px 500 `slate`, “10월 25일 월급날까지”) + 제목(`title-2` 20px 700) + 오른쪽 겹친 Avatar(`hg-avatars`, 36px). 진행 줄: 굵은 둥근 막대(`hg-hubhero__track`, 10px, 바탕 `surface-alt`, 채움 `accent-app`) + 막대 아래 13px `slate` 이름 + 오른쪽 큰 숫자(`hg-hubhero__count`, `number-lg` 24px 700, “/ 5”는 15px 500 `slate`). 맨 아래 상자 끝까지 닿는 두 칸(`hg-hubhero__split`, 위·사이 `hairline-soft` 선, 14px 500 `slate` 이름 + 700 `ink` 값). 상자 전체가 버튼, 화면 읽기는 문장 하나(`label`).
