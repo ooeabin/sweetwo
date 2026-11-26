@@ -240,6 +240,7 @@ test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 �
 test('첫 월급날 전(소급 없음): 월급 상자 첫 줄 “10월 23일부터”(25일 일요일 → 앞당김), 7일 전 띠 9번 → W-01d 자동 줄 고르기 → 띠 사라짐', async ({
   page,
 }) => {
+  test.setTimeout(60_000); // 홈·W-02·시트를 여러 번 오가서 병렬 부하에선 30초를 넘김
   const PRE = new Date('2026-10-20T10:00:00+09:00');
   const db = await open(
     page,
@@ -253,7 +254,8 @@ test('첫 월급날 전(소급 없음): 월급 상자 첫 줄 “10월 23일부�
   );
   // 첫 월급날도 앞당긴 날(25일 일요일 → 23일 금요일, 서버 make_checklist와 같음, 2026-11-14 R3)
   await expect(monthLine(page)).toContainText('10월 23일부터');
-  expect(await homeTaskTexts(page)).toContain('자동으로 나가는 걸 골라 주세요');
+  // 할 일이 다 올라오기 전엔 띠가 하나로 보일 수 있어, 문장이 보일 때까지 다시 읽는다
+  await expect.poll(() => homeTaskTexts(page)).toContain('자동으로 나가는 걸 골라 주세요');
   await axe(page);
   // W-02도 같은 문장(첫 확인 목록 전)
   await page.goto('/salary');

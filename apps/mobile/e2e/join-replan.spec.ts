@@ -219,10 +219,9 @@ test('각자(저금만 같이 해요): 형태 확인 ‘좋아요’ → 월급(
     month_us: true,
   });
   expect(db.space?.couple_state).toBe('connected');
-  expect(ev.find((e) => e.name === 'push_permission_answered')?.props).toMatchObject({
-    screen_id: 'P-11',
-    result: 'later',
-  });
+  await expect
+    .poll(() => ev.find((e) => e.name === 'push_permission_answered')?.props)
+    .toMatchObject({ screen_id: 'P-11', result: 'later' });
 
   // 출생연도는 자산 순위(F-08)를 처음 열 때 물음: ‘출생연도 알려 주기’ → S-11i → F-08(시작한 사람과 같음).
   // 순위는 자산이 있어야 보여서 공동 통장 하나
@@ -306,11 +305,9 @@ test('각자(생활비와 저금을 같이 해요) + ‘월급은 대부분 찬�
   expect(
     db.splits.find((x) => x.owner_user_id === db.me.id)?.split_line.map((l) => l.kind),
   ).toEqual(['allowance', 'send']);
-  expect(ev.find((e) => e.name === 'mode_change_requested')?.props).toEqual({
-    phrase: 'p04_send',
-    to_mode: 'combined',
-    result: 'requested',
-  });
+  await expect
+    .poll(() => ev.find((e) => e.name === 'mode_change_requested')?.props)
+    .toEqual({ phrase: 'p04_send', to_mode: 'combined', result: 'requested' });
   // 관리하지 않는 쪽: 월급날 확인 없음(자동 줄뿐), 내 용돈이 바뀌었을 때
   await pushKinds(page, [
     ['경조사가 다가올 때', true],
