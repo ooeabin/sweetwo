@@ -45,6 +45,42 @@ export const savingStartChips = (
   m: MarriageStatus | null | undefined,
 ): (SavingChip | 'custom')[] => [...savingChips(m), 'custom'];
 
+/**
+ * 저축·투자 그림 키 표(2026-11-26 사용자 결정, docs/spec/19 H-10 ‘그림 자리’, Illustrations.md ‘나중 과제’ 11번).
+ * 이름 칩마다 하나 + 직접 정한 이름은 공통 키 하나. 키 = 파일 이름(`packages/ui/src/assets/illustrations/<키>.webp`).
+ * 파일이 없으면 그 자리를 그리지 않음(`Illustration` null). 지금 쓰는 곳: 홈 H-10 같이 모으기 칸 왼쪽
+ */
+export const SAVING_ART: Record<SavingChip, string> = {
+  wedding: 'saving-wedding',
+  newlywed_home: 'saving-newlywed-home',
+  honeymoon: 'saving-honeymoon',
+  dowry: 'saving-dowry',
+  emergency: 'saving-emergency',
+  home: 'saving-home',
+  travel: 'saving-travel',
+  car: 'saving-car',
+  childcare: 'saving-childcare',
+  retire: 'saving-retire',
+  moving: 'saving-moving',
+  appliance: 'saving-appliance',
+  anniv_gift: 'saving-anniv-gift',
+  date: 'saving-date',
+  lump: 'saving-lump',
+};
+/** 직접 정한 이름(칩 이름과 다름) */
+export const SAVING_ART_CUSTOM = 'saving-custom';
+export const SAVING_ART_KEYS = [...Object.values(SAVING_ART), SAVING_ART_CUSTOM] as const;
+
+/**
+ * 저축·투자(또는 묶음) 이름 → 그림 키. 저금은 칩 코드를 저장하지 않아 이름이 칩 이름(앱 copy)과 같으면 그 칩,
+ * 아니면 직접 정한 이름 공통 키. 칩 이름은 앱 copy가 정하므로 인자로 받음
+ */
+export function savingArtKey(name: string, chipNames: Record<SavingChip, string>): string {
+  const n = name.trim();
+  const chip = (Object.keys(chipNames) as SavingChip[]).find((c) => chipNames[c] === n);
+  return chip ? SAVING_ART[chip] : SAVING_ART_CUSTOM;
+}
+
 export interface NextSavingGoal {
   status: string;
   closed_at: string | null;

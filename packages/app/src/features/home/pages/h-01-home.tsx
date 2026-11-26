@@ -689,12 +689,14 @@ export function H01Home() {
           ? notice?.node
           : undefined;
 
-  // ── H-10 같이 모으기 ──
+  // ── H-10 같이 모으기 ── 사람 원은 머리 제목 오른쪽 작은 Avatar(sm 24, 2026-11-26)
   const people = (
     <span className="hg-avatars" aria-hidden="true">
       {(() => {
         const starter = sp.created_by;
-        const meDot = <PersonDot key="me" name={myName} starter={starter === myId} userId={myId} />;
+        const meDot = (
+          <PersonDot key="me" name={myName} starter={starter === myId} userId={myId} size="sm" />
+        );
         // 미합류면 내 Avatar 하나(빈 원 없음)
         if (!joined || !partner.data) return meDot;
         const pDot = (
@@ -703,6 +705,7 @@ export function H01Home() {
             name={partner.data.nickname ?? ''}
             starter={starter === partner.data.id}
             userId={partner.data.id}
+            size="sm"
           />
         );
         return starter === myId ? [meDot, pDot] : [pDot, meDot];
@@ -711,7 +714,7 @@ export function H01Home() {
   );
   const peopleMine = (
     <span className="hg-avatars" aria-hidden="true">
-      <PersonDot name={myName} starter={sp.created_by === myId} userId={myId} />
+      <PersonDot name={myName} starter={sp.created_by === myId} userId={myId} size="sm" />
     </span>
   );
   const monthFrom = list?.cycle_start ?? `${today.slice(0, 7)}-01`;

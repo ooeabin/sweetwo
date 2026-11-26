@@ -401,3 +401,94 @@ test('홈 A안 강약(2026-11-26): 상자 제목 15/700, 월급 줄은 이름표
   ).toBe('15px/400');
   await axe(page);
 });
+
+// 2026-11-26 사용자 결정: H-10 칸 왼쪽 = 저축·투자 그림(파일이 없으면 자리째 없음), 사람 원은 머리 제목 오른쪽 작은 Avatar
+test('H-10 그림 자리는 파일이 없으면 그리지 않고, 사람 원은 머리 “같이 모으기” 바로 오른쪽 sm(연결이면 둘)', async ({
+  page,
+}) => {
+  await open(page, (d) => {
+    Object.assign(d.space ?? {}, { couple_state: 'connected', partner_nickname: '예빈' });
+    d.partner = PARTNER;
+    for (const g of d.goals) g.owner_user_id = null;
+  });
+  const box = page.locator('.hg-together');
+  const slide = box.locator('.hg-together__slide').first();
+  await expect(slide).toBeVisible();
+  // 그림 파일이 아직 없어 그림·회색 빈 자리·사람 원 모두 칸 안에 없음
+  await expect(slide.locator('img, .hg-artslot, .hg-avatar, .hg-ico')).toHaveCount(0);
+  const owners = box.locator('.hg-together__titlerow .hg-together__owners .hg-avatar');
+  await expect(owners).toHaveCount(2);
+  for (const a of await owners.all())
+    expect(Math.round((await a.boundingBox())?.width ?? 0)).toBe(24);
+  // 제목 바로 오른쪽(같은 줄, 8px 띄움)
+  const t = await box.locator('.hg-together__title').boundingBox();
+  const o = await box.locator('.hg-together__owners').boundingBox();
+  expect(Math.round((o?.x ?? 0) - ((t?.x ?? 0) + (t?.width ?? 0)))).toBe(8);
+  expect(
+    Math.abs((o?.y ?? 0) + (o?.height ?? 0) / 2 - ((t?.y ?? 0) + (t?.height ?? 0) / 2)),
+  ).toBeLessThan(2);
+  // 화면 읽기 문장은 그대로
+  await expect(slide).toHaveAccessibleName(/^같이 모으기, 내 집 마련, 0원/);
+  await axe(page);
+});
+
+test('H-16 다가오는 날 줄: 이름 15/400 ink + D-n 13/400 slate, 줄 높이 40, 제목과 첫 줄 사이 8', async ({
+  page,
+}) => {
+  await open(page, (d) => {
+    d.cares.push(care({}), care({ id: 'c-2', name: '결혼기념일', day: 30 }));
+  });
+  const box = page.locator('.hg-hubup');
+  await expect(box.locator('.hg-hubup__row')).toHaveCount(2);
+  const font = (sel: string) =>
+    box
+      .locator(sel)
+      .first()
+      .evaluate((el) => {
+        const s = getComputedStyle(el);
+        return `${s.fontSize}/${s.fontWeight}`;
+      });
+  expect(await font('.hg-hubup__name')).toBe('15px/400');
+  expect(await font('.hg-hubup__dday')).toBe('13px/400');
+  const rows = await box.locator('.hg-hubup__row').all();
+  for (const r of rows) expect(Math.round((await r.boundingBox())?.height ?? 0)).toBe(40);
+  const title = await box.locator('.hg-hubup__title').evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return { bottom: r.bottom, pad: parseFloat(getComputedStyle(el).paddingBottom) };
+  });
+  const firstTop = (await rows[0]?.boundingBox())?.y ?? 0;
+  expect(Math.round(firstTop - (title.bottom - title.pad))).toBe(8);
+  expect(Math.round((await box.boundingBox())?.height ?? 0)).toBeGreaterThanOrEqual(44);
+});
+
+for (const [amount, text] of [
+  [42_000_000, '42,000,000원'],
+  [150_000_000, '150,000,000원'],
+] as const)
+  test(`320px 반 칸 타일 자산 관리 금액 “${text}”이 17/700 한 줄(안쪽 좌우 8, 2026-11-26 A안)`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 800 });
+    await open(page, (d) => {
+      d.assets.push(asset({ amount }));
+    });
+    const tile = page.getByRole('button', { name: /^자산 관리/ });
+    const value = tile.locator('.hg-hubtile__value');
+    await expect(value).toHaveText(text);
+    const v = await value.evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { size: s.fontSize, weight: s.fontWeight, h: el.getBoundingClientRect().height };
+    });
+    expect(v).toEqual({ size: '17px', weight: '700', h: 24 });
+    expect(await tile.evaluate((el) => getComputedStyle(el).paddingLeft)).toBe('8px');
+  });
+
+test('375px 반 칸 타일 안쪽 좌우는 그대로 20', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 800 });
+  await open(page, (d) => {
+    d.assets.push(asset({}));
+  });
+  const tile = page.getByRole('button', { name: /^자산 관리/ });
+  await expect(tile.locator('.hg-hubtile__value')).toBeVisible();
+  expect(await tile.evaluate((el) => getComputedStyle(el).paddingLeft)).toBe('20px');
+});

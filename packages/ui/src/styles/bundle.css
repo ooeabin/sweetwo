@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (3af8c44e). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (9c5eff8b). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 /* 2026-11-24 구역 5 설정 검토: 사용자 앱 글자 바탕값 15/22. 클래스 없는 b·p·li가 브라우저 기본 16px로 나오던 것(기준 17/15 밖). 어드민·웹사이트는 data-platform이 없어 그대로 */
@@ -3256,4 +3256,25 @@ button.hg-datepill { cursor: pointer; }
   .hg-frame__mhead--back .hg-mhead__action { grid-column: 3; justify-self: end; display: flex; align-items: center; }
   :is(.hg-frame__mhead--back .hg-mhead__action, .hg-noti--page .hg-noti__head) > .hg-btn.hg-headaction { height: auto; min-height: 44px; margin: 0 -8px 0 0; padding: 0 var(--space-4); border: 0; background: transparent; font: var(--text-note); color: var(--ink-2); }
   :is(.hg-frame__mhead--back .hg-mhead__action, .hg-noti--page .hg-noti__head) > .hg-btn.hg-headaction:disabled { background: transparent; color: var(--muted); }
+}
+/* 2026-11-26 사용자 결정 홈 H-10 그림·머리 사람 원(SaveTogether.md ‘그림 자리’):
+   칸 왼쪽 = 그 저축·투자의 그림 40px(core savingArtKey, 파일이 없으면 Illustration이 null이라 자리째 없음, 회색 빈 자리·Phosphor 금지).
+   사람 원은 머리 제목 “같이 모으기” 바로 오른쪽 작은 겹친 Avatar(sm 24, 겹침은 기존 hg-avatars 규칙: 뒤 원이 위 + 2px surface 고리), 지금 보이는 칸 기준.
+   머리 오른쪽 D-day 알약·글자 버튼은 그대로 */
+.hg-together__titlerow { display: flex; align-items: center; gap: var(--space-2); min-width: 0; }
+.hg-hub .hg-together__head { flex-wrap: wrap; row-gap: 0; }  /* 좁은 창(320)에서 “결혼식 날짜 알려 주기”가 안 들어가면 제목을 꺾지 않고 버튼이 다음 줄로 */
+.hg-hub .hg-together__title { white-space: nowrap; }
+.hg-together__owners { display: inline-flex; flex: none; }
+.hg-together__art { flex: none; width: 40px; height: 40px; border-radius: var(--radius-md); }
+/* 2026-11-26 사용자 결정 H-16 다가오는 날 ‘홈 상자 안 짧은 목록 줄’(DESIGN.md 강약 기준 5번): 이름 15/400 ink + 오른쪽 D-n 13/400 slate,
+   줄 높이 40, 제목(15/700)과 첫 줄 사이 8. 상자 전체가 한 버튼이라(줄마다 누르지 않음) 누르는 칸은 상자 전체(44 이상) */
+.hg-hubup__title { padding-bottom: var(--space-2); }
+.hg-hubup__row { min-height: 40px; padding-block: 0; }
+.hg-hubup__name { font: var(--text-value); color: var(--ink); }
+.hg-hubup__dday { font: var(--text-note); color: var(--slate); }
+/* 2026-11-26 사용자 결정 A안: 360 미만(320 휴대폰) 반 칸 타일(H-04, H-08) 안쪽 좌우만 20 → 8로 줄여 금액이 17/700 한 줄에(글자 크기 그대로).
+   320에서 타일 136, 안쪽 120: “42,000,000원”(111)·“150,000,000원”(119)은 한 줄. 16(안쪽 104)으로는 “42,000,000원”도 꺾여 8로.
+   음수 “−20,000,000원”(123)부터는 여전히 꺾임(줄바꿈은 “원” 앞, 말줄임 없음): 보고만 하고 정하지 않음 */
+@media (max-width: 359px) {
+  .hg-hub .hg-hubtile { padding-inline: var(--space-2); }
 }
