@@ -88,7 +88,8 @@
 체크 형식은 위와 같음(담당·마감은 비워 둠).
 
 - [ ] AdMob 계정, 앱 ID·보상형 광고 단위 ID(iOS·Android), 웹사이트 `/app-ads.txt`(28)
-  - 2026-11-13 PR 13: 코드는 개발 빌드에 Google 테스트 ID. 운영 값 넣을 곳: 광고 단위 `VITE_ADMOB_REWARDED_IOS`·`VITE_ADMOB_REWARDED_ANDROID`(앱 빌드 환경 변수, 없으면 광고 없이 바로 결과), 앱 ID Android gradle 속성 `ADMOB_APP_ID_ANDROID`, iOS `Info.plist` `GADApplicationIdentifier`. `/app-ads.txt`는 게시자 ID(pub-…)가 나오면 `apps/site/public/app-ads.txt`로 [확인 필요]. 스토어 등록 정보에 개발자 웹사이트 sweetwo.kr
+  - 2026-11-26: AdMob 계정을 만들고(게시자 `pub-9081118204558256`, 수취 국가 대한민국) 앱 ‘sweeTwo 스위투’ Android·iOS를 스토어 없이 추가, 보상형 광고 단위 ‘F-08 rank refresh rewarded’ 둘을 만들어 코드에 넣음(앱 ID: build.gradle·Info.plist, 광고 단위: `apps/mobile/.env.production`, `apps/site/public/app-ads.txt`). 남은 것: 지급 정보 입력(계정 검토가 이걸로 시작, 사람이 함), 스토어 등록 뒤 AdMob 앱에 스토어 연결(앱 검토·광고 게재 제한 풀기)
+  - 2026-11-13 PR 13: 코드는 개발 빌드에 Google 테스트 ID. 운영 값 넣을 곳: 광고 단위 `VITE_ADMOB_REWARDED_IOS`·`VITE_ADMOB_REWARDED_ANDROID`(앱 빌드 환경 변수, 없으면 광고 없이 바로 결과), 앱 ID Android gradle 속성 `ADMOB_APP_ID_ANDROID`, iOS `Info.plist` `GADApplicationIdentifier`. `/app-ads.txt`는 게시자 ID(pub-…)가 나오면 `apps/site/public/app-ads.txt`로(2026-11-26 넣음). 스토어 등록 정보에 개발자 웹사이트 sweetwo.kr
 - [ ] AdMob 차단 카테고리: 대출·신용, 암호화폐, 투자·트레이딩, 도박, 보험 판매 [확인 필요], 그 밖 민감 카테고리. 광고 심사 센터 점검 담당 정하기
 - [ ] 비맞춤형 광고만(요청 `npa=1`, iOS ATT 묻지 않음). App Store 개인정보 라벨, Google Play 데이터 보안 양식에 광고 SDK 반영
   - Google Play Console: 앱 콘텐츠 › 광고 ID 선언(AdMob SDK가 `AD_ID` 권한을 넣음, 비맞춤형·광고 용도), 광고 포함 ‘예’, 데이터 보안(기기 ID·광고 데이터, 앱 활동). App Store Connect: 개인정보 라벨 ‘추적’ 아님(ATT 없음), 제3자 광고 데이터 사용
