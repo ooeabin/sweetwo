@@ -125,6 +125,7 @@ export const copy = {
   ownName: '직접 입력',
   editShort: '편집', // [확인 필요] 2026-11-26 사용자 결정: W-01 머리 오른쪽 글자 버튼(토스 내 소비 ‘편집’처럼, 예전 맨 아래 ‘편집하기’ editPlan은 없앰). 좁은 창 hg-headaction
   share: '공유하기',
+  headMore: '더 보기', // 2026-11-26 ‘W-01 정리 A안’: W-01 머리 오른쪽 ⋯ 화면 읽기 이름(편집, 통장 잔액과 맞추기, 수입 기록, 공유하기, 추천값으로 다시 채우기)
   editTitle: '월급 계획 편집',
   editDone: '완료',
   rowLabel: (name: string, amount: string) => `${name} ${amount}`,

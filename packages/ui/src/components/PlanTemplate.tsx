@@ -72,7 +72,7 @@ export interface PlanSummaryPerson {
 }
 
 /**
- * 요약 카드: 이름표 + 큰 금액(+ 연필) + 굵은 한 문장 + 한 줄(왼쪽 도넛 + 오른쪽 ● 범례 세 줄, 2026-11-26 카카오페이 자산 구성형).
+ * 요약 카드: 이름표(누를 수 있으면 “월급 ›”) + 큰 금액 + 굵은 한 문장 + 한 줄(왼쪽 도넛 + 오른쪽 ● 범례 세 줄, 2026-11-26 카카오페이 자산 구성형).
  * empty면 도넛·범례 없이 굵은 문장 + 옅은 오렌지 블록 버튼(월급 0원, “월급 입력하기”).
  * people을 주면(합쳐서) 큰 금액은 합계(누르지 않음)이고 사람마다 한 줄이 그 아래에 붙음.
  */
@@ -95,7 +95,7 @@ export function PlanSummary({
   amount: ReactNode;
   /** 큰 금액 버튼 화면 읽기 이름(“월급 350만 원, 금액 고치기”) */
   amountLabel?: string;
-  /** 있으면 큰 금액 + 연필이 버튼(월급 금액 시트) */
+  /** 있으면 이름표 “월급 ›” + 큰 금액이 한 버튼(월급 금액 시트, 2026-11-26 연필 없앰) */
   onAmount?: () => void;
   people?: PlanSummaryPerson[];
   /** 굵은 한 문장(숫자는 <em>) */
@@ -106,12 +106,15 @@ export function PlanSummary({
   bar?: { kind: PlanPartKind; percent: number }[];
   /** 도넛 화면 읽기 이름(“저축·투자 40%, 지출 52%, 미계획 8%”) */
   barLabel?: string;
-  /** 범례 줄. percent = 이름 뒤 회색 퍼센트(금액 가리기에도 그대로, 모자람의 미계획은 없음) */
+  /**
+   * 범례 줄(2026-11-26 ‘W-01 정리 A안’: 금액 없음). 이름 뒤 회색 13 한 값: percent(저축·투자·지출, 금액 가리기에도 그대로)
+   * 또는 amount(미계획: 퍼센트 대신 금액 “0원”, short면 “−300,000원” danger)
+   */
   legend?: {
     kind: PlanPartKind;
     name: string;
     percent?: number;
-    amount: ReactNode;
+    amount?: ReactNode;
     short?: boolean;
   }[];
   /** 월급 0원 상태 */
@@ -119,22 +122,26 @@ export function PlanSummary({
 }) {
   return (
     <section className="hg-plancard hg-plansum" aria-label={label}>
-      <p className="hg-plansum__label">{label}</p>
-      <div className="hg-plansum__sal">
-        {onAmount ? (
-          <button
-            type="button"
-            className="hg-plansum__amt"
-            aria-label={amountLabel}
-            onClick={onAmount}
-          >
-            {amount}
-            <Icon name="pencil" className="hg-plansum__pen" />
-          </button>
-        ) : (
+      {/* 2026-11-26 ‘큰 금액 ③’: 연필 없앰. 이름표 “월급 ›”(13 slate) + 큰 금액이 한 버튼(월급 금액 시트), 누르는 칸 44 이상 */}
+      {onAmount ? (
+        <button
+          type="button"
+          className="hg-plansum__sal"
+          aria-label={amountLabel}
+          onClick={onAmount}
+        >
+          <span className="hg-plansum__label">
+            {label}
+            <Icon name="chevron-right" size={16} className="hg-plansum__go" />
+          </span>
+          <span className="hg-plansum__amt">{amount}</span>
+        </button>
+      ) : (
+        <div className="hg-plansum__sal">
+          <p className="hg-plansum__label">{label}</p>
           <p className="hg-plansum__amt">{amount}</p>
-        )}
-      </div>
+        </div>
+      )}
       {people && people.length > 0 && (
         <ul className="hg-plansum__people" aria-label={label}>
           {people.map((x) => {
@@ -145,7 +152,7 @@ export function PlanSummary({
                   {x.note && <span className="hg-plansum__pnote">{x.note}</span>}
                 </span>
                 <span className="hg-plansum__pamt">{x.amount}</span>
-                {x.onOpen && <Icon name="pencil" className="hg-plansum__pen" />}
+                {x.onOpen && <Icon name="chevron-right" size={16} className="hg-plansum__go" />}
                 {x.locked && <Icon name="lock" size={16} className="hg-plansum__lock" />}
               </>
             );
@@ -201,16 +208,10 @@ export function PlanSummary({
                         className={`hg-plansum__dot hg-plansum__seg--${l.kind}`}
                         aria-hidden="true"
                       />
-                      <span className="hg-plansum__lname">
-                        {l.name}
-                        {l.percent !== undefined && (
-                          <>
-                            {' '}
-                            <span className="hg-plansum__lpct">{l.percent}%</span>
-                          </>
-                        )}
+                      <span className="hg-plansum__lname">{l.name}</span>
+                      <span className="hg-plansum__lpct">
+                        {l.percent !== undefined ? `${l.percent}%` : l.amount}
                       </span>
-                      <b className="hg-plansum__lamt">{l.amount}</b>
                     </li>
                   ))}
                 </ul>
@@ -224,38 +225,33 @@ export function PlanSummary({
 }
 
 /**
- * 묶음 카드(저축·투자, 지출): 머리 = 제목(18px 700) + 제목 옆 작은 ⋯(action) + 오른쪽 합계, 아래 줄들(ReceiptRows)과 끝 블록 버튼.
+ * 묶음 카드(저축·투자, 지출). 머리 = 한 줄 “저축·투자” 왼쪽 + 합계 오른쪽, 둘 다 13/400 slate(2026-11-26 ‘W-01 정리 A안’:
+ * 큰 합계 22/700·묶음 ⋯는 없앰, 동작은 화면 머리 ⋯ 하나). 아래 줄들(ReceiptRows)과 끝 ‘+ … 추가’ 줄(PlanAdd).
  * id는 주소 `#saving`으로 스크롤할 자리
  */
 export function PlanCard({
   title,
   sum,
-  action,
   id,
   children,
 }: {
   title: string;
   sum?: ReactNode;
-  action?: ReactNode;
   id?: string;
   children: ReactNode;
 }) {
   return (
     <section id={id} className="hg-plancard" aria-label={title}>
-      {/* 2026-11-26 사용자 결정(토스 내 소비 ‘고정지출’처럼): 작은 이름 15 slate 위, 큰 합계 22/700 아래, ⋯는 오른쪽 끝 */}
       <div className="hg-plancard__head">
-        <div className="hg-plancard__headl">
-          <h3 className="hg-plancard__title">{title}</h3>
-          {sum && <span className="hg-plancard__sum">{sum}</span>}
-        </div>
-        {action}
+        <h3 className="hg-plancard__title">{title}</h3>
+        {sum && <span className="hg-plancard__sum">{sum}</span>}
       </div>
       {children}
     </section>
   );
 }
 
-/** 카드 끝 회색 블록 버튼(52px, “+ 저축·투자 추가”). 글자 앞 “+”는 아이콘으로 바꿔 그리고 화면 읽기 이름은 글자 그대로 */
+/** 묶음 끝 ‘+ … 추가’ 줄(높이 48, 회색 원 32 안 +, 2026-11-26). 글자 앞 “+”는 아이콘으로 바꿔 그리고 화면 읽기 이름은 글자 그대로 */
 export function PlanAdd({
   children,
   onClick,

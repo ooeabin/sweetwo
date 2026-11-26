@@ -75,7 +75,7 @@ test('머리 B안(2026-11-26): ‹는 Regular 선·같은 자리, 제목 17/500,
   await expect(noti).toBeVisible();
   expect(await noti.evaluate((e) => getComputedStyle(e).fontWeight)).toBe('500');
   expect(await icoX()).toBe(x1);
-  // 머리 오른쪽 글자 동작(hg-headaction, 2026-11-26): N-02 ‘모두 읽음’과 W-01 ‘편집’이 한 규칙
+  // 머리 오른쪽 글자 동작(hg-headaction, 2026-11-26): N-02 ‘모두 읽음’. W-01은 2026-11-26 ‘W-01 정리 A안’으로 글자 ‘편집’ 대신 ⋯(“더 보기”)
   // 15/400 ink-2, 누르는 칸 높이 44, 글자 끝 = 화면 오른쪽 24
   const vw = page.viewportSize()?.width ?? 0;
   const headAction = async (name: string) => {
@@ -100,7 +100,7 @@ test('머리 B안(2026-11-26): ‹는 Regular 선·같은 자리, 제목 17/500,
     return m;
   };
   const readAll = await headAction('모두 읽음');
-  // W-01 ‘편집’은 줄이 하나라도 있을 때만 보임: 생활비 줄 하나
+  // W-01 머리 오른쪽 ⋯: 생활비 줄 하나(줄이 있으면 메뉴에 ‘편집’)
   db.splits.push({
     id: 'split-me',
     owner_user_id: String(db.me.id),
@@ -119,7 +119,12 @@ test('머리 B안(2026-11-26): ‹는 Regular 선·같은 자리, 제목 17/500,
   });
   await page.goto('/salary/plan');
   await expect(page.getByRole('heading', { level: 1, name: '월급 계획 템플릿' })).toBeVisible();
-  const edit = await headAction('편집');
+  const more = page.getByRole('button', { name: '더 보기', exact: true });
+  const mb = await more.boundingBox();
+  expect(mb?.width).toBe(44);
+  expect(mb?.height).toBe(44);
+  expect(Math.round((mb?.x ?? 0) + (mb?.width ?? 0))).toBe(vw - 8); // ‹(왼쪽 8)와 좌우 대칭
+  await expect(page.getByRole('button', { name: '편집', exact: true })).toHaveCount(0);
   const token = (v: string) =>
     page.evaluate((name) => {
       const d = document.createElement('i');
@@ -129,6 +134,5 @@ test('머리 B안(2026-11-26): ‹는 Regular 선·같은 자리, 제목 17/500,
       d.remove();
       return c;
     }, v);
-  expect(edit.color).toBe(await token('--ink-2'));
   expect([await token('--ink-2'), await token('--muted')]).toContain(readAll.color);
 });

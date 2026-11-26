@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { mockOnboarding, seed } from './mocks';
+import { planAction } from './plan-menu';
 
 // 구역 2 W-01 화면 고침(2026-11-23): 긴 시트의 ‘확인’이 화면 안, ⋯ 팝오버가 화면 안, 새 항목 강조 2초 + 시트는 그 뒤,
 // 편집 모드 ‘지우기’ 회색. 휴대폰 크기(375x640)에서 확인한다.
@@ -40,10 +41,10 @@ test('줄 고치기 시트가 낮은 화면보다 길어도 ‘확인’은 화�
   expect(r.scrolls).toBe(true);
 });
 
-test('저축·투자 ⋯ 팝오버는 화면 왼쪽·오른쪽 안에 들어옴', async ({ page }) => {
+test('머리 ⋯ 팝오버는 화면 왼쪽·오른쪽 안에 들어옴', async ({ page }) => {
   await open(page, '/salary/plan');
-  await page.getByRole('button', { name: '더보기' }).click();
-  const menu = page.getByRole('menu', { name: '더보기' });
+  await page.getByRole('button', { name: '더 보기' }).click();
+  const menu = page.getByRole('menu', { name: '더 보기' });
   await expect(menu).toBeVisible();
   const r = await menu.evaluate((el) => {
     const b = el.getBoundingClientRect();
@@ -126,7 +127,7 @@ test('편집 모드 지우기는 회색 아이콘 버튼(44px, “{이름} 지�
   page,
 }) => {
   await open(page, '/salary/plan');
-  await page.getByRole('button', { name: '편집', exact: true }).click();
+  await planAction(page, '편집');
   const del = page.getByRole('button', { name: '고정지출 지우기', exact: true });
   await expect(del).toBeVisible();
   await expect(del).not.toHaveText(/지우기/);

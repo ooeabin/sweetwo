@@ -192,7 +192,7 @@ test('W-10b 바로잡기(묶음): 사유는 나만, 예빈에게는 사람·금�
 
 test('W-10c 실제 잔액 맞추기: 비운 칸은 그대로, 차이만큼 바로잡기', async ({ page }) => {
   const { s } = await open(page, '/salary/plan#saving');
-  await page.getByRole('button', { name: '더보기' }).first().click();
+  await page.getByRole('button', { name: '더 보기' }).click(); // W-01 머리 ⋯(2026-11-26 ‘W-01 정리 A안’)
   await page.getByRole('menuitem', { name: '통장 잔액과 맞추기' }).click();
   await expect(
     page.getByRole('heading', { name: '통장 잔액과 모은 금액을 맞춰 볼까요?' }),
@@ -253,9 +253,9 @@ test('W-20a ‘나머지 모두 넣기’, W-20b 수입 기록: 고치기, 지�
   await page.getByRole('button', { name: '넣기', exact: true }).click();
   await expect(page.getByText('저축·투자 1개에 500,000원 넣었어요')).toBeVisible();
 
-  // W-20b: W-01 저축·투자 묶음 ⋯ → 수입 기록
+  // W-20b: W-01 머리 ⋯ → 수입 기록(2026-11-26 묶음 ⋯를 머리 ⋯로 옮김)
   await page.goto('/salary/plan#saving');
-  await page.getByRole('button', { name: '더보기' }).click();
+  await page.getByRole('button', { name: '더 보기' }).click();
   await page.getByRole('menuitem', { name: '수입 기록' }).click();
   await expect(page.getByRole('heading', { name: '수입 기록' })).toBeVisible();
   await expect(page.getByText(/저축·투자에 500,000원 넣었어요/)).toBeVisible();
