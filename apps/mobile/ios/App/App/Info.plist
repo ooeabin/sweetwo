@@ -33,10 +33,10 @@
 			</array>
 		</dict>
 	</array>
-	<!-- 보상형 광고(AdMob, 23 F-08). 지금은 Google 테스트 앱 ID. 운영 앱 ID(ca-app-pub-…~…)로 바꿈 [확인 필요].
+	<!-- 보상형 광고(AdMob, 23 F-08). 운영 앱 ID(2026-11-26 sweeTwo 스위투 iOS). 개발 빌드는 광고 단위가 Google 테스트 단위라 테스트 광고만 나옴.
 	     비맞춤형만(npa=1)이라 앱 추적(ATT)을 묻지 않음: NSUserTrackingUsageDescription을 넣지 않음 -->
 	<key>GADApplicationIdentifier</key>
-	<string>ca-app-pub-3940256099942544~1458002511</string>
+	<string>ca-app-pub-9081118204558256~9222781606</string>
 	<!-- Google 광고 네트워크(SKAdNetwork). Google 문서의 목록으로 늘릴 수 있음 [확인 필요] -->
 	<key>SKAdNetworkItems</key>
 	<array>

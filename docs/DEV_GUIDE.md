@@ -471,8 +471,8 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
   - iOS: 위젯 확장 `ios/App/SweetwoWidget/`(`SweetwoWidget.swift` SwiftUI WidgetKit, `Info.plist`, `SweetwoWidget.entitlements`, Phosphor lock·eye-slash `Assets.xcassets`). 이 저장소에서 Xcode 타깃은 만들지 않음 → 아래 순서로 사람이 한 번 만듦
   - 글꼴은 기기 기본 글꼴(SUIT를 위젯에 넣지 않음) [확인 필요]
 - 보상형 광고(23 F-08 ‘새로 확인하기’만): 브리지 `ads.rewarded()` → `native/ads.ts`(`@capacitor-community/admob` 8.2.1). 요청마다 `npa: true`(비맞춤형), ATT·UMP 동의 창은 띄우지 않음(`requestTrackingAuthorization`을 부르지 않고 Info.plist에 `NSUserTrackingUsageDescription` 없음). 보상 받고 닫으면 'rewarded', 보상 전 닫으면 'closed', 못 불러오거나 못 띄우면 'failed'
-  - 광고 단위 ID: 개발 빌드(`import.meta.env.DEV`)는 Google 테스트 단위, 운영은 `VITE_ADMOB_REWARDED_IOS`·`VITE_ADMOB_REWARDED_ANDROID`(공개 값) [확인 필요]. 없으면 'failed'(광고 없이 바로 결과)
-  - 앱 ID: Android `app/build.gradle` `manifestPlaceholders.admobAppId`(gradle 속성 `ADMOB_APP_ID_ANDROID`, 없으면 Google 테스트 앱 ID), iOS `Info.plist` `GADApplicationIdentifier`(지금 테스트 앱 ID) [확인 필요]
+  - 광고 단위 ID: 개발 빌드(`import.meta.env.DEV`)는 Google 테스트 단위, 운영은 `VITE_ADMOB_REWARDED_IOS`·`VITE_ADMOB_REWARDED_ANDROID`(공개 값, `apps/mobile/.env.production`에 커밋, 2026-11-26). 없으면 'failed'(광고 없이 바로 결과)
+  - 앱 ID: Android `app/build.gradle` `manifestPlaceholders.admobAppId`(기본값 운영 앱 ID, gradle 속성 `ADMOB_APP_ID_ANDROID`로 바꿀 수 있음), iOS `Info.plist` `GADApplicationIdentifier`(운영 앱 ID). 2026-11-26 AdMob 계정(게시자 `pub-9081118204558256`, 앱 이름 ‘sweeTwo 스위투’ Android·iOS)에서 만듦. 개발 빌드는 앱 ID가 운영이어도 광고 단위가 테스트 단위라 테스트 광고만 나옴. 웹사이트 `/app-ads.txt`(`apps/site/public/app-ads.txt`)도 같은 게시자 ID
   - 금융 카테고리 차단은 AdMob 콘솔(차단 관리 › 민감한 카테고리·일반 카테고리)에서 사람이. 광고는 네이티브 화면이라 웹뷰 CSP에 출처를 더하지 않음
 - iOS Xcode 순서(사람, 한 번. 이 저장소 CI는 iOS를 빌드하지 않음):
   1. Apple Developer › Identifiers › App Groups에 `group.kr.sweetwo.app`을 만들고, App ID `kr.sweetwo.app`과 새 `kr.sweetwo.app.widget`에 App Groups를 켜 이 그룹을 고름

@@ -6,7 +6,7 @@ import { Capacitor } from '@capacitor/core';
 // - 비맞춤형만: 요청마다 npa=1. iOS 앱 추적 투명성(ATT) 창은 묻지 않음(requestTrackingAuthorization 부르지 않음,
 //   Info.plist에 NSUserTrackingUsageDescription 없음). 동의 창(UMP)도 띄우지 않음(비맞춤형만이라)
 // - 금융 카테고리 차단은 AdMob 콘솔에서 사람이 설정(코드로 못 함)
-// - 광고 단위 ID는 공개 값. 개발 빌드는 Google 테스트 광고 단위, 운영은 VITE_ADMOB_REWARDED_IOS·_ANDROID [확인 필요].
+// - 광고 단위 ID는 공개 값. 개발 빌드는 Google 테스트 광고 단위, 운영은 VITE_ADMOB_REWARDED_IOS·_ANDROID(apps/mobile/.env.production, 2026-11-26).
 //   운영 값이 없으면 광고 없이 'failed'(앱은 광고 없이 바로 결과)
 // 앱 ID(ca-app-pub-…~…)는 네이티브 설정: Android build.gradle admobAppId, iOS Info.plist GADApplicationIdentifier
 const TEST_UNIT = {
