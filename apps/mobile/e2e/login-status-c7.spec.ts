@@ -63,7 +63,9 @@ test('서버 오류(CS-07): 못 받으면 뼈대에 머물지 않고 오류 카�
   await axe(page);
   broken = false;
   // 다른 요청의 재시도로 오류 카드가 다시 그려질 수 있어(요소 교체), 눌릴 때까지 다시 찾는다
+  // 다른 요청의 재시도가 먼저 성공하면 카드가 스스로 사라질 수 있다(그것도 통과)
   await expect(async () => {
+    if ((await card.count()) === 0) return;
     await card.getByRole('button', { name: '다시 시도' }).click({ timeout: 3_000 });
   }).toPass({ timeout: 30_000 });
   await expect(card).toHaveCount(0, { timeout: 15_000 });
