@@ -30,11 +30,14 @@ export function H15SalaryBox({
   const month = monthValue(line, won);
   const label = (name: string, v: { value?: string; sub?: string }) =>
     spoken(`${name}, ${[v.value, v.sub].filter(Boolean).join(' ')}`);
+  // 2026-11-26 사용자 결정(‘빈 상태 A안’ 보충): 날짜 없는 사람의 기간 없음(첫 수입 전)은 이 줄만 빈 상태라
+  // 값 대신 이름표 아래 회색 보조 버튼 “수입 입력하기”(→ W-20, 가는 곳 그대로)
+  const periodEmpty = line.kind === 'period' && line.display === 'none';
   const rows: HubBoxRow[] = [
     {
       key: 'month',
       name: copy.rowMonth,
-      ...month,
+      ...(periodEmpty ? { action: month.value } : month),
       alert: monthLineUrgent(line),
       label: label(copy.rowMonth, month),
       onClick: line.kind === 'error' ? onRetry : () => go('salary_month', line.to),

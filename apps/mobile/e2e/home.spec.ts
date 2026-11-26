@@ -192,9 +192,10 @@ test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 �
   await axe(page);
   await page.keyboard.press('Escape');
   // H-12: 저축·투자가 하나도 없으면 쓸 곳 메모를 붙일 곳이 없어 “+ 저축·투자 추가”(2026-11-25, 예전엔 “+ 쓸 곳 메모 추가”인데 저축·투자 추가로 감)
-  await expect(page.getByRole('button', { name: /^결혼 준비 메모,/ })).toContainText(
-    '+ 저축·투자 추가',
-  );
+  // 2026-11-26 ‘빈 상태 A안’ 보충: 상자 안 회색 보조 버튼
+  await expect(
+    page.getByRole('group', { name: /^결혼 준비 메모/ }).locator('.hg-btn--secondary'),
+  ).toHaveText('+ 저축·투자 추가');
   await axe(page);
   // 띠 → W-01 저축·투자 묶음 빈 상태
   await band(page).click();
@@ -438,7 +439,14 @@ test('날짜 없는 사람: 첫 수입 전 “수입 입력하기”, 빈 날 �
     Object.assign(d.me, { payday: null, payday_none: true });
     d.checklists.length = 0;
   });
-  await expect(monthLine(page)).toContainText('수입 입력하기');
+  // 2026-11-26 ‘빈 상태 A안’ 보충: 기간 없음은 줄만 빈 상태 → 줄은 묶음, 이름표 아래 회색 보조 버튼 “수입 입력하기”(→ W-20)
+  const row = page.getByRole('group', { name: '이번 달 월급 체크' });
+  await expect(row.getByRole('button', { name: '수입 입력하기' })).toHaveClass(/hg-btn--secondary/);
+  await expect(page.getByRole('button', { name: /^이번 달 월급 체크/ })).toHaveCount(0);
+  await axe(page);
+  await row.getByRole('button', { name: '수입 입력하기' }).click();
+  await expect(page).toHaveURL(/\/salary\/money-in(\?|$)/);
+  await page.goto('/');
   if (db.v22)
     db.v22.period = {
       status: 'gap',

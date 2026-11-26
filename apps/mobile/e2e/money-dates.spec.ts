@@ -106,6 +106,32 @@ test('만기일 당일: 다시 가입했어요 → 새 만기일, 닫으면 그�
   await expect(band.getByRole('button', { name: '닫기' })).toHaveCount(0);
 });
 
+test('F-04a 옮길 통장이 없으면 “옮길 통장이 없어요” + 회색 보조 버튼 “통장 추가하기”(2026-11-26 ‘빈 상태 A안’ 보충)', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  Object.assign(db.space ?? {}, { couple_state: 'solo' });
+  seedAssets(db);
+  db.assets.splice(
+    db.assets.findIndex((a) => a.id === 'a-bank'),
+    1,
+  );
+  await page.goto('/assets/a-sav/matured');
+  await expect(page.getByText('옮길 통장이 없어요')).toBeVisible();
+  const add = page.getByRole('button', { name: '통장 추가하기' });
+  await expect(add).toHaveClass(/hg-btn--secondary/);
+  await expect(add).not.toHaveClass(/hg-btn--link|hg-btn--sm/);
+  // 글자 길이만큼(꽉 찬 버튼 아님)
+  const w = await add.evaluate((el) => el.getBoundingClientRect().width);
+  const col = await add.evaluate((el) => el.parentElement?.getBoundingClientRect().width ?? 0);
+  expect(w).toBeLessThan(col);
+  await axe(page);
+  await add.click();
+  await expect(page).toHaveURL(/\/assets\/new\?chip=bank$/);
+});
+
 test('F-04 투자: 시세 바꾸기, 팔았어요(일부) → 받은 통장 → 실현 손익, 수정 내역에 고친 사람', async ({
   page,
 }) => {

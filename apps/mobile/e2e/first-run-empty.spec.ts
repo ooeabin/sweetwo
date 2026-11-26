@@ -242,10 +242,13 @@ test('H-12: 쓸 곳 메모가 0개면 쓸 곳 메모 추가(W-14a)로, 있으면
   const db = await open(page, (d) => {
     Object.assign(d.space ?? {}, { marriage_status: 'engaged', wedding_date: '2027-03-01' });
   });
-  const tile = page.getByRole('button', { name: /^결혼 준비 메모/ });
-  await expect(tile.locator('.hg-hubtile__sub')).toHaveText('+ 쓸 곳 메모 추가');
+  // 2026-11-26 ‘빈 상태 A안’ 보충: 상자 일부만 빈 상태 → 상자는 묶음, 다음 행동은 회색 보조 버튼(보통 크기)
+  const tile = page.getByRole('group', { name: '결혼 준비 메모' });
+  const add = tile.getByRole('button', { name: '+ 쓸 곳 메모 추가' });
+  await expect(add).toHaveClass(/hg-btn--secondary/);
+  await expect(add).not.toHaveClass(/hg-btn--sm/);
   await page.waitForLoadState('networkidle');
-  await tile.click();
+  await add.click();
   await expect(page).toHaveURL(/\/salary\/items\/[^/]+\/notes\/new$/);
   await expect(page.getByRole('heading', { name: '쓸 곳 메모 추가' })).toBeVisible();
   await axe(page);

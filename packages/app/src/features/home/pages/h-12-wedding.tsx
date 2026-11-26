@@ -33,16 +33,17 @@ export function H12Wedding({
       ? copy.weddingNext(next.name, next.due_on)
       : null;
   const add = hasSaving ? copy.weddingAdd : copy.weddingAddSaving;
-  const sub = due ?? add;
+  // 2026-11-26 사용자 결정(‘빈 상태 A안’ 보충): 낼 날이 있는 메모가 없으면(상자 일부만 빈 상태) 다음 행동은 회색 보조 버튼.
+  // 상자는 누를 수 없는 묶음이 되고 버튼만 눌림(가는 곳은 그대로)
+  if (!due)
+    return <HubTile className="hg-hub__wide" title={title} action={add} onClick={onClick} />;
   return (
     <HubTile
       className="hg-hub__wide"
       title={title}
-      value={due ?? undefined}
-      sub={due ? undefined : add}
-      hint
+      value={due}
       art
-      label={`${title}, ${sub}`}
+      label={`${title}, ${due}`}
       onClick={onClick}
     />
   );

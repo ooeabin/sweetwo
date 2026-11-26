@@ -122,7 +122,12 @@ export function F04aMatured() {
           ) : (
             <>
               <p className="hg-form__hint">{copy.maturedNoAccount}</p>
-              <Button variant="link" onClick={() => nav('/assets/new?chip=bank')}>
+              {/* 2026-11-26 사용자 결정(‘빈 상태 A안’ 보충): 화면 일부만 빈 상태 → 글자 버튼 대신 회색 보조 버튼(보통 크기) */}
+              <Button
+                variant="secondary"
+                className="hg-form__emptyact"
+                onClick={() => nav('/assets/new?chip=bank')}
+              >
                 {copy.maturedAddAccount}
               </Button>
             </>

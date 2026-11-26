@@ -304,9 +304,11 @@ test('H-12 결혼 준비 메모가 0개면 제목은 “결혼 준비 메모”(
   await open(page, (d) => {
     Object.assign(d.space ?? {}, { marriage_status: 'engaged', wedding_date: '2027-03-01' });
   });
-  const tile = page.getByRole('button', { name: /^결혼 준비 메모/ });
+  // 2026-11-26 ‘빈 상태 A안’ 보충: 다음 행동은 상자 안 회색 보조 버튼(상자는 누를 수 없는 묶음)
+  const tile = page.getByRole('group', { name: '결혼 준비 메모' });
   await expect(tile.locator('.hg-hubtile__title')).toHaveText('결혼 준비 메모');
-  await expect(tile.locator('.hg-hubtile__sub')).toHaveText('+ 쓸 곳 메모 추가');
+  await expect(tile.locator('.hg-btn--secondary')).toHaveText('+ 쓸 곳 메모 추가');
+  await expect(page.getByRole('button', { name: /^결혼 준비 메모/ })).toHaveCount(0);
   await expect(page.getByText('결혼 준비 메모 0개')).toHaveCount(0);
 });
 
@@ -391,14 +393,14 @@ test('홈 A안 강약(2026-11-26): 상자 제목 15/700, 월급 줄은 이름표
   ).toBe('700');
   const cal = page.getByRole('button', { name: /^캘린더/ });
   await expect(cal.locator('.hg-hubtile__value')).toHaveText('어머니 생신 D-7');
-  // 결혼 준비: 추가 안내는 15/400
-  const wed = page.getByRole('button', { name: /^결혼 준비 메모/ });
+  // 결혼 준비: 낼 날이 있는 메모가 없으면 추가는 회색 보조 버튼(2026-11-26 ‘빈 상태 A안’ 보충, 예전 15/400 안내 글자)
+  const wed = page.getByRole('group', { name: /^결혼 준비 메모/ });
   expect(
-    await wed.locator('.hg-hubtile__sub').evaluate((el) => {
+    await wed.locator('.hg-btn--secondary').evaluate((el) => {
       const s = getComputedStyle(el);
       return `${s.fontSize}/${s.fontWeight}`;
     }),
-  ).toBe('15px/400');
+  ).toBe('17px/700');
   await axe(page);
 });
 

@@ -3287,3 +3287,14 @@ button.hg-datepill { cursor: pointer; }
 @media (max-width: 359px) {
   .hg-hub .hg-hubtile { padding-inline: var(--space-2); }
 }
+/* 2026-11-26 사용자 결정 ‘빈 상태 A안’ 보충: 화면 일부만 빈 상태의 다음 행동은 모두 회색 보조 버튼(hg-btn--secondary, 보통 크기, 글자 700).
+   상자·줄 전체 버튼이던 자리는 버튼이 아닌 묶음(role=group)이 되고 안의 보조 버튼만 눌림: H-12 결혼 준비 상자(hg-hubtile--action “+ 쓸 곳 메모 추가”),
+   H-15 ‘이번 달 월급 체크’ 줄의 날짜 없음·기간 없음(hg-hubbox__row--action “수입 입력하기”), F-04a 만기 정리 통장 없음(hg-form__emptyact “통장 추가하기”).
+   제목(이름표)과 버튼 사이 12, 버튼은 왼쪽 정렬(글자 길이만큼) */
+.hg-hubtile--action, .hg-hubbox__row--action { cursor: default; }
+.hg-hubtile--action > .hg-btn { margin-top: var(--space-3); }
+.hg-hubbox__row--action { flex-direction: column; align-items: flex-start; gap: var(--space-3); padding-block: var(--space-4); }
+.hg-hubbox__row--action .hg-hubbox__name { font: var(--text-value); color: var(--ink-2); }
+:is(.hg-hubtile--action, .hg-hubbox__row--action):active { transform: none; }
+@media (hover: hover) { .hg-hubtile--action:hover { box-shadow: none; } }
+.hg-form__emptyact { align-self: flex-start; }
