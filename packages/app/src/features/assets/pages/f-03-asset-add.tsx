@@ -45,7 +45,7 @@ type Owner = 'me' | 'partner' | 'joint';
 type Sheet = AssetFold | 'visibility' | 'unsure';
 
 // F-03 자산·부채 추가 한 화면 입력(23, 2026-11-24 FormScreen). 예전 단계형(F-03a 유형 → b 이름 → c 금액 → d 명의 → e 공개 범위 → f~h 유형별)을 한 화면으로:
-// 맨 위 요약 문장(“여행 적금 / 1,200만 원 적을까요?”) + 자산·부채 밑줄 탭 + 종류 칩(묶음 → 세부 종류) + 이름 + 지금 금액(‘잘 모르겠어요’) + 명의
+// 맨 위 요약 문장(“여행 적금 / 1,200만 원 입력할까요?”) + 자산·부채 밑줄 탭 + 종류 칩(묶음 → 세부 종류) + 이름 + 지금 금액(‘잘 모르겠어요’) + 명의
 // + 접힌 선택 줄(파트너에게 보이기, 만기일, 월 납입액, 납입 회차, 금리) + 아래 “추가하기”.
 // 공개 범위는 처음 한 번 직접 고름(asset_share_default 없음, 미리 고른 값 없음): 그때는 필수 섹션으로 펼쳐 보이고, 고른 값이 내 기본값이 되면 이후는 접힌 줄.
 // 들어오는 곳이 종류를 미리 고른 채로 엶: F-01 묶음 타일 ?grp=, F-02 빈 상태 종류 칩 ?chip=(분석 entry chip), 탭 쪽 ?side=
@@ -138,7 +138,7 @@ export function F03AssetAdd() {
     try {
       const own: Owner = solo ? 'me' : owner;
       const isFirst = d.items.length === 0 && d.sums.length === 0;
-      // 내 첫 자산(파트너만 적은 상태 포함): F-02 맨 위 순자산 + 순위 이동 줄을 한 번
+      // 내 첫 자산(파트너만 입력한 상태 포함): F-02 맨 위 순자산 + 순위 이동 줄을 한 번
       const ownFirst = assetOwnership(d.items, d.sums, d.me?.id).mine === 0;
       const v = own === 'me' && !solo ? (vis ?? 'sum') : 'all';
       // 처음 고른 공개 범위 = 내 새 항목 기본값(서버도 첫 저장 행으로 정하지만 명시)
@@ -258,7 +258,7 @@ export function F03AssetAdd() {
             { value: 'debt', label: copy.debtsLabel },
           ]}
         />
-        {/* 2026-11-13 F-03q 입구: “큰 항목만 빠르게 적기 ›” */}
+        {/* 2026-11-13 F-03q 입구: “큰 항목만 빠르게 입력하기 ›” */}
         <button
           type="button"
           className="hg-btn hg-btn--link hg-form__quick"

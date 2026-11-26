@@ -12,7 +12,7 @@ export const inviteCopy = {
   copyCode: '코드 복사', // 코드 상자 옆 복사 아이콘 버튼의 접근성 이름(2026-11-16, 예전 글 “눌러서 복사”)
   sendKakao: '카톡으로 보내기',
   copied: '복사했어요', // [확인 필요] 복사 토스트
-  copyFailed: '복사하지 못했어요. 코드를 직접 적어 보내 주세요', // [확인 필요] 2026-11-11 S3-12
+  copyFailed: '복사하지 못했어요. 코드를 직접 입력해서 보내 주세요', // [확인 필요] 2026-11-11 S3-12
   making: '초대 코드를 만드는 중',
   /** 공유 글(2026-11-10 S2-05). 호칭이 없으면 ‘파트너가’ */
   shareText: (name: string, code: string, link: string) =>

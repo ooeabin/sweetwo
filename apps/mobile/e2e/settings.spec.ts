@@ -496,7 +496,7 @@ test('연결 해제 요청(S-12a·c): 지워지는 것, “연결 해제” 입�
   // S-12c 입력 후 요청
   const send = page.getByRole('button', { name: '연결 해제 요청하기' });
   await expect(
-    page.getByRole('heading', { name: '확인을 위해 ‘연결 해제’라고 적어 주세요' }),
+    page.getByRole('heading', { name: '확인을 위해 ‘연결 해제’라고 입력해 주세요' }),
   ).toBeVisible();
   await expect(send).toBeDisabled();
   await page.getByLabel('연결 해제').fill('연결해제');

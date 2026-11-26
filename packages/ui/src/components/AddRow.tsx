@@ -15,7 +15,7 @@ export function AddRow({
   onClick: () => void;
   block?: boolean;
   className?: string;
-  /** 보이는 글자보다 긴 화면 읽기 이름(W-02 수입 줄 “+ 적기” → “수입 적기”) */
+  /** 보이는 글자보다 긴 화면 읽기 이름(W-02 수입 줄 “+ 입력하기” → “수입 입력하기”) */
   ariaLabel?: string;
 }) {
   return (

@@ -77,7 +77,7 @@ export interface SplitShares {
 /**
  * 분담 몫(06 3-7). total = 한 달 넣을 금액(1만 원 단위). half = 반올림(total ÷ 2).
  * income_ratio = 반올림(total × 내 실수령 ÷ 두 실수령 합)(앱은 서버 응답을 쓰고, 이 계산은 테스트·미리 보기용).
- * custom = 내가 적은 몫. 결과가 0 아래거나 total을 넘으면 null(서버 'bad_amount'), 월급이 없으면 income_ratio는 null
+ * custom = 내가 입력한 몫. 결과가 0 아래거나 total을 넘으면 null(서버 'bad_amount'), 월급이 없으면 income_ratio는 null
  */
 export function splitShares(
   total: Won,
@@ -108,7 +108,7 @@ export function splitShares(
 // ───────── W-01 요약 카드(20 W-01 3번, 2026-11-19) ─────────
 
 export interface PlanSummaryValue {
-  /** 월급(합쳐서면 두 사람 합). 0 이하면 요약은 ‘월급 적기’ 상태(막대·범례 없음) */
+  /** 월급(합쳐서면 두 사람 합). 0 이하면 요약은 ‘월급 입력하기’ 상태(막대·범례 없음) */
   income: Won;
   /** 월급 0원이라 막대와 범례를 그리지 않음 */
   empty: boolean;

@@ -331,18 +331,18 @@ test('내 월급(S-11c): 이번 달부터면 월급날(25일) 전이어도 바�
   await expect(page.getByText(/2026년 10월부터/)).toHaveCount(0);
 });
 
-test('내 월급(S-11c) 월급날 고르기(A안): 저장된 25일은 칩, 직접 적은 날은 저장되고 다시 열면 직접 적기 칸, 말일 칩, 범위 오류는 저장 막음', async ({
+test('내 월급(S-11c) 월급날 고르기(A안): 저장된 25일은 칩, 직접 입력한 날은 저장되고 다시 열면 직접 입력하기 칸, 말일 칩, 범위 오류는 저장 막음', async ({
   page,
 }) => {
   const { db } = await connected(page);
   await page.goto('/settings/me/salary');
   await expect(page.locator('.hg-wheel')).toHaveCount(0);
   const chips = page.getByRole('radiogroup', { name: '월급날' });
-  const custom = page.getByRole('textbox', { name: '다른 날 직접 적기' });
+  const custom = page.getByRole('textbox', { name: '다른 날 직접 입력하기' });
   await expect(chips.getByRole('radio', { name: '25일' })).toBeChecked();
   await expect(custom).toHaveValue('');
   await custom.fill('45');
-  await expect(page.getByText('1~31 사이로 적어 주세요')).toBeVisible();
+  await expect(page.getByText('1~31 사이로 입력해 주세요')).toBeVisible();
   await expect(page.getByRole('button', { name: '저장' })).toBeDisabled();
   await custom.fill('12');
   await expect(chips.getByRole('radio', { name: '25일' })).not.toBeChecked();
@@ -350,9 +350,9 @@ test('내 월급(S-11c) 월급날 고르기(A안): 저장된 25일은 칩, 직�
   await expect(page.getByText('월급을 바꿨어요')).toBeVisible();
   expect(db.me.payday).toBe(12);
   await page.goto('/settings/me/salary');
-  await expect(page.getByRole('textbox', { name: '다른 날 직접 적기' })).toHaveValue('12');
+  await expect(page.getByRole('textbox', { name: '다른 날 직접 입력하기' })).toHaveValue('12');
   await page.getByRole('radio', { name: '말일' }).click();
-  await expect(page.getByRole('textbox', { name: '다른 날 직접 적기' })).toHaveValue('');
+  await expect(page.getByRole('textbox', { name: '다른 날 직접 입력하기' })).toHaveValue('');
   await axe(page);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('월급을 바꿨어요')).toBeVisible();

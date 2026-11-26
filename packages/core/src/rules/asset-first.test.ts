@@ -21,10 +21,10 @@ describe('홈 자산 관리 타일 문구(2026-11-18)', () => {
     expect(assetTileHint({ together: true, mine: 1, partner: 3 })).toBe('value');
     expect(assetTileHint({ together: false, mine: 2, partner: 0 })).toBe('value');
   });
-  it('둘이고 내 것은 없고 파트너가 적었으면 파트너 소식(궁금함보다 먼저)', () => {
+  it('둘이고 내 것은 없고 파트너가 입력했으면 파트너 소식(궁금함보다 먼저)', () => {
     expect(assetTileHint({ together: true, mine: 0, partner: 1 })).toBe('partner');
   });
-  it('둘인데 아무도 안 적었거나 파트너가 숨겼으면(개수 0) 우리 둘 궁금함', () => {
+  it('둘인데 아무도 안 입력했거나 파트너가 숨겼으면(개수 0) 우리 둘 궁금함', () => {
     expect(assetTileHint({ together: true, mine: 0, partner: 0 })).toBe('ask-two');
   });
   it('혼자 쓰기·미합류는 내 순자산 궁금함, 파트너 개수는 무시', () => {

@@ -113,7 +113,7 @@ export const copy = {
   moveCopy: '사본 내려받기',
 
   // P-02b
-  prefillTitle: (starter: string) => `${who(starter)} 미리 적어 둔 내 정보가 있어요`,
+  prefillTitle: (starter: string) => `${who(starter)} 미리 입력해 둔 내 정보가 있어요`,
   prefillIncome: '월 수입', // [확인 필요] 항목명
   prefillOk: '확인하고 이어 쓸게요',
   prefillClear: '지우고 새로 입력할게요',
@@ -157,14 +157,14 @@ export const copy = {
   salary: '한 달 실수령액은 얼마예요?',
   salaryHelp: '세금 떼고 통장에 들어오는 금액이에요', // [확인 필요] 2026-11-09 ‘들어오는 돈’ 대신
   salaryVariable: '매달 금액이 달라요',
-  salaryVariableHelp: '보통 들어오는 금액을 적어 주세요. 더 들어온 달은 그때 적으면 돼요', // O-31과 같음(2026-11-13)
+  salaryVariableHelp: '보통 들어오는 금액을 입력해 주세요. 더 들어온 달은 그때 입력하면 돼요', // O-31과 같음(2026-11-13)
   noSalary: '지금은 월급이 없어요',
   noSalaryJoin: '월급 없이 합류할게요', // [확인 필요] 각자 계열만(2026-11-13)
   payday: '월급날',
   paydayTitle: '월급날은 며칠이에요?',
   paydayLast: '말일',
-  paydayCustom: '다른 날 직접 적기',
-  paydayRange: '1~31 사이로 적어 주세요',
+  paydayCustom: '다른 날 직접 입력하기',
+  paydayRange: '1~31 사이로 입력해 주세요',
   paydayShortMonth: '그날이 없는 달은 말일로 계산해요', // O-32와 같음
   paydayNone: '날짜가 정해져 있지 않아요', // [확인 필요] O-32와 같음(2026-11-13)
   checkValue: '입력한 값이 맞나요?',

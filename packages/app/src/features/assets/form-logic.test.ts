@@ -15,11 +15,11 @@ const base = {
 } as const;
 
 describe('F-03 요약 문장', () => {
-  const o = { money: m, what: '무엇을', ask: '얼마 적을까요?', verb: '적을까요?' };
+  const o = { money: m, what: '무엇을', ask: '얼마 입력할까요?', verb: '입력할까요?' };
   it('이름·금액이 모두 비면 자리표시', () => {
     expect(assetHero({ ...o, name: '', amount: null })).toEqual([
       [{ text: '무엇을' }],
-      [{ text: '얼마 적을까요?' }],
+      [{ text: '얼마 입력할까요?' }],
     ]);
   });
   it('이름만 있으면 이름 + 금액 자리표시', () => {
@@ -30,7 +30,7 @@ describe('F-03 요약 문장', () => {
   it('금액 자리만 accent', () => {
     expect(assetHero({ ...o, name: '여행 적금', amount: 12_000_000 })).toEqual([
       [{ text: '여행 적금' }],
-      [{ text: '12,000,000원', tone: 'accent' }, { text: ' 적을까요?' }],
+      [{ text: '12,000,000원', tone: 'accent' }, { text: ' 입력할까요?' }],
     ]);
   });
 });
@@ -62,7 +62,7 @@ describe('필수 검사', () => {
     expect(assetFormReady({ ...base, askVisibility: true, visibility: null })).toBe(false);
     expect(assetFormReady({ ...base, askVisibility: true, visibility: 'sum' })).toBe(true);
   });
-  it('금리·회차는 적었으면 규칙 안이어야 함(안 적으면 나중에)', () => {
+  it('금리·회차는 입력했으면 규칙 안이어야 함(안 입력하면 나중에)', () => {
     expect(assetFormReady({ ...base, rateText: '31' })).toBe(false);
     expect(assetFormReady({ ...base, rateText: '3.5' })).toBe(true);
     expect(assetFormReady({ ...base, countText: '1000' })).toBe(false);

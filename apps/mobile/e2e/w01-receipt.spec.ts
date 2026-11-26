@@ -266,7 +266,7 @@ test('도넛 범례(2026-11-26): 320·375에서 범례 줄은 늘 한 줄(퍼센
   await axe(page);
 });
 
-test('월급 0원: 요약 카드는 “월급을 적으면 / 나눌 수 있어요” + 월급 적기, 도넛·범례 없음, 빈 칩 카드', async ({
+test('월급 0원: 요약 카드는 “월급을 입력하면 / 나눌 수 있어요” + 월급 입력하기, 도넛·범례 없음, 빈 칩 카드', async ({
   page,
 }) => {
   const { db, go } = await open(page);
@@ -277,11 +277,11 @@ test('월급 0원: 요약 카드는 “월급을 적으면 / 나눌 수 있어�
   await go();
   const sum = page.locator('.hg-plansum');
   await expect(sum.locator('.hg-plansum__amt')).toHaveText('0원');
-  await expect(sum.locator('.hg-plansum__title')).toHaveText('월급을 적으면나눌 수 있어요');
+  await expect(sum.locator('.hg-plansum__title')).toHaveText('월급을 입력하면나눌 수 있어요');
   await expect(
     sum.locator('.hg-plansum__donut, .hg-plansum__chart, .hg-plansum__legend'),
   ).toHaveCount(0);
-  await expect(sum.getByRole('button', { name: '월급 적기' })).toHaveClass(/hg-plan__block--soft/);
+  await expect(sum.getByRole('button', { name: '월급 입력하기' })).toHaveClass(/hg-plan__block--soft/);
   // 빈 카드: 저축·투자 = 이름 칩 + 직접 정하기, 지출 = 지출 칩 + 직접 정하기, 블록 추가 버튼은 없음
   const saving = page.getByRole('region', { name: '저축·투자', exact: true });
   await expect(saving.getByRole('group', { name: '무엇을 모을지 골라 보세요' })).toBeVisible();
@@ -292,7 +292,7 @@ test('월급 0원: 요약 카드는 “월급을 적으면 / 나눌 수 있어�
     await expect(spend.getByRole('button', { name: n, exact: true })).toBeVisible();
   await expect(page.locator('.hg-plan__block:not(.hg-plan__block--soft)')).toHaveCount(0);
   await expect(page.getByText('매달 나가는 지출이 있어요?')).toHaveCount(0); // 맨 위 칩 카드 없음
-  await sum.getByRole('button', { name: '월급 적기' }).click();
+  await sum.getByRole('button', { name: '월급 입력하기' }).click();
   await expect(page.getByRole('dialog', { name: '월급 금액' })).toBeVisible();
   await axe(page);
 });
@@ -624,7 +624,7 @@ test('추천값으로 다시 채우기(D1): 직접 추가 줄과 이미 있는 �
   const modal = page.getByRole('alertdialog', { name: '추천값으로 다시 채울까요?' });
   await expect(
     modal.getByText(
-      '용돈과 기한 있는 저축·투자가 추천값으로 바뀌어요. 이미 적은 지출은 그대로예요',
+      '용돈과 기한 있는 저축·투자가 추천값으로 바뀌어요. 이미 입력한 지출은 그대로예요',
     ),
   ).toBeVisible();
   await modal.getByRole('button', { name: '다시 채우기' }).click();
@@ -845,7 +845,7 @@ test('월급 0원이어도 줄이 0개면 아래 버튼 숨김', async ({ page }
   const sp = db.splits[0];
   if (sp) sp.split_line = [];
   await go();
-  await expect(page.getByRole('button', { name: '월급 적기' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '월급 입력하기' })).toBeVisible();
   for (const n of ['편집', '공유하기', '추천값으로 다시 채우기'])
     await expect(page.getByRole('button', { name: n, exact: true })).toHaveCount(0);
 });

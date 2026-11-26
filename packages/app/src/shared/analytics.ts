@@ -220,7 +220,7 @@ export type AnalyticsEvent =
   | { name: 'rank_consent_answered'; props: { result: 'accepted' | 'declined' | 'expired' } }
   | { name: 'rank_badge_toggled'; props: { on: boolean } }
   | {
-      // F-03q 빠르게 적기(32 0-4, 2026-11-13)
+      // F-03q 빠르게 입력하기(32 0-4, 2026-11-13)
       name: 'quick_assets_saved';
       props: {
         count: number;
@@ -422,7 +422,7 @@ export type AnalyticsEvent =
       name: 'home_box_tapped';
       props: {
         // 2026-11-18: H-10은 누를 수 없는 정보 상자라 together·more·chip(빈 상태)을 없앰.
-        // wedding = H-12, money_in = ‘+ 수입 적기’, dday = H-10 머리 ‘결혼식 날짜 알려 주기’
+        // wedding = H-12, money_in = ‘+ 수입 입력하기’, dday = H-10 머리 ‘결혼식 날짜 알려 주기’
         box:
           | 'wedding'
           | 'money_in'

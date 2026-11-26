@@ -132,7 +132,7 @@ test('W-02 빈 상태: 휴대폰 크기(390x844)에서 주 버튼이 화면 아�
   await axe(page);
 });
 
-test('W-02 월급 0원 + 계획 없음도 같은 3단계 안내(예전 “월급을 적고 …” 없음)', async ({ page }) => {
+test('W-02 월급 0원 + 계획 없음도 같은 3단계 안내(예전 “월급을 입력하고 …” 없음)', async ({ page }) => {
   await open(
     page,
     (db) => {
@@ -142,18 +142,18 @@ test('W-02 월급 0원 + 계획 없음도 같은 3단계 안내(예전 “월급
     '/salary',
   );
   await expect(page.getByRole('heading', { name: '월급날 루틴, 한 번에 끝내기' })).toBeVisible();
-  await expect(page.getByText('월급을 적고')).toHaveCount(0);
+  await expect(page.getByText('월급을 입력하고')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '월급 계획 세우기', exact: true })).toBeVisible();
 });
 
-test('선물 기록 빈 상태: 제목 한 줄 + 제자리 회색 “+ 기념일 적기”(보통 크기) → 경조사 추가(Y-07)', async ({
+test('선물 기록 빈 상태: 제목 한 줄 + 제자리 회색 “+ 기념일 입력하기”(보통 크기) → 경조사 추가(Y-07)', async ({
   page,
 }) => {
   await open(page, undefined, '/calendar/gifts');
   await expect(page.getByText('아직 선물 기록이 없어요')).toBeVisible();
   // 설명 문구 없음(제목 한 줄 + 버튼 하나)
   await expect(page.getByText('다가오는 생일·기념일을 먼저')).toHaveCount(0);
-  const add = page.getByRole('button', { name: '+ 기념일 적기' });
+  const add = page.getByRole('button', { name: '+ 기념일 입력하기' });
   // 화면 일부 빈 상태(밑줄 탭 아래): 아래 고정 바가 아니라 제자리, 보통 크기(2026-11-26 ‘빈 상태 A안’)
   await expect(page.locator('.hg-stickybar')).toHaveCount(0);
   await expect(add).not.toHaveClass(/hg-btn--sm/);

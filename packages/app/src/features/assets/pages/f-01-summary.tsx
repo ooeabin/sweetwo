@@ -55,7 +55,7 @@ export function F01Summary() {
     body = (
       <>
         <RankBanner />
-        {/* 2026-11-13 F-03q 빠르게 적기 입구(F-01 빈 상태) */}
+        {/* 2026-11-13 F-03q 빠르게 입력하기 입구(F-01 빈 상태) */}
         <List>
           <ListRow label={copy.quickEntry} onClick={() => nav('/assets/quick')} />
         </List>
@@ -130,7 +130,7 @@ export function F01Summary() {
             onClick={() => nav('/assets/items?side=debt')}
           />
         </List>
-        {/* 23 F-01 고친 점: 평가금액 기준이 기본, 켜면 원금 기준(06 6장). 원금을 적은 항목이 없으면 같은 값 */}
+        {/* 23 F-01 고친 점: 평가금액 기준이 기본, 켜면 원금 기준(06 6장). 원금을 입력한 항목이 없으면 같은 값 */}
         <div className="hg-card">
           <Toggle
             label={copy.principalView}

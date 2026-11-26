@@ -3,7 +3,7 @@ import { cx } from './cx';
 
 // 초대 코드 칸(2026-11-11 QA 3구간 디자인): 6자를 한 글자씩 회색 칸에.
 // 보여 주기(CodeCells, O-07·S-12 코드 상자, P-01 합류 시작)와 넣기(CodeInput, P-01 코드 입력)가 같은 칸이라
-// 받은 코드를 그대로 옮겨 적는 모양. 참고: Shop·Family 인증 코드 칸, Places 초대 코드 칸.
+// 받은 코드를 그대로 옮겨 입력하는 모양. 참고: Shop·Family 인증 코드 칸, Places 초대 코드 칸.
 
 /** 보여 주기만. 읽는 사람용 글은 소비자가 따로 준다(칸은 aria-hidden). */
 export function CodeCells({

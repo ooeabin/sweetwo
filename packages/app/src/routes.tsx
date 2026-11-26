@@ -178,7 +178,7 @@ export const routes: RouteObject[] = [
           ['/salary/bundles/:id/notes', <W14Notes key="w14b" kind="bundle" />], // W-14 쓸 곳 메모(묶음)
           ['/salary/bundles/:id/notes/:note', <W14aNoteEdit key="w14ab" kind="bundle" />], // W-14a
           ['/salary/bundles/:id/achieved', <W12BundleAchieved key="w12m" />], // W-12 묶음 달성
-          ['/salary/money-in', <W20MoneyIn key="w20" />], // W-20 수입 적기
+          ['/salary/money-in', <W20MoneyIn key="w20" />], // W-20 수입 입력하기
           ['/salary/money-in/list', <W20bMoneyInList key="w20b" />], // W-20b 수입 기록(고치기·지우기)
           ['/salary/archive', <W21MonthArchive key="w21" />], // W-21 지난 달 모아보기
           ['/salary/money-in/:id', <W20aDistribute key="w20a" />], // W-20a 저금에 나눠 넣기
@@ -717,7 +717,7 @@ export const routes: RouteObject[] = [
             </OnboardingGate>
           </RequireAccount>
         ),
-      }, // F-03q 빠르게 적기(2026-11-13)
+      }, // F-03q 빠르게 입력하기(2026-11-13)
       {
         path: '/assets/share',
         element: (

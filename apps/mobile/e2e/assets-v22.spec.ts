@@ -4,7 +4,7 @@ import { fakeBridge, fb } from './fake-bridge';
 import { type MemDb, mockOnboarding, YEBIN } from './mocks';
 import { fillAmount, pickAssetKind } from './form';
 
-// 자산 관리 v2.2(23 ‘자산 관리 v2.2’, 06 7-8, ADR 0009 결정 11·13): F-01 평가금액 + 원금으로 보기, F-03q 빠르게 적기,
+// 자산 관리 v2.2(23 ‘자산 관리 v2.2’, 06 7-8, ADR 0009 결정 11·13): F-01 평가금액 + 원금으로 보기, F-03q 빠르게 입력하기,
 // F-03e 첫 공개 선택(미리 고른 값 없음, ‘총액만 보여 주기’), F-08 두 상태(pair / 또래 중간값), 첫 결과 광고 없음,
 // ‘새로 확인하기’ 보상형 광고(흉내 브리지: 끝까지 봄, 닫음, 못 불러옴, 브리지 없음), F-08c 동의 요청·답. 찬우, 예빈.
 
@@ -169,21 +169,21 @@ test('F-01·F-02·홈 H-04: 내 ‘숨기기’ 항목은 파트너에게만 안
   await expect(page.getByText('17,000,000원').first()).toBeVisible();
 });
 
-test('F-03q 빠르게 적기 + F-03e 처음 공개 선택: 미리 고른 값 없음, 빈 칸은 저장 안 함, 고른 값이 기본값', async ({
+test('F-03q 빠르게 입력하기 + F-03e 처음 공개 선택: 미리 고른 값 없음, 빈 칸은 저장 안 함, 고른 값이 기본값', async ({
   page,
 }) => {
   const db = await start(page, { withAssets: false });
   await page.goto('/assets');
-  await page.getByRole('button', { name: /큰 항목만 빠르게 적기/ }).click();
+  await page.getByRole('button', { name: /큰 항목만 빠르게 입력하기/ }).click();
   await expect(page).toHaveURL(/\/assets\/quick$/);
-  await expect(page.getByRole('heading', { name: '큰 항목만 빠르게 적어 볼까요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '큰 항목만 빠르게 입력해 볼까요?' })).toBeVisible();
   const next = page.getByRole('button', { name: '다음', exact: true });
   await expect(next).toBeDisabled();
   // 적금을 어디에 넣는지 + 저금과 두 번 세지 않음(실구동)
-  await expect(page.getByText('적금 통장도 여기에 적어요')).toBeVisible();
+  await expect(page.getByText('적금 통장도 여기에 입력해요')).toBeVisible();
   await expect(
     page.getByText(
-      '모은 금액은 자산에 적은 통장이나 투자에 이미 들어 있어서 순자산에 따로 더하지 않아요',
+      '모은 금액은 자산에 입력한 통장이나 투자에 이미 들어 있어서 순자산에 따로 더하지 않아요',
     ),
   ).toBeVisible();
   await page.getByLabel('현금·예적금').fill('5000000');
@@ -235,10 +235,10 @@ test('F-03e 연결할 때(2026-11-16 B5): 숨겨 둔 내 자산이 있으면 홈
   const a2 = db.assets.find((a) => a.id === 'a2');
   Object.assign(a2 ?? {}, { visibility: 'private', share_pending: true });
   await page.goto('/');
-  await page.getByText('혼자 쓸 때 적은 자산을 예빈님에게 어떻게 보여 줄까요?').click();
+  await page.getByText('혼자 쓸 때 입력한 자산을 예빈님에게 어떻게 보여 줄까요?').click();
   await expect(page).toHaveURL(/\/assets\/share$/);
   await expect(page.getByRole('heading', { name: '파트너에게 어떻게 보여 줄까요?' })).toBeVisible();
-  await expect(page.getByText('혼자 쓸 때 적은 자산은 고르기 전까지 숨겨 뒀어요')).toBeVisible();
+  await expect(page.getByText('혼자 쓸 때 입력한 자산은 고르기 전까지 숨겨 뒀어요')).toBeVisible();
   // 미리 고른 값 없음
   const save = page.getByRole('button', { name: '저장하기' });
   await expect(save).toBeDisabled();
@@ -248,7 +248,7 @@ test('F-03e 연결할 때(2026-11-16 B5): 숨겨 둔 내 자산이 있으면 홈
   await expect(page.getByText('자산 공개를 정했어요')).toBeVisible();
   expect(a2).toMatchObject({ visibility: 'sum', share_pending: false });
   expect(db.me.asset_share_default).toBe('sum');
-  await expect(page.getByText('혼자 쓸 때 적은 자산을')).toHaveCount(0);
+  await expect(page.getByText('혼자 쓸 때 입력한 자산을')).toHaveCount(0);
 });
 
 test('F-08 (나) 순위 없음: 또래 가구 중간값 한 줄(광고 없음) → F-08c 같이 보자고 하기', async ({
@@ -415,7 +415,7 @@ test('홈 H-04 배지: (가)라도 ‘홈에 보여 주기’를 켜야 “상�
   await expect(page.locator('.hg-hubtile__badge')).toHaveText('상위 38%');
 });
 
-// ---- 첫 자산 적기 동기(2026-11-18, 19 H-04, 23 F-02 빈 상태): 궁금함, 파트너 소식, 쉬운 첫 입력 ----
+// ---- 첫 자산 입력하기 동기(2026-11-18, 19 H-04, 23 F-02 빈 상태): 궁금함, 파트너 소식, 쉬운 첫 입력 ----
 
 const heading = (page: Page, name: string) =>
   expect(page.getByRole('heading', { name })).toBeVisible();
@@ -425,13 +425,13 @@ const shot = async (page: Page, name: string) => {
   if (SHOTS) await page.screenshot({ path: `${SHOTS}/${name}.png` });
 };
 
-test('H-04 빈 타일(둘): “아직 적은 자산이 없어요” → F-02 종류 칩 → 금액만 → 저장 → 순자산 + 순위 링크(한 번만)', async ({
+test('H-04 빈 타일(둘): “아직 입력한 자산이 없어요” → F-02 종류 칩 → 금액만 → 저장 → 순자산 + 순위 링크(한 번만)', async ({
   page,
 }) => {
   const db = await start(page, { withAssets: false });
   db.me.asset_share_default = 'sum';
   await page.goto('/');
-  await expect(tile(page)).toContainText('아직 적은 자산이 없어요');
+  await expect(tile(page)).toContainText('아직 입력한 자산이 없어요');
   await expect(tile(page)).not.toContainText('+ 자산 추가');
   await expect(tile(page)).not.toContainText('원');
   await expect(tile(page)).toHaveClass(/hg-hubtile--point/);
@@ -439,9 +439,9 @@ test('H-04 빈 타일(둘): “아직 적은 자산이 없어요” → F-02 종
   await axe(page);
   await tile(page).click();
   await expect(page).toHaveURL(/\/assets\/items$/);
-  await expect(page.getByText('예빈님이 자산을 적었어요')).toHaveCount(0);
+  await expect(page.getByText('예빈님이 자산을 입력했어요')).toHaveCount(0);
   const chips = page.getByRole('group', {
-    name: '아직 적은 자산이 없어요',
+    name: '아직 입력한 자산이 없어요',
   });
   await expect(chips.getByRole('button')).toHaveText([
     '통장',
@@ -458,7 +458,7 @@ test('H-04 빈 타일(둘): “아직 적은 자산이 없어요” → F-02 종
   await shot(page, '5-f02-asset-tab');
   await page.getByRole('tab', { name: '부채', exact: true }).click();
   const debtChips = page.getByRole('group', {
-    name: '아직 적은 부채가 없어요',
+    name: '아직 입력한 부채가 없어요',
   });
   await expect(debtChips.getByRole('button')).toHaveText([
     '신용대출',
@@ -486,7 +486,7 @@ test('H-04 빈 타일(둘): “아직 적은 자산이 없어요” → F-02 종
   await expect(nw).toContainText('23,000,000원');
   const rank = page.getByRole('button', { name: '또래 중 어디쯤인지 보기' });
   await expect(rank).toBeVisible();
-  await expect(page.getByRole('group', { name: '아직 적은 자산이 없어요' })).toHaveCount(0);
+  await expect(page.getByRole('group', { name: '아직 입력한 자산이 없어요' })).toHaveCount(0);
   await shot(page, '3-f02-after-first');
   await axe(page);
   const saved = db.assets.filter((a) => !a.deleted_at);
@@ -512,7 +512,7 @@ test('첫 자산 직후 링크는 F-08 자산 순위로 간다', async ({ page }
   expect(db.assets.map((a) => [a.name, a.grp, a.kind])).toEqual([['자동차', 'etc', 'car']]);
 });
 
-test('쉬운 첫 입력: 처음 적는 사람은 금액 뒤 F-03e를 한 번(미리 고른 값 없음), 대출 칩은 부채로 저장', async ({
+test('쉬운 첫 입력: 처음 입력하는 사람은 금액 뒤 F-03e를 한 번(미리 고른 값 없음), 대출 칩은 부채로 저장', async ({
   page,
 }) => {
   const db = await start(page, { withAssets: false });
@@ -520,7 +520,7 @@ test('쉬운 첫 입력: 처음 적는 사람은 금액 뒤 F-03e를 한 번(미
   await page.getByRole('button', { name: '신용대출' }).click();
   await heading(page, '부채 추가');
   await fillAmount(page, '남은 금액', 5_000_000);
-  // 처음 적는 사람은 공개 범위를 한 번 직접 고름(미리 고른 값 없음)
+  // 처음 입력하는 사람은 공개 범위를 한 번 직접 고름(미리 고른 값 없음)
   await expect(
     page.getByRole('radiogroup', { name: '파트너에게 어떻게 보여 줄까요?' }),
   ).toBeVisible();
@@ -573,16 +573,16 @@ test('H-04 파트너 소식: 내 자산 0개 + 예빈님이 적음(모두 / 총�
     }),
   );
   await page.goto('/');
-  await expect(tile(page)).toContainText('예빈님이 자산을 적었어요');
+  await expect(tile(page)).toContainText('예빈님이 자산을 입력했어요');
   await expect(tile(page)).not.toContainText('우리 둘 순자산');
   await expect(tile(page)).not.toContainText('770만');
   await shot(page, '4-home-partner-wrote');
   await tile(page).click();
   await expect(page).toHaveURL(/\/assets\/items$/);
   await expect(
-    page.getByText('예빈님이 자산을 적었어요. 내 것도 적으면 우리 둘 순자산이 보여요'),
+    page.getByText('예빈님이 자산을 입력했어요. 내 것도 입력하면 우리 둘 순자산이 보여요'),
   ).toBeVisible();
-  await expect(page.getByRole('group', { name: '아직 적은 자산이 없어요' })).toBeVisible();
+  await expect(page.getByRole('group', { name: '아직 입력한 자산이 없어요' })).toBeVisible();
   await axe(page);
   // ‘총액만’: 묶음 개수만 서버가 줌
   db.assets.length = 0;
@@ -594,21 +594,21 @@ test('H-04 파트너 소식: 내 자산 0개 + 예빈님이 적음(모두 / 총�
     principal_total: 4_000_000,
   });
   await page.goto('/');
-  await expect(tile(page)).toContainText('예빈님이 자산을 적었어요');
+  await expect(tile(page)).toContainText('예빈님이 자산을 입력했어요');
   await expect(tile(page)).not.toContainText('440만');
 });
 
-test('H-04 파트너가 숨기기만 적었으면(서버가 아무것도 안 줌) 알리지 않음, 혼자 쓰기·미합류는 “내 순자산, …”', async ({
+test('H-04 파트너가 숨기기만 입력했으면(서버가 아무것도 안 줌) 알리지 않음, 혼자 쓰기·미합류는 “내 순자산, …”', async ({
   page,
 }) => {
   const db = await start(page, { withAssets: false });
   await page.goto('/');
-  await expect(tile(page)).toContainText('아직 적은 자산이 없어요');
-  await expect(tile(page)).not.toContainText('자산을 적었어요');
+  await expect(tile(page)).toContainText('아직 입력한 자산이 없어요');
+  await expect(tile(page)).not.toContainText('자산을 입력했어요');
   db.space = { ...db.space, couple_state: 'solo' };
   db.partner = null;
   await page.goto('/');
-  await expect(tile(page)).toContainText('아직 적은 자산이 없어요');
+  await expect(tile(page)).toContainText('아직 입력한 자산이 없어요');
   await expect(tile(page)).not.toContainText('우리 둘');
 });
 
@@ -636,17 +636,17 @@ test('F-08 (가): 그래프 아래는 한 줄 + ‘자세히’ 시트(‘중간
   await axe(page);
 });
 
-test('F-08 직접 열기: 자산이 하나도 없으면 순위 없이 “아직 적은 자산이 없어요” + 자산 적고 순위 보기', async ({
+test('F-08 직접 열기: 자산이 하나도 없으면 순위 없이 “아직 입력한 자산이 없어요” + 자산 입력하고 순위 보기', async ({
   page,
 }) => {
   const db = await start(page, { withAssets: false });
   db.rank = { pair: true, topPct: 97, views: [], requests: [] };
   await page.goto('/assets/rank');
-  await expect(page.getByText('아직 적은 자산이 없어요')).toBeVisible();
+  await expect(page.getByText('아직 입력한 자산이 없어요')).toBeVisible();
   await expect(page.getByText(/상위 \d+%/)).toHaveCount(0);
   expect(db.rpc).not.toContain('record_rank_view');
   await axe(page);
-  await page.locator('.hg-stickybar').getByRole('button', { name: '자산 적고 순위 보기' }).click();
+  await page.locator('.hg-stickybar').getByRole('button', { name: '자산 입력하고 순위 보기' }).click();
   await expect(page).toHaveURL(/\/assets\/new/);
 });
 

@@ -4,7 +4,7 @@ import { copy } from '../copy';
 import { saveMe, saveSpace } from '../data';
 import { useJoinStep } from '../join-step';
 
-// P-03 내 이름(Q5, O-03과 같음): 1~10자, 시작한 사람이 적어 둔 이름(또는 소셜 로그인 이름)이 채워짐. 앱 전체의 {나}.
+// P-03 내 이름(Q5, O-03과 같음): 1~10자, 시작한 사람이 입력해 둔 이름(또는 소셜 로그인 이름)이 채워짐. 앱 전체의 {나}.
 export function P03Name() {
   const s = useJoinStep('p-03');
   const d = s.d;

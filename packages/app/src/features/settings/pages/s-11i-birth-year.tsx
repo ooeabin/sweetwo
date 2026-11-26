@@ -9,7 +9,7 @@ import { copy } from '../copy';
 import { useSettingsData } from '../data';
 
 // S-11i 출생연도(Q4 연도 한 줄 + 연도 칸 시트, 2026-11-26 휠에서 바꿈). 본인만, 상대 알림 없음. 2026-11-10 온보딩 O-13을 빼고 자산 순위 F-08에서도 엶(?from=rank → 저장·뒤로 F-08)
-// 처음 적을 때도 보이는 처음 위치(올해 − 30)로 바로 저장할 수 있음(2026-11-13 실구동, 예전 ‘휠을 움직여야 저장’을 바꿈)
+// 처음 입력할 때도 보이는 처음 위치(올해 − 30)로 바로 저장할 수 있음(2026-11-13 실구동, 예전 ‘휠을 움직여야 저장’을 바꿈)
 export function S11iBirthYear() {
   const nav = useNavigate();
   const [params] = useSearchParams();

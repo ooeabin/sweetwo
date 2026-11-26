@@ -12,7 +12,7 @@ import { F03eShare, type ShareVis } from './f-03e-share';
 
 type QuickKey = keyof typeof copy.quickFields;
 
-/** 5칸 = 묶음 + 기본 세부 항목(이름은 칸 이름, F-04에서 고침). 23 v2.2 ‘F-03a, F-03q 빠르게 적기’ */
+/** 5칸 = 묶음 + 기본 세부 항목(이름은 칸 이름, F-04에서 고침). 23 v2.2 ‘F-03a, F-03q 빠르게 입력하기’ */
 const QUICK: { key: QuickKey; side: AssetSide; grp: string; kind: string }[] = [
   { key: 'cash', side: 'asset', grp: 'cash', kind: 'bank' },
   { key: 'invest', side: 'asset', grp: 'invest', kind: 'other' },
@@ -22,10 +22,10 @@ const QUICK: { key: QuickKey; side: AssetSide; grp: string; kind: string }[] = [
 ];
 
 /**
- * F-03q 빠르게 적기(2026-11-13): “큰 항목만 빠르게 적어 볼까요?” + 5칸 금액. 빈 칸은 저장하지 않음, 명의 ‘나’.
- * 처음 자산을 적는 사람(asset_share_default null, 혼자 쓰기 아님)은 저장 전에 F-03e를 한 번, 아니면 내 기본값.
+ * F-03q 빠르게 입력하기(2026-11-13): “큰 항목만 빠르게 입력해 볼까요?” + 5칸 금액. 빈 칸은 저장하지 않음, 명의 ‘나’.
+ * 처음 자산을 입력하는 사람(asset_share_default null, 혼자 쓰기 아님)은 저장 전에 F-03e를 한 번, 아니면 내 기본값.
  * 주 버튼 “저장하기” → F-01. 분석 quick_assets_saved.
- * 빠르게 적기 표시 asset.quick = true(서버 20261208090000)
+ * 빠르게 입력하기 표시 asset.quick = true(서버 20261208090000)
  */
 export function F03qQuick() {
   const nav = useNavigate();

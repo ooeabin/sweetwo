@@ -100,8 +100,8 @@ test('‘지금은 월급이 없어요’: W-01은 월급 0원 줄을 보여 주
   await heading(page, '월급 계획 템플릿');
   const row = page.getByRole('button', { name: '월급 0원, 금액 고치기' });
   await expect(row).toBeVisible();
-  // 2026-11-19: 요약 카드 “월급 적기”, 빈 카드는 칩 + 직접 정하기(블록 추가 버튼은 줄이 생기면)
-  await expect(page.getByRole('button', { name: '월급 적기' })).toBeVisible();
+  // 2026-11-19: 요약 카드 “월급 입력하기”, 빈 카드는 칩 + 직접 정하기(블록 추가 버튼은 줄이 생기면)
+  await expect(page.getByRole('button', { name: '월급 입력하기' })).toBeVisible();
   await expect(page.getByRole('group', { name: '무엇을 모을지 골라 보세요' })).toBeVisible();
   await expect(page.getByRole('group', { name: '매달 나가는 지출을 골라 보세요' })).toBeVisible();
   await expect(page.getByText('월급을 넣으면 월급 계획을 만들어 드려요')).toHaveCount(0);
@@ -131,11 +131,11 @@ test('‘지금은 월급이 없어요’: W-01은 월급 0원 줄을 보여 주
   const sheet = page.getByRole('dialog', { name: '월급 금액' });
   await sheet.getByRole('textbox', { name: '월급 금액' }).fill('3000000');
   await expect(sheet.getByRole('radiogroup', { name: '월급날은 며칠이에요?' })).toBeVisible();
-  // 월급날 고르기(A안): 25일 칩이 골라져 있고, 직접 적은 범위 밖 숫자는 확인을 막음
+  // 월급날 고르기(A안): 25일 칩이 골라져 있고, 직접 입력한 범위 밖 숫자는 확인을 막음
   await expect(sheet.getByRole('radio', { name: '25일' })).toBeChecked();
-  const custom = sheet.getByRole('textbox', { name: '다른 날 직접 적기' });
+  const custom = sheet.getByRole('textbox', { name: '다른 날 직접 입력하기' });
   await custom.fill('40');
-  await expect(sheet.getByText('1~31 사이로 적어 주세요')).toBeVisible();
+  await expect(sheet.getByText('1~31 사이로 입력해 주세요')).toBeVisible();
   await expect(sheet.getByRole('button', { name: '확인' })).toBeDisabled();
   await custom.fill('17');
   await sheet.getByRole('button', { name: '확인' }).click();

@@ -20,7 +20,7 @@ function monthsSince(at: string | undefined): number {
   return Math.max(0, (y1 - y0) * 12 + (m1 - m0));
 }
 
-// S-12c 해제 확인 입력(Q5, 2026-11-24 스테퍼 2/2): “연결 해제”라고 적어야 ‘연결 해제 요청하기’ 활성. 보내면 해제 대기 → S-12, 상대 알림(서버)
+// S-12c 해제 확인 입력(Q5, 2026-11-24 스테퍼 2/2): “연결 해제”라고 입력해야 ‘연결 해제 요청하기’ 활성. 보내면 해제 대기 → S-12, 상대 알림(서버)
 export function S12cUnlinkConfirm() {
   const nav = useNavigate();
   const qc = useQueryClient();

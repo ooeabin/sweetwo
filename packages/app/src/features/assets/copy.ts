@@ -23,13 +23,13 @@ export const copy = {
   gainIncl: (amount: string) => `안 판 수익 ${amount} 포함`,
   assetsLabel: '자산',
   debtsLabel: '부채',
-  empty: '아직 적은 자산이 없어요', // 23 빈 상태 제목 한 줄(2026-11-26 빈 상태 규칙, 칩이 안 보일 때만) [확인 필요]
+  empty: '아직 입력한 자산이 없어요', // 23 빈 상태 제목 한 줄(2026-11-26 빈 상태 규칙, 칩이 안 보일 때만) [확인 필요]
   expectedName: '예상 순자산',
   emptyAdd: '자산 추가하기', // 23 빈 상태
 
   // F-02 빈 상태 쉬운 첫 입력(2026-11-18, 23 F-02 빈 상태) [확인 필요]
-  firstChipsLabel: '아직 적은 자산이 없어요', // 2026-11-26 제목 한 줄(예전 설명 문장은 없앰) [확인 필요]
-  firstChipsDebtLabel: '아직 적은 부채가 없어요',
+  firstChipsLabel: '아직 입력한 자산이 없어요', // 2026-11-26 제목 한 줄(예전 설명 문장은 없앰) [확인 필요]
+  firstChipsDebtLabel: '아직 입력한 부채가 없어요',
   firstChips: {
     bank: '통장',
     savings: '적금·예금',
@@ -44,7 +44,7 @@ export const copy = {
   },
   firstChipPick: '직접 고르기',
   partnerWrote: (name: string) =>
-    `${name}님이 자산을 적었어요. 내 것도 적으면 우리 둘 순자산이 보여요`,
+    `${name}님이 자산을 입력했어요. 내 것도 입력하면 우리 둘 순자산이 보여요`,
   firstNetLabel: '순자산',
   firstRankLink: '또래 중 어디쯤인지 보기',
 
@@ -103,8 +103,8 @@ export const copy = {
   // F-03 한 화면(FormScreen, 2026-11-24) [확인 필요]
   formTitle: { asset: '자산 추가', debt: '부채 추가' },
   formWhat: '무엇을',
-  formAsk: '얼마 적을까요?',
-  formVerb: '적을까요?',
+  formAsk: '얼마 입력할까요?',
+  formVerb: '입력할까요?',
   formKindQ: '종류',
   formNameQ: '이름',
   formAmountQ: { asset: '지금 금액', debt: '남은 금액' },
@@ -144,9 +144,9 @@ export const copy = {
   soldNow: (n: string) => `지금 금액 ${n}`,
   soldRemainQ: '남은 평가금액',
   soldToQ: '어느 통장에 들어왔어요?',
-  soldNoTo: '안 적을게요',
+  soldNoTo: '입력하지 않을게요',
   soldToLine: (name: string, from: string, to: string) => `${name} ${from} > ${to}`,
-  soldDo: '적기',
+  soldDo: '입력하기',
   // F-04a 만기 정리 한 화면 [확인 필요]
   maturedHero: '정리할까요?',
   maturedDateQ: '새 만기일',
@@ -187,8 +187,8 @@ export const copy = {
   visLabel: '공개 범위', // [확인 필요]
   amountEdit: '금액 고치기', // [확인 필요] 2026-11-04 F-04 1번 버튼(2026-11-11 주 버튼)
   cancel: '취소',
-  rateInvalid: '0~30% 사이로 적어 주세요', // [확인 필요] F-03g와 F-04 같은 규칙(2026-11-12 D5 = A)
-  countInvalid: '숫자만 적어 주세요', // [확인 필요]
+  rateInvalid: '0~30% 사이로 입력해 주세요', // [확인 필요] F-03g와 F-04 같은 규칙(2026-11-12 D5 = A)
+  countInvalid: '숫자만 입력해 주세요', // [확인 필요]
   saveEdit: '저장',
   remove: '삭제',
   removed: '휴지통으로 옮겼어요',
@@ -198,7 +198,7 @@ export const copy = {
   readOnly: (name: string) => `${name}님 항목이라 볼 수만 있어요`,
   history: '수정 내역', // 23 F-04 5번
   historyEmpty: '아직 수정 내역이 없어요', // [확인 필요]
-  createdLabel: '처음 적은 날', // [확인 필요]
+  createdLabel: '처음 입력한 날', // [확인 필요]
   menu: '항목 메뉴',
   principal: (amount: string) => `원금 ${amount}`,
   owner: '명의', // [확인 필요]
@@ -250,9 +250,9 @@ export const copy = {
   // F-01 v2.2(2026-11-13): 평가금액 기준 + 전환
   principalView: '원금으로 보기', // [확인 필요]
   principalViewHelp: '원금은 처음 넣은 금액이에요. 투자와 부동산도 넣은 금액으로 셈해요',
-  // F-03q 빠르게 적기(2026-11-13)
-  quickEntry: '큰 항목만 빠르게 적기', // [확인 필요] F-03a 맨 위, F-01 빈 상태(줄 끝 ›)
-  quickTitle: '큰 항목만 빠르게 적어 볼까요?', // [확인 필요]
+  // F-03q 빠르게 입력하기(2026-11-13)
+  quickEntry: '큰 항목만 빠르게 입력하기', // [확인 필요] F-03a 맨 위, F-01 빈 상태(줄 끝 ›)
+  quickTitle: '큰 항목만 빠르게 입력해 볼까요?', // [확인 필요]
   quickFields: {
     cash: '현금·예적금',
     invest: '투자',
@@ -261,13 +261,13 @@ export const copy = {
     loan: '대출',
   }, // [확인 필요]
   // 적금을 어디에 넣는지, 저금과 두 번 세지 않음(2026-11-13 실구동, 06 6장) [확인 필요]
-  quickCashHelp: '적금 통장도 여기에 적어요',
+  quickCashHelp: '적금 통장도 여기에 입력해요',
   quickNoDouble:
-    '모은 금액은 자산에 적은 통장이나 투자에 이미 들어 있어서 순자산에 따로 더하지 않아요',
+    '모은 금액은 자산에 입력한 통장이나 투자에 이미 들어 있어서 순자산에 따로 더하지 않아요',
   quickSave: '저장하기',
-  quickSaved: (n: number) => `${n}개를 적었어요`, // [확인 필요]
+  quickSaved: (n: number) => `${n}개를 입력했어요`, // [확인 필요]
   // F-03e 연결할 때(23 ‘F-03e 연결할 때’, 2026-11-16 5차 검토 B5)
-  shareConnectHelp: '혼자 쓸 때 적은 자산은 고르기 전까지 숨겨 뒀어요', // [확인 필요]
+  shareConnectHelp: '혼자 쓸 때 입력한 자산은 고르기 전까지 숨겨 뒀어요', // [확인 필요]
   shareConnectSave: '저장하기',
   shareConnectDone: '자산 공개를 정했어요', // [확인 필요]
   quickPlaceholder: '0원',
@@ -284,10 +284,10 @@ export const copy = {
   rankAd: '광고',
   rankSource: (label: string) => `${label} 기준`, // [확인 필요] 2026-11-24 그래프 아래 한 줄(예전 세 줄)
   rankCheck: '확인하기', // [확인 필요] F-01 순위 줄과 같은 말(다시 동의한 뒤 광고 앞)
-  rankEmptyLine: '아직 적은 자산이 없어요', // [확인 필요] 2026-11-26 제목 한 줄(‘왜’는 아래 버튼 글자에)
+  rankEmptyLine: '아직 입력한 자산이 없어요', // [확인 필요] 2026-11-26 제목 한 줄(‘왜’는 아래 버튼 글자에)
   rankMore: '자세히', // [확인 필요] 설명 시트 열기
   rankMoreTitle: '순위는 이렇게 봐요', // [확인 필요]
-  rankEmptyCta: '자산 적고 순위 보기', // [확인 필요] F-08 자산이 없을 때 주 버튼(F-01 순위 줄과 같은 말)
+  rankEmptyCta: '자산 입력하고 순위 보기', // [확인 필요] F-08 자산이 없을 때 주 버튼(F-01 순위 줄과 같은 말)
   // F-08 v2.2 (나) 순위 없음
   rankPeerLine: (amount: string) => `또래 가구 중간값은 ${amount}이에요`, // [확인 필요]
   /** (나) 보조 “2025년 가계금융복지조사(2025년 3월 말), 30대 가구 기준”(23 F-08 v2.2) */
@@ -308,6 +308,6 @@ export const copy = {
   consentGone: '이미 답했거나 기한이 지난 요청이에요', // [확인 필요]
   consentFailed: '잠시 문제가 생겼어요. 다시 시도해 주세요',
   // F-01 빈 상태 항목별 등록(2026-11-04)
-  emptyAssetsQ: '무엇부터 적어 볼까요?', // [확인 필요]
+  emptyAssetsQ: '무엇부터 입력해 볼까요?', // [확인 필요]
   emptyDebtsQ: '부채도 있나요?',
 };

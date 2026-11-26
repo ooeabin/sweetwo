@@ -5,7 +5,7 @@ import type { HeroPart } from '@sweetwo/ui';
 
 /**
  * F-03 요약 문장: 이름 자리는 ink, 금액 자리만 accent. 아직 안 고른 자리는 자리표시.
- * 둘 다 비면 “무엇을 / 얼마 적을까요?”, 이름만 있으면 “여행 적금 / 얼마 적을까요?”, 금액까지 있으면 “여행 적금 / 1,200만 원 적을까요?”
+ * 둘 다 비면 “무엇을 / 얼마 입력할까요?”, 이름만 있으면 “여행 적금 / 얼마 입력할까요?”, 금액까지 있으면 “여행 적금 / 1,200만 원 입력할까요?”
  */
 export function assetHero(o: {
   name: string;
@@ -14,9 +14,9 @@ export function assetHero(o: {
   money: (v: number) => string;
   /** 이름이 없을 때 자리표시(“무엇을”) */
   what: string;
-  /** 금액이 없을 때(“얼마 적을까요?”) */
+  /** 금액이 없을 때(“얼마 입력할까요?”) */
   ask: string;
-  /** 금액 뒤 말(“적을까요?”) */
+  /** 금액 뒤 말(“입력할까요?”) */
   verb: string;
 }): HeroPart[][] {
   const name = o.name.trim();
@@ -59,7 +59,7 @@ export interface AssetFormState {
   countText: string;
 }
 
-/** 필수 검사: 묶음·세부 종류·이름·금액, 공개 범위(물을 때, 미리 고른 값 없음). 금리·회차는 적었으면 규칙 안이어야 함(나중에 해도 됨) */
+/** 필수 검사: 묶음·세부 종류·이름·금액, 공개 범위(물을 때, 미리 고른 값 없음). 금리·회차는 입력했으면 규칙 안이어야 함(나중에 해도 됨) */
 export function assetFormReady(s: AssetFormState): boolean {
   if (!s.grp || !s.kind || !s.name.trim() || s.amount === null) return false;
   if (s.askVisibility && s.visibility === null) return false;

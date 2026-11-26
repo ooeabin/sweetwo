@@ -75,8 +75,8 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   // 2026-11-18 누를 수 없는 정보 상자: 칸은 버튼이 아니고 ‘모두 보기’ 칸도 없음
   await expect(h.getByRole('button')).toHaveCount(0);
   await expect(first).toHaveCSS('cursor', 'default');
-  // 2026-11-15: ‘수입 적기’는 저금 카드에서 빼고 월급 ‘이번 달’(W-02) ‘수입 적기’로 옮김
-  await expect(h.getByRole('button', { name: '수입 적기' })).toHaveCount(0);
+  // 2026-11-15: ‘수입 입력하기’는 저금 카드에서 빼고 월급 ‘이번 달’(W-02) ‘수입 입력하기’로 옮김
+  await expect(h.getByRole('button', { name: '수입 입력하기' })).toHaveCount(0);
   // H-11: 손 줄 5개가 남음. 월급날(9월 25일)이 지났으니 “월급날이에요” 대신 날짜 문장(2026-11-13 UX B M2)
   await expect(monthLine(page)).toContainText('이번 달 월급 체크');
   await expect(monthLine(page)).toContainText('5개 남음');
@@ -433,12 +433,12 @@ test('날짜 없는 사람(H-13): 16일째부터 월급 상자 첫 줄에 “3,4
   await expect(page.getByRole('heading', { name: /\d+일 월급$/ })).toHaveCount(0);
 });
 
-test('날짜 없는 사람: 첫 수입 전 “수입 적기”, 빈 날 “마지막 수입 41일 전”', async ({ page }) => {
+test('날짜 없는 사람: 첫 수입 전 “수입 입력하기”, 빈 날 “마지막 수입 41일 전”', async ({ page }) => {
   const db = await open(page, (d) => {
     Object.assign(d.me, { payday: null, payday_none: true });
     d.checklists.length = 0;
   });
-  await expect(monthLine(page)).toContainText('수입 적기');
+  await expect(monthLine(page)).toContainText('수입 입력하기');
   if (db.v22)
     db.v22.period = {
       status: 'gap',

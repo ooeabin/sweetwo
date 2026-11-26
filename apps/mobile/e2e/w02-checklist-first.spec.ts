@@ -10,7 +10,7 @@ import {
 } from './mocks';
 
 // W-02 이번 달 월급 체크 화면 순서(20 W-02 0번, 2026-11-19 확정 시안).
-// 날짜 알약 → 큰 금액 → 보조 한 줄 → 칩 → 줄 목록 → 수입 카드(+ 수입 적기) → 아래 고정 주 버튼. 월급날 전은 “D-n, 5개” + 비활성 버튼.
+// 날짜 알약 → 큰 금액 → 보조 한 줄 → 칩 → 줄 목록 → 수입 카드(+ 수입 입력하기) → 아래 고정 주 버튼. 월급날 전은 “D-n, 5개” + 비활성 버튼.
 const y = async (loc: ReturnType<Page['locator']>) => {
   const box = await loc.first().boundingBox();
   expect(box).not.toBeNull();
@@ -104,7 +104,7 @@ test('첫 월급날 전: 날짜 알약 → 큰 금액 → “D-n, 5개” → �
   await expect(page).toHaveURL(/\/salary\/money-in\/list/);
 });
 
-test('수입 한 줄 기록 없음 상태: 월급 기본값 3,500,000원 ›, 누르면 W-20b에서 “+ 수입 적기” → W-20', async ({
+test('수입 한 줄 기록 없음 상태: 월급 기본값 3,500,000원 ›, 누르면 W-20b에서 “+ 수입 입력하기” → W-20', async ({
   page,
 }) => {
   await open(page, new Date('2026-10-07T10:00:00+09:00'));
@@ -112,7 +112,7 @@ test('수입 한 줄 기록 없음 상태: 월급 기본값 3,500,000원 ›, �
   await expect(income).toContainText('3,500,000원');
   await income.getByRole('button').click();
   await expect(page).toHaveURL(/\/salary\/money-in\/list$/);
-  await page.getByRole('button', { name: /수입 적기/ }).click();
+  await page.getByRole('button', { name: /수입 입력하기/ }).click();
   await expect(page).toHaveURL(/\/salary\/money-in$/);
 });
 

@@ -306,10 +306,10 @@ test('묶음 하나씩(H1): 찬우가 묶은 뒤 예빈이 자기 저금에서 �
     });
     for (const g of _d.goals) if (g.id === 'goal-h') g.bundle_id = 'bundle-1';
   });
-  // 예빈이 찬우 저금을 열면 들어가기 버튼, ‘+ 수입 적기’는 없음(보기만)
+  // 예빈이 찬우 저금을 열면 들어가기 버튼, ‘+ 수입 입력하기’는 없음(보기만)
   await y.goto('/salary/items/goal-h');
   await expect(y.getByRole('button', { name: '같이 모으기에 들어가기' })).toBeVisible();
-  await expect(y.getByRole('button', { name: '수입 적기' })).toHaveCount(0);
+  await expect(y.getByRole('button', { name: '수입 입력하기' })).toHaveCount(0);
   // 예빈 자기 저금 ⋯ 같이 모으기 시작하기 → 들어갈 묶음을 먼저 물음
   await y.goto('/salary/items/goal-y');
   await y.getByRole('button', { name: '더보기' }).click();

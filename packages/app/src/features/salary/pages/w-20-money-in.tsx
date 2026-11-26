@@ -39,8 +39,8 @@ const backOf = (p: URLSearchParams) => {
 };
 
 /**
- * W-20 수입 적기(20 v2.2, 모든 사람, N8·F1): “얼마를 받았어요?” 금액 + 받은 날(오늘, 미래 불가) + 칩(미리 고른 값 없음,
- * 날짜 없는 사람은 ‘프리랜스·부업’ 맨 앞). ‘다음’ = log_money_in → W-20a. H-10, H-11/H-13, W-10, W-13 “+ 수입 적기”에서 열림.
+ * W-20 수입 입력하기(20 v2.2, 모든 사람, N8·F1): “얼마를 받았어요?” 금액 + 받은 날(오늘, 미래 불가) + 칩(미리 고른 값 없음,
+ * 날짜 없는 사람은 ‘프리랜스·부업’ 맨 앞). ‘다음’ = log_money_in → W-20a. H-10, H-11/H-13, W-10, W-13 “+ 수입 입력하기”에서 열림.
  * `?edit={기록}`(W-20b ‘고치기’, 2026-11-14 M6)이면 그 기록 값으로 채우고 ‘저장’ = money_in_set → 들어온 화면으로
  */
 export function W20MoneyIn() {
@@ -157,7 +157,7 @@ export function W20MoneyIn() {
           }
         />
       </div>
-      {/* 잘못 적은 기록 고치기·지우기(W-20b, 2026-11-14 M6) */}
+      {/* 잘못 입력한 기록 고치기·지우기(W-20b, 2026-11-14 M6) */}
       {!rec && (
         <button
           type="button"
@@ -197,7 +197,7 @@ export function W20aDistribute() {
   if (!d.ready && d.failed)
     return <SavingQuestionError onBack={() => nav(back)} onRetry={d.retry} />;
   const rec = ins.data?.find((r) => r.id === id);
-  // 방금 적은 기록이 예전 목록(W-02 ‘수입’ 묶음이 받아 둔 것)에 아직 없으면 다시 받는 동안 기다림
+  // 방금 입력한 기록이 예전 목록(W-02 ‘수입’ 묶음이 받아 둔 것)에 아직 없으면 다시 받는 동안 기다림
   if (!d.ready || ins.isLoading || (!rec && ins.isFetching))
     return <QuestionSkeleton title={copy.moneyInDistributeQ} />;
   if (!rec) return <Navigate to={back} replace />;
@@ -244,7 +244,7 @@ export function W20aDistribute() {
       onBack={leave}
       primary={{ label: copy.moneyInPut, disabled: over, loading: busy }}
       onSubmit={() => void finish()}
-      // 적기만 하고 저금에 넣지 않기(2026-11-16 R4-7). 넣을 저금이 없으면 ‘넣기’가 이미 기록만
+      // 입력하기만 하고 저금에 넣지 않기(2026-11-16 R4-7). 넣을 저금이 없으면 ‘넣기’가 이미 기록만
       later={
         goals.length ? { label: copy.moneyInSkip, onClick: () => void finish(true) } : undefined
       }

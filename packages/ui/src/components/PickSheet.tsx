@@ -438,7 +438,7 @@ export function YearMonthSheet({
 
 /**
  * 일 한 줄 + 시트(W-01 나가는 날). 값 1~31 또는 'last'(말일). 한 줄 “매달 25일”, 시트는 1~31 + 말일 칸,
- * 주 버튼 “매달 25일로 하기”. 월급날 고르기는 PaydayPicker(칩 + 직접 적기)가 따로 있음
+ * 주 버튼 “매달 25일로 하기”. 월급날 고르기는 PaydayPicker(칩 + 직접 입력하기)가 따로 있음
  */
 export function DayField({
   label,

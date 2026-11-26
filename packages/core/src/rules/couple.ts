@@ -3,7 +3,7 @@ import type { BaseDay } from '../onboarding/cycle';
 import { defaultBaseDay } from '../onboarding/cycle';
 
 // 두 사람 기준(docs/spec/18-partner-join.md, 06 3·4장). 화면은 항상 ‘나’와 ‘파트너’로 본다.
-// 합류 전: 파트너 이름 = 시작한 사람이 적은 호칭(couple_space.partner_nickname), 파트너 수입은 모름(추정 없음, 08 9장).
+// 합류 전: 파트너 이름 = 시작한 사람이 입력한 호칭(couple_space.partner_nickname), 파트너 수입은 모름(추정 없음, 08 9장).
 // 합류 뒤: 파트너 값 = 파트너 본인 값(partner_profile).
 
 export interface CoupleUser {

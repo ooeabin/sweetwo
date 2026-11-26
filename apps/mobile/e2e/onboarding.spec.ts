@@ -302,7 +302,7 @@ test('O-32 ‘날짜가 정해져 있지 않아요’(매달 달라요일 때만
   await manage(page, '아니요', '아직 없어요');
   await page.getByRole('checkbox', { name: '매달 금액이 달라요' }).click();
   await expect(
-    page.getByText('보통 들어오는 금액을 적어 주세요. 더 들어온 달은 그때 적으면 돼요'),
+    page.getByText('보통 들어오는 금액을 입력해 주세요. 더 들어온 달은 그때 입력하면 돼요'),
   ).toBeVisible();
   await amount(page).fill('2800000');
   await next(page);
@@ -314,7 +314,7 @@ test('O-32 ‘날짜가 정해져 있지 않아요’(매달 달라요일 때만
   await expect(page.getByText('경조사 일주일 전에도 알려 드려요')).toHaveCount(0);
   await page.getByRole('button', { name: '나중에 할게요' }).click();
   await heading(page, '찬우님, 준비가 끝났어요');
-  await expect(page.getByText('수입은 월급 ‘이번 달’에서 적어요')).toBeVisible();
+  await expect(page.getByText('수입은 월급 ‘이번 달’에서 입력해요')).toBeVisible();
   expect(db.me).toMatchObject({ payday: null, payday_last: false, payday_none: true });
   expect(db.space?.marriage_status).toBe('dating');
   expect(db.splits).toHaveLength(1);
@@ -670,7 +670,7 @@ test('첫 저금 끝: 이미 합류했으면 초대 시트 없이 홈', async ({
   await expect(page.getByRole('dialog', { name: '같이 모을 사람을 초대할까요?' })).toHaveCount(0);
 });
 
-test('O-32 월급날 고르기(A안): 칩 + 직접 적기는 서로 하나만, 범위 오류, 31일 안내, 날짜 없음은 끔(2026-11-25)', async ({
+test('O-32 월급날 고르기(A안): 칩 + 직접 입력하기는 서로 하나만, 범위 오류, 31일 안내, 날짜 없음은 끔(2026-11-25)', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -684,7 +684,7 @@ test('O-32 월급날 고르기(A안): 칩 + 직접 적기는 서로 하나만, �
   await page.goto('/onboarding/o-32');
   await heading(page, '월급날은 며칠이에요?');
   await expect(page.getByText('회사마다 많이 쓰는 날을 먼저 보여 드려요')).toHaveCount(0);
-  // 휠도 1~31 판도 아님: 칩 6개(10 15 20 21 25 말일) + 직접 적기 칸
+  // 휠도 1~31 판도 아님: 칩 6개(10 15 20 21 25 말일) + 직접 입력하기 칸
   await expect(page.locator('.hg-wheel')).toHaveCount(0);
   const chips = page.getByRole('radiogroup', { name: '월급날은 며칠이에요?' });
   await expect(chips.getByRole('radio')).toHaveCount(6);
@@ -696,7 +696,7 @@ test('O-32 월급날 고르기(A안): 칩 + 직접 적기는 서로 하나만, �
     '25일',
     '말일',
   ]);
-  const custom = page.getByRole('textbox', { name: '다른 날 직접 적기' });
+  const custom = page.getByRole('textbox', { name: '다른 날 직접 입력하기' });
   const d25 = chips.getByRole('radio', { name: '25일' });
   await expect(d25).toBeChecked();
   await expect(custom).toHaveValue('');
@@ -720,12 +720,12 @@ test('O-32 월급날 고르기(A안): 칩 + 직접 적기는 서로 하나만, �
   await expect.poll(() => d25.evaluate((el) => getComputedStyle(el).color)).toBe(css.text);
   await expect.poll(() => d25.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(css.on);
   await expect(page.getByText('그날이 없는 달은 말일로 계산해요')).toHaveCount(0);
-  // 직접 적기: 31 → 칩 해제 + 안내
+  // 직접 입력하기: 31 → 칩 해제 + 안내
   await custom.fill('31');
   await expect(chips.getByRole('radio', { name: '25일' })).not.toBeChecked();
   await expect(page.getByText('그날이 없는 달은 말일로 계산해요')).toBeVisible();
   await expect(page.getByRole('button', { name: '다음' })).toBeEnabled();
-  // 칩을 고르면 직접 적기가 비워짐
+  // 칩을 고르면 직접 입력하기가 비워짐
   await chips.getByRole('radio', { name: '말일' }).click();
   await expect(chips.getByRole('radio', { name: '말일' })).toBeChecked();
   await expect(custom).toHaveValue('');
@@ -733,14 +733,14 @@ test('O-32 월급날 고르기(A안): 칩 + 직접 적기는 서로 하나만, �
   // 범위 밖: 오류 + 칩 해제 + 다음 꺼짐
   await custom.fill('32');
   await expect(
-    page.getByRole('alert').filter({ hasText: '1~31 사이로 적어 주세요' }),
+    page.getByRole('alert').filter({ hasText: '1~31 사이로 입력해 주세요' }),
   ).toBeVisible();
   await expect(chips.getByRole('radio', { name: '말일' })).not.toBeChecked();
   await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
   await custom.fill('0');
-  await expect(page.getByText('1~31 사이로 적어 주세요')).toBeVisible();
+  await expect(page.getByText('1~31 사이로 입력해 주세요')).toBeVisible();
   await custom.fill('');
-  await expect(page.getByText('1~31 사이로 적어 주세요')).toHaveCount(0);
+  await expect(page.getByText('1~31 사이로 입력해 주세요')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
   await custom.fill('7');
   await expect(page.getByRole('button', { name: '다음' })).toBeEnabled();
@@ -772,7 +772,7 @@ test('O-32 월급날 고르기(A안): 칩 + 직접 적기는 서로 하나만, �
   expect(st.shadow).toContain('2px');
 });
 
-test('O-32 직접 적은 날이 저장되고 다시 열면 칩 날짜는 칩으로, 아닌 날은 직접 적기 칸에 복원됨', async ({
+test('O-32 직접 입력한 날이 저장되고 다시 열면 칩 날짜는 칩으로, 아닌 날은 직접 입력하기 칸에 복원됨', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -787,7 +787,7 @@ test('O-32 직접 적은 날이 저장되고 다시 열면 칩 날짜는 칩으�
   await page.goto('/onboarding/o-32');
   await heading(page, '월급날은 며칠이에요?');
   const chips = page.getByRole('radiogroup', { name: '월급날은 며칠이에요?' });
-  const custom = page.getByRole('textbox', { name: '다른 날 직접 적기' });
+  const custom = page.getByRole('textbox', { name: '다른 날 직접 입력하기' });
   await expect(custom).toHaveValue('17');
   await expect(chips.getByRole('radio', { checked: true })).toHaveCount(0);
   await custom.fill('3');
@@ -812,7 +812,7 @@ test('O-32 저장된 월급날이 칩 날짜면 그 칩, 말일이면 말일 칩
   await heading(page, '월급날은 며칠이에요?');
   const chips = page.getByRole('radiogroup', { name: '월급날은 며칠이에요?' });
   await expect(chips.getByRole('radio', { name: '15일' })).toBeChecked();
-  await expect(page.getByRole('textbox', { name: '다른 날 직접 적기' })).toHaveValue('');
+  await expect(page.getByRole('textbox', { name: '다른 날 직접 입력하기' })).toHaveValue('');
 });
 
 test('시작한 사람이 첫 저금·초대 시트에서 앱을 닫았다 열면 A-06 권장보다 그 단계부터, A-06은 끝난 뒤 한 번(r5)', async ({
