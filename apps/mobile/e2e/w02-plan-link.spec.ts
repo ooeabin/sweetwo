@@ -312,9 +312,10 @@ test('W-01 금액 바꾸기 Toast: 이번 달 체크 안 한 줄이 바뀌면 �
   // 체크한 줄(고정지출)은 이번 달이 안 바뀌므로 예전 Toast
   await page.getByRole('button', { name: '고정지출 880,000원' }).click();
   sheet = page.getByRole('dialog', { name: '고정지출 금액' });
-  await sheet.getByRole('textbox', { name: '고정지출 금액' }).fill('900000');
+  // 2026-11-26: 시드는 미계획 0원이라 늘리면 막힘(06 3-3), 줄여서 확인
+  await sheet.getByRole('textbox', { name: '고정지출 금액' }).fill('800000');
   await sheet.getByRole('button', { name: '확인' }).click();
-  await expect(page.getByText('고정지출을 900,000원으로 바꿨어요')).toBeVisible();
+  await expect(page.getByText('고정지출을 800,000원으로 바꿨어요')).toBeVisible();
   await expect(page.getByText('이번 달 아직 확인하지 않은 것도 바꿨어요')).toHaveCount(0);
 });
 

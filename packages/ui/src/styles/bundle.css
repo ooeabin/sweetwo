@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (3af8c44e). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (9c5eff8b). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 /* 2026-11-24 구역 5 설정 검토: 사용자 앱 글자 바탕값 15/22. 클래스 없는 b·p·li가 브라우저 기본 16px로 나오던 것(기준 17/15 밖). 어드민·웹사이트는 data-platform이 없어 그대로 */
@@ -2406,7 +2406,8 @@ button.hg-plansum__person { cursor: pointer; }
 .hg-plansum__pnote { display: block; font: 400 13px/18px var(--font-sans); color: var(--slate); }
 .hg-plansum__pamt { flex: none; font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; }
 .hg-plansum__title { margin: var(--space-3) 0 0; font: 700 17px/30px var(--font-sans); letter-spacing: -0.3px; }
-.hg-plansum__title--error { color: var(--danger); }  /* 2026-11-19 “계획이 월급보다 25만 원 많아요”(오류 빨강) */
+.hg-plansum__title--error { color: var(--danger); }  /* 2026-11-19 문장 전체 빨강. 2026-11-26부터 쓰지 않음(금액만 .hg-over) */
+.hg-over { color: var(--danger); }  /* 2026-11-26 사용자 결정: 월급을 넘은 금액만 빨강(W-01 “계획이 월급보다 250,000원 많아요”, 입력 보조 글 “월급보다 300,000원 많아요”), 나머지 글자는 평소 색 */
 .hg-plansum__title em { font-style: normal; color: var(--accent-app-text); }  /* 2026-11-23 사용자 결정: W-01 “월급의 31%를 모으고 있어요”의 31%는 brand-ink가 아니라 accent-app-text(20px 700 짧은 말, 대비 예외, axe 선택자 예외) */
 .hg-plansum__bar { display: flex; gap: 3px; height: 16px; margin: var(--space-5) 0 var(--space-4); }  /* 알약 막대 16px, 칸 사이 3px, 칸마다 둥글게 */
 .hg-plansum__bar > i { display: block; min-width: 16px; border-radius: var(--radius-full); }

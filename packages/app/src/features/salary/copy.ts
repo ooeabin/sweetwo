@@ -91,7 +91,7 @@ export const copy = {
   summarySaving: ['월급의 ', '를 모으고 있어요'] as const,
   summaryPct: (n: number) => `${n}%`,
   summaryNoSaving: '월급을 어떻게 나눌지 정해 보세요', // 2026-11-26 사용자 결정: 화면 요약에서는 없앰(저축·투자 0원이면 문장 없음), 공유 이미지에만 남김
-  // 계획이 월급보다 큼(미계획 < 0)이면 굵은 문장은 core planOverText “계획이 월급보다 25만 원 많아요”(오류 빨강) [확인 필요]
+  // 계획이 월급보다 큼(미계획 < 0)이면 굵은 문장은 overPlan “계획이 월급보다 250,000원 많아요”(2026-11-26 금액만 빨강) [확인 필요]
   summaryEmpty: ['월급을 적으면', '나눌 수 있어요'] as const, // 월급 0원 상태 굵은 문장(두 줄)
   summaryEmptyAction: '월급 적기',
   allocated: '계획 금액',
@@ -267,8 +267,14 @@ export const copy = {
   incomeSaved: '월급을 바꿨어요', // 설정 S-11c와 같은 말
   tenThousandUnit: '1만 원 단위로 넣어 주세요', // [확인 필요]
   leftover: (amount: string) => `미계획 금액 ${amount}`,
-  short: (amount: string) => `${amount}이 모자라요`,
-  shortHelp: '지출이나 저축·투자를 줄여 주세요',
+  // 2026-11-26 사용자 결정(06 3-3): 줄 금액 입력이 월급을 넘으면 주 버튼을 막고 보조 글 “월급보다 300,000원 많아요”(금액만 빨강)
+  // + 회색 글자 버튼 ‘월급 고치기’. 예전 “n이 모자라요” + “지출이나 저축·투자를 줄여 주세요”는 없앰
+  overIncome: ['월급보다 ', ' 많아요'] as const,
+  overIncomeSpoken: (amount: string) => `월급보다 ${amount} 많아요`,
+  fixIncome: '월급 고치기',
+  short: (amount: string) => `${amount}이 모자라요`, // W-02 공유 이미지 합계(실제로 보낸 금액이 월급보다 많을 때)만
+  // W-01 요약 굵은 문장(입력 없이 넘은 상태, 금액만 빨강) = core planOverText와 같은 글
+  overPlan: ['계획이 월급보다 ', ' 많아요'] as const,
   // 월급 탭(2026-11-08 ADR 0007)
   tabTitle: '월급',
   monthlyShort: (amount: string) => `매달 ${amount}`, // [확인 필요] 2026-11-18 W-01 저축·투자 줄 큰 금액
@@ -401,7 +407,6 @@ export const copy = {
   foldPick: '정하기',
   foldClear: (what: string) => `${what} 지우기`,
   added: '월급 계획 템플릿에 넣었어요', // [확인 필요] 2026-11-18 W-11 끝 W-01로(예전 ‘저축·투자를 추가했어요’)
-  addShort: '미계획 금액이 모자라요. 지출이나 저축·투자를 줄여 주세요',
   addBlocked: '연결 해제를 기다리는 동안에는 저축·투자를 추가할 수 없어요',
   // W-12 달성 축하, W-12a
   storyAll: (n: number) => `${n}개월 동안 매달 둘이 같이 모았어요`,
@@ -738,7 +743,6 @@ export const copy = {
   moneyInEditBelow: '저축·투자에 넣은 금액보다 적게 고칠 수 없어요', // [확인 필요]
   moneyInEditSave: '저장',
   noteOverdue: (date: string) => `${date}이 지났어요`, // W-14 안 낸 메모(날짜는 ‘…일’로 끝남)
-  monthlyOverLeft: (left: string) => `미계획 금액 ${left}보다 적게 넣어 주세요`, // W-11b(막지 않음)
   needPerMonthTogether: (amount: string, now?: string) =>
     `기한까지 둘이 매달 ${amount}이면 돼요${now && now !== amount ? `. 지금은 ${now}씩 모아요` : ''}`, // [확인 필요] 같이 계열 W-11d·W-10, 2026-11-16 R4-2
   // ── W-21 지난 달 모아보기(20 W-21, 2026-11-17) [모두 확인 필요] ──

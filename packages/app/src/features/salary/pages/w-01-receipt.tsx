@@ -23,7 +23,6 @@ import {
   planChangeTouchesMonth,
   planRatio,
   joinLineNote,
-  planOverText,
   planSummary,
   savingLineNote,
   salaryChangedTaskOpen,
@@ -96,7 +95,7 @@ const MAX_CUSTOM = 10;
 // W-01 월급 계획 영수증(20 W-01, 2026-11-09). 별도 화면(/salary/plan, 2026-11-18 구간 탭 없앰).
 // 고칠 때마다 바로 저장(줄 RPC) + Toast ‘되돌리기’. 편집 모드: 손잡이·위아래로 순서(‘완료’에서 한 번에), 지우기.
 // 각자 + 파트너 합류면 사람 탭(?who=), 파트너 탭은 보기만(자물쇠, 서버 not_owner). 해제 대기 중 보기만.
-// ?line={저금 항목 id}: 그 저금 줄 금액 시트를 열고 시작(W-10 ‘매달 금액 바꾸기’).
+// ?line={저금 항목 id}: 그 저금 줄 금액 시트를 열고 시작(W-10 ‘매달 금액 바꾸기’). ?income=1: 월급 금액 시트(‘월급 고치기’).
 export function W01Receipt() {
   const nav = useNavigate();
   const [params, setParams] = useSearchParams();
@@ -197,6 +196,19 @@ export function W01Receipt() {
     next.delete('line');
     setParams(next, { replace: true });
   }, [lineParam, split, canEdit, params, setParams]);
+
+  // `?income=1`: 월급 금액 시트(3b)를 열고 시작(한 번). W-11·W-10 매달 금액이 월급을 넘을 때 ‘월급 고치기’(2026-11-26)
+  const incomeParam = params.get('income');
+  useEffect(() => {
+    if (!incomeParam || !m) return;
+    if (!theirs && !pending) {
+      track('salary_line_edit_opened', { joint, was_zero: (m.monthly_income ?? 0) === 0 });
+      setSheet({ income: true });
+    }
+    const next = new URLSearchParams(params);
+    next.delete('income');
+    setParams(next, { replace: true });
+  }, [incomeParam, m, theirs, pending, joint, params, setParams]);
 
   // W-11로 방금 만든 저축·투자(`?new=`, 2026-11-18): 그 줄을 잠깐 강조 + 묶음으로 스크롤. `?ask=`면 같이 모을까요·초대 물음 시트
   useEffect(() => {
@@ -695,7 +707,7 @@ export function W01Receipt() {
       sentence: summary.empty
         ? { before: `${copy.summaryEmpty[0]} ${copy.summaryEmpty[1]}`, after: '' }
         : summary.over
-          ? { before: planOverText(summary.left), after: '' }
+          ? { before: `${copy.overPlan[0]}${won(-summary.left)}${copy.overPlan[1]}`, after: '' }
           : summary.noSaving
             ? { before: copy.summaryNoSaving, after: '' }
             : {
@@ -961,6 +973,7 @@ export function W01Receipt() {
           ? copy.allowanceNotify(personName(sheetLine.user_id))
           : undefined
       }
+      onFixIncome={openIncome}
       onDelete={rowsOf([sheetLine])[0]?.onDelete ? () => remove(sheetLine, 'sheet') : undefined}
       deleteLabel={copy.removeLineLabel(nameOf(sheetLine))}
       onItem={
@@ -1136,12 +1149,16 @@ export function W01Receipt() {
                   }
                 : undefined
             }
-            // 계획이 월급보다 많으면 “계획이 월급보다 25만 원 많아요”(오류 빨강), 줄이 하나도 없으면 도넛·범례 없이 문장만
-            titleError={summary.over}
+            // 계획이 월급보다 많으면(입력 없이 넘은 상태: 월급이 줄었거나 상대 월급 변화·해제) “계획이 월급보다 250,000원 많아요”,
+            // 2026-11-26 사용자 결정: 빨강은 금액만(.hg-over), 나머지는 평소 굵은 문장 색. 줄이 하나도 없으면 도넛·범례 없이 문장만
             title={
               // 2026-11-26 사용자 결정: 저축·투자가 0원일 때 “월급을 어떻게 나눌지 정해 보세요”는 없앰(막대·범례만)
               summary.over ? (
-                planOverText(summary.left)
+                <>
+                  {copy.overPlan[0]}
+                  <span className="hg-over">{shown(won(-summary.left))}</span>
+                  {copy.overPlan[1]}
+                </>
               ) : summary.noSaving ? undefined : (
                 <>
                   {copy.summarySaving[0]}
@@ -1405,6 +1422,10 @@ export function W01Receipt() {
             : { label: copy.sharedAccountChip, onClick: () => nav('/salary/split/new') }
         }
         onBack={closeSpendForm}
+        onFixIncome={() => {
+          closeSpendForm();
+          openIncome();
+        }}
         onConfirm={(o) => {
           if (spendLines.some((l) => nameOf(l) === o.name)) return toast(copy.duplicateName);
           void add(o.name, o.chip, o.amount, spendForm.first && o.chip === 'living', o.settings);

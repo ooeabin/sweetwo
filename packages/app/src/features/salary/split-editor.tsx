@@ -1,5 +1,12 @@
 import type { Goal } from '@sweetwo/api';
-import { dateToYm, leftover, formatWon, savingNeed, type SplitLineDraft } from '@sweetwo/core';
+import {
+  dateToYm,
+  leftover,
+  planInputCheck,
+  formatWon,
+  savingNeed,
+  type SplitLineDraft,
+} from '@sweetwo/core';
 import {
   AmountInput,
   Button,
@@ -21,7 +28,8 @@ type Edit = { index: number } | { add: true } | null;
 
 /**
  * 월급 계획 목록(O-50, W-01 같은 틀, 20 W-01·17 O-50). 수입 줄 → 저금 묶음(+ 저금 항목 추가) → 지출 묶음 → ‘+ 줄 추가’,
- * 주 버튼 위에 여유 자금(음수면 “{n}이 모자라요”, 막지 않음). 줄을 누르면 같은 틀이 금액 입력(Q3)으로 바뀜.
+ * 주 버튼 위에 미계획 금액(넘으면 “계획이 월급보다 n 많아요”). 줄을 누르면 같은 틀이 금액 입력(Q3)으로 바뀜,
+ * 늘려서 월급을 넘으면 ‘확인’을 막고 “월급보다 n 많아요”(06 3-3, 2026-11-26).
  * 저금 줄 금액 입력 아래 ‘저금 항목 보기’ → W-10(onItem). 저금 줄 보조 글 = 진행 “120만 / 500만 원” + 월 필요액(기한이 있을 때)
  */
 export function SplitEditor({
@@ -132,8 +140,16 @@ export function SplitEditor({
     const v = amount ?? line?.amount ?? null;
     const renaming = !isAdd && line?.kind === 'custom';
     const newName = isAdd || renaming ? name : '';
+    const check = planInputCheck({
+      left0: left + (line?.kind === 'send' ? 0 : (line?.amount ?? 0)),
+      before: line?.amount ?? 0,
+      after: v,
+    });
     const valid =
-      v !== null && v % 10_000 === 0 && (!(isAdd || renaming) || newName.trim().length > 0);
+      v !== null &&
+      v % 10_000 === 0 &&
+      !check.blocked &&
+      (!(isAdd || renaming) || newName.trim().length > 0);
     const close = () => {
       setEdit(null);
       setAmount(null);
@@ -171,6 +187,13 @@ export function SplitEditor({
         )}
         <AmountInput label={head} value={v} onChange={setAmount} monthly allowZero />
         {v !== null && v % 10_000 !== 0 && <p className="hg-help">{copy.tenThousandUnit}</p>}
+        {check.left < 0 && (
+          <p className="hg-help">
+            {copy.overIncome[0]}
+            <span className="hg-over">{formatWon(check.over)}</span>
+            {copy.overIncome[1]}
+          </p>
+        )}
         {!isAdd && line?.kind === 'saving' && line.goalId && onItem && (
           <Button variant="ghost" onClick={() => onItem(line.goalId ?? '')}>
             {copy.seeItem}
@@ -231,10 +254,17 @@ export function SplitEditor({
       primary={{ label: primaryLabel, loading: saving, disabled: primaryDisabled }}
       onSubmit={onSave}
       summary={
-        <>
-          <span>{left >= 0 ? copy.leftover(formatWon(left)) : copy.short(formatWon(-left))}</span>
-          {left < 0 && <span className="hg-help">{copy.shortHelp}</span>}
-        </>
+        <span>
+          {left >= 0 ? (
+            copy.leftover(formatWon(left))
+          ) : (
+            <>
+              {copy.overPlan[0]}
+              <span className="hg-over">{formatWon(-left)}</span>
+              {copy.overPlan[1]}
+            </>
+          )}
+        </span>
       }
     >
       {notice}

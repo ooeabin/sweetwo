@@ -1,11 +1,11 @@
-import { leftover } from '@sweetwo/core';
+import { planInputCheck } from '@sweetwo/core';
 import type { BaseDay } from '@sweetwo/core';
 import { Chip, FormAmount, FormHero, FormScreen, FormSection, ShortText } from '@sweetwo/ui';
 import { useState } from 'react';
 import { money } from '../../../shared/mask';
 import { copy } from '../copy';
 import { formHero } from '../form-logic';
-import { LineModeBody, type LineSettings } from '../receipt-parts';
+import { LineModeBody, PlanLeftHint, type LineSettings } from '../receipt-parts';
 
 const NAME_MAX = 20;
 
@@ -24,6 +24,7 @@ export function W01eSpendAdd({
   busy,
   more,
   onBack,
+  onFixIncome,
   onConfirm,
 }: {
   chips: readonly { name: string; code: string }[];
@@ -38,6 +39,8 @@ export function W01eSpendAdd({
   /** 칩 끝 하나 더(“같이 쓰는 통장”을 숨겼을 때 나중에 켤 길) */
   more?: { label: string; onClick: () => void };
   onBack: () => void;
+  /** 월급을 넘을 때 ‘월급 고치기’(W-01 3b 월급 금액 시트) */
+  onFixIncome?: () => void;
   onConfirm: (o: {
     name: string;
     chip: string | null;
@@ -59,8 +62,9 @@ export function W01eSpendAdd({
   const shownChips = chips.filter((c) => !taken.includes(c.name));
   const customOpen = custom || (name.trim() !== '' && chip === null);
   const unit = amount !== null && amount % 10_000 !== 0;
-  const left = leftover(left0, amount === null ? [] : [{ amount }]);
-  const ready = name.trim() !== '' && amount !== null && !unit;
+  // 새 줄이라 바꾸기 전 0원: 0원보다 커서 월급을 넘으면 ‘추가하기’를 막음(06 3-3, 2026-11-26)
+  const check = planInputCheck({ left0, before: 0, after: amount });
+  const ready = name.trim() !== '' && amount !== null && !unit && !check.blocked;
   const pickChip = (c: { name: string; code: string }) => {
     setCustom(false);
     setName(c.name);
@@ -147,9 +151,7 @@ export function W01eSpendAdd({
             <>
               {unit && <p className="hg-help is-error">{copy.tenThousandUnit}</p>}
               {amount !== null && (
-                <p className={left < 0 ? 'hg-help is-error' : 'hg-help'} aria-live="polite">
-                  {left >= 0 ? copy.leftover(shown(left)) : copy.short(shown(-left))}
-                </p>
+                <PlanLeftHint left={check.left} text={shown} onFixIncome={onFixIncome} />
               )}
               <p className="hg-help">{copy.addMyShareHint}</p>
             </>

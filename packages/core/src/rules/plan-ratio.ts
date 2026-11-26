@@ -131,6 +131,26 @@ export interface PlanSummaryValue {
 /** 계획이 월급을 넘을 때 굵은 문장(2026-11-19): “계획이 월급보다 250,000원 많아요”. left = 미계획(음수) */
 export const planOverText = (left: Won) => `계획이 월급보다 ${formatWon(Math.abs(left))} 많아요`;
 
+export interface PlanInputCheck {
+  /** 바꾼 뒤 미계획 금액(음수 = 월급을 넘음) */
+  left: Won;
+  /** 월급을 넘는 금액(0 이상). “월급보다 300,000원 많아요”의 금액 */
+  over: Won;
+  /** 주 버튼을 막음: 바꾼 뒤 미계획 < 0 이고 이 줄 금액이 늘었을 때(새 줄은 바꾸기 전 0원) */
+  blocked: boolean;
+}
+
+/**
+ * 줄 금액 입력의 월급 넘김 판정(06 3-3, 2026-11-26 사용자 결정). 입력할 때만 막고 서버·월급 고치기는 막지 않음.
+ * left0 = 이 줄을 뺀 미계획 금액(월급 − 다른 줄 합), before = 바꾸기 전 이 줄 금액(새 줄은 0), after = 넣은 금액(null이면 아직 안 넣음 = before).
+ * 막음 = 바꾼 뒤 미계획 < 0 이고 after > before. 이미 넘친 상태에서 줄이는 변경과 0원 새 줄은 막지 않음.
+ */
+export function planInputCheck(o: { left0: Won; before: Won; after: Won | null }): PlanInputCheck {
+  const after = o.after ?? o.before;
+  const left = o.left0 - after;
+  return { left, over: Math.max(-left, 0), blocked: left < 0 && after > o.before };
+}
+
 /**
  * 월급, 저축·투자 줄 합, 지출 줄 합 → W-01 요약 카드 값(막대는 `planRatio`, 문장 퍼센트는 월급 기준 반올림).
  * lines = 저축·투자 줄 수 + 지출 줄 수(주지 않으면 줄이 있다고 봄)

@@ -2405,7 +2405,8 @@ button.hg-plansum__person { cursor: pointer; }
 .hg-plansum__pnote { display: block; font: 400 13px/18px var(--font-sans); color: var(--slate); }
 .hg-plansum__pamt { flex: none; font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; }
 .hg-plansum__title { margin: var(--space-3) 0 0; font: 700 17px/30px var(--font-sans); letter-spacing: -0.3px; }
-.hg-plansum__title--error { color: var(--danger); }  /* 2026-11-19 “계획이 월급보다 25만 원 많아요”(오류 빨강) */
+.hg-plansum__title--error { color: var(--danger); }  /* 2026-11-19 문장 전체 빨강. 2026-11-26부터 쓰지 않음(금액만 .hg-over) */
+.hg-over { color: var(--danger); }  /* 2026-11-26 사용자 결정: 월급을 넘은 금액만 빨강(W-01 “계획이 월급보다 250,000원 많아요”, 입력 보조 글 “월급보다 300,000원 많아요”), 나머지 글자는 평소 색 */
 .hg-plansum__title em { font-style: normal; color: var(--accent-app-text); }  /* 2026-11-23 사용자 결정: W-01 “월급의 31%를 모으고 있어요”의 31%는 brand-ink가 아니라 accent-app-text(20px 700 짧은 말, 대비 예외, axe 선택자 예외) */
 .hg-plansum__bar { display: flex; gap: 3px; height: 16px; margin: var(--space-5) 0 var(--space-4); }  /* 알약 막대 16px, 칸 사이 3px, 칸마다 둥글게 */
 .hg-plansum__bar > i { display: block; min-width: 16px; border-radius: var(--radius-full); }

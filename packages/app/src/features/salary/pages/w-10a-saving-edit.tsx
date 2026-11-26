@@ -14,6 +14,7 @@ import {
   defaultDeadline,
   formatYm,
   leftover,
+  planInputCheck,
   formatWon,
   savingEta,
   savingLate,
@@ -41,6 +42,7 @@ import { copy } from '../copy';
 import { salaryPaths, savingPaths } from '../paths';
 import { useMe, usePartner, useSplits } from '../data';
 import { trackSharedGoal, useSavingItems } from '../saving';
+import { speakMasked } from '../../../shared/masked-text';
 import { SavingQuestionError } from '../saving-parts';
 import { toDraft } from '../split-editor';
 
@@ -118,7 +120,13 @@ export function W10aSavingEdit() {
   const income = d.joint
     ? (me.data?.monthly_income ?? 0) + (partnerQ.data?.monthly_income ?? 0)
     : (me.data?.monthly_income ?? 0);
-  const leftAfter = leftover(income, nextLines(curMonthly ?? 0));
+  // 매달 금액을 늘려 월급을 넘으면 ‘저장’을 막음(06 3-3, 2026-11-26 사용자 결정). 줄이는 변경은 넘쳐 있어도 막지 않음
+  const over = planInputCheck({
+    left0: leftover(income, nextLines(0)),
+    before: item.monthly,
+    after: curMonthly,
+  });
+  const leftAfter = over.left;
   // 기한 처음 값: 지금 기한, 없으면 1년 뒤(W-11d와 같음, 2026-11-12 S7-07)
   const curYm =
     ym === undefined
@@ -285,9 +293,13 @@ export function W10aSavingEdit() {
     copy.retargetHelp(money(item.saved, masked))
   ) : f === 'monthly' ? (
     leftAfter >= 0 ? (
-      copy.leftover(money(leftAfter, masked))
+      speakMasked(copy.leftover(money(leftAfter, masked)))
     ) : (
-      copy.short(money(-leftAfter, masked))
+      <>
+        {copy.overIncome[0]}
+        <span className="hg-over">{speakMasked(money(-leftAfter, masked))}</span>
+        {copy.overIncome[1]}
+      </>
     )
   ) : need !== null ? (
     <>
@@ -330,7 +342,8 @@ export function W10aSavingEdit() {
         disabled:
           !!err ||
           low ||
-          (f === 'monthly' && (curMonthly === null || curMonthly % 10_000 !== 0 || !stored)) ||
+          (f === 'monthly' &&
+            (curMonthly === null || curMonthly % 10_000 !== 0 || !stored || over.blocked)) ||
           (f === 'amount' && !curAmount) ||
           (f === 'deadline' && !curYm) ||
           (f === 'name' && !curName.trim()),
@@ -363,6 +376,17 @@ export function W10aSavingEdit() {
       )}
       {f === 'monthly' && curMonthly !== null && curMonthly % 10_000 !== 0 && (
         <p className="hg-help">{copy.tenThousandUnit}</p>
+      )}
+      {f === 'monthly' && leftAfter < 0 && (
+        // 월급을 넘으면 회색 글자 버튼 ‘월급 고치기’ → W-01 월급 금액 시트(3b)
+        <button
+          type="button"
+          className="hg-btn hg-btn--link"
+          style={{ alignSelf: 'flex-start' }}
+          onClick={() => nav(`${salaryPaths.plan}?income=1`)}
+        >
+          {copy.fixIncome}
+        </button>
       )}
       {f === 'amount' && !retarget && g.target_amount !== null && (
         // 목표 금액을 지우면 기한도 같이 지움(20 W-10a 2번). 회색 글자 버튼(2026-11-12 S7-12)

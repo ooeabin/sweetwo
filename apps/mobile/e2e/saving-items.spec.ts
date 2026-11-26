@@ -76,6 +76,8 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
+  // 2026-11-26: 월급을 넘는 매달 금액은 입력에서 막힘(06 3-3). 시드는 미계획 0원이라 월급을 늘려 둠
+  Object.assign(db.me, { monthly_income: 5_000_000 });
   await page.goto('/salary/items/new');
   // 2026-11-23 한 화면 입력: 요약 문장이 고르는 대로 바뀜
   const hero = page.getByRole('heading', { level: 2 });
@@ -128,8 +130,7 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   // 2026-11-18: 만들면 W-01 월급 계획 템플릿 ‘저축·투자’ 묶음으로: 새 줄 강조 + Toast, 초대 물음은 거기서
   await expect(page).toHaveURL(/\/salary\/plan/);
   await expect(page.getByRole('heading', { name: '월급 계획 템플릿', level: 1 })).toBeVisible();
-  // 이 시드는 미계획 금액이 모자라 “모자라요” Toast(addShort)가 뜸
-  await expect(page.locator('.hg-toasts')).toBeVisible();
+  await expect(page.getByText('월급 계획 템플릿에 넣었어요')).toBeVisible();
   await expect(page.locator('.hg-receipt__row.is-new')).toContainText('제주 여행');
   await expect(page.locator('.hg-receipt__row.is-new')).toContainText('200,000원');
   await page.getByRole('button', { name: '나중에 할게요' }).click();
@@ -191,6 +192,8 @@ test('W-11c 이미 모은 금액(2026-11-09): 만들 때만, 목표 금액보다
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
+  // 2026-11-26: 월급을 넘는 매달 금액은 입력에서 막힘(06 3-3). 시드는 미계획 0원이라 월급을 늘려 둠
+  Object.assign(db.me, { monthly_income: 5_000_000 });
   await page.goto('/salary/items/new');
   await pickName(page, '결혼 비용');
   await page.getByRole('button', { name: '30만 원' }).click();
