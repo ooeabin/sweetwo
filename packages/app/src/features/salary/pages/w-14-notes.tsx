@@ -196,14 +196,17 @@ export function W14Notes({ kind }: { kind: 'goal' | 'bundle' }) {
           ))}
         </div>
       ) : (
-        // 빈 상태: “+ 메모 추가”는 문구 바로 아래(2026-11-23, EmptyState action)
+        // 빈 상태: 화면 전체가 비어 “메모 추가”는 아래 고정 주 버튼(2026-11-26 ‘빈 상태 A안’, 예전 2026-11-23 문구 바로 아래 AddRow)
         <EmptyState
           list
           page
+          actionPlacement="bottom"
           title={copy.notesEmpty}
           action={
             t.canEdit ? (
-              <AddRow label={copy.noteAdd} onClick={() => nav(t.noteTo('new'))} />
+              <Button variant="primary" block onClick={() => nav(t.noteTo('new'))}>
+                {copy.noteAdd}
+              </Button>
             ) : undefined
           }
         />

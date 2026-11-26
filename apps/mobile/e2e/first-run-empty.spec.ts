@@ -146,7 +146,7 @@ test('W-02 월급 0원 + 계획 없음도 같은 3단계 안내(예전 “월급
   await expect(page.getByRole('button', { name: '월급 계획 세우기', exact: true })).toBeVisible();
 });
 
-test('선물 기록 빈 상태: 제목 한 줄 + 회색 “+ 기념일 적기” → 경조사 추가(Y-07)', async ({
+test('선물 기록 빈 상태: 제목 한 줄 + 제자리 회색 “+ 기념일 적기”(보통 크기) → 경조사 추가(Y-07)', async ({
   page,
 }) => {
   await open(page, undefined, '/calendar/gifts');
@@ -154,6 +154,9 @@ test('선물 기록 빈 상태: 제목 한 줄 + 회색 “+ 기념일 적기”
   // 설명 문구 없음(제목 한 줄 + 버튼 하나)
   await expect(page.getByText('다가오는 생일·기념일을 먼저')).toHaveCount(0);
   const add = page.getByRole('button', { name: '+ 기념일 적기' });
+  // 화면 일부 빈 상태(밑줄 탭 아래): 아래 고정 바가 아니라 제자리, 보통 크기(2026-11-26 ‘빈 상태 A안’)
+  await expect(page.locator('.hg-stickybar')).toHaveCount(0);
+  await expect(add).not.toHaveClass(/hg-btn--sm/);
   const box = await add.boundingBox();
   expect(box?.height ?? 0).toBeGreaterThanOrEqual(43.9);
   // 회색 보조 버튼(오렌지 채움 아님), 글자 700
@@ -166,18 +169,17 @@ test('선물 기록 빈 상태: 제목 한 줄 + 회색 “+ 기념일 적기”
   await expect(page.getByRole('heading', { name: '경조사 추가' })).toBeVisible();
 });
 
-test('지난 달 모아보기 빈 상태: 월급 계획이 없으면 “+ 월급 계획 세우기” → W-01, 있으면 제목만', async ({
-  page,
-}) => {
+test('지난 달 모아보기 빈 상태: 월급 계획이 있으면 제목만(아래 고정 바 없음)', async ({ page }) => {
   // 계획 있음(확인 목록에 들어갈 줄이 있음): 문구만
   await open(page, undefined, '/salary/archive');
   await expect(page.getByText('아직 지난 달 기록이 없어요')).toBeVisible();
   await expect(page.getByText('첫 월급날이 지나면 여기에 모여요')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: '+ 월급 계획 세우기' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '월급 계획 세우기' })).toHaveCount(0);
+  await expect(page.locator('.hg-stickybar')).toHaveCount(0);
   await axe(page);
 });
 
-test('지난 달 모아보기 빈 상태: 월급 계획이 없으면 “+ 월급 계획 세우기” → W-01', async ({
+test('지난 달 모아보기 빈 상태: 월급 계획이 없으면 아래 고정 주 버튼 “월급 계획 세우기” → W-01(W-02와 같은 자리)', async ({
   page,
 }) => {
   await open(
@@ -190,8 +192,16 @@ test('지난 달 모아보기 빈 상태: 월급 계획이 없으면 “+ 월급
   );
   await expect(page.getByText('아직 지난 달 기록이 없어요')).toBeVisible();
   await expect(page.getByText('첫 월급날이 지나면 여기에 모여요')).toHaveCount(0);
-  const add = page.getByRole('button', { name: '+ 월급 계획 세우기' });
+  // 화면 전체가 빈 상태: 아래 고정 주 버튼(2026-11-26 ‘빈 상태 A안’)
+  const add = page
+    .locator('.hg-stickybar')
+    .getByRole('button', { name: '월급 계획 세우기', exact: true });
   await expect(add).toBeVisible();
+  await expect(add).toHaveClass(/hg-btn--primary/);
+  // 내용이 짧아도 화면 아래(남는 높이를 빈 상태가 채움)
+  const vh = page.viewportSize()?.height ?? 0;
+  const ab = await add.boundingBox();
+  expect((ab?.y ?? 0) + (ab?.height ?? 0)).toBeGreaterThan(vh - 120);
   await axe(page);
   await add.click();
   await expect(page).toHaveURL(/\/salary\/plan/);

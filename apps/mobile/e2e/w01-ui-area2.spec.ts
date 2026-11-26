@@ -171,12 +171,17 @@ test('금액 시트의 빨간 버튼은 “항목 지우기”', async ({ page }
   await expect(sheet.getByText('줄 지우기')).toHaveCount(0);
 });
 
-test('W-14 쓸 곳 메모가 비면 “+ 메모 추가”는 빈 상태 문구 바로 아래', async ({ page }) => {
+test('W-14 쓸 곳 메모가 비면 “메모 추가”는 아래 고정 주 버튼(2026-11-26 빈 상태 A안)', async ({
+  page,
+}) => {
   await open(page, '/salary/items/goal-h/notes', 844);
   const title = page.getByText('아직 메모가 없어요');
   await expect(title).toBeVisible();
-  const add = page.getByRole('button', { name: /메모 추가/ });
+  // 버튼은 하나(아래 고정 바), 목록 아래 AddRow는 없음
+  await expect(page.getByRole('button', { name: /메모 추가/ })).toHaveCount(1);
+  const add = page.locator('.hg-stickybar').getByRole('button', { name: '메모 추가' });
   await expect(add).toBeVisible();
-  const [a, b] = await Promise.all([title.boundingBox(), add.boundingBox()]);
-  expect(a && b && b.y - (a.y + a.height)).toBeLessThan(80);
+  await expect(add).toHaveClass(/hg-btn--primary/);
+  const b = await add.boundingBox();
+  expect((b?.y ?? 0) + (b?.height ?? 0)).toBeGreaterThan(844 - 120);
 });

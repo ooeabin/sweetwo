@@ -750,7 +750,7 @@ export const copy = {
   },
   archivePlanned: (amount: string) => `계획한 월급 ${amount}`, // 오른쪽 큰 숫자가 모은 금액이라 보조 줄에 계획 합
   archiveEmpty: '아직 지난 달 기록이 없어요',
-  archiveEmptyPlan: '+ 월급 계획 세우기', // [확인 필요] 2026-11-25 월급 계획이 없을 때 → W-01
+  archiveEmptyPlan: '월급 계획 세우기', // [확인 필요] 2026-11-25 월급 계획이 없을 때 → W-01, 2026-11-26 아래 고정 주 버튼(‘빈 상태 A안’, W-02와 같은 말)
   /** 날짜 없는 사람: 줄 이름 “10월 3일 ~ 11월 1일”, 보조 “수입 2번” */
   archivePeriod: (start: string, end: string) => `${start} ~ ${end}`,
   archivePeriodCount: (n: number) => `수입 ${n}번`,

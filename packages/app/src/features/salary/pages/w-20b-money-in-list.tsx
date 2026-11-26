@@ -114,6 +114,9 @@ export function W20bMoneyInList() {
     }
   };
   const summaryAmount = base ? base.amount : sum;
+  // 기록도 기본값 줄도 없어 화면 전체가 빈 상태(아래 고정 주 버튼 “수입 적기”가 다음 행동 하나)
+  const listEmpty =
+    !ins.isLoading && !(ins.isError && !ins.data) && !mine.length && !base?.lines.length;
   const summary = (
     <section className="hg-fdhero" aria-label={copy.incomeCardLabel}>
       <p className="hg-fdhero__label">{copy.incomeCardLabel}</p>
@@ -132,7 +135,7 @@ export function W20bMoneyInList() {
           speakMasked(m(summaryAmount))
         )}
       </p>
-      <PlanAdd onClick={() => nav(togetherPaths.moneyIn)}>{copy.moneyInGo}</PlanAdd>
+      {!listEmpty && <PlanAdd onClick={() => nav(togetherPaths.moneyIn)}>{copy.moneyInGo}</PlanAdd>}
     </section>
   );
   const body = (
@@ -209,12 +212,14 @@ export function W20bMoneyInList() {
             })}
           </div>
         ) : (
+          // 화면 전체가 빈 상태: “수입 적기”는 아래 고정 주 버튼(2026-11-26 ‘빈 상태 A안’), 요약의 “+ 수입 적기”는 이때 숨김(다음 행동 하나)
           <EmptyState
             list
             page
+            actionPlacement="bottom"
             title={copy.moneyInListEmpty}
             action={
-              <Button variant="secondary" onClick={() => nav(togetherPaths.moneyIn)}>
+              <Button variant="primary" block onClick={() => nav(togetherPaths.moneyIn)}>
                 {copy.moneyInGo}
               </Button>
             }
