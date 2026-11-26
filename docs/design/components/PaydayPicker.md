@@ -1,6 +1,6 @@
 # PaydayPicker
 
-월급날 고르기(`hg-payday`, 코드 `PaydayPicker`, `question/PaydayPicker.tsx`). 2026-11-25 사용자 결정 A안 ‘자주 쓰는 날 칩 + 직접 입력’(시안 `work/w02-design/payday.png` 왼쪽). 휠(`DayWheel`)과 펼친 1~31 날짜 칸(`DayChips`·`DayGrid`, 2026-11-25 구역 6)을 이것 하나로 바꿈(2026-11-26 `DayWheel`은 없어지고 W-01 ‘나가는 날’은 `DayField`, PickSheet.md). 월급날 일(1~31 또는 말일)을 고르는 모든 곳이 씀: O-32, P-05b, S-11c, W-01 월급 금액 시트(월급날이 없고 금액이 0보다 클 때). W-01 줄 ‘나가는 날’은 월급날이 아니라 그대로 `DayWheel`(칩 ‘월급날’·‘다음 날’ + 휠).
+월급날 고르기(`hg-payday`, 코드 `PaydayPicker`, `question/PaydayPicker.tsx`). 2026-11-25 사용자 결정 A안 ‘자주 쓰는 날 칩 + 직접 입력’(시안 `work/w02-design/payday.png` 왼쪽). 휠(`DayWheel`)과 펼친 1~31 날짜 칸(`DayChips`·`DayGrid`, 2026-11-25 구역 6)을 이것 하나로 바꿈(2026-11-26 `DayWheel`은 없어지고 W-01 ‘나가는 날’은 `DayField`, PickSheet.md). 월급날 일(1~31 또는 말일)을 고르는 모든 곳이 씀: O-32, P-05b, S-11c, W-01 월급 금액 시트(월급날이 없고 금액이 0보다 클 때). W-01 줄 ‘나가는 날’은 월급날이 아니라 `DayField`(칩 ‘월급날’·‘다음 날’ + 한 줄 → 1~31 + 말일 칸 시트, PickSheet.md).
 
 - 구성(위에서 아래, 간격 16): 칩 줄 + 직접 적기 칸 + (오류 또는 29~31일 안내 한 줄). 오류·안내 줄은 직접 적기 칸에 붙여 8px(2026-11-25).
 - 칩: 10일, 15일, 20일, 21일, 25일, 말일(말일 값은 ‘말일’). 회색 알약(`choice-plate`, 높이 48, 좌우 20, 칸 사이 12, 줄이 넘치면 줄바꿈), 안 고른 칩 17/400 `ink-2`. 고른 칩은 흰 칸(`choice-on`) + `choice-on-shadow` + 17/700 + 오렌지 글자 `accent-app-text`(2026-11-25 사용자 결정. 17px 700 짧은 말이라 대비 예외, axe 선택자 예외 `.hg-payday__chip.is-on`). 테두리 없음. 누르는 칸 44px 이상(높이 48).

@@ -259,7 +259,7 @@ test('각자(저금만 같이 해요): 형태 확인 ‘좋아요’ → 월급(
   await expect(page.getByRole('heading', { name: '예빈님은 몇 년생이에요?' })).toBeVisible();
   // 처음 보이는 값으로 바로 저장할 수 있음(2026-11-13 실구동)
   await expect(page.getByRole('button', { name: '저장' })).toBeEnabled();
-  await pickYear(page, '예빈님은 몇 년생이에요?', 1995);
+  await pickYear(page, '출생연도', 1995);
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page).toHaveURL(/\/assets\/rank$/);
   expect(db.me.birth_year).toBe(1995);
