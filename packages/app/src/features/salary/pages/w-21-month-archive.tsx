@@ -110,14 +110,16 @@ export function W21MonthArchive() {
           ]}
         />
       ) : rowCount === 0 ? (
-        // 다음 행동(2026-11-25 사용자 확정): 월급 계획이 없으면 “+ 월급 계획 세우기” → W-01, 있으면 안내 문구만
+        // 다음 행동(2026-11-25 사용자 확정): 월급 계획이 없으면 “월급 계획 세우기” → W-01, 있으면 제목만.
+        // 화면 전체가 빈 상태라 아래 고정 주 버튼(2026-11-26 ‘빈 상태 A안’, W-02와 같음)
         <EmptyState
           list
           page
+          actionPlacement="bottom"
           title={copy.archiveEmpty}
           action={
             splits.isSuccess && !hasPlan && !periodMode ? (
-              <Button variant="secondary" size="sm" onClick={() => nav(salaryPaths.plan)}>
+              <Button variant="primary" block onClick={() => nav(salaryPaths.plan)}>
                 {copy.archiveEmptyPlan}
               </Button>
             ) : undefined

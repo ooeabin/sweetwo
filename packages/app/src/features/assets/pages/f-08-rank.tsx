@@ -14,6 +14,7 @@ import {
   BottomSheet,
   Button,
   Distribution,
+  EmptyState,
   ListRow,
   PageHeader,
   RankRow,
@@ -119,14 +120,18 @@ export function F08Rank() {
       <div key="r" className="hg-stack hg-detail" style={{ gap: 0 }}>
         {header}
         <div className="hg-page">
-          <p className="hg-help" style={{ margin: 0 }}>
-            {copy.rankEmptyLine}
-          </p>
-          <StickyBar>
-            <Button variant="primary" block onClick={() => nav('/assets/new')}>
-              {copy.rankEmptyCta}
-            </Button>
-          </StickyBar>
+          {/* 화면 전체가 빈 상태: 공통 빈 상태 + 아래 고정 주 버튼(2026-11-26 ‘빈 상태 A안’) */}
+          <EmptyState
+            list
+            page
+            actionPlacement="bottom"
+            title={copy.rankEmptyLine}
+            action={
+              <Button variant="primary" block onClick={() => nav('/assets/new')}>
+                {copy.rankEmptyCta}
+              </Button>
+            }
+          />
         </div>
       </div>
     );
