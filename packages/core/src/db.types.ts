@@ -2613,6 +2613,7 @@ export type Database = {
           id: string
           last_seen_at: string
           platform: string
+          session_id: string | null
           token: string
           user_id: string
         }
@@ -2623,6 +2624,7 @@ export type Database = {
           id?: string
           last_seen_at?: string
           platform: string
+          session_id: string | null
           token: string
           user_id: string
         }
@@ -2632,6 +2634,7 @@ export type Database = {
           id?: string
           last_seen_at?: string
           platform?: string
+          session_id?: string | null
           token?: string
           user_id?: string
         }
