@@ -72,12 +72,12 @@ test('지난 달 모아보기: 서랍 줄 → 최근 것부터 결과·모은 �
   await expect(rows.nth(0)).toContainText('8월 25일 월급');
   await expect(rows.nth(0)).toContainText('확인할 것 1개');
   // 오른쪽 큰 숫자 = 그 달 모은 금액, 보조 = 계획한 월급(달마다 다름, 지금 실수령 350만 원이 아님)
-  await expect(rows.nth(0)).toContainText('계획한 월급 150만 원');
-  await expect(rows.nth(0).locator('.hg-listrow__value')).toContainText('100만 원');
-  await expect(rows.nth(1)).toContainText('계획한 월급 270만 원');
-  await expect(rows.nth(1).locator('.hg-listrow__value')).toContainText('270만 원');
-  await expect(rows.nth(2)).toContainText('계획한 월급 70만 원');
-  await expect(rows.nth(2).locator('.hg-listrow__value')).toContainText('40만 원');
+  await expect(rows.nth(0)).toContainText('계획한 월급 1,500,000원');
+  await expect(rows.nth(0).locator('.hg-listrow__value')).toContainText('1,000,000원');
+  await expect(rows.nth(1)).toContainText('계획한 월급 2,700,000원');
+  await expect(rows.nth(1).locator('.hg-listrow__value')).toContainText('2,700,000원');
+  await expect(rows.nth(2)).toContainText('계획한 월급 700,000원');
+  await expect(rows.nth(2).locator('.hg-listrow__value')).toContainText('400,000원');
   await expect(page.locator('.hg-list')).not.toContainText('350만');
   await expect(rows.nth(1)).toContainText('7월 24일 월급');
   await expect(rows.nth(1)).toContainText('계획대로 됐어요');

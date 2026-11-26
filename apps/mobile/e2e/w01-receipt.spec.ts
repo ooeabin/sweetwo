@@ -91,7 +91,7 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
   await expect(page.locator('.hg-plancard')).toHaveCount(3);
   await expect(page.locator('.hg-receipt, .hg-receipt__row--strong')).toHaveCount(0);
   const sum = page.locator('.hg-plansum');
-  await expect(sum.locator('.hg-plansum__amt')).toHaveText('350만 원');
+  await expect(sum.locator('.hg-plansum__amt')).toHaveText('3,500,000원');
   await expect(sum.locator('.hg-plansum__title')).toHaveText('월급의 40%를 모으고 있어요');
   await expect(sum.locator('.hg-plansum__title em')).toHaveText('40%');
   // 06 3-5: 139만 / 211만 / 0 → 40% / 60% / 0%
@@ -105,13 +105,19 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
   await expect(donut.locator('circle').first()).toHaveClass(/hg-plansum__slice--saving/);
   await expect(donut.locator('circle').nth(1)).toHaveAttribute('stroke-dashoffset', '-40');
   const legend = sum.locator('.hg-plansum__legend li');
-  await expect(legend).toHaveText(['저축·투자 40%139만 원', '지출 60%211만 원', '미계획 0%0원']);
+  await expect(legend).toHaveText([
+    '저축·투자 40%1,390,000원',
+    '지출 60%2,110,000원',
+    '미계획 0%0원',
+  ]);
   await expect(legend.locator('.hg-plansum__lpct')).toHaveText(['40%', '60%', '0%']);
   // 도넛 오른쪽 한 줄 배치: 범례는 도넛 오른쪽(간격 20), 범례 줄은 꺾이지 않음
   const db0 = await donut.boundingBox();
   const lb0 = await sum.locator('.hg-plansum__legend').boundingBox();
   expect(db0 && lb0 && Math.round(lb0.x - (db0.x + db0.width))).toBe(20);
-  expect(db0?.width).toBe(112);
+  // 금액이 일곱 자리(“2,110,000원”, 2026-11-26 토스식)면 범례를 한 줄로 두려고 도넛이 112 → 96까지 줄어듦
+  expect(db0?.width ?? 0).toBeGreaterThanOrEqual(96);
+  expect(db0?.width ?? 0).toBeLessThanOrEqual(112);
   for (const h of await legend.evaluateAll((els) =>
     els.map((e) => e.getBoundingClientRect().height),
   ))
@@ -121,7 +127,7 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
   await expect(pen).toHaveCSS('width', '18px');
   expect(await names(page, '저축·투자')).toEqual(['청약', '내 집 마련']);
   expect(await names(page, '지출')).toEqual(['용돈', '고정지출', '생활비']);
-  await expect(page.locator('.hg-plancard__sum')).toHaveText(['139만 원', '211만 원']);
+  await expect(page.locator('.hg-plancard__sum')).toHaveText(['1,390,000원', '2,110,000원']);
   await expect(page.locator('.hg-fab')).toHaveCount(0);
   // 2026-11-26 사용자 결정: 맨 아래 ‘편집하기’ 대신 머리 오른쪽 글자 버튼 ‘편집’(좁은 창 = 앱 머리, 넓은 창 = 제목 줄)
   await expect(page.getByRole('button', { name: '편집하기' })).toHaveCount(0);
@@ -201,11 +207,11 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
     page.getByRole('region', { name: '지출', exact: true }).locator('.hg-receipt__go'),
   ).toHaveCount(0);
   // 저축·투자 0%가 아닌 목표 진행만 막대(내 집 마련 목표 금액 1억 5,000만 원 중 0%면 막대 없음, 보조 줄은 그대로)
-  await expect(savingCard.getByText('목표 금액 1억 5,000만 원')).toBeVisible();
+  await expect(savingCard.getByText('목표 금액 150,000,000원')).toBeVisible();
   await expect(savingCard.locator('.hg-receipt__prog')).toHaveCount(0);
   await axe(page);
   // 큰 금액(연필) → 월급 금액 시트(설정 내 월급으로 가지 않음)
-  await page.getByRole('button', { name: '월급 350만 원, 금액 고치기' }).click();
+  await page.getByRole('button', { name: '월급 3,500,000원, 금액 고치기' }).click();
   const incomeSheet = page.getByRole('dialog', { name: '월급 금액' });
   await expect(incomeSheet).toBeVisible();
   // 옛 주소 /salary/split → 계획, ‘이번 달’ → W-02
@@ -296,22 +302,22 @@ test('금액 바꾸기: 시트(미계획 금액 미리보기) → 바로 저장 
 }) => {
   const { db, go } = await open(page);
   await go();
-  await page.getByRole('button', { name: '생활비 88만 원' }).click();
+  await page.getByRole('button', { name: '생활비 880,000원' }).click();
   const sheet = page.getByRole('dialog', { name: '생활비 금액' });
   await expect(sheet.getByText('미계획 금액 0원')).toBeVisible();
   await sheet.getByRole('textbox', { name: '생활비 금액' }).fill('800000');
-  await expect(sheet.getByText('미계획 금액 8만 원')).toBeVisible();
+  await expect(sheet.getByText('미계획 금액 80,000원')).toBeVisible();
   // 기본 줄은 이름을 바꾸지 않음
   await expect(sheet.getByLabel('항목 이름')).toHaveCount(0);
   await axe(page);
   await sheet.getByRole('button', { name: '확인' }).click();
   // 이번 달 체크 안 한 줄도 바뀌어 Toast가 그 말로(2026-11-09)
   await expect(page.getByText('이번 달 아직 확인하지 않은 것도 바꿨어요')).toBeVisible();
-  await expect(page.getByRole('button', { name: '생활비 80만 원' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '생활비 800,000원' })).toBeVisible();
   expect(lineOf(db, 'living')?.amount).toBe(800_000);
   expect(waitLine(db, 'living')?.planned).toBe(800_000);
   await page.getByRole('button', { name: '되돌리기' }).click();
-  await expect(page.getByRole('button', { name: '생활비 88만 원' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '생활비 880,000원' })).toBeVisible();
   expect(lineOf(db, 'living')?.amount).toBe(880_000);
 });
 
@@ -333,7 +339,7 @@ test('지출 추가: 이름 칩 → 금액 → 추가하기, 직접 추가 줄�
   await expect(page.getByRole('button', { name: '추가하기' })).toBeDisabled();
   await fillAmount(page, '매달 얼마씩?', 100000);
   await expect(page.getByRole('heading', { level: 2 })).toHaveText(
-    '관리비에 매달 10만 원씩 쓸까요?',
+    '관리비에 매달 100,000원씩 쓸까요?',
   );
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page.getByText('관리비를 추가했어요')).toBeVisible();
@@ -350,12 +356,12 @@ test('지출 추가: 이름 칩 → 금액 → 추가하기, 직접 추가 줄�
   await expect(page.getByText('이미 있는 이름이에요')).toBeVisible();
   await page.getByRole('button', { name: '뒤로' }).click();
   // 직접 추가 줄: 시트에서 이름 바꾸기
-  await page.getByRole('button', { name: '관리비 10만 원' }).click();
+  await page.getByRole('button', { name: '관리비 100,000원' }).click();
   const s2 = page.getByRole('dialog', { name: '관리비 금액' });
   await s2.getByLabel('항목 이름').fill('아파트 관리비');
   await s2.getByRole('button', { name: '확인' }).click();
   await expect(page.getByText('이름을 바꿨어요')).toBeVisible();
-  await expect(page.getByRole('button', { name: '아파트 관리비 10만 원' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '아파트 관리비 100,000원' })).toBeVisible();
 });
 
 test('기본 줄 지우기 + 되돌리기(같은 자리), 저금 줄 지우기는 확인 뒤 그만 모음', async ({
@@ -363,7 +369,7 @@ test('기본 줄 지우기 + 되돌리기(같은 자리), 저금 줄 지우기�
 }) => {
   const { db, go } = await open(page);
   await go();
-  await page.getByRole('button', { name: '고정지출 88만 원' }).click();
+  await page.getByRole('button', { name: '고정지출 880,000원' }).click();
   await page
     .getByRole('dialog', { name: '고정지출 금액' })
     .getByRole('button', { name: '고정지출 항목 지우기' })
@@ -437,7 +443,7 @@ test('파트너 탭(각자): 보기만(자물쇠), 편집·추가·추천값 없
   await go();
   await expect(page.getByText('예빈님 월급 계획이에요. 보기만 할 수 있어요')).toBeVisible();
   const cards = page.locator('.hg-plancard');
-  await expect(page.locator('.hg-plansum__amt')).toHaveText('270만 원');
+  await expect(page.locator('.hg-plansum__amt')).toHaveText('2,700,000원');
   await expect(page.locator('.hg-receipt__lock')).toHaveCount(2);
   // 카드 안에는 누를 수 있는 것이 없음(연필·블록 버튼·⋯ 없음, 머리 이동 링크 ‘이번 달 월급 체크 ›’는 2026-11-19 없앰)
   await expect(cards.getByRole('button')).toHaveCount(0);
@@ -482,10 +488,12 @@ test('합쳐서: 두 사람 Avatar 겹침, 수입 합, 월급날 둘, 용돈 줄
   await go();
   // 2026-11-19: 큰 금액은 합계(누르지 않음), 아래 사람마다 한 줄(내 것만 연필), 사람 원은 없음
   await expect(page.locator('.hg-plancard .hg-avatar')).toHaveCount(0);
-  await expect(page.locator('p.hg-plansum__amt')).toHaveText('620만 원');
-  await expect(page.getByRole('button', { name: '찬우 월급 350만 원, 금액 고치기' })).toBeVisible();
+  await expect(page.locator('p.hg-plansum__amt')).toHaveText('6,200,000원');
+  await expect(
+    page.getByRole('button', { name: '찬우 월급 3,500,000원, 금액 고치기' }),
+  ).toBeVisible();
   await expect(page.getByRole('button', { name: /예빈 월급/ })).toHaveCount(0);
-  await expect(page.locator('.hg-plansum__person').nth(1)).toContainText('예빈 월급270만 원');
+  await expect(page.locator('.hg-plansum__person').nth(1)).toContainText('예빈 월급2,700,000원');
   expect(await names(page, '지출')).toEqual(['찬우 용돈', '예빈 용돈', '고정지출']);
   await page.getByRole('button', { name: '편집', exact: true }).click();
   await expect(page.getByRole('button', { name: '고정지출 지우기' })).toBeVisible();
@@ -494,7 +502,7 @@ test('합쳐서: 두 사람 Avatar 겹침, 수입 합, 월급날 둘, 용돈 줄
   await axe(page);
 });
 
-test('모자람: 도넛은 저축·투자·지출로 꽉, 범례 “미계획 −32만 원”(금액만 danger)', async ({
+test('모자람: 도넛은 저축·투자·지출로 꽉, 범례 “미계획 −320,000원”(금액만 danger)', async ({
   page,
 }) => {
   const { db, go } = await open(page);
@@ -502,7 +510,7 @@ test('모자람: 도넛은 저축·투자·지출로 꽉, 범례 “미계획 �
   await go();
   // 139만 / 243만(기준 382만) → 36.39 / 63.61 → 36 / 64
   await expect(
-    page.getByRole('img', { name: '저축·투자 36%, 지출 64%, 미계획 −32만 원' }),
+    page.getByRole('img', { name: '저축·투자 36%, 지출 64%, 미계획 −320,000원' }),
   ).toBeVisible();
   // 도넛은 저축·투자·지출로 꽉(미계획 조각 없음), 범례 셋째 줄은 퍼센트 없이 금액만 −와 빨강
   await expect(page.locator('.hg-plansum__donut circle')).toHaveCount(2);
@@ -512,7 +520,7 @@ test('모자람: 도넛은 저축·투자·지출로 꽉, 범례 “미계획 �
   );
   await expect(page.locator('.hg-plansum__legend .hg-plansum__lpct')).toHaveText(['36%', '64%']);
   const short = page.locator('.hg-plansum__legend li.is-short');
-  await expect(short).toHaveText('미계획−32만 원');
+  await expect(short).toHaveText('미계획−320,000원');
   // 금액만 danger 토큰(라이트·다크 값이 달라 토큰으로 비교), 이름은 ink-2
   const colors = await short.evaluate((li) => {
     const probe = document.createElement('i');
@@ -529,7 +537,7 @@ test('모자람: 도넛은 저축·투자·지출로 꽉, 범례 “미계획 �
   expect(colors.amt).toBe(colors.danger);
   expect(colors.name).not.toBe(colors.danger);
   // 계획이 월급보다 많으면 굵은 문장이 바뀜(2026-11-19)
-  await expect(page.locator('.hg-plansum__title')).toHaveText('계획이 월급보다 32만 원 많아요');
+  await expect(page.locator('.hg-plansum__title')).toHaveText('계획이 월급보다 320,000원 많아요');
   await axe(page);
 });
 
@@ -586,7 +594,7 @@ test('오프라인: 줄을 눌러도 시트 없이 “인터넷에 연결되면 
   await go();
   await expect(page.getByRole('button', { name: '편집', exact: true })).toBeVisible();
   await goOffline(page);
-  await page.getByRole('button', { name: '생활비 88만 원' }).click();
+  await page.getByRole('button', { name: '생활비 880,000원' }).click();
   await expect(page.getByText('인터넷에 연결되면 할 수 있어요')).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await goOnline(page);
@@ -629,7 +637,7 @@ test('추천값으로 다시 채우기(D1): 직접 추가 줄과 이미 있는 �
 test('Toast ‘되돌리기’를 누르면 토스트가 닫힘(S5-03)', async ({ page }) => {
   const { db, go } = await open(page);
   await go();
-  await page.getByRole('button', { name: '생활비 88만 원' }).click();
+  await page.getByRole('button', { name: '생활비 880,000원' }).click();
   const sheet = page.getByRole('dialog', { name: '생활비 금액' });
   await sheet.getByRole('textbox', { name: '생활비 금액' }).fill('800000');
   await sheet.getByRole('button', { name: '확인' }).click();

@@ -134,10 +134,10 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   await expect(page.getByRole('button', { name: /두 사람 사이/ })).toContainText('했어요');
   // 내 월급이 먼저, 아래 예빈 월급 줄은 보기만(2026-11-15 3차 검토), 관리 방식(각자면 체크리스트 만드는 날 없음)
   const salary = page.getByRole('button', { name: /내 월급/ });
-  await expect(salary).toContainText('350만 원, 25일');
+  await expect(salary).toContainText('3,500,000원, 25일');
   await expect(salary).not.toContainText('예빈');
   const partnerRow = page.locator('.hg-listrow', { hasText: '예빈님 월급' });
-  await expect(partnerRow).toContainText('250만 원, 10일');
+  await expect(partnerRow).toContainText('2,500,000원, 10일');
   await expect(partnerRow.getByRole('button')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText('각자 써요');
   await expect(page.getByRole('button', { name: /월급날 확인 목록 만드는 날/ })).toHaveCount(0);
@@ -282,7 +282,7 @@ test('월급(S-11c 언제부터), 관리 형태(S-11f 세 질문 → 요청), �
     p_amount: 3_800_000,
     p_from: '2026-10-01',
   });
-  await expect(page.getByText(/2026년 10월부터 380만 원/)).toHaveCount(0);
+  await expect(page.getByText(/2026년 10월부터 3,800,000원/)).toHaveCount(0);
 
   // 관리 형태(S-11f): 세 질문, 각자 → 합쳐서는 예빈 ‘좋아요’가 필요(요청)
   await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText('각자 써요');

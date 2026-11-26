@@ -4,13 +4,13 @@ import { expect, type Page } from '@playwright/test';
 const esc = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 /** 할 일 줄(이름 앞 오렌지 점 + ›) */
 export const goRow = (page: Page, name: string) =>
-  page.getByRole('button', { name: new RegExp(`^${esc(name)} [^,]+, 확인할 것$`) });
+  page.getByRole('button', { name: new RegExp(`^${esc(name)} .+?, 확인할 것$`) });
 /** 끝남 줄(slate + ✓) */
 export const doneRow = (page: Page, name: string) =>
-  page.getByRole('button', { name: new RegExp(`^${esc(name)} [^,]+, 완료, 고치기$`) });
+  page.getByRole('button', { name: new RegExp(`^${esc(name)} .+?, 완료, 고치기$`) });
 /** 건너뜀 줄(취소선 + –) */
 export const skippedRow = (page: Page, name: string) =>
-  page.getByRole('button', { name: new RegExp(`^${esc(name)} [^,]+, 건너뜀, 고치기$`) });
+  page.getByRole('button', { name: new RegExp(`^${esc(name)} .+?, 건너뜀, 고치기$`) });
 /** 할 일 줄을 눌러 시트에서 ‘계획대로 했어요’ */
 export async function checkRow(page: Page, name: string) {
   await goRow(page, name).click();

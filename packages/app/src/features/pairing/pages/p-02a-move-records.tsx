@@ -6,7 +6,7 @@ import {
   qk,
   type JoinResult,
 } from '@sweetwo/api';
-import { readWon } from '@sweetwo/core';
+import { formatWon } from '@sweetwo/core';
 import {
   BottomSheet,
   ChoiceCards,
@@ -83,7 +83,7 @@ export function P02aMoveRecords({
               <ListRow
                 label={copy.moveSalaryLabel}
                 sub={day ? copy.moveDay(day) : undefined}
-                value={readWon(m.monthly_income ?? 0)}
+                value={formatWon(m.monthly_income ?? 0)}
               />
             )}
             {/* 2026-11-03 휴대폰 기본 드롭다운 대신: 줄 오른쪽에 공개 범위, 누르면 시트에서 고름 */}
@@ -92,7 +92,7 @@ export function P02aMoveRecords({
               <ListRow
                 key={a.id}
                 label={a.name}
-                sub={readWon(a.amount)}
+                sub={formatWon(a.amount)}
                 value={copy.moveVis[vis[a.id] ?? 'sum']}
                 onClick={() => setOpen(a.id)}
               />

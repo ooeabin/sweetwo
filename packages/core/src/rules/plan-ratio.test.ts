@@ -170,10 +170,10 @@ describe('W-01 요약 카드: 줄 없음·계획 초과(2026-11-19)', () => {
     expect(planSummary({ income: 0, saving: 100, spend: 0, lines: 1 }).chart).toBe(false);
     expect(planSummary({ income: 3_500_000, saving: 1, spend: 1 }).chart).toBe(true);
   });
-  it('계획이 월급을 넘으면 “계획이 월급보다 25만 원 많아요”', () => {
+  it('계획이 월급을 넘으면 “계획이 월급보다 250,000원 많아요”', () => {
     const r = planSummary({ income: 3_500_000, saving: 500_000, spend: 3_250_000, lines: 4 });
     expect(r.over).toBe(true);
     expect(r.left).toBe(-250_000);
-    expect(planOverText(r.left)).toBe('계획이 월급보다 25만 원 많아요');
+    expect(planOverText(r.left)).toBe('계획이 월급보다 250,000원 많아요');
   });
 });

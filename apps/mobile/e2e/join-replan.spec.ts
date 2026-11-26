@@ -521,9 +521,9 @@ test('P-02a 혼자 쓰던 기록 옮기기: 이미 시작한 기록 → 합류�
   await page.getByRole('button', { name: '합류하기' }).click();
   await expect(page.getByRole('heading', { name: '내 정보만 옮겨요' })).toBeVisible();
   await expect(page.getByText('월급날 10일')).toBeVisible();
-  await expect(page.getByText('270만 원', { exact: true })).toBeVisible();
+  await expect(page.getByText('2,700,000원', { exact: true })).toBeVisible();
   // 공개 범위: 줄 오른쪽 ‘총액만 보여 주기’ → 시트에서 고름(2026-11-03)
-  const row = page.getByRole('button', { name: /예빈 적금 500만 원/ });
+  const row = page.getByRole('button', { name: /예빈 적금 5,000,000원/ });
   await expect(row).toContainText('총액만 보여 주기');
   await expect(page.getByText(/30일 동안 보관한 뒤 지워요/)).toBeVisible();
   // 테두리 카드 없이 흰 바탕 줄 + 묶음 사이 8px 띠(2026-11-25 구역 6)

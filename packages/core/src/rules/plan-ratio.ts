@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { readWon, type Won } from '../money';
+import { formatWon, type Won } from '../money';
 
 // W-01 영수증 비율 막대(docs/spec/06-calc-allocation.md 3-5, 20 W-01 4번).
 // 퍼센트는 정수이고 합이 100: 모두 버림 → 모자란 만큼 나머지가 큰 순서로 1씩(같으면 저금 → 지출 → 여유 자금).
@@ -128,8 +128,8 @@ export interface PlanSummaryValue {
   chart: boolean;
 }
 
-/** 계획이 월급을 넘을 때 굵은 문장(2026-11-19): “계획이 월급보다 25만 원 많아요”. left = 미계획(음수) */
-export const planOverText = (left: Won) => `계획이 월급보다 ${readWon(Math.abs(left))} 많아요`;
+/** 계획이 월급을 넘을 때 굵은 문장(2026-11-19): “계획이 월급보다 250,000원 많아요”. left = 미계획(음수) */
+export const planOverText = (left: Won) => `계획이 월급보다 ${formatWon(Math.abs(left))} 많아요`;
 
 /**
  * 월급, 저축·투자 줄 합, 지출 줄 합 → W-01 요약 카드 값(막대는 `planRatio`, 문장 퍼센트는 월급 기준 반올림).

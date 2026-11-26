@@ -139,8 +139,8 @@ test('W-15 묶기(찬우) → 들어가기(예빈): 합계만, 상대 줄은 이
   await expect(y).toHaveURL(/\/salary\/items\/goal-y$/);
   // 묶음 카드: 합계 500만, 각자 금액 줄 없음
   const card = y.getByRole('region', { name: '같이 모으기', exact: true });
-  await expect(card).toContainText('500만 원');
-  await expect(card).toContainText('목표 금액 1억 8,000만 원의 2%');
+  await expect(card).toContainText('5,000,000원');
+  await expect(card).toContainText('목표 금액 180,000,000원의 2%');
   await expect(card).not.toContainText('찬우');
   // 진행 표시는 이 카드 하나, 내 몫 = 합계(찬우 0원)면 ‘내 몫’ 줄 없음(2026-11-16 4차 검토)
   await expect(card).not.toContainText('내 몫');
@@ -166,7 +166,7 @@ test('W-15 묶기(찬우) → 들어가기(예빈): 합계만, 상대 줄은 이
   await axe(y);
   await c.goto('/salary/items/goal-h');
   await expect(c.getByRole('region', { name: '같이 모으기', exact: true })).not.toContainText(
-    '예빈 500만 원',
+    '예빈 5,000,000원',
   );
   // 찬우 W-10: 합계 카드 아래 ‘내 몫’ 한 줄, 따로 모은 금액 카드 없음(2026-11-16 4차 검토)
   await expect(c.getByRole('region', { name: '같이 모으기', exact: true })).toContainText(
@@ -181,7 +181,7 @@ test('W-15 묶기(찬우) → 들어가기(예빈): 합계만, 상대 줄은 이
   );
   await c.goto('/salary/items/goal-h');
   await expect(c.getByRole('region', { name: '같이 모으기', exact: true })).toContainText(
-    '찬우 0원, 예빈 500만 원',
+    '찬우 0원, 예빈 5,000,000원',
   );
   // 각자 금액 줄이 있으면 ‘내 몫’ 줄은 겹쳐서 뺌
   await expect(c.getByRole('region', { name: '같이 모으기', exact: true })).not.toContainText(
@@ -198,7 +198,7 @@ test('W-15 묶기(찬우) → 들어가기(예빈): 합계만, 상대 줄은 이
   await y.goto('/salary/items/goal-y');
   const yc = y.getByRole('region', { name: '같이 모으기', exact: true });
   await expect(yc).toContainText('2%');
-  await expect(yc).not.toContainText('500만 원');
+  await expect(yc).not.toContainText('5,000,000원');
   await close();
 });
 

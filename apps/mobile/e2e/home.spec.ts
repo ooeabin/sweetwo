@@ -65,10 +65,10 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   const first = h.locator('.hg-together__slide').first();
   await expect(first.locator('.hg-avatar')).toHaveCount(1);
   await expect(first).toHaveAccessibleName(
-    '같이 모으기, 내 집 마련, 0원, 목표 금액의 0%, 2031년 10월까지 1억 5,000만 원 더 필요해요',
+    '같이 모으기, 내 집 마련, 0원, 목표 금액의 0%, 2031년 10월까지 150,000,000원 더 필요해요',
   );
   // 보조 줄은 한 줄(2026-11-20): 목표 금액이 있으면 “0%, 1억 5,000만 원 중”
-  await expect(first.locator('.hg-together__line')).toHaveText(['0%, 1억 5,000만 원 중']);
+  await expect(first.locator('.hg-together__line')).toHaveText(['0%, 150,000,000원 중']);
   await expect(h.locator('.hg-together__slide')).toHaveCount(2);
   // 2026-11-18 누를 수 없는 정보 상자: 칸은 버튼이 아니고 ‘모두 보기’ 칸도 없음
   await expect(h.getByRole('button')).toHaveCount(0);
@@ -116,8 +116,8 @@ test('H-10 같이 모으기 + H-15 월급 상자(이번 달 월급 체크·월�
   await page.goto('/');
   await expect(monthLine(page)).toContainText('계획대로 됐어요');
   // 체크한 저금 줄이 모은 금액에. 보조 줄은 한 줄이라 목표 금액이 있으면 ‘이번 달 +’ 대신 “0%, … 중”(2026-11-20)
-  await expect(first).toContainText('95만 원');
-  await expect(first.locator('.hg-together__line')).toHaveText(['0%, 1억 5,000만 원 중']);
+  await expect(first).toContainText('950,000원');
+  await expect(first.locator('.hg-together__line')).toHaveText(['0%, 150,000,000원 중']);
 });
 
 test('홈 상자 → 화면: 월급 줄마다 W-02·W-01, 캘린더, 자산 관리(같이 모으기 H-10은 누를 수 없음, 2026-11-18)', async ({
@@ -386,7 +386,7 @@ test('지난 달 늦은 확인: 월급 상자 첫 줄 “지난달 2개 남음�
   expect(db.v22?.calls.some((c) => c.fn === 'confirm_payday')).toBe(false);
 });
 
-test('날짜 없는 사람(H-13): 16일째부터 월급 상자 첫 줄에 “340만 원 / 350만 원”(판정 문장 없음), 월급 계획 템플릿 “수입이 들어올 때”, W-02 자리는 기간 막대', async ({
+test('날짜 없는 사람(H-13): 16일째부터 월급 상자 첫 줄에 “3,400,000원 / 3,500,000원”(판정 문장 없음), 월급 계획 템플릿 “수입이 들어올 때”, W-02 자리는 기간 막대', async ({
   page,
 }) => {
   await open(page, (d) => {
@@ -404,11 +404,11 @@ test('날짜 없는 사람(H-13): 16일째부터 월급 상자 첫 줄에 “340
       };
   });
   const line = monthLine(page);
-  await expect(line).toContainText('340만 원 / 350만 원');
+  await expect(line).toContainText('3,400,000원 / 3,500,000원');
   await expect(line).toContainText('수입 / 월급 계획');
   await expect(line).not.toContainText('모자라');
   await expect(line).toHaveAccessibleName(
-    '이번 달 월급 체크, 340만 원 / 350만 원 수입 / 월급 계획',
+    '이번 달 월급 체크, 3,400,000원 / 3,500,000원 수입 / 월급 계획',
   );
   await expect(page.locator('.hg-hubline, .hg-periodbar')).toHaveCount(0);
   await expect(planRow(page)).not.toContainText('수입이 들어올 때');
@@ -418,7 +418,7 @@ test('날짜 없는 사람(H-13): 16일째부터 월급 상자 첫 줄에 “340
   await page.goto('/salary');
   // 2026-11-19: 같은 개편 모양(기간 알약, 큰 금액, “월급 계획 350만 원 중”) + 중립 막대
   await expect(page.locator('.hg-w02hero__bar')).toBeVisible();
-  await expect(page.locator('.hg-w02hero__amt')).toHaveText('340만 원');
+  await expect(page.locator('.hg-w02hero__amt')).toHaveText('3,400,000원');
   // 막대는 오렌지가 아닌 ink-2
   const fill = await page
     .locator('.hg-w02hero__bar > i')
@@ -536,9 +536,9 @@ test('각자 계열 묶음(찬우·예빈): 묶음이 맨 앞, 합계 + 둘 다 
   const first = together(page).locator('.hg-together__slide').first();
   await expect(first.locator('.hg-avatar')).toHaveCount(2);
   await expect(first).toHaveAccessibleName(
-    '같이 모으기, 결혼 비용, 3,100만 원, 목표 금액의 62%, 2027년 5월까지 1,900만 원 더 필요해요',
+    '같이 모으기, 결혼 비용, 31,000,000원, 목표 금액의 62%, 2027년 5월까지 19,000,000원 더 필요해요',
   );
-  await expect(first).toContainText('찬우 2,100만 원, 예빈 1,000만 원');
+  await expect(first).toContainText('찬우 21,000,000원, 예빈 10,000,000원');
   // 큰 숫자는 묶음 합계라는 이름(2026-11-14 R4)
   await expect(first).toContainText('둘이 모은 금액');
   await axe(page);
@@ -601,7 +601,7 @@ test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동
   page,
 }) => {
   const db = await open(page, undefined, NOW, '/salary/plan');
-  await page.getByRole('button', { name: '고정지출 88만 원' }).click();
+  await page.getByRole('button', { name: '고정지출 880,000원' }).click();
   const sheet = page.getByRole('dialog', { name: '고정지출 금액' });
   // 2026-11-23: 스위치 둘 대신 ‘어떻게 챙겨요?’ 구간 선택(지출 줄은 세 칸)
   await expect(sheet.getByRole('radio')).toHaveCount(3);
@@ -676,7 +676,7 @@ test('H-04 자산 관리 타일: 순자산 값, 순위 배지는 기본 끔(배�
     });
   });
   const tile = page.getByRole('button', { name: /^자산 관리/ });
-  await expect(tile).toContainText('3,000만 원');
+  await expect(tile).toContainText('30,000,000원');
   // 홈의 오렌지 포인트 상자는 자산 관리 타일 하나뿐(2026-11-17)
   await expect(page.locator('.hg-hubtile--point')).toHaveCount(1);
   await expect(tile).toHaveClass(/hg-hubtile--point/);
@@ -1035,7 +1035,7 @@ test('홈 순서(2026-11-17): 모은 금액이 있으면 같이 모으기 → �
   await open(page, (d) => {
     Object.assign(d.goals.find((g) => g.id === 'goal-h') ?? {}, { start_saved: 5_000_000 });
   });
-  await expect(together(page)).toContainText('500만 원');
+  await expect(together(page)).toContainText('5,000,000원');
   const narrow = (page.viewportSize()?.width ?? 1280) < 1100;
   if (narrow) {
     expect(await top(page, '.hg-together')).toBeLessThan(await top(page, '.hg-hubbox'));

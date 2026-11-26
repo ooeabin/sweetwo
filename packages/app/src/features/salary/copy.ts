@@ -209,10 +209,10 @@ export const copy = {
   guideSampleHead: '확인할 것 2개',
   guideSampleTag: '예시',
   guideSampleSr:
-    '예시: 월급 계획을 세우면 이런 목록이 떠요. 비상금 30만 원, 여행 20만 원, 월세는 자동으로 나가요', // 흐린 예시 판은 aria-hidden, 이 한 줄로 대신 읽음
+    '예시: 월급 계획을 세우면 이런 목록이 떠요. 비상금 300,000원, 여행 200,000원, 월세는 자동으로 나가요', // 흐린 예시 판은 aria-hidden, 이 한 줄로 대신 읽음
   guideSample: [
-    { name: '비상금', value: '30만 원', auto: false },
-    { name: '여행', value: '20만 원', auto: false },
+    { name: '비상금', value: '300,000원', auto: false },
+    { name: '여행', value: '200,000원', auto: false },
     { name: '월세', value: '자동으로 나가요', auto: true },
   ],
   fillPlan: '월급 계획 세우기',
@@ -363,7 +363,7 @@ export const copy = {
   addNameQ: '무엇을 위해 모을까요?', // [확인 필요]
   addNamePlaceholder: '예: 여행, 적금', // [확인 필요]
   addMonthlyQ: '매달 얼마씩 모을까요?', // [확인 필요]
-  // 2026-11-23: 미계획 금액이 있으면 “미계획 금액 55만 원 안에서 정해 보세요” [확인 필요], 0원 이하면 예전 문구(용돈 빼고, 2026-11-16 r6)
+  // 2026-11-23: 미계획 금액이 있으면 “미계획 금액 550,000원 안에서 정해 보세요” [확인 필요], 0원 이하면 예전 문구(용돈 빼고, 2026-11-16 r6)
   addMonthlyHelp: (left: string, allowance?: string, positive = false) =>
     positive
       ? `미계획 금액 ${left} 안에서 정해 보세요`

@@ -85,7 +85,7 @@ test('W-02 빈 상태: 날짜 태그 + 큰 제목 + 번호 3줄 + 예시 판 + �
   await expect(sample.locator('.hg-w02guide__sample-head')).toContainText('확인할 것 2');
   await expect(sample.locator('.hg-w02guide__sample-badge')).toHaveText('예시');
   await expect(sample).toContainText('비상금');
-  await expect(sample).toContainText('30만 원');
+  await expect(sample).toContainText('300,000원');
   await expect(sample).toContainText('월세');
   await expect(sample).toContainText('자동으로 나가요');
   // 바탕 기준: 제목 22/700, 번호 13/700, 문구 15/400, 태그 13/400
@@ -348,9 +348,9 @@ test('미계획 금액: 합쳐서 + 한 사람 관리형에서 저축·투자 �
     '/salary/plan',
   );
   // 수입 350 + 270 = 620만, 용돈 35 + 30 = 65만, 보내기는 셈하지 않음 → 555만 원
-  await expect(page.locator('.hg-plansum')).toContainText('555만 원');
+  await expect(page.locator('.hg-plansum')).toContainText('5,550,000원');
   await page.goto('/salary/items/new');
-  await expect(page.getByText('미계획 금액 555만 원')).toBeVisible();
+  await expect(page.getByText('미계획 금액 5,550,000원')).toBeVisible();
   expect(db.splits.length).toBeGreaterThan(0);
   await axe(page);
 });

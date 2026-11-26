@@ -1,4 +1,4 @@
-import { readWon, type BaseDay } from '@sweetwo/core';
+import { formatWon, type BaseDay } from '@sweetwo/core';
 import {
   AmountInput,
   BottomSheet,
@@ -188,7 +188,7 @@ export function PlanSheet({
   const left = left0 - (v ?? 0);
   const unit = v !== null && v % 10_000 !== 0;
   const valid = v !== null && !unit && (!renamable || name.trim().length > 0);
-  const won = (x: number) => (masked ? MASKED : readWon(x));
+  const won = (x: number) => (masked ? MASKED : formatWon(x));
   return (
     <BottomSheet
       title={title}
@@ -294,7 +294,7 @@ export function IncomeSheet({
   const [day, setDay] = useState<number | 'last' | null>(25);
   const left = others + (v ?? 0) - planned;
   const needDay = askDay && (v ?? 0) > 0;
-  const won = (x: number) => (masked ? MASKED : readWon(x));
+  const won = (x: number) => (masked ? MASKED : formatWon(x));
   return (
     <BottomSheet
       title={title}

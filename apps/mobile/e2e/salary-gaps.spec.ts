@@ -131,7 +131,7 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
   joinYebin(db);
   await page.goto('/salary/plan');
   await page.getByRole('tab', { name: '예빈' }).click();
-  await expect(page.locator('.hg-plansum__amt')).toHaveText('270만 원');
+  await expect(page.locator('.hg-plansum__amt')).toHaveText('2,700,000원');
   await expect(page.getByText('예빈님 월급 계획이에요. 보기만 할 수 있어요')).toBeVisible();
   // 줄은 누를 수 없고 자물쇠
   await expect(page.getByRole('button', { name: /^생활비/ })).toHaveCount(0);
@@ -160,7 +160,7 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
   await page.getByRole('dialog').getByLabel('항목 이름').fill('헬스');
   await page.getByRole('button', { name: '확인', exact: true }).click();
   await expect(page.getByRole('button', { name: /^헬스/ })).toBeVisible();
-  await page.getByRole('button', { name: '월급 350만 원, 금액 고치기' }).click();
+  await page.getByRole('button', { name: '월급 3,500,000원, 금액 고치기' }).click();
   await expect(page.getByRole('dialog', { name: '월급 금액' })).toBeVisible();
 });
 

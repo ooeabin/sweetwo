@@ -72,7 +72,7 @@ const asset = (o: Record<string, unknown>) => ({
   ...o,
 });
 
-test('H-10 보조 줄은 한 줄(목표 금액 있으면 “0%, 1억 5,000만 원 중”). “…님은 아직 같이 모으기에 없어요”는 카드에 없음', async ({
+test('H-10 보조 줄은 한 줄(목표 금액 있으면 “0%, 150,000,000원 중”). “…님은 아직 같이 모으기에 없어요”는 카드에 없음', async ({
   page,
 }) => {
   await open(page, (d) => {
@@ -81,11 +81,11 @@ test('H-10 보조 줄은 한 줄(목표 금액 있으면 “0%, 1억 5,000만 �
   });
   const slide = page.locator('.hg-together__slide').first();
   await expect(slide).toBeVisible();
-  await expect(slide.locator('.hg-together__line')).toHaveText(['0%, 1억 5,000만 원 중']);
+  await expect(slide.locator('.hg-together__line')).toHaveText(['0%, 150,000,000원 중']);
   await expect(page.locator('.hg-together')).not.toContainText('같이 모으기에 없어요');
 });
 
-test('H-10 목표 금액이 없으면 보조 한 줄은 “이번 달 +95만 원”', async ({ page }) => {
+test('H-10 목표 금액이 없으면 보조 한 줄은 “이번 달 +950,000원”', async ({ page }) => {
   await open(page, (d) => {
     for (const g of d.goals) Object.assign(g, { target_amount: null, deadline: null });
     const c = d.checklists[0];
@@ -97,7 +97,7 @@ test('H-10 목표 금액이 없으면 보조 한 줄은 “이번 달 +95만 원
       });
   });
   const slide = page.locator('.hg-together__slide').first();
-  await expect(slide.locator('.hg-together__line')).toHaveText(['이번 달 +95만 원']);
+  await expect(slide.locator('.hg-together__line')).toHaveText(['이번 달 +950,000원']);
   await expect(slide.locator('.hg-together__bar')).toHaveCount(0);
 });
 
@@ -119,7 +119,7 @@ test('H-04 자산 관리 타일: 이름표 “순자산”, 마이너스 그대�
   });
   const tile = page.getByRole('button', { name: /^자산 관리/ });
   await expect(tile.locator('.hg-hubtile__sub')).toHaveText('순자산');
-  await expect(tile.locator('.hg-hubtile__value')).toHaveText('−2,000만 원');
+  await expect(tile.locator('.hg-hubtile__value')).toHaveText('−20,000,000원');
   await expect(tile.locator('.hg-hubtile__foot')).toHaveCount(0);
   await expect(tile).toHaveClass(/hg-hubtile--point/);
   await axe(page);

@@ -13,7 +13,7 @@ import {
 import {
   coupleBaseDay,
   formatDateFull,
-  formatManWon,
+  formatWon,
   salaryChangeMonthsAhead,
   salaryChangeState,
   todayKst,
@@ -61,7 +61,7 @@ export function S11Me() {
     sp.joint_cycle_day === null ? later : sp.joint_cycle_day === 31 ? 'last' : sp.joint_cycle_day;
   const dayText = (x: BaseDay | null) =>
     x === null ? '' : x === 'last' ? copy.lastDay : copy.dayN(x);
-  const man = (v: number | null) => (v === null ? '' : `${formatManWon(v)} 원`);
+  const man = (v: number | null) => (v === null ? '' : formatWon(v));
   const locked = sp.couple_state === 'unlink_pending';
   const married = sp.marriage_status === 'married';
   const weddingText = sp.wedding_date

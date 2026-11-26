@@ -1,5 +1,5 @@
 import type { Goal } from '@sweetwo/api';
-import { dateToYm, leftover, readWon, savingNeed, type SplitLineDraft } from '@sweetwo/core';
+import { dateToYm, leftover, formatWon, savingNeed, type SplitLineDraft } from '@sweetwo/core';
 import {
   AmountInput,
   Button,
@@ -120,8 +120,8 @@ export function SplitEditor({
       saved,
       deadline: g.deadline ? dateToYm(g.deadline) : null,
     });
-    const progress = copy.itemProgress(readWon(saved), readWon(g.target_amount));
-    return need ? `${progress}, ${copy.needPerMonth(readWon(need))}` : progress;
+    const progress = copy.itemProgress(formatWon(saved), formatWon(g.target_amount));
+    return need ? `${progress}, ${copy.needPerMonth(formatWon(need))}` : progress;
   };
   const paydayText = payday === 'last' ? copy.paydayLast : payday ? copy.payday(payday) : '';
 
@@ -206,7 +206,7 @@ export function SplitEditor({
         key={`${l.kind}-${l.goalId ?? l.userId ?? l.name ?? i}`}
         label={nameOf(l)}
         sub={noteOf?.(l) ?? sub}
-        value={readWon(l.amount)}
+        value={formatWon(l.amount)}
         locked={!!locked?.(l)}
         onClick={
           fixed
@@ -232,7 +232,7 @@ export function SplitEditor({
       onSubmit={onSave}
       summary={
         <>
-          <span>{left >= 0 ? copy.leftover(readWon(left)) : copy.short(readWon(-left))}</span>
+          <span>{left >= 0 ? copy.leftover(formatWon(left)) : copy.short(formatWon(-left))}</span>
           {left < 0 && <span className="hg-help">{copy.shortHelp}</span>}
         </>
       }
@@ -240,7 +240,7 @@ export function SplitEditor({
       {notice}
       <List>
         <ListRow
-          label={(joint ? copy.splitIncomeJoint : copy.splitIncome)(readWon(income))}
+          label={(joint ? copy.splitIncomeJoint : copy.splitIncome)(formatWon(income))}
           sub={incomeSub}
           value={paydayText}
           chevron={!!onIncome}

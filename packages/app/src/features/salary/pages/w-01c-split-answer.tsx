@@ -6,7 +6,7 @@ import {
   splitAccountKeys,
   type SalarySplit,
 } from '@sweetwo/api';
-import { coupleOf, readWon } from '@sweetwo/core';
+import { coupleOf, formatWon } from '@sweetwo/core';
 import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -136,11 +136,11 @@ export function W01cSplitAnswer() {
       <div className="hg-card hg-stack" style={{ gap: 'var(--space-2)' }}>
         <p style={{ margin: 0 }}>
           {t.body(
-            readWon(a.monthly_total),
+            formatWon(a.monthly_total),
             c.myName,
-            readWon(myShare),
+            formatWon(myShare),
             c.partnerName,
-            readWon(theirShare),
+            formatWon(theirShare),
           )}
         </p>
         <p className="hg-help" style={{ margin: 0 }}>

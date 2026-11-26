@@ -6,7 +6,7 @@ import {
   fetchPartnerPlanView,
   qk,
 } from '@sweetwo/api';
-import { assetGroup, readWon } from '@sweetwo/core';
+import { assetGroup, formatWon } from '@sweetwo/core';
 import { ListRow, PageHeader, SectionHeader } from '@sweetwo/ui';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
@@ -96,7 +96,7 @@ export function S13pPreview() {
   );
   // 저금(상대 W-10 파트너 저금·H-09·W-13): 각자 계열의 묶이지 않은 내 개인 저금
   const myGoals = joint ? [] : liveGoals.filter((g) => g.owner_user_id === me.id);
-  const amountOf = (n: number | null | undefined) => (n == null ? '' : readWon(n));
+  const amountOf = (n: number | null | undefined) => (n == null ? '' : formatWon(n));
   // 했어요만(각자 계열): 상대는 내 개인 저금을 “개인 저금” + 이번 달 확인 여부로만 받음
   const doneOnly = !joint && v.share === 'done_only';
   const doneOf = (goalId: string) =>
@@ -116,7 +116,9 @@ export function S13pPreview() {
       <ListRow
         key={g.id}
         label={g.name}
-        value={g.target_amount ? copy.previewOf(readWon(s), readWon(g.target_amount)) : readWon(s)}
+        value={
+          g.target_amount ? copy.previewOf(formatWon(s), formatWon(g.target_amount)) : formatWon(s)
+        }
         chevron={false}
       />
     );
@@ -138,12 +140,12 @@ export function S13pPreview() {
                 b.percent_only || b.total === null
                   ? `${b.pct ?? 0}%`
                   : b.target
-                    ? copy.previewOf(readWon(b.total), readWon(b.target))
-                    : readWon(b.total)
+                    ? copy.previewOf(formatWon(b.total), formatWon(b.target))
+                    : formatWon(b.total)
               }
               sub={
                 b.show_each && !b.percent_only && b.mine !== null
-                  ? copy.previewBundleMine(c.myName, readWon(b.mine))
+                  ? copy.previewBundleMine(c.myName, formatWon(b.mine))
                   : undefined
               }
               chevron={false}
@@ -192,7 +194,7 @@ export function S13pPreview() {
         {v.income !== null && (
           <ListRow
             label={copy.previewIncome(
-              readWon(v.income),
+              formatWon(v.income),
               v.payday === null ? '' : v.payday >= 31 ? copy.lastDay : copy.dayN(v.payday),
             )}
             chevron={false}
@@ -244,7 +246,7 @@ export function S13pPreview() {
             <ListRow
               key={a.id}
               label={a.owner === 'joint' ? `${a.name} (${copy.previewJoint})` : a.name}
-              value={`${a.side === 'debt' ? '−' : ''}${readWon(a.amount)}`}
+              value={`${a.side === 'debt' ? '−' : ''}${formatWon(a.amount)}`}
               chevron={false}
             />
           ))}
@@ -252,7 +254,7 @@ export function S13pPreview() {
             <ListRow
               key={k}
               label={copy.previewSum(assetGroup(k.split(':')[1] ?? '')?.name ?? '', s.n)}
-              value={`${s.side === 'debt' ? '−' : ''}${readWon(s.total)}`}
+              value={`${s.side === 'debt' ? '−' : ''}${formatWon(s.total)}`}
               chevron={false}
             />
           ))}

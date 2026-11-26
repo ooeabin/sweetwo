@@ -72,7 +72,7 @@ test('만기일 당일: 할 일 한 줄 → 다른 통장으로 옮겼어요(통
     .getByRole('group', { name: '어느 통장으로 옮겼어요?' })
     .getByRole('button', { name: /입출금 통장/ })
     .click();
-  await expect(page.getByText('입출금 통장 300만 원 > 1,500만 원')).toBeVisible();
+  await expect(page.getByText('입출금 통장 3,000,000원 > 15,000,000원')).toBeVisible();
   await page.getByRole('button', { name: '정리하기', exact: true }).click();
   await expect(page).toHaveURL(/\/assets\/a-bank$/);
   expect(db.assets.find((a) => a.id === 'a-bank')?.amount).toBe(15_000_000);
@@ -140,10 +140,10 @@ test('F-04 투자: 시세 바꾸기, 팔았어요(일부) → 받은 통장 → 
     .getByRole('group', { name: '어느 통장에 들어왔어요?' })
     .getByRole('button', { name: /입출금 통장/ })
     .click();
-  await expect(page.getByText('입출금 통장 300만 원 > 800만 원')).toBeVisible();
+  await expect(page.getByText('입출금 통장 3,000,000원 > 8,000,000원')).toBeVisible();
   await page.getByRole('button', { name: '적기', exact: true }).click();
-  await expect(page.getByText('입출금 통장 +500만 원')).toBeVisible();
-  await expect(page.getByText('판 수익 +100만 원')).toBeVisible();
+  await expect(page.getByText('입출금 통장 +5,000,000원')).toBeVisible();
+  await expect(page.getByText('판 수익 +1,000,000원')).toBeVisible();
   await axe(page);
   expect(db.assets.find((a) => a.id === 'a-bank')?.amount).toBe(8_000_000);
   expect(db.assets.find((a) => a.id === 'a-stock')).toMatchObject({
@@ -178,8 +178,8 @@ test('F-04 투자: 전부 팔았어요 → 받은 통장 → 결과(F-04d)가 �
     .click();
   await page.getByRole('button', { name: '적기', exact: true }).click();
   await expect(page.getByRole('heading', { name: '팔았어요' }).first()).toBeVisible();
-  await expect(page.getByText('입출금 통장 +1,100만 원')).toBeVisible();
-  await expect(page.getByText('판 수익 +300만 원')).toBeVisible();
+  await expect(page.getByText('입출금 통장 +11,000,000원')).toBeVisible();
+  await expect(page.getByText('판 수익 +3,000,000원')).toBeVisible();
   await axe(page);
   expect(db.assets.find((a) => a.id === 'a-stock')?.status).toBe('sold');
   await page.getByRole('button', { name: '목록으로 가기' }).click();
@@ -210,7 +210,7 @@ test('F-04b 팔았어요: 통장 “안 적을게요” → 통장 금액은 그
   await page.getByRole('button', { name: '안 적을게요', exact: true }).click();
   await expect(page.getByText(/입출금 통장 .* > /)).toHaveCount(0);
   await page.getByRole('button', { name: '적기', exact: true }).click();
-  await expect(page.getByText('판 수익 +300만 원')).toBeVisible();
+  await expect(page.getByText('판 수익 +3,000,000원')).toBeVisible();
   expect(db.assets.find((a) => a.id === 'a-stock')?.status).toBe('sold');
   expect(db.assets.find((a) => a.id === 'a-bank')?.amount).toBe(3_000_000);
 });

@@ -52,7 +52,7 @@ test('온보딩에서 넣은 월급은 W-01 월급 줄에 그대로, 줄을 눌�
 
   await page.goto('/salary/plan');
   await heading(page, '월급 계획 템플릿');
-  const row = page.getByRole('button', { name: '월급 350만 원, 금액 고치기' });
+  const row = page.getByRole('button', { name: '월급 3,500,000원, 금액 고치기' });
   await expect(row).toBeVisible();
   await expect(page.getByText('월급 알려 주기')).toHaveCount(0);
   // 용돈 35만 원만 계획: 350만 원이면 미계획 90%
@@ -65,7 +65,7 @@ test('온보딩에서 넣은 월급은 W-01 월급 줄에 그대로, 줄을 눌�
   await sheet.getByRole('textbox', { name: '월급 금액' }).fill('4000000');
   await expect(sheet.getByText(/^미계획 금액 /)).toBeVisible();
   await sheet.getByRole('button', { name: '확인' }).click();
-  await expect(page.getByRole('button', { name: '월급 400만 원, 금액 고치기' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '월급 4,000,000원, 금액 고치기' })).toBeVisible();
   await expect(page.getByText('월급을 바꿨어요')).toBeVisible();
   expect(db.me.monthly_income).toBe(4_000_000);
   expect(v.calls.find((c) => c.fn === 'schedule_salary_change')?.body).toMatchObject({
@@ -139,7 +139,7 @@ test('‘지금은 월급이 없어요’: W-01은 월급 0원 줄을 보여 주
   await expect(sheet.getByRole('button', { name: '확인' })).toBeDisabled();
   await custom.fill('17');
   await sheet.getByRole('button', { name: '확인' }).click();
-  await expect(page.getByRole('button', { name: '월급 300만 원, 금액 고치기' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '월급 3,000,000원, 금액 고치기' })).toBeVisible();
   expect(db.me).toMatchObject({ monthly_income: 3_000_000, payday: 17 });
 });
 
@@ -195,7 +195,7 @@ test('합쳐서: 사람마다 월급 줄, 내 줄만 고치고 상대 줄은 보
   for (const c of db.checklists) c.owner_user_id = null;
   await page.goto('/salary/plan');
   await heading(page, '월급 계획 템플릿');
-  const mine = page.getByRole('button', { name: '찬우 월급 350만 원, 금액 고치기' });
+  const mine = page.getByRole('button', { name: '찬우 월급 3,500,000원, 금액 고치기' });
   await expect(mine).toBeVisible();
   // 예빈 줄: 누를 수 없고 자물쇠 + 회색 보조
   await expect(page.getByRole('button', { name: /^예빈 월급/ })).toHaveCount(0);

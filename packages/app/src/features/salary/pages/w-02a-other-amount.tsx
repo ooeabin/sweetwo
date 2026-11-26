@@ -1,5 +1,5 @@
 import type { PayCheckLine } from '@sweetwo/api';
-import { MAX_WON, readWon } from '@sweetwo/core';
+import { MAX_WON, formatWon } from '@sweetwo/core';
 import { AmountInput, QuestionLayout } from '@sweetwo/ui';
 import { useState } from 'react';
 import { money, useMask } from '../../../shared/mask';
@@ -33,7 +33,7 @@ export function W02aOtherAmount({
   const check = useCheck(entry);
   const { masked } = useMask();
   const [amount, setAmount] = useState<number | null>(line.planned);
-  // 999억을 넘는 값(붙여넣기 등)은 읽기(readWon)가 멈추므로 계획 금액 안내로 두고 ‘다음’을 막음
+  // 999억을 넘는 값(붙여넣기 등)은 읽기(formatWon)가 멈추므로 계획 금액 안내로 두고 ‘다음’을 막음
   const tooBig = amount !== null && amount > MAX_WON;
   const diff = (amount === null || tooBig ? line.planned : amount) - line.planned;
   return (
@@ -41,12 +41,12 @@ export function W02aOtherAmount({
       title={copy.howMuchFor(name)}
       help={
         amount === null || tooBig
-          ? copy.planned(readWon(line.planned))
+          ? copy.planned(formatWon(line.planned))
           : diff < 0
-            ? copy.lessThanPlan(readWon(-diff))
+            ? copy.lessThanPlan(formatWon(-diff))
             : diff > 0
-              ? copy.moreThanPlan(readWon(diff))
-              : copy.planned(readWon(line.planned))
+              ? copy.moreThanPlan(formatWon(diff))
+              : copy.planned(formatWon(line.planned))
       }
       onBack={onClose}
       primary={{ label: copy.next, disabled: amount === null || tooBig }}

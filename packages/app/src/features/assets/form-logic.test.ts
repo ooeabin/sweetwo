@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { assetFolds, assetFormReady, assetHero, soldFormReady, soldHero } from './form-logic';
+import { formatWon } from '@sweetwo/core';
 
-const m = (v: number) => `${v / 10000}만 원`;
+const m = (v: number) => formatWon(v);
 const base = {
   grp: 'deposit',
   kind: 'saving',
@@ -29,7 +30,7 @@ describe('F-03 요약 문장', () => {
   it('금액 자리만 accent', () => {
     expect(assetHero({ ...o, name: '여행 적금', amount: 12_000_000 })).toEqual([
       [{ text: '여행 적금' }],
-      [{ text: '1200만 원', tone: 'accent' }, { text: ' 적을까요?' }],
+      [{ text: '12,000,000원', tone: 'accent' }, { text: ' 적을까요?' }],
     ]);
   });
 });
@@ -39,7 +40,7 @@ describe('F-04b 요약 문장', () => {
   it('조사는 받침으로', () => {
     expect(soldHero({ ...o, name: '미국 ETF', received: 8_400_000 })).toEqual([
       [{ text: '미국 ETF를 팔고' }],
-      [{ text: '840만 원', tone: 'accent' }, { text: ' 받았어요' }],
+      [{ text: '8,400,000원', tone: 'accent' }, { text: ' 받았어요' }],
     ]);
     expect(soldHero({ ...o, name: '주식', received: null })[0]).toEqual([{ text: '주식을 팔고' }]);
   });

@@ -129,13 +129,13 @@ test('F-01: 순자산은 평가금액 기준, ‘원금으로 보기’를 켜�
   await page.goto('/assets');
   const nw = page.getByRole('region', { name: '순자산', exact: true });
   // 평가: 300 + 1,000 − 100 = 1,200만, 지난달(평가 1,100만)보다 100만 늘었어요
-  await expect(nw).toContainText('1,200만 원');
-  await expect(nw).toContainText('지난달보다 100만 원 늘었어요');
+  await expect(nw).toContainText('12,000,000원');
+  await expect(nw).toContainText('지난달보다 1,000,000원 늘었어요');
   await expect(page.getByText('예상 순자산')).toHaveCount(0);
   await axe(page);
   await page.getByRole('switch', { name: /원금으로 보기/ }).click();
   // 원금: 300 + 800 − 100 = 1,000만, 지난달(원금 900만)보다 100만
-  await expect(nw).toContainText('1,000만 원');
+  await expect(nw).toContainText('10,000,000원');
 });
 
 test('F-01·F-02·홈 H-04: 내 ‘숨기기’ 항목은 파트너에게만 안 보이고 내 합계에는 더함(H3)', async ({
@@ -159,14 +159,14 @@ test('F-01·F-02·홈 H-04: 내 ‘숨기기’ 항목은 파트너에게만 안
   await page.goto('/assets');
   // 300 + 1,000 + 숨김 500 − 100 = 1,700만
   const nw = page.getByRole('region', { name: '순자산', exact: true });
-  await expect(nw).toContainText('1,700만 원');
-  await expect(page.getByRole('button', { name: /자산 1,800만 원/ })).toBeVisible();
+  await expect(nw).toContainText('17,000,000원');
+  await expect(page.getByRole('button', { name: /자산 18,000,000원/ })).toBeVisible();
   await page.goto('/assets/items?side=asset');
   // 숨김 알약은 그대로, 묶음 머리 합계(현금·예적금)에 숨김 500만도 더함
   await expect(page.getByText('숨김', { exact: true })).toBeVisible();
-  await expect(page.getByText('800만 원').first()).toBeVisible();
+  await expect(page.getByText('8,000,000원').first()).toBeVisible();
   await page.goto('/');
-  await expect(page.getByText('1,700만 원').first()).toBeVisible();
+  await expect(page.getByText('17,000,000원').first()).toBeVisible();
 });
 
 test('F-03q 빠르게 적기 + F-03e 처음 공개 선택: 미리 고른 값 없음, 빈 칸은 저장 안 함, 고른 값이 기본값', async ({
@@ -266,7 +266,7 @@ test('F-08 (나) 순위 없음: 또래 가구 중간값 한 줄(광고 없음) �
   await banner.click();
   await expect(page).toHaveURL(/\/assets\/rank$/);
   // 1993년생 → 30대 중간값
-  await expect(page.getByText('또래 가구 중간값은 1억 5,585만 원이에요')).toBeVisible();
+  await expect(page.getByText('또래 가구 중간값은 155,850,000원이에요')).toBeVisible();
   await expect(page.getByText(/상위 \d+%/)).toHaveCount(0);
   await axe(page);
   // 2026-11-24 ‘같이 순위 보기’는 아래 고정 주 버튼
@@ -483,7 +483,7 @@ test('H-04 빈 타일(둘): “아직 적은 자산이 없어요” → F-02 종
   await page.getByRole('button', { name: '추가하기', exact: true }).click();
   await expect(page).toHaveURL(/\/assets\/items\?side=asset$/);
   const nw = page.getByRole('region', { name: '순자산', exact: true });
-  await expect(nw).toContainText('2,300만 원');
+  await expect(nw).toContainText('23,000,000원');
   const rank = page.getByRole('button', { name: '또래 중 어디쯤인지 보기' });
   await expect(rank).toBeVisible();
   await expect(page.getByRole('group', { name: '아직 적은 자산이 없어요' })).toHaveCount(0);
@@ -615,7 +615,7 @@ test('H-04 파트너가 숨기기만 적었으면(서버가 아무것도 안 줌
 test('H-04 내 자산이 생기면 지금처럼 순자산 금액', async ({ page }) => {
   await start(page);
   await page.goto('/');
-  await expect(tile(page)).toContainText('1,200만 원');
+  await expect(tile(page)).toContainText('12,000,000원');
   await expect(tile(page)).not.toContainText('어디쯤');
 });
 

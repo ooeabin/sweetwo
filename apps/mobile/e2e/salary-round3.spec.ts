@@ -58,7 +58,7 @@ test('W-01 저축·투자 묶음(2026-11-18 옛 W-13 합침): W-02에는 저금 
   await expect(page.getByRole('button', { name: /^저축·투자, / })).toHaveCount(0);
 });
 
-test('W-10 ‘매달 95만 원씩’ 바꾸기: 이 줄 금액만 열고 바로 저장 + 되돌리기, 미계획 금액 미리보기', async ({
+test('W-10 ‘매달 950,000원씩’ 바꾸기: 이 줄 금액만 열고 바로 저장 + 되돌리기, 미계획 금액 미리보기', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -74,14 +74,14 @@ test('W-10 ‘매달 95만 원씩’ 바꾸기: 이 줄 금액만 열고 바로 
   await expect(page.getByLabel('매달 얼마씩 모을까요?')).toHaveValue('950,000');
   await axe(page);
   await page.getByLabel('매달 얼마씩 모을까요?').fill('1000000');
-  await expect(page.getByText('5만 원이 모자라요')).toBeVisible();
+  await expect(page.getByText('50,000원이 모자라요')).toBeVisible();
   await page.getByLabel('매달 얼마씩 모을까요?').fill('800000');
-  await expect(page.getByText('미계획 금액 15만 원')).toBeVisible();
+  await expect(page.getByText('미계획 금액 150,000원')).toBeVisible();
   await page.getByRole('button', { name: '저장' }).click();
   await expect(page.getByText('매달 금액을 바꿨어요')).toBeVisible();
   await expect(page).toHaveURL(/\/salary\/items\/goal-h$/);
   await expect(page.locator('.hg-listrow', { hasText: '매달 모으는 금액' })).toContainText(
-    '80만 원',
+    '800,000원',
   );
   expect(amountOf()).toBe(800_000);
   // 다른 줄은 그대로, 이번 달 체크 안 한 줄도 새 금액
@@ -90,7 +90,7 @@ test('W-10 ‘매달 95만 원씩’ 바꾸기: 이 줄 금액만 열고 바로 
   ]);
   await page.getByRole('button', { name: '되돌리기' }).click();
   await expect(page.locator('.hg-listrow', { hasText: '매달 모으는 금액' })).toContainText(
-    '95만 원',
+    '950,000원',
   );
   expect(amountOf()).toBe(950_000);
 });
@@ -118,7 +118,7 @@ test('W-12a 선택지 보조 한 줄 + ‘목표 금액을 새로 정할게요�
   await page.getByRole('radio', { name: /목표 금액을 새로 정할게요/ }).click();
   await expect(page).toHaveURL(/\/salary\/items\/goal-e\/edit\/amount\?retarget=1$/);
   await expect(page.getByRole('heading', { name: '새 목표 금액은 얼마예요?' })).toBeVisible();
-  await expect(page.getByText('지금 모은 금액 44만 원')).toBeVisible();
+  await expect(page.getByText('지금 모은 금액 440,000원')).toBeVisible();
   // 고르기 전이라 아직 달성 그대로
   expect(g.status).toBe('achieved');
   await page.getByLabel('새 목표 금액은 얼마예요?').fill('400000');
