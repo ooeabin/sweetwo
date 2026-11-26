@@ -730,7 +730,10 @@ export function W01Receipt() {
       legend: [
         { kind: 'saving', name: copy.savingGroup, value: `${ratio.saving}%` },
         { kind: 'spend', name: copy.spendGroup, value: `${ratio.spend}%` },
-        { kind: 'free', name: copy.legendFreeName, value: won(left), short: summary.over },
+        // 2026-11-26 사용자 결정: 미계획이 0원이면 범례 줄 없음(넘치거나 남을 때만)
+        ...(left !== 0
+          ? [{ kind: 'free' as const, name: copy.legendFreeName, value: won(left), short: summary.over }]
+          : []),
       ],
       sections: [
         { title: copy.savingGroup, subtotal: won(savingSum), ls: savingLines },
@@ -1173,12 +1176,17 @@ export function W01Receipt() {
                     // 미계획만 퍼센트 대신 금액(“0원”, 모자라면 “−300,000원” 빨강)
                     { kind: 'saving', name: copy.savingGroup, percent: ratio.saving },
                     { kind: 'spend', name: copy.spendGroup, percent: ratio.spend },
-                    {
-                      kind: 'free',
-                      name: copy.legendFreeName,
-                      amount: shown(won(left)),
-                      short: summary.over,
-                    },
+                    // 2026-11-26 사용자 결정: 미계획이 0원이면 범례 줄 없음(넘치거나 남을 때만)
+                    ...(left !== 0
+                      ? [
+                          {
+                            kind: 'free' as const,
+                            name: copy.legendFreeName,
+                            amount: shown(won(left)),
+                            short: summary.over,
+                          },
+                        ]
+                      : []),
                   ]
                 : undefined
             }

@@ -108,8 +108,9 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
   // 2026-11-26 ‘W-01 도넛 그린 L1 + 세로 목록’: 범례는 이름 왼쪽 + 값 오른쪽(퍼센트, 미계획만 금액), 금액 열 없음
   const legend = sum.locator('.hg-plansum__legend li');
   await expect(sum.getByRole('list')).toHaveCount(1);
-  await expect(legend).toHaveText(['저축·투자40%', '지출60%', '미계획0원']);
-  await expect(legend.locator('.hg-plansum__lpct')).toHaveText(['40%', '60%', '0원']);
+  // 2026-11-26: 미계획이 0원이면 범례 줄 없음
+  await expect(legend).toHaveText(['저축·투자40%', '지출60%']);
+  await expect(legend.locator('.hg-plansum__lpct')).toHaveText(['40%', '60%']);
   await expect(sum.locator('.hg-plansum__lamt')).toHaveCount(0);
   // 도넛 가운데(지름 140) + 그 아래 범례 전체 폭 세로 목록(줄 높이 40)
   const db0 = await donut.boundingBox();
@@ -283,7 +284,7 @@ test('도넛 범례(2026-11-26 그린 L1 + 세로 목록): 320·375 모두 도�
     const rows = await sum
       .locator('.hg-plansum__legend li')
       .evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
-    expect(rows).toHaveLength(3);
+    expect(rows).toHaveLength(2); // 2026-11-26 미계획 0원이면 줄 없음
     for (const h of rows) expect(Math.round(h)).toBe(40);
     const d = await donut.boundingBox();
     const l = await sum.locator('.hg-plansum__legend').boundingBox();
@@ -925,7 +926,8 @@ test('공유 이미지: 저축·투자 줄 보조 줄이 화면과 같은 글(�
   expect(drawn).toContain(note);
   // 2026-11-26 요약은 화면과 같은 세로 목록 범례: 이름 + 오른쪽 값(퍼센트, 미계획은 금액), 범례 금액 열은 없음
   expect(drawn).toEqual(
-    expect.arrayContaining(['저축·투자', '40%', '지출', '60%', '미계획', '0원']),
+    expect.arrayContaining(['저축·투자', '40%', '지출', '60%']),
   );
+  expect(drawn).not.toContain('미계획'); // 2026-11-26: 미계획 0원이면 줄 없음
   expect(drawn.filter((t) => t === '1,390,000원')).toHaveLength(1); // 묶음 머리 합계만(범례 금액 없음)
 });

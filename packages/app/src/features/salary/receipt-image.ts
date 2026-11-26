@@ -364,8 +364,6 @@ export interface PlanImageModel {
   }[];
 }
 
-const CARD_R = 24;
-const GAP = 12;
 
 function loadImage(src: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
@@ -384,8 +382,9 @@ function layoutPlan(
   logo: HTMLImageElement | null,
   draw: boolean,
 ) {
-  const x0 = PAD;
-  const x1 = W - PAD;
+  // 흰 바탕이라 카드 밖 여백 없음: 글자 옆 여백은 화면과 같은 24(CARD_PAD)
+  const x0 = 0;
+  const x1 = W;
   const left = x0 + CARD_PAD;
   const right = x1 - CARD_PAD;
   const font = (weight: number, size: number) => `${weight} ${size}px ${t.font}`;
@@ -407,12 +406,11 @@ function layoutPlan(
     }
     ctx.fillText(out, x, y);
   };
-  const card = (top: number, bottom: number) => {
+  // 2026-11-26 사용자 결정: 화면처럼 흰 바탕 + 묶음 사이 8px 회색 띠(카드·둥근 모서리 없음, 홈만 회색 바탕)
+  const band = (at: number) => {
     if (!draw) return;
-    ctx.fillStyle = t.surface;
-    ctx.beginPath();
-    ctx.roundRect(x0, top, x1 - x0, bottom - top, CARD_R);
-    ctx.fill();
+    ctx.fillStyle = t.surfaceAlt;
+    ctx.fillRect(0, at, W, 8);
   };
   // 2026-11-26 ‘W-01 도넛 그린’: 저축·투자 chart-save, 지출 chart-spend(그래프 전용 초록), 화면 도넛과 같은 토큰
   const color = (k: 'saving' | 'spend' | 'free') =>
@@ -510,7 +508,6 @@ function layoutPlan(
     return yy + CARD_PAD;
   };
   const summaryBottom = inner(false);
-  card(top, summaryBottom);
   inner(draw);
   y = summaryBottom;
 
@@ -519,11 +516,11 @@ function layoutPlan(
   // 줄은 화면 ReceiptRows와 같은 이름 17/400 ink + 금액 17/700 ink, 보조 줄 13/400 stone
   const HEAD = 18 + 8;
   for (const s of m.sections) {
-    y += GAP;
+    band(y);
+    y += 8;
     const cardTop = y;
     const rowsH = s.rows.reduce((h, r) => h + (r.sub ? 60 : 48), 0);
     const bottom = cardTop + CARD_PAD + HEAD + rowsH + CARD_PAD - 8;
-    card(cardTop, bottom);
     y = cardTop + CARD_PAD;
     text(s.title, left, y + 9, { weight: 400, size: 13, color: t.slate });
     text(s.subtotal, right, y + 9, { weight: 400, size: 13, color: t.slate, align: 'right' });
@@ -575,7 +572,7 @@ export async function renderPlanPng(m: PlanImageModel): Promise<Blob> {
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('canvas');
   ctx.scale(SCALE, SCALE);
-  ctx.fillStyle = t.surfaceAlt;
+  ctx.fillStyle = t.surface;
   ctx.fillRect(0, 0, W, H);
   layoutPlan(ctx, m, t, logo, true);
   return new Promise((resolve, reject) =>
