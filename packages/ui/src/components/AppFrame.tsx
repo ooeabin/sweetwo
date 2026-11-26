@@ -66,6 +66,8 @@ export interface AppFrameProps {
   page?: { title: ReactNode; actions?: ReactNode };
   /** 좁은 창 머리 왼쪽 제목(메뉴 이름, 홈은 워드마크라 화면 읽기용). 탭 막대 이름표로도 씀 */
   narrowTitle: string;
+  /** 홈 밖 메뉴 첫 화면 좁은 창 머리 오른쪽 동작 하나(글자 버튼 ‘편집’ 등, 2026-11-26 W-01). 넓은 창은 제목 줄 actions로 */
+  narrowAction?: ReactNode;
   date: string;
   labels: {
     search: string;
@@ -260,6 +262,9 @@ export function AppFrame(p: AppFrameProps) {
               </>
             )}
           </div>
+          {!home && p.onHome && p.narrowAction && (
+            <div className="hg-mhead__action">{p.narrowAction}</div>
+          )}
           {home && (
             <>
               <IconButton

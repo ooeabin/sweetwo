@@ -199,7 +199,9 @@ test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 �
   await page.getByRole('dialog', { name: '할 일' }).locator('.hg-listrow').nth(1).click();
   await expect(page).toHaveURL(/\/salary\/plan\?from=home#saving$/);
   const sec = page.getByRole('region', { name: '저축·투자', exact: true });
-  await expect(sec).toContainText('무엇을 모을지 골라 보세요');
+  // 2026-11-26: 안내 한 줄은 없앰, 칩 묶음의 화면 읽기 이름으로만
+  await expect(sec).not.toContainText('무엇을 모을지 골라 보세요');
+  await expect(sec.getByRole('group', { name: '무엇을 모을지 골라 보세요' })).toBeVisible();
   for (const c of [
     '결혼 비용',
     '신혼집',

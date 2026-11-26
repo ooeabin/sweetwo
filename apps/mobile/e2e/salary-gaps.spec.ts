@@ -137,8 +137,8 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
   await expect(page.getByRole('button', { name: /^생활비/ })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^예빈 카메라/ })).toHaveCount(0);
   await expect(page.locator('.hg-receipt__lock')).toHaveCount(3);
-  for (const n of ['추천값으로 다시 채우기', '+ 지출 추가', '편집하기'])
-    await expect(page.getByRole('button', { name: n })).toHaveCount(0);
+  for (const n of ['추천값으로 다시 채우기', '+ 지출 추가', '편집'])
+    await expect(page.getByRole('button', { name: n, exact: true })).toHaveCount(0);
   await axe(page);
   const y = db.splits.find((s) => s.owner_user_id === 'yebin');
   expect(
@@ -223,6 +223,6 @@ test('W-01 연결 해제 대기 중이면 보기만', async ({ page }) => {
     page.getByText('연결 해제를 기다리는 동안에는 월급 계획을 고칠 수 없어요'),
   ).toBeVisible();
   await expect(page.getByRole('button', { name: /^고정지출/ })).toHaveCount(0);
-  for (const n of ['추천값으로 다시 채우기', '편집하기', '+ 지출 추가', '+ 저축·투자 추가'])
-    await expect(page.getByRole('button', { name: n })).toHaveCount(0);
+  for (const n of ['추천값으로 다시 채우기', '편집', '+ 지출 추가', '+ 저축·투자 추가'])
+    await expect(page.getByRole('button', { name: n, exact: true })).toHaveCount(0);
 });

@@ -48,7 +48,7 @@ test('알림 화면 제목은 h1, 알림 설정에서 ‹는 알림으로, 설�
   await expect(page.getByRole('button', { name: /^내 정보/ })).toBeVisible();
 });
 
-test('머리 B안(2026-11-26): ‹는 Regular 선·같은 자리, 제목 17/500, N-02 ‘모두 읽음’ 글자 끝은 화면 오른쪽 24', async ({
+test('머리 B안(2026-11-26): ‹는 Regular 선·같은 자리, 제목 17/500, N-02 ‘모두 읽음’·W-01 ‘편집’ 머리 오른쪽 글자 동작은 13/400·글자 끝 화면 오른쪽 24', async ({
   page,
 }, info) => {
   test.skip(info.project.name !== 'narrow', '좁은 창 머리');
@@ -75,10 +75,60 @@ test('머리 B안(2026-11-26): ‹는 Regular 선·같은 자리, 제목 17/500,
   await expect(noti).toBeVisible();
   expect(await noti.evaluate((e) => getComputedStyle(e).fontWeight)).toBe('500');
   expect(await icoX()).toBe(x1);
-  const all = page.getByRole('button', { name: '모두 읽음' });
-  const end = await all.evaluate((e) => {
-    const r = e.getBoundingClientRect();
-    return Math.round(r.right - parseFloat(getComputedStyle(e).paddingRight));
+  // 머리 오른쪽 글자 동작(hg-headaction, 2026-11-26): N-02 ‘모두 읽음’과 W-01 ‘편집’이 한 규칙
+  // 13/400 ink-2, 누르는 칸 높이 44, 글자 끝 = 화면 오른쪽 24
+  const vw = page.viewportSize()?.width ?? 0;
+  const headAction = async (name: string) => {
+    const b = page.getByRole('button', { name, exact: true });
+    await expect(b).toHaveClass(/hg-headaction/);
+    const m = await b.evaluate((e) => {
+      const r = document.createRange();
+      r.selectNodeContents(e);
+      const cs = getComputedStyle(e);
+      return {
+        end: Math.round(r.getBoundingClientRect().right),
+        h: e.getBoundingClientRect().height,
+        size: cs.fontSize,
+        weight: cs.fontWeight,
+        color: cs.color,
+      };
+    });
+    expect(m.end).toBe(vw - 24);
+    expect(m.h).toBeGreaterThanOrEqual(44);
+    expect(m.size).toBe('13px');
+    expect(m.weight).toBe('400');
+    return m;
+  };
+  const readAll = await headAction('모두 읽음');
+  // W-01 ‘편집’은 줄이 하나라도 있을 때만 보임: 생활비 줄 하나
+  db.splits.push({
+    id: 'split-me',
+    owner_user_id: String(db.me.id),
+    split_line: [
+      {
+        id: 'l1',
+        split_id: 'split-me',
+        kind: 'living',
+        goal_id: null,
+        user_id: null,
+        name: null,
+        amount: 800_000,
+        sort: 0,
+      },
+    ],
   });
-  expect(end).toBe((page.viewportSize()?.width ?? 0) - 24);
+  await page.goto('/salary/plan');
+  await expect(page.getByRole('heading', { level: 1, name: '월급 계획 템플릿' })).toBeVisible();
+  const edit = await headAction('편집');
+  const token = (v: string) =>
+    page.evaluate((name) => {
+      const d = document.createElement('i');
+      d.style.color = `var(${name})`;
+      document.body.append(d);
+      const c = getComputedStyle(d).color;
+      d.remove();
+      return c;
+    }, v);
+  expect(edit.color).toBe(await token('--ink-2'));
+  expect([await token('--ink-2'), await token('--muted')]).toContain(readAll.color);
 });

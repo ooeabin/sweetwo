@@ -32,7 +32,6 @@ import {
 } from '@sweetwo/core';
 import {
   BottomSheet,
-  Button,
   Chip,
   Icon,
   ListRow,
@@ -683,7 +682,7 @@ export function W01Receipt() {
       ? { kind: 'free' as const, text: copy.legendShort(won(left)), short: true }
       : { kind: 'free' as const, text: copy.legendFree(ratio.free) },
   ];
-  // 공유 이미지(2026-11-19): W-01 요약 카드 모양(월급, 한 문장, 알약 막대, ● 범례) + 저축·투자·지출 줄 목록 + 워드마크.
+  // 공유 이미지(2026-11-19, 2026-11-26 도넛): W-01 요약 카드 모양(월급, 한 문장, 도넛 + ● 범례) + 저축·투자·지출 줄 목록 + 워드마크.
   // 금액 가리기·공개 범위는 화면과 같은 값(won, nameOf)을 그대로 씀
   // 저축·투자 줄 보조 줄은 화면과 같은 글(“모은 금액 1,140만 원, 목표 금액의 22%”, 금액 가리기 포함): rowsOf의 note
   const share = async () => {
@@ -711,9 +710,15 @@ export function W01Receipt() {
         { kind: 'free', percent: summary.bar.free },
       ],
       legend: [
-        { kind: 'saving', name: copy.savingGroup, amount: won(savingSum) },
-        { kind: 'spend', name: copy.spendGroup, amount: won(spendSum) },
-        { kind: 'free', name: copy.legendFreeName, amount: won(left), short: summary.over },
+        { kind: 'saving', name: copy.savingGroup, percent: ratio.saving, amount: won(savingSum) },
+        { kind: 'spend', name: copy.spendGroup, percent: ratio.spend, amount: won(spendSum) },
+        {
+          kind: 'free',
+          name: copy.legendFreeName,
+          percent: ratio.free ?? undefined,
+          amount: won(left),
+          short: summary.over,
+        },
       ],
       sections: [
         { title: copy.savingGroup, subtotal: won(savingSum), ls: savingLines },
@@ -834,10 +839,13 @@ export function W01Receipt() {
         locked: lineLocked,
         fresh: l.id === fresh,
         note,
+        // 2026-11-26: 0%면 막대를 그리지 않음(끊긴 구분선처럼 보여서). 보조 줄 “목표 금액 …”은 그대로
         progress:
-          si && si.target !== null && !si.bundled
+          si && si.target !== null && !si.bundled && (si.state === 'achieved' || si.bar > 0)
             ? { percent: si.state === 'achieved' ? 100 : si.bar }
             : undefined,
+        // 2026-11-26: 누르면 W-10 상세로 가는 저축·투자 줄은 오른쪽 ›(지출 줄은 금액 시트라 없음)
+        go: !!(si && !si.private && l.goal_id && !lineLocked),
         onOpen:
           si && !si.private && l.goal_id && !lineLocked
             ? () => nav(savingPaths.item(l.goal_id as string))
@@ -1128,14 +1136,13 @@ export function W01Receipt() {
                   }
                 : undefined
             }
-            // 계획이 월급보다 많으면 “계획이 월급보다 25만 원 많아요”(오류 빨강), 줄이 하나도 없으면 막대·범례 없이 문장만
+            // 계획이 월급보다 많으면 “계획이 월급보다 25만 원 많아요”(오류 빨강), 줄이 하나도 없으면 도넛·범례 없이 문장만
             titleError={summary.over}
             title={
+              // 2026-11-26 사용자 결정: 저축·투자가 0원일 때 “월급을 어떻게 나눌지 정해 보세요”는 없앰(막대·범례만)
               summary.over ? (
                 planOverText(summary.left)
-              ) : summary.noSaving ? (
-                copy.summaryNoSaving
-              ) : (
+              ) : summary.noSaving ? undefined : (
                 <>
                   {copy.summarySaving[0]}
                   <em>{copy.summaryPct(summary.share)}</em>
@@ -1156,11 +1163,23 @@ export function W01Receipt() {
             legend={
               summary.chart
                 ? [
-                    { kind: 'saving', name: copy.savingGroup, amount: shown(won(savingSum)) },
-                    { kind: 'spend', name: copy.spendGroup, amount: shown(won(spendSum)) },
+                    // 2026-11-26 도넛 범례: 이름 뒤 회색 퍼센트(금액 가리기에도 그대로), 모자람의 미계획은 퍼센트 없이 −금액
+                    {
+                      kind: 'saving',
+                      name: copy.savingGroup,
+                      percent: ratio.saving,
+                      amount: shown(won(savingSum)),
+                    },
+                    {
+                      kind: 'spend',
+                      name: copy.spendGroup,
+                      percent: ratio.spend,
+                      amount: shown(won(spendSum)),
+                    },
                     {
                       kind: 'free',
                       name: copy.legendFreeName,
+                      percent: ratio.free ?? undefined,
                       amount: shown(won(left)),
                       short: summary.over,
                     },
@@ -1222,7 +1241,7 @@ export function W01Receipt() {
             )}
             {savingEmpty ? (
               <>
-                <p className="hg-plancard__hint">{copy.savingEmptyAsk}</p>
+                {/* 2026-11-26 사용자 결정: 안내 한 줄 “무엇을 모을지 골라 보세요”는 없앰(칩만, 화면 읽기 이름으로는 남김) */}
                 <div className="hg-receipt__chips" role="group" aria-label={copy.savingEmptyAsk}>
                   {savingStartChips(sp.marriage_status).map((c) => {
                     const name = c === 'custom' ? '' : copy.chipNames[c];
@@ -1298,7 +1317,7 @@ export function W01Receipt() {
             />
             {spendChipsShown && (
               <>
-                <p className="hg-plancard__hint">{copy.spendEmpty.ask}</p>
+                {/* 2026-11-26 사용자 결정: 안내 한 줄 “매달 나가는 지출을 골라 보세요”는 없앰(칩만) */}
                 <div className="hg-receipt__chips" role="group" aria-label={copy.spendEmpty.ask}>
                   {copy.spendEmpty.chips
                     .filter((c) => !spendLines.some((l) => nameOf(l) === c.name))
@@ -1341,19 +1360,7 @@ export function W01Receipt() {
           </PlanCard>
           {!edit && !planEmpty && (
             <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
-              {canEdit && (
-                <Button
-                  variant="outline"
-                  block
-                  onClick={() => {
-                    if (offline()) return;
-                    setOrder(null);
-                    setEdit(true);
-                  }}
-                >
-                  {copy.editPlan}
-                </Button>
-              )}
+              {/* 2026-11-26 사용자 결정(토스 내 소비 ‘편집’): 맨 아래 꽉 찬 ‘편집하기’는 없애고 머리 오른쪽 글자 버튼 ‘편집’ */}
               <div className="hg-receipt-actions">
                 <button
                   type="button"
@@ -1404,11 +1411,32 @@ export function W01Receipt() {
         }}
       />
     );
+  // 2026-11-26 사용자 결정: ‘편집’은 좁은 창 머리 오른쪽 글자 동작(hg-headaction, N-02 ‘모두 읽음’과 같은 모양),
+  // 넓은 창은 제목 줄 오른쪽 글자 버튼. 보이는 조건은 예전 맨 아래 ‘편집하기’와 같음
+  const editAction = (cls: string) =>
+    !edit && !planEmpty && canEdit ? (
+      <button
+        type="button"
+        className={cls}
+        onClick={() => {
+          if (offline()) return;
+          setOrder(null);
+          setEdit(true);
+        }}
+      >
+        {copy.editShort}
+      </button>
+    ) : undefined;
+  const editWide = editAction('hg-btn hg-btn--link');
   return (
     <>
       <MainFrame
         current="salary"
-        page={{ title: copy.planTitle }}
+        page={{
+          title: copy.planTitle,
+          actions: editWide ? <span className="hg-wide-only">{editWide}</span> : undefined,
+        }}
+        narrowAction={editAction('hg-btn hg-headaction')}
         // W-02 링크로 열었으면 ‹ = W-02(2026-11-18), 서랍·홈에서 열었으면 홈
         onBack={fromMonth ? () => nav(-1) : undefined}
         columns={[column]}
