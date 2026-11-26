@@ -307,7 +307,7 @@ export const copy = {
       debts: '부채.csv',
       goals: '저축·투자.csv',
       splits: '월급 계획.csv',
-      checklists: '월급 월급날 확인 목록.csv',
+      checklists: '월급날 확인 목록.csv',
       care: '경조사.csv',
     },
     heads: {
@@ -410,7 +410,7 @@ export const copy = {
   accessScopes: {
     month: '이번 달 화면',
     plan: '월급 계획 화면', // 예전 요청 기록 키(2026-11-09 없앤 말 ‘플랜’ 대신)
-    close: '월급 전 확인 화면', // 예전 요청 기록 키(2026-11-09 없앤 말 ‘월말 정리’ 대신, 어드민과 같음)
+    close: '월급날 확인 목록 화면', // 예전 요청 기록 키(2026-11-09 ‘월말 정리’ → 2026-11-15 ‘월급 전 확인’ → 월급날 확인 목록, 어드민과 같음)
     goals: '월급 화면', // [확인 필요] 2026-11-08 ADR 0007 목표 탭 자리(키는 그대로)
     assets: '자산 관리 화면',
     income_spend: '월 수입·지출 화면',
@@ -467,7 +467,7 @@ export const copy = {
   mailNote: '계정 보안처럼 꼭 알아야 할 안내는 이메일로도 보내요', // [확인 필요]
   livingCheckSub: (partner: string) => `켜면 ${partner}님도 함께 받아요`,
   groups: {
-    plan: '월급 월급날 확인 목록',
+    plan: '월급날 확인 목록',
     partner_change: (name: string) => `${name}님이 바꾼 값`,
     care: '경조사·기념일',
     money: '금융 일정',
