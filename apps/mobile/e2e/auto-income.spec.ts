@@ -16,15 +16,15 @@ async function open(page: Page) {
   return { db, sv };
 }
 
-test('첫 확인 → 수입 카드에 “월급 +350만 원 자동”, 지우면 다시 확인해도 안 생김', async ({
+test('첫 확인 → 수입 카드에 “월급 +3,500,000원 자동”, 지우면 다시 확인해도 안 생김', async ({
   page,
 }) => {
   const { sv } = await open(page);
   const income = page.getByRole('group', { name: '이번 달 수입' });
-  await expect(income).toContainText('350만 원'); // 기본값(저장 전)
+  await expect(income).toContainText('3,500,000원'); // 기본값(저장 전)
   // 줄 하나를 확인하면 월급이 수입으로 들어옴
   await checkRow(page, '청약');
-  await expect(income).toContainText('350만 원');
+  await expect(income).toContainText('3,500,000원');
   expect(sv.moneyIns.filter((m) => m.source === 'payday_auto')).toHaveLength(1);
   // 다른 줄을 더 확인해도 한 줄 그대로
   await checkRow(page, '내 집 마련');
@@ -34,7 +34,7 @@ test('첫 확인 → 수입 카드에 “월급 +350만 원 자동”, 지우면
   await income.getByRole('button').click();
   await expect(page).toHaveURL(/\/salary\/money-in\/list/);
   await expect(page.getByText(/, 자동/)).toBeVisible();
-  await page.getByRole('button', { name: '350만 원 기록 메뉴' }).click();
+  await page.getByRole('button', { name: '3,500,000원 기록 메뉴' }).click();
   await page.getByRole('menuitem', { name: '지우기' }).click();
   await expect(page.getByText('아직 적은 수입이 없어요')).toBeVisible();
   // 같은 사이클에서 다시 확인(한 번에 모두)해도 다시 안 생김

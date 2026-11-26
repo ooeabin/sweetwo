@@ -1,8 +1,8 @@
-import { assetGroupsOf, formatYm, readWon } from '@sweetwo/core';
+import { assetGroupsOf, formatYm, formatWon } from '@sweetwo/core';
 import { Button, Lead, leadOf, List, ListRow, MonthBars, SectionHeader, Toggle } from '@sweetwo/ui';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { money, useMask } from '../../../shared/mask';
+import { money, moneyShort, useMask } from '../../../shared/mask';
 import { netWorthTrend, RankBanner, SkelBody } from '../../frame';
 import { AssetsFrame } from '../assets-frame';
 import { copy } from '../copy';
@@ -83,7 +83,8 @@ export function F01Summary() {
     const series = t.series.slice(-6);
     const change = t.change;
     const now = series[series.length - 1];
-    const short = (v: number) => m(v).replace(/ 원$/, '');
+    // 막대 위 지금 값은 폭이 좁아 짧은 표기(11 공통 6장 예외 표): “1,600만”
+    const short = (v: number) => moneyShort(v, masked).replace(/ 원$/, '');
     body = (
       <>
         {/* 2026-11-04 순위 줄(23 F-01 0번)은 요약 맨 위 */}
@@ -125,7 +126,7 @@ export function F01Summary() {
           <ListRow
             lead={<Lead {...leadOf('summary', 'debts')} />}
             label={copy.debtsLabel}
-            value={nw.debts ? m(nw.debts) : readWon(0)}
+            value={nw.debts ? m(nw.debts) : formatWon(0)}
             onClick={() => nav('/assets/items?side=debt')}
           />
         </List>

@@ -1,5 +1,5 @@
 import { qk, updateMe } from '@sweetwo/api';
-import { readWon } from '@sweetwo/core';
+import { formatWon } from '@sweetwo/core';
 import { PageHeader, SegChoice, SectionHeader, Toggle } from '@sweetwo/ui';
 import { useQueryClient } from '@tanstack/react-query';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -76,7 +76,7 @@ export function S22WidgetSettings() {
               ...choices.map((i) => ({
                 value: i.goal.id,
                 label: i.goal.name,
-                sub: copy.widgetGoalTarget(readWon(i.target ?? 0)),
+                sub: copy.widgetGoalTarget(formatWon(i.target ?? 0)),
               })),
             ]}
           />

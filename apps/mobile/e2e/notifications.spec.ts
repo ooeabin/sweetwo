@@ -106,7 +106,7 @@ function seedNotis(db: MemDb) {
       id: '00000000-0000-4000-8000-000000000002',
       kind: 'care_day',
       title: '어머니 생신이 한 달 남았어요',
-      body: '예산은 30만 원이에요',
+      body: '예산은 300,000원이에요',
       target: '/calendar/list',
       icon: 'gift',
       created_at: '2026-10-05T00:00:00Z', // 월요일 → 이번 주
@@ -217,7 +217,7 @@ test('알림 센터: 금액 가리기면 문구 속 금액 •••, 빈 상태
     noti({
       id: '00000000-0000-4000-8000-000000000009',
       kind: 'care_day',
-      title: '예산은 30만 원이에요',
+      title: '예산은 300,000원이에요',
       target: '/calendar/list',
       created_at: '2026-10-07T00:00:00Z',
     }),

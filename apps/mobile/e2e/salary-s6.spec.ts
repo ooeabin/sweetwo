@@ -134,7 +134,7 @@ test('W-02a 다른 금액: 저장하면 Toast + 되돌리기, 0원은 못 함 To
   await input.fill('');
   await expect(page.getByRole('button', { name: '다음' })).toBeDisabled();
   await input.fill('700000');
-  await expect(page.getByText('계획보다 18만 원 적어요')).toBeVisible();
+  await expect(page.getByText('계획보다 180,000원 적어요')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '다음' }).click();
   await expect(page.locator('.hg-datepill')).toHaveText('9월 25일 월급');

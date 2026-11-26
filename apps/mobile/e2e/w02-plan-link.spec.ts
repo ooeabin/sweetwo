@@ -63,7 +63,7 @@ test('확인 버튼(2026-11-19): 누르면 줄이 아래(완료)로 가고 보�
   await open(page);
   await page.goto('/salary');
   await expect(page.getByText('9월 25일 월급')).toBeVisible();
-  await expect(page.locator('.hg-w02hero__amt')).toHaveText('350만 원');
+  await expect(page.locator('.hg-w02hero__amt')).toHaveText('3,500,000원');
   await expect(page.getByText('5개 중 0개 확인')).toHaveCount(0); // 2026-11-23 없앰
   // 밑줄 탭 숫자
   await expect(page.getByRole('tab', { name: /^전체 5$/ })).toHaveAttribute(
@@ -88,7 +88,7 @@ test('확인 버튼(2026-11-19): 누르면 줄이 아래(완료)로 가고 보�
   await expect(names(page)).toHaveText(['내 집 마련', '고정지출', '생활비', '용돈', '청약']);
   await expect(doneRow(page, '청약')).toBeVisible();
   await expect(page.locator('.hg-transfer--act.is-done .hg-transfer__dot.is-on')).toHaveCount(0);
-  await expect(page.locator('.hg-w02hero__amt')).toHaveText('350만 원');
+  await expect(page.locator('.hg-w02hero__amt')).toHaveText('3,500,000원');
   // 되돌리기 Toast
   await page.locator('.hg-toast').getByRole('button', { name: '되돌리기' }).click();
   await expect(names(page)).toHaveText(['청약', '내 집 마련', '고정지출', '생활비', '용돈']);
@@ -107,7 +107,7 @@ test('줄 나머지를 누르면 줄 시트, 완료 버튼은 시트에서 체�
   mark(linesOf(db)[0], 'checked');
   await page.goto('/salary');
   await page.locator('.hg-transfer__open', { hasText: '생활비' }).click();
-  const sheet = page.getByRole('dialog', { name: '생활비 88만 원' });
+  const sheet = page.getByRole('dialog', { name: '생활비 880,000원' });
   await expect(sheet.getByRole('button', { name: '계획대로 했어요' })).toBeVisible();
   await expect(sheet.getByRole('button', { name: '다른 금액으로 했어요' })).toBeVisible();
   // 건너뛰기는 회색 채움이 아닌 글자 버튼(hg-btn--link hg-btn--quiet, 2026-11-23)
@@ -143,7 +143,7 @@ test('다 확인(2026-11-19): 이동 없이 이 화면이 축하 상태로, 제�
   const toast = page.locator('.hg-toast');
   await expect(toast).toContainText('9월 25일 월급, 계획대로 됐어요');
   await expect(page.getByRole('heading', { name: '이번 달도 계획대로!' })).toBeVisible();
-  await expect(page.locator('.hg-w02hero__saved')).toHaveText('저축·투자 139만 원 모았어요');
+  await expect(page.locator('.hg-w02hero__saved')).toHaveText('저축·투자 1,390,000원 모았어요');
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);
   // 칩·큰 금액 없음, 그림 자리는 파일이 없어 비어 있음(회색 자리 없음)
   await expect(page.locator('.hg-w02hero__amt')).toHaveCount(0);
@@ -176,7 +176,7 @@ test('다 확인 + 건너뜀이 섞이면 “이번 달 확인 끝”, 공유하
   await page.goto('/salary');
   await expect(page.getByRole('heading', { name: '이번 달 확인 끝' })).toBeVisible();
   // 확인한 저축·투자 = 내 집 마련 95만(청약은 건너뜀)
-  await expect(page.locator('.hg-w02hero__saved')).toHaveText('저축·투자 95만 원 모았어요');
+  await expect(page.locator('.hg-w02hero__saved')).toHaveText('저축·투자 950,000원 모았어요');
   const dl = page.waitForEvent('download');
   await page.getByRole('button', { name: '공유하기' }).click();
   expect((await dl).suggestedFilename()).toBe('sweetwo-2026-09.png');
@@ -279,7 +279,7 @@ test('파트너 탭(각자): 같은 구조 보기만(버튼 비활성), 다 끝�
   await page.goto('/salary?who=yebin');
   await expect(page.getByText('예빈님 월급날 확인 목록이에요. 보기만 할 수 있어요')).toBeVisible();
   // 큰 금액 = 그 사이클 월급(2026-11-19, 예전 줄 계획 합 95만 원)
-  await expect(page.locator('.hg-w02hero__amt')).toHaveText('270만 원');
+  await expect(page.locator('.hg-w02hero__amt')).toHaveText('2,700,000원');
   await expect(page.getByRole('tab', { name: /^남음 2$/ })).toBeVisible();
   await expect(page.locator('.hg-transfer__dot.is-on')).toHaveCount(0);
   await expect(page.getByRole('checkbox')).toHaveCount(0);
@@ -301,20 +301,20 @@ test('W-01 금액 바꾸기 Toast: 이번 달 체크 안 한 줄이 바뀌면 �
   const db = await open(page);
   mark(linesOf(db)[2], 'checked'); // 고정지출은 이미 체크
   await page.goto('/salary/plan');
-  await page.getByRole('button', { name: '생활비 88만 원' }).click();
+  await page.getByRole('button', { name: '생활비 880,000원' }).click();
   let sheet = page.getByRole('dialog', { name: '생활비 금액' });
   await sheet.getByRole('textbox', { name: '생활비 금액' }).fill('800000');
   await sheet.getByRole('button', { name: '확인' }).click();
   await expect(page.getByText('이번 달 아직 확인하지 않은 것도 바꿨어요')).toBeVisible();
   expect(linesOf(db).find((l) => l.kind === 'living' && l.state === 'wait')?.planned).toBe(800_000);
   await page.getByRole('button', { name: '되돌리기' }).click();
-  await expect(page.getByRole('button', { name: '생활비 88만 원' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '생활비 880,000원' })).toBeVisible();
   // 체크한 줄(고정지출)은 이번 달이 안 바뀌므로 예전 Toast
-  await page.getByRole('button', { name: '고정지출 88만 원' }).click();
+  await page.getByRole('button', { name: '고정지출 880,000원' }).click();
   sheet = page.getByRole('dialog', { name: '고정지출 금액' });
   await sheet.getByRole('textbox', { name: '고정지출 금액' }).fill('900000');
   await sheet.getByRole('button', { name: '확인' }).click();
-  await expect(page.getByText('고정지출을 90만 원으로 바꿨어요')).toBeVisible();
+  await expect(page.getByText('고정지출을 900,000원으로 바꿨어요')).toBeVisible();
   await expect(page.getByText('이번 달 아직 확인하지 않은 것도 바꿨어요')).toHaveCount(0);
 });
 
@@ -354,7 +354,7 @@ test('줄 상태(2026-11-23 C안): 할 일 점 + ›, 끝남 ✓, 건너뜀 취�
   // 키보드 Enter로 시트
   await goRow(page, '생활비').focus();
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('dialog', { name: '생활비 88만 원' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: '생활비 880,000원' })).toBeVisible();
   await page.keyboard.press('Escape');
   await axe(page);
 });

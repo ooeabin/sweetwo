@@ -131,7 +131,7 @@ test('관리 형태(S-11f): 진행 중인 내 요청 표시와 요청 취소, �
   expect(db.space?.salary_mode).toBe('separate');
 });
 
-test('분담 도우미(W-01b): 생활비 통장 → 100만 원 → 반반 → 예빈님께 알리기, 월급 비율은 흐린 선택지', async ({
+test('분담 도우미(W-01b): 생활비 통장 → 1,000,000원 → 반반 → 예빈님께 알리기, 월급 비율은 흐린 선택지', async ({
   page,
 }) => {
   const { v } = await connected(page);
@@ -145,7 +145,7 @@ test('분담 도우미(W-01b): 생활비 통장 → 100만 원 → 반반 → �
   await expect(page.getByRole('radio', { name: '월급 비율' })).toBeDisabled();
   await expect(page.getByText(/공개|보여 주기/)).toHaveCount(0);
   await page.getByRole('radio', { name: '반반' }).click();
-  await expect(page.getByText('찬우 50만 원, 예빈 50만 원 (5 : 5)')).toBeVisible();
+  await expect(page.getByText('찬우 500,000원, 예빈 500,000원 (5 : 5)')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '예빈님께 알리기' }).click();
   await expect(page.getByText('예빈님께 알렸어요')).toBeVisible();
@@ -174,7 +174,7 @@ test('분담 도우미(W-01b): 두 사람 모두 ‘모두 보여 주기’면 �
   await fillAmount(page, '둘이 한 달에 얼마 넣을까요?', 600_000);
   await page.getByRole('radio', { name: '월급 비율' }).click();
   // 350만 : 250만 → 60만 × 350/600 = 35만
-  await expect(page.getByText('찬우 35만 원, 예빈 25만 원 (6 : 4)')).toBeVisible();
+  await expect(page.getByText('찬우 350,000원, 예빈 250,000원 (6 : 4)')).toBeVisible();
   await expect(page.getByText(/250만|350만/)).toHaveCount(0);
   await page.getByRole('button', { name: '예빈님께 알리기' }).click();
   await expect.poll(() => v.shared[0]?.share_a).toBe(350_000);
@@ -206,7 +206,7 @@ test('분담 제안 받음(W-01c): 좋아요 → 내 월급 계획에 같이 쓰
   await expect(
     page.getByRole('heading', { name: '예빈님이 ‘생활비 통장’ 나누기를 알렸어요' }),
   ).toBeVisible();
-  await expect(page.getByText('한 달 100만 원, 찬우 40만 원, 예빈 60만 원')).toBeVisible();
+  await expect(page.getByText('한 달 1,000,000원, 찬우 400,000원, 예빈 600,000원')).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: '좋아요' }).click();
   await expect(page).toHaveURL(/\/salary\/plan$/);
@@ -249,15 +249,15 @@ test('상대에게 보이는 모습(S-13p): 저금만이면 저금 줄 금액, �
   });
   await expect(page.getByText('찬우님은 저축·투자만 보여 줘요')).toBeVisible();
   // 저금만: 저금 줄 금액은 보이고, 월급·고정지출은 안 보임
-  await expect(page.getByText('95만 원', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('950,000원', { exact: true }).first()).toBeVisible();
   await expect(page.getByText('고정지출')).toHaveCount(0);
   await expect(page.getByText(/월급 350만/)).toHaveCount(0);
   // 상대 홈 H-10과 같게(2026-11-13 실구동): 묶이지 않은 내 개인 저금은 ‘같이 모으기’가 아니라 ‘저금’(상대 W-10·H-09)에
   const together = page.getByRole('region', { name: '같이 모으기' });
   await expect(together.getByText('보이는 게 없어요')).toBeVisible();
-  await expect(together.getByText('95만 원 / 1억 5,000만 원')).toHaveCount(0);
+  await expect(together.getByText('950,000원 / 150,000,000원')).toHaveCount(0);
   const mySaving = page.getByRole('region', { name: '저축·투자', exact: true });
-  await expect(mySaving.getByText('95만 원 / 1억 5,000만 원')).toBeVisible();
+  await expect(mySaving.getByText('950,000원 / 150,000,000원')).toBeVisible();
   // 같이 모으기 묶음: 합계 / 목표 금액, 둘 다 ‘각자 모은 금액 보여 주기’면 내 몫 한 줄(상대 H-10 카드와 같은 값)
   v.bundles.push({
     id: 'b-1',
@@ -278,8 +278,8 @@ test('상대에게 보이는 모습(S-13p): 저금만이면 저금 줄 금액, �
   });
   await page.reload();
   await expect(together.getByText('신혼여행')).toBeVisible();
-  await expect(together.getByText('150만 원 / 500만 원')).toBeVisible();
-  await expect(together.getByText('찬우님 몫 90만 원')).toBeVisible();
+  await expect(together.getByText('1,500,000원 / 5,000,000원')).toBeVisible();
+  await expect(together.getByText('찬우님 몫 900,000원')).toBeVisible();
   // 자산 총액만: 종류별 합계만
   await expect(page.getByText('예금·적금 1개')).toBeVisible();
   await expect(page.getByText('청년 적금')).toHaveCount(0);
@@ -292,7 +292,7 @@ test('상대에게 보이는 모습(S-13p): 저금만이면 저금 줄 금액, �
   await expect(page.getByText('이번 달 했어요').first()).toBeVisible();
   await expect(page.getByText('개인 저축·투자').first()).toBeVisible();
   await expect(mySaving.getByText('개인 저축·투자').first()).toBeVisible();
-  await expect(page.getByText('95만 원 / 1억 5,000만 원')).toHaveCount(0);
+  await expect(page.getByText('950,000원 / 150,000,000원')).toHaveCount(0);
   await expect(page.getByText('내 집 마련')).toHaveCount(0);
   await axe(page);
 });
@@ -310,7 +310,7 @@ test('내 월급(S-11c): 다음 달부터 + 언제까지 → 예약 표시(S-11)
   await expect(page.getByText('2026년 11월부터 바꿀게요')).toBeVisible();
   expect(db.me.monthly_income).toBe(3_500_000);
   expect(v.salaryChanges[0]).toMatchObject({ effective_from: '2026-11-01', amount: 1_600_000 });
-  await expect(page.getByText(/2026년 11월부터 160만 원/)).toBeVisible();
+  await expect(page.getByText(/2026년 11월부터 1,600,000원/)).toBeVisible();
   await page.getByRole('button', { name: '취소' }).click();
   await expect(page.getByText('월급 변경을 취소했어요')).toBeVisible();
   expect(v.salaryChanges[0]?.cancelled_at).toBeTruthy();
@@ -428,7 +428,7 @@ test('W-01 파트너 탭(3b): 예빈이 ‘저금만’이면 저금 줄만, ‘
   await expect(
     page.getByRole('button', { name: /예빈 여행/ }).or(page.getByText('예빈 여행')),
   ).toBeVisible();
-  await expect(page.getByText('30만 원', { exact: true })).toBeVisible();
+  await expect(page.getByText('300,000원', { exact: true })).toBeVisible();
   await expect(page.getByText('고정지출')).toHaveCount(0);
   await axe(page);
 
@@ -438,7 +438,7 @@ test('W-01 파트너 탭(3b): 예빈이 ‘저금만’이면 저금 줄만, ‘
   await expect(page.getByText('개인 저축·투자')).toBeVisible();
   await expect(page.getByText('예빈 여행')).toHaveCount(0);
   await expect(page.getByText('아직이에요')).toBeVisible();
-  await expect(page.getByText('30만 원', { exact: true })).toHaveCount(0);
+  await expect(page.getByText('300,000원', { exact: true })).toHaveCount(0);
   await axe(page);
 });
 

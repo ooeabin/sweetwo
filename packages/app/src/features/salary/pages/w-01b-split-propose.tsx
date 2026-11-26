@@ -11,7 +11,7 @@ import {
   coupleOf,
   incomeRatioAllowed,
   quickChips,
-  readWon,
+  formatWon,
   splitShares,
   type PlanShare,
   type SplitRule,
@@ -141,9 +141,9 @@ export function W01bSplitPropose() {
   const resultLine = shares
     ? t.result(
         c.myName,
-        readWon(shares.mine),
+        formatWon(shares.mine),
         c.partnerName,
-        readWon(shares.partner),
+        formatWon(shares.partner),
         shares.ratioTen[0],
         shares.ratioTen[1],
       )

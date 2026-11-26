@@ -38,7 +38,7 @@ test('W-01 b: 줄이 하나도 없으면 도넛·범례 없음, 문장도 없음
   const db = await open(page);
   for (const s of db.splits) s.split_line = [];
   await page.goto('/salary/plan');
-  await expect(page.getByRole('button', { name: '월급 350만 원, 금액 고치기' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '월급 3,500,000원, 금액 고치기' })).toBeVisible();
   // 2026-11-26 사용자 결정: 저축·투자 0원일 때 “월급을 어떻게 나눌지 정해 보세요”는 없앰
   await expect(page.getByText('월급을 어떻게 나눌지 정해 보세요')).toHaveCount(0);
   await expect(page.locator('.hg-plansum__title')).toHaveCount(0);
@@ -46,14 +46,14 @@ test('W-01 b: 줄이 하나도 없으면 도넛·범례 없음, 문장도 없음
   await axe(page);
 });
 
-test('W-01 e: 계획이 월급보다 많으면 “계획이 월급보다 150만 원 많아요”(오류 빨강), 줄이 있으면 도넛·범례는 그대로', async ({
+test('W-01 e: 계획이 월급보다 많으면 “계획이 월급보다 1,500,000원 많아요”(오류 빨강), 줄이 있으면 도넛·범례는 그대로', async ({
   page,
 }) => {
   const db = await open(page);
   Object.assign(db.me, { monthly_income: 2_000_000 });
   await page.goto('/salary/plan');
   const title = page.locator('.hg-plansum__title');
-  await expect(title).toHaveText('계획이 월급보다 150만 원 많아요');
+  await expect(title).toHaveText('계획이 월급보다 1,500,000원 많아요');
   await expect(title).toHaveClass(/hg-plansum__title--error/);
   const color = await title.evaluate((el) => getComputedStyle(el).color);
   const danger = await page.evaluate(() => {
@@ -77,7 +77,7 @@ test('W-01 저축·투자 줄 보조 줄: 모은 금액 0원은 빼고 “목표
   await page.goto('/salary/plan#saving');
   const group = page.getByRole('region', { name: '저축·투자', exact: true });
   const house = group.locator('.hg-receipt__row', { hasText: '내 집 마련' });
-  await expect(house.locator('.hg-receipt__note')).toHaveText('목표 금액 1억 5,000만 원');
+  await expect(house.locator('.hg-receipt__note')).toHaveText('목표 금액 150,000,000원');
   await expect(
     group.locator('.hg-receipt__row', { hasText: '청약' }).locator('.hg-receipt__note'),
   ).toHaveCount(0);
@@ -169,8 +169,8 @@ test('W-02 h: 월급날 없는 사람은 같은 모양(제목, 기간 알약, �
   await page.goto('/salary');
   await expect(page.getByRole('heading', { name: '이번 달 월급 체크' })).toBeVisible();
   await expect(page.locator('.hg-datepill')).toHaveText('9월 20일 ~ 10월 19일');
-  await expect(page.locator('.hg-w02hero__amt')).toHaveText('340만 원');
-  await expect(page.locator('.hg-w02hero__meta')).toHaveText('월급 계획 350만 원 중');
+  await expect(page.locator('.hg-w02hero__amt')).toHaveText('3,400,000원');
+  await expect(page.locator('.hg-w02hero__meta')).toHaveText('월급 계획 3,500,000원 중');
   // 큰 금액은 위 기간 수입이라 카드는 이름표 + 기록 없음 안내 + 버튼만
   const card = page.getByRole('group', { name: '이번 기간 수입' });
   await expect(card).toBeVisible();

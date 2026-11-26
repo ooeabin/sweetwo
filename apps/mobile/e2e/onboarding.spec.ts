@@ -153,7 +153,7 @@ test('결혼했어요 + 각자 따로: 이름부터 준비 끝까지(O-06 없음
   await page.goto('/');
   await expect(page).toHaveURL(/\/salary\/items\/new\?from=onboarding$/);
   await expect(page.getByRole('heading', { level: 2 })).toHaveText(
-    '내 집 마련에 매달 95만 원씩 모을까요?',
+    '내 집 마련에 매달 950,000원씩 모을까요?',
   );
   await foldAmount(page, '목표 금액', 150000000);
   await page.getByRole('button', { name: '추가하기' }).click();
@@ -554,7 +554,7 @@ test('파트너가 온보딩 중에 먼저 합류: O-30c “예빈님이 주로 
   ]);
 });
 
-test('O-31 금액: 999억 넘으면 다음 비활성(S2-06), 10만 원 미만·1억 원 초과는 한 번 확인(S2-07), 소수점은 버림(S2-18)', async ({
+test('O-31 금액: 999억 넘으면 다음 비활성(S2-06), 100,000원 미만·100,000,000원 초과는 한 번 확인(S2-07), 소수점은 버림(S2-18)', async ({
   page,
 }) => {
   test.setTimeout(60_000);
@@ -573,12 +573,12 @@ test('O-31 금액: 999억 넘으면 다음 비활성(S2-06), 10만 원 미만·1
   await amount(page).fill('50000');
   await next(page);
   await expect(
-    page.getByRole('alert').filter({ hasText: '한 달에 5만 원이 맞나요?' }),
+    page.getByRole('alert').filter({ hasText: '한 달에 50,000원이 맞나요?' }),
   ).toBeVisible();
   await axe(page);
   await amount(page).fill('150000000');
   await next(page);
-  await expect(page.getByText('한 달에 1억 5,000만 원이 맞나요?')).toBeVisible();
+  await expect(page.getByText('한 달에 150,000,000원이 맞나요?')).toBeVisible();
   await next(page);
   await heading(page, '월급날은 며칠이에요?');
   expect(db.me.monthly_income).toBe(150_000_000);

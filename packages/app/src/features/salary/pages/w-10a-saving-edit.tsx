@@ -14,7 +14,7 @@ import {
   defaultDeadline,
   formatYm,
   leftover,
-  readWon,
+  formatWon,
   savingEta,
   savingLate,
   savingNeed,
@@ -307,7 +307,7 @@ export function W10aSavingEdit() {
     f === 'amount'
       ? x.target_amount === null
         ? '-'
-        : readWon(x.target_amount)
+        : formatWon(x.target_amount)
       : f === 'deadline'
         ? x.deadline
           ? formatYm(x.deadline)

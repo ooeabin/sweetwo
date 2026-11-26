@@ -25,30 +25,30 @@ async function openList(page: Page) {
   await expect(page).toHaveURL(LIST);
 }
 
-test('기록 0건: 한 줄 350만 원 → W-20b 월급 350만 원 + 연필 → 300만 원으로 고침 → 기록 1건, 첫 확인 뒤에도 1건', async ({
+test('기록 0건: 한 줄 3,500,000원 → W-20b 월급 3,500,000원 + 연필 → 3,000,000원으로 고침 → 기록 1건, 첫 확인 뒤에도 1건', async ({
   page,
 }) => {
   const { sv } = await open(page);
   const line = page.getByRole('group', { name: '이번 달 수입' });
-  await expect(line).toContainText('350만 원');
+  await expect(line).toContainText('3,500,000원');
   await openList(page);
   const hero = page.locator('.hg-fdhero');
-  await expect(hero.locator('.hg-fdhero__amt')).toContainText('350만 원');
-  await expect(page.getByText('+350만 원')).toBeVisible();
+  await expect(hero.locator('.hg-fdhero__amt')).toContainText('3,500,000원');
+  await expect(page.getByText('+3,500,000원')).toBeVisible();
   await expect(page.getByText('자동', { exact: false }).first()).toBeVisible();
   expect(sv.moneyIns).toHaveLength(0); // 저장 전에는 기록 없음
   await hero.getByRole('button', { name: /월급 금액 고치기/ }).click();
   const sheet = page.getByRole('dialog');
   await sheet.getByLabel('월급 금액').fill('3000000');
   await sheet.getByRole('button', { name: '확인' }).click();
-  await expect(hero.locator('.hg-fdhero__amt')).toContainText('300만 원');
-  await expect(page.getByText('+300만 원')).toBeVisible();
+  await expect(hero.locator('.hg-fdhero__amt')).toContainText('3,000,000원');
+  await expect(page.getByText('+3,000,000원')).toBeVisible();
   expect(sv.moneyIns.filter((m) => m.source === 'payday_auto')).toHaveLength(1);
   expect(sv.moneyIns[0]).toMatchObject({ amount: 3_000_000, source: 'payday_auto' });
   // 첫 확인을 해도 한 줄, 금액 그대로
   await page.goto('/salary');
   await checkRow(page, '청약');
-  await expect(page.getByRole('group', { name: '이번 달 수입' })).toContainText('300만 원');
+  await expect(page.getByRole('group', { name: '이번 달 수입' })).toContainText('3,000,000원');
   expect(sv.moneyIns.filter((m) => !m.deleted_at)).toHaveLength(1);
   expect(sv.moneyIns[0]?.amount).toBe(3_000_000);
 });
@@ -57,7 +57,7 @@ test('손대지 않고 첫 확인 → 프로필 월급으로 자동 기록(그�
   const { sv } = await open(page);
   await checkRow(page, '청약');
   const line = page.getByRole('group', { name: '이번 달 수입' });
-  await expect(line).toContainText('350만 원');
+  await expect(line).toContainText('3,500,000원');
   expect(sv.moneyIns[0]).toMatchObject({ amount: 3_500_000, source: 'payday_auto' });
 });
 

@@ -1,4 +1,4 @@
-import { formatManWon, MAX_WON } from '@sweetwo/core';
+import { formatWon, MAX_WON } from '@sweetwo/core';
 import { cx } from '../cx';
 import { IconButton } from '../IconButton';
 import { AddText } from '../AddText';
@@ -106,7 +106,7 @@ export function ListInput({
       </button>
       {rows.length >= limit && <span className="hg-help">{limit}개까지 넣을 수 있어요</span>}
       <p className="hg-listin__total" aria-live="polite">
-        {done.length ? totalLabel(formatManWon(total)) : '—'}
+        {done.length ? totalLabel(formatWon(total)) : '—'}
       </p>
     </div>
   );

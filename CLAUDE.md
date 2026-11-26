@@ -44,7 +44,7 @@ Capacitor(iOS, Android, 태블릿 포함) + React 18 + TypeScript + Vite, TanSta
 - TypeScript strict, `any` 금지. 서버 응답은 Zod로 검사한다.
 - DB 타입은 `supabase gen types` 결과만 쓰고 손대지 않는다.
 - 금액은 정수 원 단위만. 부동소수점 금지. 입력 상한 999억 원. 반올림은 기획서 계산·배분 규칙.
-- 날짜는 KST 하나. 금액과 날짜 표기는 `packages/core`의 포맷 함수로만.
+- 날짜는 KST 하나. 금액과 날짜 표기는 `packages/core`의 포맷 함수로만. 금액은 토스식 “3,500,000원”(core `formatWon`, 앱 화면 `money`, 2026-11-26 사용자 결정). 억·만 짧은 표기는 `docs/spec/11-common.md` 6장 예외 표 자리(막대 위 값, 위젯 금액 줄, 금액 칸 아래 읽기, 빠른 칩)만.
 - 계산 규칙은 `packages/core/rules`에 두고 서버 함수와 같은 결과를 낸다. 계산·배분 탭 예시를 그대로 테스트로 만든다.
 - 스키마는 추가만. 이름 바꾸기와 지우기는 2단계로.
 - 비밀 값(service role, KMS, SES)은 앱 코드에 넣지 않는다. 앱에는 공개돼도 되는 값만 `VITE_`로.

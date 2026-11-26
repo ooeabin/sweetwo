@@ -34,11 +34,11 @@ test('필수가 비면 추가하기 비활성, 1만 원 단위, 직접 정하기
   await fillAmount(page, '매달 얼마씩?', 10000);
   await expect(add).toBeEnabled();
   await expect(page.getByRole('heading', { level: 2 })).toHaveText(
-    '운동에 매달 1만 원씩 모을까요?',
+    '운동에 매달 10,000원씩 모을까요?',
   );
   // 금액 자리만 오렌지(accent), 이름 자리는 ink
   const val = page.locator('.hg-form__val');
-  await expect(val).toHaveText('1만 원');
+  await expect(val).toHaveText('10,000원');
   await axe(page);
 });
 
@@ -118,7 +118,7 @@ test('선택 항목 접힌 줄: 목표 금액을 정하면 기한 줄이 생기�
   await page.goto('/salary/items/new');
   await pickName(page, '여행', true);
   await foldAmount(page, '목표 금액', 3000000);
-  await expect(page.getByRole('button', { name: /^목표 금액,/ })).toContainText('300만 원');
+  await expect(page.getByRole('button', { name: /^목표 금액,/ })).toContainText('3,000,000원');
   await expect(page.getByRole('button', { name: /^기한,/ })).toBeVisible();
   await page.getByRole('button', { name: /^목표 금액,/ }).click();
   await page.getByRole('dialog').getByRole('button', { name: '목표 금액 지우기' }).click();

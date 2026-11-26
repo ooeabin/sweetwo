@@ -55,7 +55,7 @@ update public.goal set target_amount = 150000000 where template = 'home';
 select is(public.send_weekly_summary(public.kst_today() + 1), 1, '요약 하나');
 select is((select count(*)::int from public.mail_outbox), 0, '주간 요약 메일은 안 보냄');
 select is((select count(*)::int from public.notification where kind = 'weekly_summary'), 1, '알림은 남김');
-select ok((select body_text like '예빈님이 바꾼 것' || E'\n' || '- 목표 금액 1억 원 → 1억 5,000만 원%'
+select ok((select body_text like '예빈님이 바꾼 것' || E'\n' || '- 목표 금액 100,000,000원 → 150,000,000원%'
   from public.weekly_mail_body('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222', public.kst_today() + 1)),
   '요약 본문 바뀐 것 전 → 후');
 

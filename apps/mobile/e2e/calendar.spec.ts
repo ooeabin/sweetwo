@@ -403,7 +403,7 @@ test('상세(Y-05)와 기록(Y-08): 7일 지난 날 기록하기(꺼내 쓰기 �
   await expect(overdue).toContainText('민지 결혼식, 10월 5일');
   const next = page.getByRole('region', { name: '다음 경조사' });
   await expect(next).toContainText('D-6');
-  await expect(next).toContainText('30만 원 생각해 뒀어요');
+  await expect(next).toContainText('300,000원 생각해 뒀어요');
   await axe(page);
 
   await overdue.click();
@@ -873,7 +873,7 @@ test('상세(Y-05): 기록을 마친 회차는 요약 + 기록 고치기, 지남
   await expect(page.getByRole('button', { name: '다녀왔어요' })).toHaveCount(0);
   const sum = page.getByRole('region', { name: '기록' });
   await expect(sum).toContainText('쓴 돈');
-  await expect(sum).toContainText('5만 원');
+  await expect(sum).toContainText('50,000원');
   await expect(sum).toContainText('현금, 아기 옷');
   await expect(sum).toContainText('케이크 같이 먹었어요');
   await axe(page);
@@ -914,7 +914,7 @@ test('달력 K안: 머리 “10월 ⌄”, 요약 줄, 모든 칸 높이 같음,
   await expect(head).toHaveText('10월');
   await expect(page.getByRole('button', { name: '오늘' })).toHaveCount(0);
   // 요약 한 줄: 그 달 경조사 수 + 금액 메모 합(35만 원이 아니라 30 + 5 = 35만, 금액 0은 합에 영향 없음)
-  await expect(page.locator('.hg-cal__summary')).toHaveText('경조사 3개(35만 원 예상)');
+  await expect(page.locator('.hg-cal__summary')).toHaveText('경조사 3개(350,000원 예상)');
   // 모든 칸 높이가 같음(그림이 없어도 줄이 흐트러지지 않음)
   const heights = await page
     .locator('button.hg-cal__day')
@@ -948,7 +948,7 @@ test('달력 K안: 머리 “10월 ⌄”, 요약 줄, 모든 칸 높이 같음,
   await page.getByRole('tab', { name: '금융 일정', exact: true }).click();
   await expect(page.locator('.hg-cal__summary')).toHaveText(/^금융 일정 \d+개$/);
   await page.getByRole('tab', { name: '경조사·기념일', exact: true }).click();
-  await expect(page.locator('.hg-cal__summary')).toHaveText('경조사 3개(35만 원 예상)');
+  await expect(page.locator('.hg-cal__summary')).toHaveText('경조사 3개(350,000원 예상)');
   await page.getByRole('button', { name: '다음 달' }).click();
   await expect(page.locator('.hg-cal__summary')).toHaveCount(0);
 });

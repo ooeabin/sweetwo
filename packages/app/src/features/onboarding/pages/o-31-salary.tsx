@@ -1,4 +1,4 @@
-import { MAX_WON, quickChips, readWon } from '@sweetwo/core';
+import { MAX_WON, quickChips, formatWon } from '@sweetwo/core';
 import { AmountInput, Checkbox, Modal, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useState } from 'react';
 import { useConfirmOnce } from '../confirm';
@@ -77,7 +77,7 @@ export function O31Salary() {
       note={me ? share.note : undefined}
       onSubmit={() =>
         valid &&
-        ok.check(value < LOW || value > HIGH, copy.checkSalary(readWon(value))) &&
+        ok.check(value < LOW || value > HIGH, copy.checkSalary(formatWon(value))) &&
         void save(value)
       }
     >

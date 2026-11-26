@@ -5,7 +5,7 @@ import {
   formatYm,
   netWorth,
   netWorthSeries,
-  readWon,
+  formatWon,
   savingEta,
   savingPct,
   savingState,
@@ -212,14 +212,14 @@ export async function renderPdf(m: PdfModel): Promise<Uint8Array> {
   y -= 44;
   text(copy.pdf.net, M, y, { size: 11, color: SLATE });
   y -= 34;
-  text(readWon(m.assets.net), M, y, { size: 28, bold: true });
+  text(formatWon(m.assets.net), M, y, { size: 28, bold: true });
   y -= 36;
   const half = (W - 2 * M) / 2;
   text(copy.pdf.assets, M, y, { size: 10, color: SLATE });
   text(copy.pdf.debts, M + half, y, { size: 10, color: SLATE });
   y -= 20;
-  text(readWon(m.assets.assets), M, y, { size: 15, bold: true });
-  text(readWon(m.assets.debts), M + half, y, { size: 15, bold: true });
+  text(formatWon(m.assets.assets), M, y, { size: 15, bold: true });
+  text(formatWon(m.assets.debts), M + half, y, { size: 15, bold: true });
   y -= 52;
   const trend = m.assets.trend;
   if (trend && trend.length) {
@@ -262,7 +262,7 @@ export async function renderPdf(m: PdfModel): Promise<Uint8Array> {
     });
     const last = trend[n - 1];
     if (last)
-      text(readWon(last.net), xAt(n - 1), yAt(last.net) + 10, {
+      text(formatWon(last.net), xAt(n - 1), yAt(last.net) + 10, {
         size: 9,
         bold: true,
         align: n < 2 ? 'center' : 'right',
@@ -279,7 +279,7 @@ export async function renderPdf(m: PdfModel): Promise<Uint8Array> {
   y -= 44;
   text(copy.pdf.yearSaved, M, y, { size: 11, color: SLATE });
   y -= 34;
-  text(readWon(m.year.months.reduce((a, b) => a + b, 0)), M, y, { size: 28, bold: true });
+  text(formatWon(m.year.months.reduce((a, b) => a + b, 0)), M, y, { size: 28, bold: true });
   y -= 48;
   text(copy.pdf.monthly, M, y, { size: 13, bold: true });
   y -= 24;
@@ -335,13 +335,13 @@ export async function renderPdf(m: PdfModel): Promise<Uint8Array> {
           color: INK,
         });
       y -= 22;
-      text(`${copy.pdf.savedOf(readWon(g.saved), readWon(g.target ?? 0))}, ${g.pct}%`, M, y, {
+      text(`${copy.pdf.savedOf(formatWon(g.saved), formatWon(g.target ?? 0))}, ${g.pct}%`, M, y, {
         size: 10,
         color: SLATE,
       });
     } else {
       y -= 8;
-      text(readWon(g.saved), M, y, { size: 10, color: SLATE });
+      text(formatWon(g.saved), M, y, { size: 10, color: SLATE });
     }
     y -= 30;
   }

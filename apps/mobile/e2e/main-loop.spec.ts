@@ -136,7 +136,7 @@ test('찬우·예빈 큰 흐름: 첫 저금 → 초대 → 합류 → 월급날 
   await y.getByRole('button', { name: '같이 모으기 시작하기' }).click();
   await expect(y).toHaveURL(/\/salary\/items\/goal-y$/);
   const yCard = y.getByRole('region', { name: '같이 모으기', exact: true });
-  await expect(yCard).toContainText('595만 원');
+  await expect(yCard).toContainText('5,950,000원');
   await axe(y);
 
   // 5. 예빈 수입 적기(월급 탭 W-02) → 결혼 비용에 50만 → 찬우 묶음 합계도 645만
@@ -148,11 +148,11 @@ test('찬우·예빈 큰 흐름: 첫 저금 → 초대 → 합류 → 월급날 
   await y.getByRole('button', { name: '다음' }).click();
   await y.getByLabel('결혼 비용', { exact: true }).fill('500000');
   await y.getByRole('button', { name: '넣기', exact: true }).click();
-  await expect(y.getByText('저축·투자 1개에 50만 원 넣었어요')).toBeVisible();
+  await expect(y.getByText('저축·투자 1개에 500,000원 넣었어요')).toBeVisible();
   expect(s.moves).toMatchObject([{ goal_id: 'goal-y', kind: 'in', amount: 500_000 }]);
   await c.goto('/salary/items/goal-h');
   await expect(c.getByRole('region', { name: '같이 모으기', exact: true })).toContainText(
-    '645만 원',
+    '6,450,000원',
   );
 
   // 6. 예빈이 연결 해제를 요청 → 찬우 ‘해제할게요’ → 해제 안내(S-12h) → 시작하기 = 홈(각자 엔진은 내 것이 남음)

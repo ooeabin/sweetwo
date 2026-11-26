@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { formHero, lineMode, modeSettings, savingFormReady } from './form-logic';
+import { formatWon } from '@sweetwo/core';
 
-const money = (v: number) => `${v / 10_000}만 원`;
+const money = (v: number) => formatWon(v);
 const text = (h: ReturnType<typeof formHero>) => h.map((l) => l.map((p) => p.text).join(''));
 
 describe('요약 문장', () => {
@@ -17,18 +18,18 @@ describe('요약 문장', () => {
   });
   it('이름과 금액이면 금액 조각만 accent', () => {
     const h = formHero({ name: ' 여행 ', amount: 300_000, verb: '모을까요?', what: '무엇', money });
-    expect(text(h)).toEqual(['여행에', '매달 30만 원씩 모을까요?']);
+    expect(text(h)).toEqual(['여행에', '매달 300,000원씩 모을까요?']);
     expect(
       h
         .flat()
         .filter((p) => p.tone === 'accent')
         .map((p) => p.text),
-    ).toEqual(['30만 원']);
+    ).toEqual(['300,000원']);
   });
   it('금액만 고르면 이름 자리는 무엇', () => {
     expect(text(formHero({ name: '', amount: 0, verb: '쓸까요?', what: '무엇', money }))).toEqual([
       '무엇에',
-      '매달 0만 원씩 쓸까요?',
+      '매달 0원씩 쓸까요?',
     ]);
   });
 });

@@ -56,7 +56,7 @@ select is(public.flush_partner_changes(now() + interval '5 minutes'), 0, '10분 
 select is(public.flush_partner_changes(now() + interval '11 minutes'), 1, '10분 지나면 보냄(내 목표는 없음)');
 select results_eq(
   $$ select user_id, title, body, target, topic from public.notification $$,
-  $$ values ('11111111-1111-1111-1111-111111111111'::uuid, '예빈님이 내 집 마련 저축·투자를 바꿨어요', '목표 금액 1억 원 → 1억 5,000만 원',
+  $$ values ('11111111-1111-1111-1111-111111111111'::uuid, '예빈님이 내 집 마련 저축·투자를 바꿨어요', '목표 금액 100,000,000원 → 150,000,000원',
              '/salary/items/' || (select id from public.goal where template = 'home'), 'partner_change') $$,
   '목표 변경 알림');
 
@@ -77,7 +77,7 @@ select is((select count(*)::int from public.notification where kind = 'partner_c
   'v2.2 각자 계열 바로 알림 없음');
 select results_eq(
   $$ select title, body, topic from public.notification where kind = 'partner_activity' $$,
-  $$ values ('예빈님이 자산을 바꿨어요', '전세 보증금 2억 원 → 2억 2,000만 원', 'silent') $$,
+  $$ values ('예빈님이 자산을 바꿨어요', '전세 보증금 200,000,000원 → 220,000,000원', 'silent') $$,
   '자산 금액은 활동 기록만');
 select is((select count(*)::int from public.notification where user_id = '22222222-2222-2222-2222-222222222222'), 0,
   '고친 사람에게는 알림 없음');

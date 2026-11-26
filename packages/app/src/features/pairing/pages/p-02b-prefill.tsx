@@ -1,5 +1,5 @@
 import { discardPrefill, recordPrefillConsent } from '@sweetwo/api';
-import { readWon } from '@sweetwo/core';
+import { formatWon } from '@sweetwo/core';
 import { ListRow, QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { copy } from '../copy';
 import { useJoinStep } from '../join-step';
@@ -30,7 +30,7 @@ export function P02bPrefill() {
             key={a.id}
             label={a.name}
             sub={a.estimated ? copy.estimated : undefined}
-            value={readWon(a.amount)}
+            value={formatWon(a.amount)}
           />
         ))}
       </div>
