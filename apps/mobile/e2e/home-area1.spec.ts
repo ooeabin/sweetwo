@@ -347,3 +347,57 @@ test('모으는 저금이 하나도 없고 그만 모은 것이 있으면 H-10�
   await (await homeTask(page, '다음엔 뭘 모을까요?')).click();
   await expect(page).toHaveURL(/\/salary\/plan\?from=home#saving$/);
 });
+
+test('홈 A안 강약(2026-11-26): 상자 제목 15/700, 월급 줄은 이름표 13/400 위 + 값 17/700 아래(높이 64), 타일 제목 15/700 + 값 17/700, 안내 글자 15/400', async ({
+  page,
+}) => {
+  await open(page, (d) => {
+    Object.assign(d.space ?? {}, { marriage_status: 'engaged', wedding_date: '2027-03-01' });
+    d.cares.push(care({}));
+    d.assets.push(asset({}));
+  });
+  const font = (sel: string) =>
+    page
+      .locator(sel)
+      .first()
+      .evaluate((el) => {
+        const s = getComputedStyle(el);
+        return `${s.fontSize}/${s.fontWeight}`;
+      });
+  for (const sel of [
+    '.hg-hubbox__title',
+    '.hg-hubup__title',
+    '.hg-together__title',
+    '.hg-hubtile__title',
+  ])
+    expect(await font(sel)).toBe('15px/700');
+  expect(await font('.hg-hubbox__row .hg-hubbox__name')).toBe('13px/400');
+  expect(await font('.hg-hubbox__row .hg-hubbox__main')).toBe('17px/700');
+  expect(await font('.hg-together__name')).toBe('13px/400');
+  const month = page.locator('.hg-hubbox__row').first();
+  await expect(month.locator('.hg-hubbox__name')).toHaveText('이번 달 월급 체크');
+  await expect(month.locator('.hg-hubbox__main')).toHaveText('5개 남음');
+  expect(Math.round((await month.boundingBox())?.height ?? 0)).toBe(64);
+  // 이름표가 값 위
+  const y = async (sel: string) => (await month.locator(sel).boundingBox())?.y ?? 0;
+  expect(await y('.hg-hubbox__name')).toBeLessThan(await y('.hg-hubbox__main'));
+  // 타일: 자산 관리 이름표 13 + 값 17/700, 캘린더는 기존 보조 값을 굵게
+  const assets = page.getByRole('button', { name: /^자산 관리/ });
+  expect(
+    await assets.locator('.hg-hubtile__sub').evaluate((el) => getComputedStyle(el).fontSize),
+  ).toBe('13px');
+  expect(
+    await assets.locator('.hg-hubtile__value').evaluate((el) => getComputedStyle(el).fontWeight),
+  ).toBe('700');
+  const cal = page.getByRole('button', { name: /^캘린더/ });
+  await expect(cal.locator('.hg-hubtile__value')).toHaveText('어머니 생신 D-7');
+  // 결혼 준비: 추가 안내는 15/400
+  const wed = page.getByRole('button', { name: /^결혼 준비 메모/ });
+  expect(
+    await wed.locator('.hg-hubtile__sub').evaluate((el) => {
+      const s = getComputedStyle(el);
+      return `${s.fontSize}/${s.fontWeight}`;
+    }),
+  ).toBe('15px/400');
+  await axe(page);
+});
