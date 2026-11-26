@@ -115,7 +115,9 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
   const db0 = await donut.boundingBox();
   const lb0 = await sum.locator('.hg-plansum__legend').boundingBox();
   expect(db0 && lb0 && Math.round(lb0.x - (db0.x + db0.width))).toBe(20);
-  expect(db0?.width).toBe(112);
+  // 금액이 일곱 자리(“2,110,000원”, 2026-11-26 토스식)면 범례를 한 줄로 두려고 도넛이 112 → 96까지 줄어듦
+  expect(db0?.width ?? 0).toBeGreaterThanOrEqual(96);
+  expect(db0?.width ?? 0).toBeLessThanOrEqual(112);
   for (const h of await legend.evaluateAll((els) =>
     els.map((e) => e.getBoundingClientRect().height),
   ))
