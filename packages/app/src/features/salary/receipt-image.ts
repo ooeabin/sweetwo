@@ -336,22 +336,24 @@ export async function renderReceiptPng(m: ReceiptImageModel): Promise<Blob> {
   );
 }
 
-/** 요약 카드 모양 공유 이미지(W-01, 2026-11-19. 2026-11-26 막대 대신 화면과 같은 도넛) */
+/** 요약 카드 모양 공유 이미지(W-01, 2026-11-19. 2026-11-26 화면과 같은 가운데 도넛 + 아래 세로 목록 범례) */
 export interface PlanImageModel {
-  /** 카드 위 이름표 “월급” */
+  /** 카드 위 이름표 “월급”(› 같은 누르는 표시는 그리지 않음) */
   label: string;
   amount: string;
-  /** 굵은 한 문장. pct가 있으면 앞·뒤 글자 사이에 퍼센트를 chart-save 초록으로(2026-11-26) */
-  sentence: { before: string; pct?: string; after: string };
+  /**
+   * 한 문장(17/400 ink, 화면 hg-plansum__title과 같음). tone 'save' = 퍼센트(700 chart-save),
+   * 'over' = 넘친 금액(danger, 화면 hg-over와 같음). 빈 배열이면 문장 없음
+   */
+  sentence: { text: string; tone?: 'save' | 'over' }[];
   /** 도넛·범례를 그림(월급 0원이거나 줄이 없으면 false) */
   chart: boolean;
   bar: { kind: 'saving' | 'spend' | 'free'; percent: number }[];
-  /** percent = 이름 뒤 회색 퍼센트(모자람의 미계획은 없음, 2026-11-26 도넛 범례) */
+  /** 범례 줄: ● 이름 + 오른쪽 값(저축·투자·지출은 퍼센트, 미계획은 금액, short면 값만 danger). 범례 금액 열은 없음(화면과 같음) */
   legend: {
     kind: 'saving' | 'spend' | 'free';
     name: string;
-    percent?: number;
-    amount: string;
+    value: string;
     short?: boolean;
   }[];
   /** 저축·투자, 지출 줄 목록(줄이 없는 묶음은 부르는 쪽에서 뺌). sub = 목표 금액이 있으면 “목표 금액의 62%” */
@@ -416,7 +418,7 @@ function layoutPlan(
   const color = (k: 'saving' | 'spend' | 'free') =>
     k === 'saving' ? t.chartSave : k === 'spend' ? t.chartSpend : t.barTrack;
 
-  // ── 요약 카드 ──
+  // ── 요약 카드(2026-11-26 화면과 같게: PlanSummary.md ‘W-01 도넛 그린 L1 + 세로 목록’) ──
   let y = PAD;
   const top = y;
   // 카드 높이는 안을 다 잰 뒤에 알 수 있어 draw 때는 먼저 같은 식으로 잰 높이로 칠함
@@ -425,40 +427,45 @@ function layoutPlan(
     const put = (s: string, x: number, cy: number, o: Parameters<typeof text>[3]) => {
       if (d) text(s, x, cy, o);
     };
-    put(m.label, left, yy + 10, { weight: 500, size: 14, color: t.slate });
-    yy += 20 + 4;
-    put(m.amount, left, yy + 19, { weight: 700, size: 30, color: t.ink });
-    yy += 38 + 12;
-    // 굵은 한 문장(숫자만 chart-save 초록, 2026-11-26 화면과 같음). 너무 길면 글자 크기를 줄임
-    const full = `${m.sentence.before}${m.sentence.pct ?? ''}${m.sentence.after}`;
-    let size = 20;
-    ctx.font = font(700, size);
-    while (size > 15 && ctx.measureText(full).width > right - left) {
-      size -= 1;
-      ctx.font = font(700, size);
-    }
-    if (d) {
-      let x = left;
-      const parts: [string, string][] = [
-        [m.sentence.before, t.ink],
-        ...(m.sentence.pct ? ([[m.sentence.pct, t.chartSave]] as [string, string][]) : []),
-        [m.sentence.after, t.ink],
-      ];
-      for (const [str, c] of parts) {
-        text(str, x, yy + 15, { weight: 700, size, color: c });
-        ctx.font = font(700, size);
-        x += ctx.measureText(str).width;
+    // 이름표 13/400 slate(화면 “월급 ›”에서 ›는 빼고)
+    put(m.label, left, yy + 9, { weight: 400, size: 13, color: t.slate });
+    yy += 18 + 4;
+    // 큰 금액 28/36 700, 글자 사이 −0.4px, 비례 숫자(화면 ‘큰 금액 ③’)
+    if (d) ctx.letterSpacing = '-0.4px';
+    put(m.amount, left, yy + 18, { weight: 700, size: 28, color: t.ink });
+    if (d) ctx.letterSpacing = '0px';
+    yy += 36;
+    // 한 문장 17/24 400 ink, 퍼센트만 700 chart-save, 넘친 금액만 danger. 너무 길면 글자 크기를 줄임
+    if (m.sentence.length) {
+      yy += 4;
+      const weightOf = (tone?: 'save' | 'over') => (tone === 'save' ? 700 : 400);
+      const widthAt = (size: number) =>
+        m.sentence.reduce((w, p) => {
+          ctx.font = font(weightOf(p.tone), size);
+          return w + ctx.measureText(p.text).width;
+        }, 0);
+      let size = 17;
+      while (size > 13 && widthAt(size) > right - left) size -= 1;
+      if (d) {
+        let x = left;
+        for (const p of m.sentence) {
+          const weight = weightOf(p.tone);
+          const color = p.tone === 'save' ? t.chartSave : p.tone === 'over' ? t.danger : t.ink;
+          text(p.text, x, yy + 12, { weight, size, color });
+          ctx.font = font(weight, size);
+          x += ctx.measureText(p.text).width;
+        }
       }
+      yy += 24;
     }
-    yy += 30;
     if (m.chart) {
-      // 2026-11-26 사용자 결정(카카오페이 자산 구성형): 왼쪽 굵은 파이 도넛(지름 112, 구멍 약 30%, 가운데 글자 없음,
-      // 12시부터 시계 방향 저축·투자 → 지출 → 미계획, 틈 없음, 0%는 안 그림) + 오른쪽(간격 20) 범례 세 줄
-      yy += 20;
-      const D = 112;
+      // 굵은 문장 아래 24에 도넛 가운데(지름 140, 구멍 약 30%, 가운데 글자 없음,
+      // 12시부터 시계 방향 저축·투자 → 지출 → 미계획, 틈 없음, 0%는 안 그림)
+      yy += 24;
+      const D = 140;
       const ringR = (D * 13) / 42;
       const ringW = (D * 14) / 42;
-      const cx = left + D / 2;
+      const cx = (left + right) / 2;
       const cy = yy + D / 2;
       if (d) {
         let a = -Math.PI / 2;
@@ -472,43 +479,33 @@ function layoutPlan(
           a += sweep;
         }
       }
-      const lx = left + D + 20;
-      const rowsH = m.legend.length * 22 + Math.max(m.legend.length - 1, 0) * 12;
-      let ly = yy + (D - rowsH) / 2;
+      yy += D + 16;
+      // 그 아래 전체 폭 세로 목록(줄 높이 40): ● 8 + 8 + 이름 15/400 ink-2 … 오른쪽 값 15/700 ink(short면 danger)
       for (const l of m.legend) {
+        const my = yy + 20;
         if (d) {
           ctx.fillStyle = color(l.kind);
           ctx.beginPath();
-          ctx.arc(lx + 4, ly + 11, 4, 0, Math.PI * 2);
+          ctx.arc(left + 4, my, 4, 0, Math.PI * 2);
           ctx.fill();
           if (l.kind === 'free') {
             // 미계획 점: 흰 카드 위에서 보이게 slate 1px 테두리(화면 hg-plansum__dot과 같음)
             ctx.strokeStyle = t.slate;
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.arc(lx + 4, ly + 11, 3.5, 0, Math.PI * 2);
+            ctx.arc(left + 4, my, 3.5, 0, Math.PI * 2);
             ctx.stroke();
           }
-          ctx.font = font(400, 15);
-          const nameW = ctx.measureText(`${l.name} `).width;
-          put(l.name, lx + 20, ly + 11, { weight: 400, size: 15, color: t.ink2 });
-          if (l.percent !== undefined)
-            // 퍼센트는 13/400 slate(화면 범례와 같음, 이름과 기준선을 맞추려 1px 아래)
-            put(`${l.percent}%`, lx + 20 + nameW, ly + 12, {
-              weight: 400,
-              size: 13,
-              color: t.slate,
-            });
         }
-        put(l.amount, right, ly + 11, {
+        put(l.name, left + 16, my, { weight: 400, size: 15, color: t.ink2 });
+        put(l.value, right, my, {
           weight: 700,
           size: 15,
           color: l.short ? t.danger : t.ink,
           align: 'right',
         });
-        ly += 22 + 12;
+        yy += 40;
       }
-      yy += D;
     }
     return yy + CARD_PAD;
   };
@@ -518,30 +515,33 @@ function layoutPlan(
   y = summaryBottom;
 
   // ── 저축·투자, 지출 카드 ──
+  // 묶음 머리는 화면과 같은 한 줄: 이름 왼쪽 + 합계 오른쪽, 둘 다 13/400 slate(2026-11-26 ‘W-01 정리 A안’).
+  // 줄은 화면 ReceiptRows와 같은 이름 17/400 ink + 금액 17/700 ink, 보조 줄 13/400 stone
+  const HEAD = 18 + 8;
   for (const s of m.sections) {
     y += GAP;
     const cardTop = y;
     const rowsH = s.rows.reduce((h, r) => h + (r.sub ? 60 : 48), 0);
-    const bottom = cardTop + CARD_PAD + 28 + 4 + rowsH + CARD_PAD - 8;
+    const bottom = cardTop + CARD_PAD + HEAD + rowsH + CARD_PAD - 8;
     card(cardTop, bottom);
     y = cardTop + CARD_PAD;
-    text(s.title, left, y + 14, { weight: 700, size: 18, color: t.ink });
-    text(s.subtotal, right, y + 14, { weight: 600, size: 15, color: t.slate, align: 'right' });
-    y += 28 + 4;
+    text(s.title, left, y + 9, { weight: 400, size: 13, color: t.slate });
+    text(s.subtotal, right, y + 9, { weight: 400, size: 13, color: t.slate, align: 'right' });
+    y += HEAD;
     for (const r of s.rows) {
-      ctx.font = font(700, 16);
+      ctx.font = font(700, 17);
       const aw = ctx.measureText(r.amount).width;
       const h = r.sub ? 60 : 48;
       text(r.name, left, y + (r.sub ? 20 : 24), {
-        weight: 600,
-        size: 16,
+        weight: 400,
+        size: 17,
         color: t.ink,
         max: right - left - aw - 12,
       });
-      if (r.sub) text(r.sub, left, y + 42, { weight: 400, size: 13, color: t.slate });
+      if (r.sub) text(r.sub, left, y + 42, { weight: 400, size: 13, color: t.stone });
       text(r.amount, right, y + (r.sub ? 20 : 24), {
         weight: 700,
-        size: 16,
+        size: 17,
         color: t.ink,
         align: 'right',
       });
