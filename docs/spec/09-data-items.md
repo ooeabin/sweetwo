@@ -43,7 +43,7 @@
 | 시작할 때 모은 금액 | 금액, 0원 기본 | 선택, 만들 때만(W-11c ‘이미 모은 금액이 있어요’, 2026-11-09). 목표 금액보다 적게, 나중에 못 고침 |
 | 모은 금액 | 계산값 | 저장하지 않음 = 시작할 때 모은 금액 + 이 항목 저금 줄을 체크한 금액 합(→ 계산·배분 4장) |
 | 주인 | 사람 또는 우리 둘 | 각자 모드 = 만든 사람, 합쳐서 모드 = 우리 둘. 관리 방식을 바꿀 때 바뀜(→ 월급 탭 ‘다시 계산되는 때’) |
-| 공개 범위 | 선택 | 2026-11-13 없앰: 새 코드에서 읽지 않음(2단계로 지움). 저금 공개는 S-13 ① ‘내 월급 계획’ 하나(→ 08 6장) |
+| 공개 범위 | 선택 | 2026-11-13 없앰: 앱은 읽지 않음(서버 RLS·함수는 아직 읽음, 지울지는 결정 대기). 저금 공개는 S-13 ① ‘내 월급 계획’ 하나(→ 08 6장) |
 | 묶음 | id, 빈 값 가능 | 같이 모으기 묶음(`goal.bundle_id`, 각자 계열만, 2026-11-13) |
 | 상태 | 선택 | 모으는 중 / 달성 / 그만 모음(→ 월급 탭 ‘달성과 그만 모음’). 달성 시각과 축하를 본 사람은 저장(축하 화면 1회) |
 
@@ -205,7 +205,7 @@
 | 월급 계획 줄 `split_line` | `in_checklist`, `auto_pay`, `auto_day`, kind 값 `send`·`shared_account`(+ `shared_account_id`) |
 | 체크리스트 줄 `pay_check_line` | `auto`, `auto_due`, `late` |
 | 월급 체크리스트 `pay_checklist` | `confirmed_at`, `confirmed_by`, `auto_income_at`(2026-11-20) |
-| 저금 항목 `goal` | `bundle_id`. 저금 공개 열은 새 코드에서 읽지 않음(2단계로 지움) |
+| 저금 항목 `goal` | `bundle_id`. 저금 공개 열은 앱이 읽지 않음(서버는 아직 읽음, 지울지는 결정 대기) |
 | 저금 움직임 `goal_move` | `reason` text(40자, 주인만 읽는 뷰. 상대용은 `goal_move_public`), `reason_code`(enum `goal_move_reason`: fix/used/interest/reconcile/note_paid/custom/auto), `hide_from_summary` bool, `money_in_id`, `note_id`. kind는 기존 in / out만 |
 | 자산 `asset` | `quick` bool(빠르게 적기, 기본 false, 2026-11-13 열 추가). 공개 enum 값은 그대로(화면 이름만 ‘총액만’) |
 | 경조사 `care_day` | kind 값 `dating_anniversary`(사귄 날). `art_key`(달력 그림 키, 글자, 비어 있을 수 있음, 2026-11-24 K안: 값은 `docs/spec/24` ‘경조사 그림 키’ 12개, 기존 행은 kind 기준으로 채움) |

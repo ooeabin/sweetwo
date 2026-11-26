@@ -68,7 +68,6 @@ const READ_RPC = new Set([
   'my_mail_bounced',
   'my_notice_history',
   'my_notices',
-  'my_reconnect_ok',
   'my_sessions',
   'my_unlink',
   'net_worth_history',

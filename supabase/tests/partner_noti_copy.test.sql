@@ -2,7 +2,7 @@
 -- 찬우(호칭 있음), 예빈(호칭 없이 합류)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(19);
+select plan(18);
 
 insert into auth.users (id, email) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com'),
@@ -66,7 +66,6 @@ reset role;
 -- 다시 연결: 예빈 요청 → 찬우 수락
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select is(public.my_reconnect_ok(), true, '30일 안이면 다시 연결 가능(S3-20)');
 select public.request_reconnect();
 reset role;
 select is(pg_temp.last('reconnect_requested'), '파트너가 다시 연결하자고 했어요 / 연결하면 새로 같이 시작해요', 'v2.2 다시 연결 요청(D10)');

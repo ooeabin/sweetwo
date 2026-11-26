@@ -1,7 +1,7 @@
 -- pgTAP: 계정 삭제(S-18b), 삭제 취소, 30일 뒤 지우기. 찬우(삭제), 예빈(파트너), 혼자 쓰는 K
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(17);
+select plan(21);
 
 insert into auth.users (id, email, last_sign_in_at) values
   ('11111111-1111-1111-1111-111111111111', 'chanwoo@example.com', now()),
@@ -44,6 +44,7 @@ select is(public.request_account_deletion(), (now() at time zone 'Asia/Seoul')::
 select is((select count(*)::int from public.goal), 0, '바로 이용 중지(아무것도 안 보임)');
 reset role;
 select is((select status::text from public.app_user where nickname = '찬우'), 'deletion_requested', '삭제 요청');
+select is((select reconnect_until is null from public.couple_unlink where how = 'deleted'), true, '해제 기록에 옛 reconnect_until을 채우지 않음(drop 1단계)');
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select is((select couple_state::text from public.couple_space), 'solo', '예빈은 혼자 쓰기');
@@ -58,6 +59,7 @@ select lives_ok($$ select public.cancel_account_deletion() $$, '삭제 취소');
 select is((select couple_state::text from public.couple_space), 'solo', '찬우는 혼자 쓰기로');
 select throws_ok($$ select public.cancel_account_deletion() $$, 'P0001', 'not_requested', '한 번만');
 reset role;
+select is((select reconnect_until is null from public.couple_unlink where how = 'deleted'), true, '삭제를 취소해도 reconnect_until을 늘리지 않음');
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select is((select title from public.notification where kind = 'partner_restored'), '찬우님이 계정 삭제를 취소했어요', '계정 복구 알림');
@@ -72,6 +74,14 @@ select results_eq(
             (select count(*)::int from public.asset where space_id = current_setting('test.s')::uuid),
             (select count(*)::int from public.app_user where space_id = current_setting('test.s')::uuid) $$,
   $$ values ('solo', 2, 0) $$, 'v2.2 다시 연결은 복구 없음(원래 공간은 보관만, D10)');
+
+-- 원래 공간 지우기는 확정 시각 + 30일(reconnect_until 아님)
+update public.couple_unlink set confirmed_at = now() - interval '29 days' where how = 'deleted';
+select public.purge_unlinked_spaces();
+select is((select count(*)::int from public.couple_space where id = current_setting('test.s')::uuid), 1, '확정 29일 뒤에는 원래 공간을 보관');
+update public.couple_unlink set confirmed_at = now() - interval '31 days' where how = 'deleted';
+select public.purge_unlinked_spaces();
+select is((select count(*)::int from public.couple_space where id = current_setting('test.s')::uuid), 0, '확정 31일 뒤에는 원래 공간을 지움');
 
 -- 혼자 쓰는 K: 삭제 → 30일 뒤 공간과 계정까지 지움
 select pg_temp.login_as('33333333-3333-3333-3333-333333333333');

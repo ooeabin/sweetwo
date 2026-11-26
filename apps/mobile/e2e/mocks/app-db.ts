@@ -82,8 +82,6 @@ export interface MemDb {
   }[];
   /** 합류가 끝난 초대(시작한 사람이 취소, 24시간 지남): join_context가 null(2026-11-11 D1) */
   joinEnded: boolean;
-  /** 다시 연결할 수 있는지(my_reconnect_ok). 기본은 확정 해제 기록의 reconnect_until로 */
-  reconnectOk?: boolean;
   unlinks: Record<string, unknown>[];
   inquiries: Record<string, unknown>[];
   sessions: Record<string, unknown>[];
@@ -149,7 +147,6 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       noti_prefs: {},
       quiet_start: 22,
       quiet_end: 8,
-      default_visibility: 'sum',
       asset_share_default: null,
       rank_consent: false,
       rank_badge_home: false,
@@ -1998,7 +1995,6 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             how: 'agreed',
             final_plan: u.plan,
             confirmed_at: '2026-10-07T01:00:00Z',
-            reconnect_until: '2026-11-06T01:00:00Z',
           });
         // 서버 finish_unlink·move_owned_rows(v2.2, 20261204090000 계약 1)와 같게: 각자 엔진이면 내 월급 계획·확인 목록·
         // 내 저금(주인 = 나, 묶음에서 뺌)은 남기고, 같이 쓰던 것(공동 월급 계획·저금, 상대 것)만 지움. 합쳐서 엔진이면 모두 지움
@@ -2046,7 +2042,6 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             how: 'counter',
             final_plan: u.counter,
             confirmed_at: '2026-10-07T01:00:00Z',
-            reconnect_until: '2026-11-06T01:00:00Z',
           });
         if (db.space) Object.assign(db.space, { couple_state: 'solo', partner_nickname: null });
         db.partner = null;
@@ -2267,16 +2262,13 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
       }
       if (fn === 'unlink_partner_name') return json(route, '예빈');
       if (fn === 'request_reconnect') {
-        const u = db.unlinks.find((x) => x.status === 'confirmed');
-        if (u) Object.assign(u, { reconnect_by: db.me.id, reconnect_answer: null });
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
       if (fn === 'answer_reconnect') {
         const body = JSON.parse(route.request().postData() ?? '{}') as { p_accept: boolean };
         const u = db.unlinks.find((x) => x.status === 'confirmed');
-        if (u && !body.p_accept) u.reconnect_answer = 'declined';
         if (u && body.p_accept) {
-          Object.assign(u, { reconnect_answer: 'accepted', status: 'reconnected' });
+          Object.assign(u, { status: 'reconnected' });
           if (db.space)
             Object.assign(db.space, { couple_state: 'connected', partner_nickname: '예빈' });
         }
@@ -2311,17 +2303,6 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             });
         return route.fulfill({ status: 204, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
-      if (fn === 'my_reconnect_ok')
-        return json(
-          route,
-          db.reconnectOk ??
-            db.unlinks.some(
-              (x) =>
-                x.status === 'confirmed' &&
-                typeof x.reconnect_until === 'string' &&
-                x.reconnect_until > (opts.now ?? new Date()).toISOString(),
-            ),
-        );
       if (fn === 'create_invite' || fn === 'renew_invite') {
         // 시각을 쓰지 않는 흉내: 만료는 시험이 넣은 값(지난 날짜)으로만. 첫 코드는 늘 K7M2QX
         const past = (i: { expires_at: string }) => i.expires_at < '2026-10-07';
