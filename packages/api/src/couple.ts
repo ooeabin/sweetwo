@@ -57,13 +57,6 @@ export async function cancelInvite() {
   fail(error);
 }
 
-/** 다시 연결할 수 있는지(서버 기준, S3-20) */
-export async function fetchReconnectOk(): Promise<boolean> {
-  const { data, error } = await supabase().rpc('my_reconnect_ok');
-  fail(error);
-  return data === true;
-}
-
 /** 새 코드 받기: 이전 코드는 바로 못 씀 */
 export async function renewInvite(): Promise<{ code: string; expiresAt: string }> {
   const { data, error } = await supabase().rpc('renew_invite');

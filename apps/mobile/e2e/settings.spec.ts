@@ -579,7 +579,7 @@ test('연결 해제 요청 받음(S-12, S-12d) → 해제할게요 → 해제 �
   await expect(page).toHaveURL(/\/onboarding\/o-30$/);
 });
 
-const soloAfterUnlink = (db: MemDb, reconnectBy: string | null = null) => {
+const soloAfterUnlink = (db: MemDb) => {
   Object.assign(db.space ?? {}, { couple_state: 'solo', partner_nickname: null });
   db.partner = null;
   db.unlinks.push({
@@ -594,9 +594,6 @@ const soloAfterUnlink = (db: MemDb, reconnectBy: string | null = null) => {
     status: 'confirmed',
     how: 'agreed',
     confirmed_at: '2026-10-01T01:00:00Z',
-    reconnect_until: '2026-10-31T01:00:00Z',
-    reconnect_by: reconnectBy,
-    reconnect_answer: null,
   });
 };
 
@@ -650,7 +647,7 @@ test('다시 연결 요청 받음(S-12 → S-12g): 연결할게요 → 합류 �
       invite_code: null,
     });
   ask();
-  // 홈 띠 2번(19): 받은 열린 요청(reconnect_request)을 봄(옛 couple_unlink.reconnect_by는 비어 있음)
+  // 홈 띠 2번(19): 받은 열린 요청(reconnect_request)을 봄
   await page.goto('/');
   // 띠가 하나면 그 띠, 둘이면 “할 일 2개” 시트(19 ‘띠 하나로 묶기’, 2026-11-16)
   expect(
