@@ -67,13 +67,13 @@ test('W-02: hero 아래 32, 밑줄 탭 아래 24, 수입 줄 앞 32', async ({ p
   expect(await gap(page, '.hg-checklist__list', '.hg-incomeline')).toBe(32);
 });
 
-test('W-01(흰 바탕): 영역 사이 32 + 8px 회색 띠 + 아래 12, 영역 안 위 여백 없음', async ({
+test('W-01(흰 바탕, 2026-11-26 정리 A안): 영역 사이 = 8px 회색 띠 + 아래 16(위는 앞 영역 안 16), 영역 안 위 여백 없음', async ({
   page,
 }) => {
   await open(page, '/salary/plan');
   await expect(page.locator('.hg-plancard').first()).toBeVisible();
-  // 영역 사이 = 위 32 + 띠 8 + 아래 12(띠는 ::before)
-  expect(await gap(page, '.hg-plancard:nth-of-type(1)', '.hg-plancard:nth-of-type(2)')).toBe(52);
+  // 영역 사이 = 띠 8 + 아래 16(띠는 ::before, 띠 위 16은 앞 영역 안: 요약 아래 여백·‘+ 추가’ 아래 8 + 원 안쪽 8)
+  expect(await gap(page, '.hg-plancard:nth-of-type(1)', '.hg-plancard:nth-of-type(2)')).toBe(24);
   const band = await page.evaluate(() => {
     const c = document.querySelectorAll('.hg-plancard')[1] as HTMLElement;
     const b = getComputedStyle(c, '::before');

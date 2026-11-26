@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (50e37d9b). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (4524b4db). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 /* 2026-11-24 구역 5 설정 검토: 사용자 앱 글자 바탕값 15/22. 클래스 없는 b·p·li가 브라우저 기본 16px로 나오던 것(기준 17/15 밖). 어드민·웹사이트는 data-platform이 없어 그대로 */
@@ -132,7 +132,7 @@ a.hg-btn { box-sizing: border-box; max-width: 100%; text-decoration: none; }
 .hg-input.is-error { border-color: var(--danger); }
 .hg-input.is-error:focus { outline: 2px solid var(--danger); outline-offset: 0; border-color: transparent; }  /* 2026-11-25 오류 입력 칸은 선 하나: 포커스여도 ink 링을 겹치지 않고 빨간 선이 포커스 표시를 겸함(두께는 포커스 링과 같은 2px) */
 .hg-amount { display: flex; align-items: baseline; gap: 2px; border-bottom: 2px solid var(--ink); padding-bottom: var(--space-2); }
-.hg-amount__value { font: 700 34px/40px var(--font-sans); letter-spacing: -0.6px; font-variant-numeric: tabular-nums; }  /* 2026-11-02 당근, 카카오페이 금액처럼 크게 */
+.hg-amount__value { font: var(--text-amount-xl); letter-spacing: -0.4px; }  /* 2026-11-02 당근, 카카오페이 금액처럼 크게 */
 .hg-amount__unit { font: var(--weight-semibold) 17px/24px var(--font-sans); }
 .hg-help { font: var(--text-caption); color: var(--stone); }
 .hg-help.is-error { color: var(--danger); }
@@ -1990,7 +1990,6 @@ button.hg-stat:focus-visible { outline: 2px solid var(--focus-ring); outline-off
   .hg-today__in { padding: var(--space-5); gap: var(--space-4); }
   .hg-today__row { flex-wrap: wrap; }
   .hg-today__title { font: var(--text-title-2); }
-  .hg-today__value { font-size: 34px; line-height: 40px; }
   .hg-today__stats { display: flex; overflow-x: auto; }
   .hg-today__stats .hg-stat { flex: none; width: 150px; }
   .hg-body { padding: var(--space-4) var(--space-4) calc(var(--space-8) + env(safe-area-inset-bottom, 0px)); gap: var(--space-4); }  /* 2026-11-09 하단 탭 막대가 없어 아래 여백은 space-8 + 안전 영역 */
@@ -2392,13 +2391,13 @@ button.hg-rankrow:focus-visible { outline: 2px solid var(--focus-ring); outline-
 .hg-plancard { padding: 0; background: none; color: var(--ink); }  /* 2026-11-24 사용자 결정: 홈 밖은 흰 바탕이 기본이라 카드 바탕·모서리·안쪽 여백 없음(2026-11-19 radius 24 흰 카드 셋을 대체). 카드 사이는 8px 회색 띠(아래 ‘홈 밖 흰 바탕 기본’) */
 .hg-plan__block { display: flex; align-items: center; justify-content: center; gap: var(--space-2); width: 100%; height: 52px; margin-top: var(--space-2); padding: 0 var(--space-4); border: 0; border-radius: var(--radius-btn); background: var(--surface-alt); color: var(--ink-2); font: var(--weight-semibold) 15px/22px var(--font-sans); cursor: pointer; }
 .hg-plan__block--soft { margin-top: var(--space-4); }  /* 월급 0원 ‘월급 적기’: 카드 안 보조 버튼 규칙(옅은 오렌지 판) */
-.hg-plan__block:focus-visible, .hg-plansum__amt:focus-visible, .hg-plansum__person:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.hg-plan__block:focus-visible, .hg-plansum__sal:focus-visible, .hg-plansum__person:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 /* 요약 카드 */
 .hg-plansum__label { margin: 0; font: var(--weight-medium) 13px/18px var(--font-sans); color: var(--slate); }
-.hg-plansum__sal { display: flex; align-items: center; margin-top: var(--space-1); }
+.hg-plansum__sal { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); width: fit-content; min-height: 44px; margin: 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; }
 .hg-plansum__amt { display: inline-flex; align-items: center; gap: var(--space-2); margin: 0; padding: 0; border: 0; background: none; color: var(--ink); font: 700 34px/38px var(--font-sans); letter-spacing: -0.5px; font-variant-numeric: tabular-nums; text-align: left; }
 button.hg-plansum__amt { cursor: pointer; }
-.hg-plansum__pen, .hg-plansum__lock { flex: none; color: var(--slate); }
+.hg-plansum__lock { flex: none; color: var(--slate); }
 .hg-plansum__people { margin: var(--space-3) 0 0; padding: 0; list-style: none; }
 .hg-plansum__person { display: flex; align-items: center; gap: var(--space-2); width: 100%; min-height: 44px; padding: 0; border: 0; background: none; color: inherit; font: var(--weight-medium) 15px/22px var(--font-sans); text-align: left; }
 button.hg-plansum__person { cursor: pointer; }
@@ -2683,8 +2682,8 @@ html:has(.hg-frame--alt), body:has(.hg-frame--alt) { background: var(--surface-a
 /* 2026-11-16 메뉴·화면 점검 PR-1 ─────────────────────────────────────────────
    작은 누르는 칸(구간 알약, 작은 글자 알약 버튼 ‘모두 읽음’ ‘사진 바꾸기’ ‘켜기’, ‘달력 ›’, 36px 이하 아이콘 버튼(달력 이전·다음 달, 지우기),
    눌러서 고치는 큰 금액 ‘내 월급 고치기’)은 보이는 크기는 그대로 두고 보이지 않는 44px 칸을 덧댐. 어드민은 제 규칙 그대로 */
-:where(.hg-btn--sm, .hg-seg__item, .hg-sechead__more, .hg-iconbtn:not(.hg-iconbtn--dot), button.hg-plansum__amt):not(.hg-admin *) { position: relative; }
-:where(.hg-btn--sm, .hg-seg__item, .hg-sechead__more, .hg-iconbtn:not(.hg-iconbtn--dot), button.hg-plansum__amt):not(.hg-admin *)::after { content: ""; position: absolute; top: 50%; left: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%); }
+:where(.hg-btn--sm, .hg-seg__item, .hg-sechead__more, .hg-iconbtn:not(.hg-iconbtn--dot)):not(.hg-admin *) { position: relative; }
+:where(.hg-btn--sm, .hg-seg__item, .hg-sechead__more, .hg-iconbtn:not(.hg-iconbtn--dot)):not(.hg-admin *)::after { content: ""; position: absolute; top: 50%; left: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%); }
 /* W-02 이번 달 월급 체크 새 구조(2026-11-19 사용자 확정 시안): 가운데 날짜 알약 + 큰 금액 + 보조 한 줄, 필터 칩, 줄(이름 + 종류 한 줄 / 금액 + 상태 버튼), 수입 상자, 아래 고정 주 버튼, 다 확인 상태 */
 .hg-w02hero { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); padding: var(--space-3) 0 var(--space-4); text-align: center; }
 .hg-datepill { display: inline-flex; align-items: center; gap: var(--space-1); height: 32px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink-2); font: var(--weight-semibold) 13px/18px var(--font-sans); }
@@ -2934,7 +2933,7 @@ button.hg-datepill { cursor: pointer; }
 .hg-frame--alt .hg-banner--notice .hg-btn--sm { font: var(--text-note); font-weight: 700; }
 
 /* ── W-01 월급 계획 템플릿(흰 바탕, 영역 사이 8px 회색 띠, 2026-11-24) ── */
-.hg-plansum__label { font: var(--text-note); color: var(--stone); }
+.hg-plansum__label { font: var(--text-note); color: var(--slate); }  /* 2026-11-26 ‘W-01 정리 A안’: 묶음 머리 이름표와 같은 13/400 slate */
 .hg-plansum__amt { font: var(--text-amount-xl); letter-spacing: -0.5px; }
 .hg-plansum__title { margin-top: var(--space-1); font: var(--text-name); letter-spacing: 0; }
 .hg-plansum__title em { font-weight: 700; }
@@ -3062,8 +3061,8 @@ button.hg-datepill { cursor: pointer; }
    회색 바탕 + 흰 상자(`hg-frame--alt`)는 홈(H-01)만. 그 밖 모든 화면(W-01, 자산 관리 F-xx, 설정 S-xx 등)은 흰 바탕이고
    상자(카드·목록·체크 카드·W-01 요약·묶음)는 바탕·테두리·모서리 없이 본문 그대로. 상자가 이어지면 사이를 8px 회색 띠로 나눔(위 32 + 띠 8 + 아래 12).
    영역 간격은 위 ‘영역 간격’ 그대로. 화면마다 띠를 따로 두지 않고 이 규칙 하나가 이어진 상자 사이에 긋는다(제목이 낀 묶음은 제외). */
-.hg-frame:not(.hg-frame--alt) :is(.hg-stack, .hg-planstage) > :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard):not(.hg-card--tint, .hg-card--fill, .hg-list--plain) + :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard):not(.hg-card--tint, .hg-card--fill, .hg-list--plain) { position: relative; margin-top: calc(8px + var(--gap-title)); }
-.hg-frame:not(.hg-frame--alt) :is(.hg-stack, .hg-planstage) > :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard):not(.hg-card--tint, .hg-card--fill, .hg-list--plain) + :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard):not(.hg-card--tint, .hg-card--fill, .hg-list--plain)::before { content: ""; position: absolute; top: calc(-8px - var(--gap-title)); left: calc(var(--space-6) * -1); right: calc(var(--space-6) * -1); height: 8px; background: var(--surface-alt); }
+.hg-frame:not(.hg-frame--alt) :is(.hg-stack, .hg-planstage) > :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard):not(.hg-card--tint, .hg-card--fill, .hg-list--plain) + :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard):not(.hg-card--tint, .hg-card--fill, .hg-list--plain) { position: relative; margin-top: calc(8px + var(--band-below, var(--gap-title))); }
+.hg-frame:not(.hg-frame--alt) :is(.hg-stack, .hg-planstage) > :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard):not(.hg-card--tint, .hg-card--fill, .hg-list--plain) + :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard):not(.hg-card--tint, .hg-card--fill, .hg-list--plain)::before { content: ""; position: absolute; top: calc(-8px - var(--band-below, var(--gap-title))); left: calc(var(--space-6) * -1); right: calc(var(--space-6) * -1); height: 8px; background: var(--surface-alt); }
 
 /* 질문 섹션·영역이 쌓이는 FormScreen: 섹션 사이 32, 제목 아래 12, 띠(8) 아래 첫 줄 12, 옆 여백 24 */
 .hg-form { gap: var(--gap-area); padding-inline: var(--space-2); }
@@ -3169,7 +3168,7 @@ button.hg-datepill { cursor: pointer; }
    목록 뒤에 제목이 오는 묶음 사이(P-02a ‘옮겨요’ → ‘안 옮겨요’)는 화면 폭 8px 회색 띠. 띠 위 24 + 8 + 아래 12(제목). */
 .hg-q :is(.hg-card, .hg-list):not(.hg-card--tint, .hg-card--fill, .hg-list--plain) { border: 0; border-radius: 0; background: none; box-shadow: none; padding-inline: 0; max-width: none; overflow: visible; }
 .hg-q > .hg-list + .hg-sechead { position: relative; margin-top: calc(8px + var(--gap-title)); }
-.hg-q > .hg-list + .hg-sechead::before { content: ""; position: absolute; top: calc(-8px - var(--gap-title)); left: 50%; width: 100vw; height: 8px; transform: translateX(-50%); background: var(--surface-alt); }
+.hg-q > .hg-list + .hg-sechead::before { content: ""; position: absolute; top: calc(-8px - var(--band-below, var(--gap-title))); left: 50%; width: 100vw; height: 8px; transform: translateX(-50%); background: var(--surface-alt); }
 
 /* ── A-06 앱 잠금 묻기·Face ID 질문: ‘나중에 할게요’는 O-55·O-60·P-11처럼 주 버튼 왼쪽 글자 버튼(2026-11-25 구역 6) ── */
 .hg-auth__actions--row > .hg-btn--link { flex: 0 1 auto; min-width: 0; white-space: normal; word-break: keep-all; text-align: center; }
@@ -3223,8 +3222,6 @@ button.hg-datepill { cursor: pointer; }
 .hg-plancard__headl { flex-direction: column; align-items: flex-start; gap: 0; }
 .hg-plancard__title { font: var(--text-value); color: var(--slate); }
 .hg-plancard__sum { font: var(--text-amount-lg); color: var(--ink); }
-.hg-plancard__head > :last-child:not(.hg-plancard__headl) { flex: none; margin: 0 -12px -7px 0; }
-.hg-plancard__head > :last-child:not(.hg-plancard__headl) > .hg-iconbtn { width: 44px; height: 44px; }
 .hg-plancard .hg-receipt__note { margin-top: 2px; }
 .hg-plan__block:not(.hg-plan__block--soft) { position: relative; justify-content: flex-start; gap: 0; height: 48px; margin: 0 0 var(--space-2); padding: 0; border-radius: 0; background: none; font: var(--text-value); color: var(--ink-2); }
 .hg-plan__block:not(.hg-plan__block--soft)::before { content: ""; position: absolute; left: 0; top: 50%; width: 32px; height: 32px; margin-top: -16px; border-radius: var(--radius-full); background: var(--surface-alt); }
@@ -3251,8 +3248,6 @@ button.hg-datepill { cursor: pointer; }
 .hg-plansum__chart .hg-plansum__lamt { flex: none; margin-left: var(--space-2); font-weight: 700; color: var(--ink); }
 .hg-plansum__chart .hg-plansum__legend li.is-short .hg-plansum__lamt { color: var(--danger); }
 .hg-plansum__dot.hg-plansum__seg--spend { background: var(--chart-spend); }
-/* 요약 연필(2026-11-26 사용자 결정 ‘토스형’, 토스 상세 내역): 큰 금액 옆·합쳐서 사람 줄 연필 18px, 옅게. muted는 흰·다크 바탕에서 3:1이 안 돼(2.5·2.7) 그래픽 3:1을 넘는 stone. 누르는 칸은 금액 버튼 그대로(44 이상) */
-.hg-plansum__pen.hg-ico { width: 18px; height: 18px; color: var(--stone); }  /* Icon 크기 단계(16·20·24) 밖이라 CSS로 */
 /* 범례 줄은 어떤 너비에서도 한 줄(2026-11-26 사용자 결정). 금액이 길어도(“1,830,000원” 표기 대비) 375에서 도넛 왼쪽 + 범례 오른쪽 한 줄(도넛이 112→96까지 줄어 자리를 내줌).
    360 미만(320)은 도넛을 위 가운데(112), 범례를 그 아래 전체 너비로 */
 @media (max-width: 359px) {
@@ -3315,3 +3310,46 @@ button.hg-datepill { cursor: pointer; }
 .hg-hub .hg-together__bar { margin-top: var(--space-3); }
 .hg-hub .hg-together__line, .hg-hub .hg-together__line:first-of-type { margin-top: var(--space-2); }
 .hg-hub .hg-together__dots { margin-top: var(--space-3); }
+
+/* 큰 금액 ③(2026-11-26 사용자 결정): 화면 위 큰 금액 한 단계 --text-amount-xl·--text-display = 28/36 700(예전 34/44),
+   글자 사이 −0.4px, 숫자는 비례(tabular-nums 없음: 고정폭이면 “1”이 벌어져 보임). 큰 금액 클래스는 모두 이 한 규칙. 어드민·웹사이트는 예전 그대로 */
+:is(.hg-plansum__amt, .hg-amount__value, .hg-w02hero__amt, .hg-fdhero__amt, .hg-resultcard__value, .hg-networth__value, .hg-celebrate__value, .hg-chart__value--lg, .hg-today__value):not(.hg-admin *, .hg-adminauth *, .hg-site *) { letter-spacing: -0.4px; font-variant-numeric: normal; }
+/* 요약 이름표 “월급 ›”(2026-11-26 ‘큰 금액 ③’, 연필을 없앰): 이름표 13/400 slate + › 16 slate, 이름표와 큰 금액이 한 버튼(.hg-plansum__sal, 월급 금액 시트).
+   합쳐서 사람 줄도 내 줄만 ›(예전 연필) */
+button.hg-plansum__sal { cursor: pointer; }
+.hg-plansum__sal .hg-plansum__label { display: inline-flex; align-items: center; gap: 2px; font: var(--text-note); color: var(--slate); }
+.hg-plansum__go { flex: none; color: var(--slate); }
+/* ── W-01 정리 A안(2026-11-26 사용자 결정) ──
+   묶음 머리: 큰 합계 22/700·묶음 ⋯ 없앰 → 한 줄 “저축·투자” 왼쪽 + 합계 오른쪽, 둘 다 13/400 slate(요약 이름표 “월급”과 같은 단계).
+   간격 한 값: 보이는 간격(글자·그림 끝 기준) 16 — 회색 띠 → 묶음 머리 글자 16, 묶음 머리 → 첫 줄 글자 16(머리 아래 0 + 줄 안 12 + 글자 여백),
+   마지막 줄 → ‘+ … 추가’ 원 16(줄 안 12 + 원 안쪽 8 − 글자 여백), ‘+ … 추가’ 원 → 회색 띠 16(아래 8 + 원 안쪽 8), 요약 도넛 → 띠 16.
+   줄 높이 56(위아래 12)과 ‘+ … 추가’ 줄 높이 48(원 32)은 그대로라 상자 간격은 0 / 0 / 8 / 16(--gap-plan 16).
+   줄은 모두 이름 17/400 + 금액 17/700 + ›(지출 줄도), 오른쪽 끝 한 줄. 범례는 금액 없이 ● + 이름 15/400 + 퍼센트 13 slate(미계획은 금액). */
+.hg-planstage { --gap-plan: 16px; --band-below: var(--gap-plan); gap: 0; }  /* --band-below: ‘홈 밖 흰 바탕 기본’ 띠 아래 간격(기본 --gap-title 12) */
+.hg-plancard__head { display: flex; flex-direction: row; align-items: baseline; justify-content: space-between; gap: var(--space-3); min-height: 0; padding: 0; }
+.hg-plancard__title, .hg-plancard__sum { margin: 0; font: var(--text-note); color: var(--slate); letter-spacing: 0; }
+.hg-plancard__sum { margin: 0; font-variant-numeric: normal; white-space: nowrap; }
+.hg-plancard > * + .hg-plan__block:not(.hg-plan__block--soft) { margin-top: 0; }
+.hg-plan__block:not(.hg-plan__block--soft) { margin-bottom: var(--space-2); }
+.hg-plancard .hg-receipt__chips { margin-top: var(--space-3); }
+.hg-planstage > .hg-plansum { padding-bottom: var(--gap-plan); }
+/* 범례: 금액이 빠져 도넛 112 고정 + 범례 오른쪽(좁은 창 320에서도 한 줄, 360 미만 세로 배치 없앰) */
+.hg-plansum__chart .hg-plansum__legend { flex: 1 1 auto; max-width: none; min-width: 0; }
+.hg-plansum__chart .hg-plansum__legend li { gap: 0; align-items: baseline; }
+.hg-plansum__chart .hg-plansum__lname { flex: none; }
+.hg-plansum__chart .hg-plansum__dot { align-self: center; }
+.hg-plansum__chart .hg-plansum__lpct { margin-left: var(--space-1); font-variant-numeric: normal; }
+.hg-plansum__legend li.is-short .hg-plansum__lpct { color: var(--danger); }
+@media (max-width: 359px) {
+  .hg-plansum__chart { flex-direction: row; align-items: center; }
+  .hg-plansum__donut { flex: 0 1 112px; width: auto; }
+  .hg-plansum__chart .hg-plansum__legend { flex: 1 1 auto; align-self: auto; }
+}
+/* 줄 오른쪽 ›: 저축·투자·지출 모두(누르면 열리는 줄), 끝선 한 줄 */
+.hg-plancard .hg-receipt__go { margin-left: calc(var(--space-2) * -1); }
+/* 머리 오른쪽 ⋯(화면 읽기 “더 보기”, 2026-11-26 W-01 ‘편집’ 글자 대신): 누르는 칸 44, ‹와 좌우 대칭(버튼 끝 = 화면 오른쪽 8) */
+@media (max-width: 767px) {
+  .hg-frame__mhead--back .hg-mhead__action > span { margin-right: -8px; }
+  .hg-frame__mhead--back .hg-mhead__action .hg-iconbtn { width: 44px; height: 44px; color: var(--ink); }
+  .hg-frame__mhead--back .hg-mhead__action .hg-iconbtn.is-on { background: var(--surface-alt); color: var(--ink); }  /* 열린 동안: 회색 원(검은 원 안 ink 글리프가 안 보여서) */
+}

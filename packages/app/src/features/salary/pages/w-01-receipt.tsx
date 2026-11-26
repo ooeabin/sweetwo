@@ -35,13 +35,13 @@ import {
   Icon,
   ListRow,
   Menu,
+  type MenuAction,
   Modal,
   PlanAdd,
   PlanCard,
   PlanStage,
   PlanSummary,
   ReceiptRows,
-  SectionHeader,
   Tabs,
   type ReceiptLine,
 } from '@sweetwo/ui';
@@ -856,8 +856,8 @@ export function W01Receipt() {
           si && si.target !== null && !si.bundled && (si.state === 'achieved' || si.bar > 0)
             ? { percent: si.state === 'achieved' ? 100 : si.bar }
             : undefined,
-        // 2026-11-26: 누르면 W-10 상세로 가는 저축·투자 줄은 오른쪽 ›(지출 줄은 금액 시트라 없음)
-        go: !!(si && !si.private && l.goal_id && !lineLocked),
+        // 2026-11-26 ‘W-01 정리 A안’: 누르면 열리는 줄은 모두 오른쪽 ›(저축·투자 → W-10, 지출 → 금액 시트), 금액 끝선을 한 줄로
+        go: !!(si && !si.private && l.goal_id && !lineLocked) || (canEdit && !lineLocked),
         onOpen:
           si && !si.private && l.goal_id && !lineLocked
             ? () => nav(savingPaths.item(l.goal_id as string))
@@ -869,6 +869,8 @@ export function W01Receipt() {
         onDelete: deletable && !send ? () => remove(l, 'edit') : undefined,
       };
     });
+  // 순서 바꾸기 상태(2026-11-26, 예전 편집 모드)에는 줄 지우기 버튼이 없음: 지우기는 줄 금액 시트 ‘항목 지우기’에서만
+  const orderRows = (ls: SplitLine[]) => rowsOf(ls).map((r) => ({ ...r, onDelete: undefined }));
   const rowLabels = {
     handle: copy.handle,
     up: copy.moveUp,
@@ -1033,21 +1035,8 @@ export function W01Receipt() {
   const limited = theirs && !!pv && !pv.hidden && pv.mode === 'separate' && pv.share !== 'all';
   const column = (
     <div key="l" className="hg-stack">
-      {edit ? (
-        <SectionHeader
-          title={copy.editTitle}
-          action={
-            <button
-              type="button"
-              className="hg-btn hg-btn--link"
-              aria-busy={busy || undefined}
-              onClick={finish}
-            >
-              {copy.editDone}
-            </button>
-          }
-        />
-      ) : (
+      {/* 2026-11-26 사용자 결정: ‘편집’ 모드 대신 ‘순서 바꾸기’ 상태. ‘완료’는 머리 오른쪽(⋯ 자리), 본문 머리 줄은 없음 */}
+      {edit ? null : (
         <>
           {tabs && p && (
             <Tabs
@@ -1180,23 +1169,13 @@ export function W01Receipt() {
             legend={
               summary.chart
                 ? [
-                    // 2026-11-26 도넛 범례: 이름 뒤 회색 퍼센트(금액 가리기에도 그대로), 모자람의 미계획은 퍼센트 없이 −금액
-                    {
-                      kind: 'saving',
-                      name: copy.savingGroup,
-                      percent: ratio.saving,
-                      amount: shown(won(savingSum)),
-                    },
-                    {
-                      kind: 'spend',
-                      name: copy.spendGroup,
-                      percent: ratio.spend,
-                      amount: shown(won(spendSum)),
-                    },
+                    // 2026-11-26 ‘W-01 정리 A안’: 범례는 금액 없이 이름 + 회색 퍼센트(금액 가리기에도 그대로).
+                    // 미계획만 퍼센트 대신 금액(“0원”, 모자라면 “−300,000원” 빨강)
+                    { kind: 'saving', name: copy.savingGroup, percent: ratio.saving },
+                    { kind: 'spend', name: copy.spendGroup, percent: ratio.spend },
                     {
                       kind: 'free',
                       name: copy.legendFreeName,
-                      percent: ratio.free ?? undefined,
                       amount: shown(won(left)),
                       short: summary.over,
                     },
@@ -1204,19 +1183,10 @@ export function W01Receipt() {
                 : undefined
             }
           />
-          <PlanCard
-            id="saving"
-            title={copy.savingGroup}
-            sum={shown(won(savingSum))}
-            action={
-              !edit && !theirs && savingMenu.length > 0 ? (
-                <Menu label={copy.menu} actions={savingMenu} />
-              ) : undefined
-            }
-          >
+          <PlanCard id="saving" title={copy.savingGroup} sum={shown(won(savingSum))}>
             <ReceiptRows
               label={copy.savingGroup}
-              lines={rowsOf(savingLines)}
+              lines={orderRows(savingLines)}
               edit={edit}
               onMove={edit ? moveIn(savingLines) : undefined}
               labels={rowLabels}
@@ -1319,7 +1289,7 @@ export function W01Receipt() {
             {allowanceLines.length > 0 && (
               <ReceiptRows
                 label={copy.allowanceRows}
-                lines={rowsOf(allowanceLines)}
+                lines={orderRows(allowanceLines)}
                 edit={edit}
                 onMove={edit ? moveIn(allowanceLines) : undefined}
                 labels={rowLabels}
@@ -1327,7 +1297,7 @@ export function W01Receipt() {
             )}
             <ReceiptRows
               label={copy.spendGroup}
-              lines={proposalRow ? [...rowsOf(otherSpend), proposalRow] : rowsOf(otherSpend)}
+              lines={proposalRow ? [...orderRows(otherSpend), proposalRow] : orderRows(otherSpend)}
               edit={edit}
               onMove={edit ? moveIn(otherSpend) : undefined}
               labels={rowLabels}
@@ -1375,32 +1345,6 @@ export function W01Receipt() {
               </PlanAdd>
             )}
           </PlanCard>
-          {!edit && !planEmpty && (
-            <div className="hg-stack" style={{ gap: 'var(--space-3)' }}>
-              {/* 2026-11-26 사용자 결정(토스 내 소비 ‘편집’): 맨 아래 꽉 찬 ‘편집하기’는 없애고 머리 오른쪽 글자 버튼 ‘편집’ */}
-              <div className="hg-receipt-actions">
-                <button
-                  type="button"
-                  className="hg-btn hg-btn--link"
-                  aria-busy={sharing || undefined}
-                  onClick={() => void share()}
-                >
-                  {copy.share}
-                </button>
-                {canEdit && (
-                  <button
-                    type="button"
-                    className="hg-btn hg-btn--link hg-btn--quiet"
-                    onClick={() => {
-                      if (!offline()) setRefill(true);
-                    }}
-                  >
-                    {copy.refill}
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
         </PlanStage>
       )}
       <BundleAchieveWatch />
@@ -1432,32 +1376,62 @@ export function W01Receipt() {
         }}
       />
     );
-  // 2026-11-26 사용자 결정: ‘편집’은 좁은 창 머리 오른쪽 글자 동작(hg-headaction, N-02 ‘모두 읽음’과 같은 모양),
-  // 넓은 창은 제목 줄 오른쪽 글자 버튼. 보이는 조건은 예전 맨 아래 ‘편집하기’와 같음
-  const editAction = (cls: string) =>
-    !edit && !planEmpty && canEdit ? (
-      <button
-        type="button"
-        className={cls}
-        onClick={() => {
-          if (offline()) return;
-          setOrder(null);
-          setEdit(true);
-        }}
-      >
-        {copy.editShort}
+  // 2026-11-26 ‘W-01 정리 A안’: 흩어진 동작 입구(머리 ‘편집’, 저축·투자 묶음 ⋯, 맨 아래 ‘공유하기’·‘추천값으로 다시 채우기’)를
+  // 머리 오른쪽 ⋯ 하나(화면 읽기 “더 보기”)로 모음. 좁은 창 = 앱 머리 오른쪽, 넓은 창 = 제목 줄. 편집 중에는 없음(‘완료’)
+  const headActions: MenuAction[] = edit
+    ? []
+    : [
+        ...(!planEmpty && canEdit
+          ? [
+              {
+                label: copy.reorder,
+                onSelect: () => {
+                  if (offline()) return;
+                  setOrder(null);
+                  setEdit(true);
+                },
+              },
+            ]
+          : []),
+        ...(theirs ? [] : savingMenu),
+        ...(!planEmpty ? [{ label: copy.share, onSelect: () => void share() }] : []),
+        ...(!planEmpty && canEdit
+          ? [
+              {
+                label: copy.refill,
+                onSelect: () => {
+                  if (!offline()) setRefill(true);
+                },
+              },
+            ]
+          : []),
+      ];
+  // 순서 바꾸기 중 머리 오른쪽은 ‘완료’: ⋯와 같은 자리(버튼 끝 = 화면 오른쪽 8, 높이 44), 글자는 머리 오른쪽 글자 동작(hg-headaction)
+  const doneAction = (cls: string) =>
+    edit ? (
+      <button type="button" className={cls} aria-busy={busy || undefined} onClick={finish}>
+        {copy.editDone}
       </button>
     ) : undefined;
-  const editWide = editAction('hg-btn hg-btn--link');
+  const headMenu = edit ? (
+    doneAction('hg-btn hg-headaction')
+  ) : headActions.length > 0 ? (
+    <Menu label={copy.headMore} actions={headActions} />
+  ) : undefined;
+  const wideHead = edit ? (
+    doneAction('hg-btn hg-btn--link')
+  ) : headActions.length > 0 ? (
+    <Menu label={copy.headMore} actions={headActions} />
+  ) : undefined;
   return (
     <>
       <MainFrame
         current="salary"
         page={{
           title: copy.planTitle,
-          actions: editWide ? <span className="hg-wide-only">{editWide}</span> : undefined,
+          actions: wideHead ? <span className="hg-wide-only">{wideHead}</span> : undefined,
         }}
-        narrowAction={editAction('hg-btn hg-headaction')}
+        narrowAction={headMenu}
         // W-02 링크로 열었으면 ‹ = W-02(2026-11-18), 서랍·홈에서 열었으면 홈
         onBack={fromMonth ? () => nav(-1) : undefined}
         columns={[column]}
