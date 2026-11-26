@@ -365,6 +365,23 @@ export interface PlanImageModel {
 }
 
 
+/** 워드마크를 같은 모양 그대로 한 색(잉크)으로 칠한 canvas. 이미지가 없으면 null */
+function inkTint(img: HTMLImageElement | null, color: string): HTMLCanvasElement | null {
+  if (!img) return null;
+  const w = img.naturalWidth || 6074;
+  const h = img.naturalHeight || 1633;
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  const x = c.getContext('2d');
+  if (!x) return null;
+  x.drawImage(img, 0, 0, w, h);
+  x.globalCompositeOperation = 'source-in';
+  x.fillStyle = color;
+  x.fillRect(0, 0, w, h);
+  return c;
+}
+
 function loadImage(src: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
@@ -379,7 +396,7 @@ function layoutPlan(
   ctx: CanvasRenderingContext2D,
   m: PlanImageModel,
   t: Tokens,
-  logo: HTMLImageElement | null,
+  logo: CanvasImageSource | null,
   draw: boolean,
 ) {
   // 흰 바탕이라 카드 밖 여백 없음: 글자 옆 여백은 화면과 같은 24(CARD_PAD)
@@ -562,7 +579,9 @@ function layoutPlan(
 export async function renderPlanPng(m: PlanImageModel): Promise<Blob> {
   await document.fonts?.ready;
   const t = readTokens();
-  const logo = await loadImage(wordmarkUrl);
+  // 2026-11-26 사용자 결정: 공유 이미지 맨 아래 워드마크는 잉크(검정). 초록 그래프와 오렌지가 섞이지 않게.
+  // 글자 모양은 그대로 두고 색만 `ink`로 칠함(어드민 hg-wordmark--ink와 같은 잉크)
+  const logo = inkTint(await loadImage(wordmarkUrl), t.ink);
   const probe = document.createElement('canvas').getContext('2d');
   if (!probe) throw new Error('canvas');
   const H = Math.ceil(layoutPlan(probe, m, t, logo, false));
