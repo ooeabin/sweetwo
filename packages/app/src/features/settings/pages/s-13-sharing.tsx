@@ -103,15 +103,13 @@ export function S13Sharing() {
         onBack={() => nav(next ?? '/settings')}
       />
       {joined && (
-        <div className="hg-row">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="hg-btn--link"
+        // 2026-11-27 ‘버튼·색 정리’ 결정 6: 이동만 하는 한 줄은 목록 줄(ListRow nav). 문구 끝 ‘›’는 줄의 › 표시가 대신함
+        <div className="hg-list">
+          <ListRow
+            label={copy.previewLink(c.partnerName).replace(/\s*›$/, '')}
+            nav
             onClick={() => nav('/settings/visibility/preview')}
-          >
-            {copy.previewLink(c.partnerName)}
-          </Button>
+          />
         </div>
       )}
       {/* ① 내 월급 계획 */}

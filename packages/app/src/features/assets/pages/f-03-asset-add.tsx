@@ -24,8 +24,8 @@ import {
   FormHero,
   FormScreen,
   FormSection,
-  Icon,
   LineTabs,
+  ListRow,
   QuestionSkeleton,
   SegChoice,
   ShortText,
@@ -258,15 +258,10 @@ export function F03AssetAdd() {
             { value: 'debt', label: copy.debtsLabel },
           ]}
         />
-        {/* 2026-11-13 F-03q 입구: “큰 항목만 빠르게 입력하기 ›” */}
-        <button
-          type="button"
-          className="hg-btn hg-btn--link hg-form__quick"
-          onClick={() => nav('/assets/quick')}
-        >
-          {copy.quickEntry}
-          <Icon name="chevron-right" size={16} />
-        </button>
+        {/* 2026-11-13 F-03q 입구: “큰 항목만 빠르게 입력하기 ›”. 2026-11-27 ‘버튼·색 정리’ 결정 6: 이동만 하는 한 줄은 목록 줄(ListRow nav, 15/400 ink-2 + ›) */}
+        <div className="hg-list hg-list--plain">
+          <ListRow label={copy.quickEntry} nav onClick={() => nav('/assets/quick')} />
+        </div>
         <FormSection title={copy.formKindQ}>
           <div className="hg-form__chips" role="group" aria-label={copy.groupLabel}>
             {groups.map((x) => (

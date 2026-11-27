@@ -8,7 +8,7 @@ import { expectAmount, fillAmount } from './form';
 const addEntry = (page: Page, name: string) =>
   page
     .getByRole('button', { name, exact: true })
-    .or(page.locator('.hg-addrow'))
+    .or(page.locator('.hg-addrow', { hasText: name.replace(/^\+\s*/, '') }))
     .locator('visible=true')
     .first();
 
@@ -630,7 +630,7 @@ test('QA 9구간: 고치기 Toast ‘되돌리기’(S9-04), 파트너 월급날
   await expect(list.getByRole('button', { name: /찬우 월급날/ }).first()).toBeVisible();
   await expect(page.locator('.hg-banner')).toHaveCount(0);
   // 넓은 창은 제목 줄 ‘+ 일정 추가’만, 좁은 창은 필터 줄 ‘일정 추가’만(S9-11)
-  await expect(page.locator('.hg-addrow').locator('visible=true')).toHaveCount(
+  await expect(list.locator('.hg-addrow').locator('visible=true')).toHaveCount(
     (page.viewportSize()?.width ?? 0) >= 768 ? 0 : 1,
   );
   await list

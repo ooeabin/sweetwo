@@ -37,7 +37,7 @@ import {
   Menu,
   type MenuAction,
   Modal,
-  PlanAdd,
+  AddRow,
   PlanCard,
   PlanStage,
   PlanSummary,
@@ -732,7 +732,14 @@ export function W01Receipt() {
         { kind: 'spend', name: copy.spendGroup, value: `${ratio.spend}%` },
         // 2026-11-26 사용자 결정: 미계획이 0원이면 범례 줄 없음(넘치거나 남을 때만)
         ...(left !== 0
-          ? [{ kind: 'free' as const, name: copy.legendFreeName, value: won(left), short: summary.over }]
+          ? [
+              {
+                kind: 'free' as const,
+                name: copy.legendFreeName,
+                value: won(left),
+                short: summary.over,
+              },
+            ]
           : []),
       ],
       sections: [
@@ -1259,14 +1266,15 @@ export function W01Receipt() {
               </>
             ) : (
               canEdit && (
-                <PlanAdd
+                <AddRow
+                  block
+                  label={copy.addItemInReceipt}
+                  ariaLabel={copy.addItemInReceipt}
                   onClick={() => {
                     // 오프라인이면 W-11로 가지 않음(20 W-01 ‘오프라인’, S5-08)
                     if (!offline()) nav(`${savingPaths.add}?from=split`);
                   }}
-                >
-                  {copy.addItemInReceipt}
-                </PlanAdd>
+                />
               )
             )}
             {/* 그만 모은 저축·투자(옛 W-13 맨 아래와 같음): 접힌 줄, 펼치면 이름 + 모은 금액 → W-10 */}
@@ -1341,16 +1349,17 @@ export function W01Receipt() {
               </>
             )}
             {!spendEmpty && canEdit && customs < MAX_CUSTOM && (
-              <PlanAdd
+              <AddRow
+                block
+                label={copy.addSpend}
+                ariaLabel={copy.addSpend}
                 onClick={() => {
                   if (offline()) return;
                   // 같이 쓰는 통장을 쓸 수 있으면 먼저 작은 선택 시트(지출 / 같이 쓰는 통장), 아니면 바로 지출 추가
                   if (sharedOn) setPick(true);
                   else openSpendForm({ name: '', chip: null, first: false });
                 }}
-              >
-                {copy.addSpend}
-              </PlanAdd>
+              />
             )}
           </PlanCard>
         </PlanStage>

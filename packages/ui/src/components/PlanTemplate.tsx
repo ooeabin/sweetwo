@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { cx } from './cx';
-import { AddText } from './AddText';
 import { Icon } from './Icon';
 
 // W-01 월급 계획 템플릿 틀(docs/design/components/PlanSummary.md, 2026-11-19 사용자 확정 시안).
@@ -226,7 +225,7 @@ export function PlanSummary({
 
 /**
  * 묶음 카드(저축·투자, 지출). 머리 = 한 줄 “저축·투자” 왼쪽 + 합계 오른쪽, 둘 다 13/400 slate(2026-11-26 ‘W-01 정리 A안’:
- * 큰 합계 22/700·묶음 ⋯는 없앰, 동작은 화면 머리 ⋯ 하나). 아래 줄들(ReceiptRows)과 끝 ‘+ … 추가’ 줄(PlanAdd).
+ * 큰 합계 22/700·묶음 ⋯는 없앰, 동작은 화면 머리 ⋯ 하나). 아래 줄들(ReceiptRows)과 끝 ‘+ … 추가’ 줄(AddRow block, 2026-11-27 PlanAdd를 AddRow로 합침).
  * id는 주소 `#saving`으로 스크롤할 자리
  */
 export function PlanCard({
@@ -248,28 +247,5 @@ export function PlanCard({
       </div>
       {children}
     </section>
-  );
-}
-
-/** 묶음 끝 ‘+ … 추가’ 줄(높이 48, 회색 원 32 안 +, 2026-11-26). 글자 앞 “+”는 아이콘으로 바꿔 그리고 화면 읽기 이름은 글자 그대로 */
-export function PlanAdd({
-  children,
-  onClick,
-  expanded,
-}: {
-  children: string;
-  onClick: () => void;
-  expanded?: boolean;
-}) {
-  return (
-    <button
-      type="button"
-      className="hg-plan__block"
-      aria-label={children}
-      aria-expanded={expanded}
-      onClick={onClick}
-    >
-      <AddText>{children}</AddText>
-    </button>
   );
 }

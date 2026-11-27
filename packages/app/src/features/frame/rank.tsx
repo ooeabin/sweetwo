@@ -9,7 +9,7 @@ import {
   type Me,
 } from '@sweetwo/api';
 import { rankState, todayKst, type RankPairResponse, type RankState } from '@sweetwo/core';
-import { RankRow } from '@sweetwo/ui';
+import { Button, RankRow } from '@sweetwo/ui';
 import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate, type NavigateFunction } from 'react-router-dom';
@@ -122,8 +122,13 @@ export function RankBanner() {
   const [busy, setBusy] = useState(false);
   if (!r) return null;
   const s = r.state;
+  // 자산이 없을 때(F-01 빈 상태): 화면 일부가 빈 상태라 그 자리 회색 보조 버튼 보통 크기(2026-11-27 사용자 결정, 빈 상태 A안 inline 규칙. 예전 순위 줄)
   if (s.kind === 'empty')
-    return <RankRow title={copy.rankEmpty} onClick={() => nav('/assets/new')} />;
+    return (
+      <Button variant="secondary" block onClick={() => nav('/assets/new')}>
+        {copy.rankEmpty}
+      </Button>
+    );
   const tap = (kind: 'unseen' | 'seen' | 'stale') =>
     track('rank_banner_tapped', { state: kind, entry: 'assets' });
   if (r.pair.mode === 'peer')

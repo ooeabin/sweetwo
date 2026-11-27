@@ -288,12 +288,7 @@ export function S11cSalary() {
               {shareNoteOf(joint, me.plan_share)}
             </p>
             {!joint && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="hg-btn--link"
-                onClick={() => setSheet(true)}
-              >
+              <Button variant="link" onClick={() => setSheet(true)}>
                 {copy.change}
               </Button>
             )}

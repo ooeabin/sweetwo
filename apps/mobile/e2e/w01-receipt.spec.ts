@@ -219,15 +219,15 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
   );
   // 묶음 끝 바로 아래 띠(8), 띠 아래 머리까지 16(띠 위 16은 ‘+ 추가’ 아래 8 + 원 안쪽 8)
   expect(Math.round(spendTitle.y - (cardBox.y + cardBox.height))).toBe(8 + 16);
-  // ‘+ … 추가’: 목록 한 줄(높이 48, 회색 원 32, 글자 15 ink-2)
+  // ‘+ … 추가’: 앱 공통 AddRow 한 줄(높이 48, 회색 원 32, 글자 15 ink-2, 2026-11-27 PlanAdd를 합침)
   for (const n of ['+ 저축·투자 추가', '+ 지출 추가']) {
     const add = page.getByRole('button', { name: n });
-    await expect(add).toHaveClass(/hg-plan__block/);
+    await expect(add).toHaveClass(/hg-addrow/);
     await expect(add).toHaveCSS('height', '48px');
     await expect(add).toHaveCSS('font-size', '15px');
     await expect(add).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
-    const circle = await add.evaluate((b) => {
-      const c = getComputedStyle(b, '::before');
+    const circle = await add.locator('.hg-addrow__icon').evaluate((b) => {
+      const c = getComputedStyle(b);
       return [c.width, c.height, c.borderRadius];
     });
     expect(circle.slice(0, 2)).toEqual(['32px', '32px']);

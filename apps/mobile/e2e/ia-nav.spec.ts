@@ -26,7 +26,7 @@ function seed(db: MemDb) {
   } as MemDb['space'];
 }
 
-test('알림 화면 제목은 h1, 알림 설정에서 ‹는 알림으로, 설정 첫 줄은 내 정보', async ({
+test('알림 화면 제목은 h1, 빈 상태 ‘알림 종류 고르기’ → 알림 설정에서 ‹는 알림으로, 설정 첫 줄은 내 정보', async ({
   page,
 }, info) => {
   test.skip(info.project.name !== 'narrow', '좁은 창 흐름');
@@ -36,10 +36,9 @@ test('알림 화면 제목은 h1, 알림 설정에서 ‹는 알림으로, 설�
   await page.goto('/');
   await page.locator('.hg-frame__mhead').getByRole('button', { name: /^알림/ }).click();
   await expect(page.getByRole('heading', { level: 1, name: '알림' })).toBeVisible();
-  await page
-    .getByRole('button', { name: /알림 설정/ })
-    .first()
-    .click();
+  // 2026-11-27 ‘버튼·색 정리’: 맨 아래 ‘알림 설정’ 줄은 없애고 빈 상태에도 ‘알림 종류 고르기’ 하나
+  await expect(page.getByRole('button', { name: '알림 설정' })).toHaveCount(0);
+  await page.getByRole('button', { name: '알림 종류 고르기' }).click();
   await expect(page).toHaveURL(/\/settings\/notifications$/);
   await page.getByRole('button', { name: '뒤로' }).first().click();
   await expect(page).toHaveURL(/\/notifications$/);

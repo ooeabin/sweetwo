@@ -155,11 +155,11 @@ export function S11Me() {
         </span>
         {/* 1번 “사진 바꾸기” / 사진이 있으면 “사진 지우기”도(글자 버튼, 2026-11-12 QA 11구간 S11-11) */}
         <span className="hg-row" style={{ gap: 'var(--space-2)', flexWrap: 'wrap' }}>
-          <Button variant="ghost" size="sm" onClick={() => nav('/settings/me/photo')}>
+          <Button variant="link" onClick={() => nav('/settings/me/photo')}>
             {copy.photoChange}
           </Button>
           {photo && (
-            <Button variant="ghost" size="sm" loading={clearing} onClick={() => void clearPhoto()}>
+            <Button variant="link" loading={clearing} onClick={() => void clearPhoto()}>
               {copy.photoRemove}
             </Button>
           )}
@@ -258,13 +258,7 @@ export function S11Me() {
                     Number(scheduled.until_month.slice(5, 7)),
                   )}`}
               </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="hg-btn--link"
-                loading={cancelling}
-                onClick={() => void cancelChange()}
-              >
+              <Button variant="link" loading={cancelling} onClick={() => void cancelChange()}>
                 {copy.cancelChange}
               </Button>
             </div>

@@ -113,7 +113,7 @@ export function UpcomingSection({ d, filter }: { d: CalData; filter: CalFilter }
   return (
     <>
       {filter !== 'money' && next && (
-        <section className="hg-card hg-stack" aria-label={copy.nextCare}>
+        <section className="hg-card hg-stack hg-cal__next" aria-label={copy.nextCare}>
           {/* 2026-11-04 Y-05와 같게: 큰 D-day + 이름 + 날짜·금액 메모. 2026-11-27 굵은 글자는 D-day 하나(이름 15/400, StatBlock.md) */}
           <StatBlock
             as="div"
