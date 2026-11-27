@@ -560,6 +560,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           sp = { id: `split-${db.splits.length + 1}`, owner_user_id: owner, split_line: [] };
           db.splits.push(sp);
         }
+        const prev = sp.split_line;
         sp.split_line = b.p_lines.map((l, i) => ({
           id: `${sp.id}-line-${i}`,
           split_id: sp.id,
@@ -572,6 +573,15 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           in_checklist: l.in_checklist ?? !['living', 'allowance'].includes(String(l.kind)),
           auto_pay: l.auto_pay ?? ['send', 'shared_account'].includes(String(l.kind)),
           auto_day: l.auto_day ?? null,
+          // 지출 묶음(2026-11-27 서버 흉내): 넘긴 값, 없으면 같은 줄의 옛 값, 생활비 기본 줄은 늘 living
+          category:
+            l.kind === 'living'
+              ? 'living'
+              : l.kind !== 'custom'
+                ? null
+                : 'category' in l
+                  ? (l.category ?? null)
+                  : (prev.find((x) => x.kind === 'custom' && x.name === l.name)?.category ?? null),
         }));
         recalcSend();
         // 이번 사이클 체크 안 한 줄만 새 금액(sync_checklist 흉내)
@@ -615,6 +625,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           p_user?: string;
           p_sort?: number;
           p_ids?: string[];
+          p_category?: string | null;
         };
         const sp = b.p_split
           ? db.splits.find((x) => x.id === b.p_split)
@@ -636,13 +647,14 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           if (name && dupe(name, line.id)) return err('duplicate_line');
           if (b.p_amount !== undefined && b.p_amount !== null) line.amount = b.p_amount;
           if (name) line.name = name;
+          if (b.p_category) line.category = b.p_category;
         }
         if (fn === 'split_line_add') {
           const name = b.p_name?.trim() ?? null;
           if (b.p_kind === 'custom' && name && dupe(name)) return err('duplicate_line');
           if (
             b.p_kind === 'custom' &&
-            sp.split_line.filter((l) => l.kind === 'custom').length >= 10
+            sp.split_line.filter((l) => l.kind === 'custom').length >= 20
           )
             return err('too_many_custom');
           const last = Math.max(-1, ...sp.split_line.map((l) => Number(l.sort)));
@@ -659,6 +671,12 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
             name: b.p_kind === 'custom' ? name : null,
             amount: b.p_amount ?? 0,
             sort: pos,
+            category:
+              b.p_kind === 'living'
+                ? 'living'
+                : b.p_kind === 'custom'
+                  ? (b.p_category ?? null)
+                  : null,
           });
           sp.split_line.sort((a, c) => Number(a.sort) - Number(c.sort));
           touch();

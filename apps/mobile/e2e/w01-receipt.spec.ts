@@ -26,10 +26,13 @@ const listNames = (page: Page, group: string) =>
     .getByRole('list', { name: group })
     .locator('.hg-receipt__name')
     .evaluateAll((els) => els.map((e) => e.firstChild?.textContent ?? ''));
-// 지출 묶음은 맨 위 용돈 줄 목록(‘용돈’) + 나머지 지출(‘지출’)(2026-11-16 R4-3)
+// 지출 묶음은 맨 위 용돈 줄 목록(‘용돈’) + 지출 묶음(생활비 …, 2026-11-27) + 묶음 없는 줄(‘지출’): 카드 안 줄 이름을 보이는 순서대로
 const names = async (page: Page, group: string) =>
   group === '지출'
-    ? [...(await listNames(page, '용돈')), ...(await listNames(page, '지출'))]
+    ? page
+        .getByRole('region', { name: '지출', exact: true })
+        .locator('.hg-receipt__name')
+        .evaluateAll((els) => els.map((e) => e.firstChild?.textContent ?? ''))
     : listNames(page, group);
 
 /** ‘+ 지출 추가’ → 작은 선택 시트에서 “지출”(같이 쓰는 통장을 쓸 수 있을 때, 2026-11-19) */
@@ -150,7 +153,7 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
   await expect(sum.locator('.hg-plansum__pen')).toHaveCount(0);
   await expect(sum.locator('.hg-plansum__label .hg-plansum__go')).toBeVisible();
   expect(await names(page, '저축·투자')).toEqual(['청약', '내 집 마련']);
-  expect(await names(page, '지출')).toEqual(['용돈', '고정지출', '생활비']);
+  expect(await names(page, '지출')).toEqual(['용돈', '기타 생활비', '고정지출']);
   await expect(page.locator('.hg-plancard__sum')).toHaveText(['1,390,000원', '2,110,000원']);
   await expect(page.locator('.hg-fab')).toHaveCount(0);
   // 2026-11-26 ‘W-01 정리 A안’: 동작 입구는 머리 오른쪽 ⋯(“더 보기”) 하나. 글자 ‘편집’·묶음 ⋯·맨 아래 글자 버튼은 없음
@@ -386,7 +389,8 @@ test('지출 추가: 이름 칩 → 금액 → 추가하기, 직접 추가 줄�
   );
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page.getByText('관리비를 추가했어요')).toBeVisible();
-  expect(await names(page, '지출')).toEqual(['용돈', '고정지출', '생활비', '관리비']);
+  // 2026-11-27 ‘관리비’ 칩은 주거 묶음이라 묶음 없는 고정지출보다 위
+  expect(await names(page, '지출')).toEqual(['용돈', '기타 생활비', '관리비', '고정지출']);
   expect(lineOf(db, 'custom', '관리비')?.amount).toBe(100_000);
   expect(waitLine(db, 'custom')?.planned).toBe(100_000);
   // 이미 있는 이름은 칩에서 숨김, 글자로 넣으면 막음
@@ -418,14 +422,14 @@ test('기본 줄 지우기 + 되돌리기(같은 자리), 저금 줄 지우기�
     .getByRole('button', { name: '고정지출 항목 지우기' })
     .click();
   await expect(page.getByText('고정지출을 지웠어요')).toBeVisible();
-  expect(await names(page, '지출')).toEqual(['용돈', '생활비']);
+  expect(await names(page, '지출')).toEqual(['용돈', '기타 생활비']);
   expect(lineOf(db, 'fixed')).toBeUndefined();
   expect(waitLine(db, 'fixed')).toBeUndefined();
   await expect(
     page.getByRole('img', { name: '저축·투자 40%, 지출 35%, 미계획 25%' }),
   ).toBeVisible();
   await page.getByRole('button', { name: '되돌리기' }).click();
-  await expect.poll(() => names(page, '지출')).toEqual(['용돈', '고정지출', '생활비']);
+  await expect.poll(() => names(page, '지출')).toEqual(['용돈', '기타 생활비', '고정지출']);
   // 저금 줄: 확인 Modal → 그만 모음
   // 저축·투자 줄을 누르면 W-10 상세로 가고(2026-11-18), 줄 시트는 W-10 ‘매달 금액 바꾸기’(?line=)나 편집하기에서
   await page.goto('/salary/plan?line=goal-e');
@@ -446,6 +450,18 @@ test('순서 바꾸기(2026-11-26, 예전 편집 모드): 키보드 위·아래�
   page,
 }) => {
   const { db, go } = await open(page);
+  // 2026-11-27 묶음 안에서만 순서를 바꿈: 묶음 없는 줄(고정지출 + 직접 추가 관리비)끼리 바꿈
+  const sp0 = db.splits[0];
+  const fixed0 = sp0?.split_line.find((l) => l.kind === 'fixed');
+  if (sp0 && fixed0)
+    sp0.split_line.push({
+      ...fixed0,
+      id: 'line-mgmt',
+      kind: 'custom',
+      name: '관리비',
+      amount: 0,
+      sort: 99,
+    });
   await go();
   await planAction(page, '순서 바꾸기');
   await expect(page.getByRole('link', { name: '이번 달 월급 체크' })).toHaveCount(0);
@@ -455,12 +471,12 @@ test('순서 바꾸기(2026-11-26, 예전 편집 모드): 키보드 위·아래�
   await axe(page);
   // 용돈 줄은 지출 맨 위에 고정(2026-11-16 R4-3), 나머지 지출끼리 순서를 바꿈
   await expect(page.getByRole('button', { name: '용돈 위로' })).toHaveCount(0);
-  const up = page.getByRole('button', { name: '생활비 위로' });
+  const up = page.getByRole('button', { name: '관리비 위로' });
   await up.focus();
   await expect(up).toBeVisible();
   await page.keyboard.press('Enter');
-  await expect(page.getByText('생활비, 1번째')).toBeAttached();
-  expect(await names(page, '지출')).toEqual(['용돈', '생활비', '고정지출']);
+  await expect(page.getByText('관리비, 1번째')).toBeAttached();
+  expect(await names(page, '지출')).toEqual(['용돈', '기타 생활비', '관리비', '고정지출']);
   // 아직 저장 전
   expect(db.rpc.includes('split_reorder')).toBe(false);
   await page.getByRole('button', { name: '완료' }).click();
@@ -470,7 +486,7 @@ test('순서 바꾸기(2026-11-26, 예전 편집 모드): 키보드 위·아래�
     [...(db.splits[0]?.split_line ?? [])]
       .sort((a, b) => Number(a.sort) - Number(b.sort))
       .map((l) => l.kind),
-  ).toEqual(['saving', 'saving', 'allowance', 'living', 'fixed']);
+  ).toEqual(['saving', 'saving', 'allowance', 'living', 'custom', 'fixed']);
   // 이번 달 체크리스트도 같은 순서
   await page.goto('/salary'); // 2026-11-19 W-01 머리 링크 없앰
   await expect(page.locator('.hg-transfer__label').nth(2)).toHaveText('용돈');
@@ -682,7 +698,7 @@ test('추천값으로 다시 채우기(D1): 직접 추가 줄과 이미 있는 �
   await expect.poll(() => lineOf(db, 'custom', '관리비')?.amount).toBe(150_000);
   expect(lineOf(db, 'fixed')?.amount).toBe(880_000);
   expect(lineOf(db, 'living')?.amount).toBe(880_000);
-  expect(await names(page, '지출')).toEqual(['용돈', '고정지출', '생활비', '관리비']);
+  expect(await names(page, '지출')).toEqual(['용돈', '기타 생활비', '고정지출', '관리비']);
 });
 
 test('Toast ‘되돌리기’를 누르면 토스트가 닫힘(S5-03)', async ({ page }) => {
@@ -1004,4 +1020,67 @@ test('공유 이미지: 저축·투자 줄 보조 줄이 화면과 같은 글(�
   expect(drawn).toEqual(expect.arrayContaining(['저축·투자', '40%', '지출', '60%']));
   expect(drawn).not.toContain('미계획'); // 2026-11-26: 미계획 0원이면 줄 없음
   expect(drawn.filter((t) => t === '1,390,000원')).toHaveLength(1); // 묶음 머리 합계만(범례 금액 없음)
+});
+
+test('지출 묶음(2026-11-27 ‘대분류 안 소분류’): 묶음 소제목 + 소계, 생활비 기본 줄은 ‘기타 생활비’, 묶음 없는 줄은 맨 아래, 칩으로 넣으면 그 묶음', async ({
+  page,
+}) => {
+  const { db, go } = await open(page);
+  Object.assign(db.me, { monthly_income: 6_000_000 });
+  const sp0 = db.splits[0];
+  const fixed0 = sp0?.split_line.find((l) => l.kind === 'fixed');
+  if (sp0 && fixed0) {
+    const add = (id: string, name: string, amount: number, category: string | null) =>
+      sp0.split_line.push({
+        ...fixed0,
+        id,
+        kind: 'custom',
+        name,
+        amount,
+        category,
+        sort: 90 + sp0.split_line.length,
+      });
+    add('l-food', '식비', 600_000, 'living');
+    add('l-rent', '월세', 700_000, 'housing');
+    add('l-gym', '헬스장', 50_000, null);
+  }
+  await go();
+  const card = page.getByRole('region', { name: '지출', exact: true });
+  await expect(card.locator('.hg-plancard__subhead')).toHaveText([
+    '생활비1,480,000원',
+    '주거700,000원',
+  ]);
+  await expect(card.locator('.hg-plancard__subhead').first()).toHaveCSS('font-size', '13px');
+  expect(await names(page, '지출')).toEqual([
+    '용돈',
+    '기타 생활비',
+    '식비',
+    '월세',
+    '고정지출',
+    '헬스장',
+  ]);
+  await expect(card.getByRole('list', { name: '생활비', exact: true })).toBeVisible();
+  await axe(page);
+  // 칩(생활비 묶음 ‘의류’)으로 넣으면 그 묶음, 글자로 넣으면 묶음 없음
+  await addSpend(page);
+  const chips = page.getByRole('group', { name: '지출 이름' });
+  await chips.getByRole('button', { name: '더 보기' }).click();
+  await chips.getByRole('button', { name: '의류', exact: true }).click();
+  await fillAmount(page, '매달 얼마씩?', 100000);
+  await page.getByRole('button', { name: '추가하기' }).click();
+  await expect(page.getByText('의류를 추가했어요')).toBeVisible();
+  expect(lineOf(db, 'custom', '의류')?.category).toBe('living');
+  await expect(
+    card.getByRole('list', { name: '생활비', exact: true }).getByText('의류'),
+  ).toBeVisible();
+  await addSpend(page);
+  await chips.getByRole('button', { name: '직접 정하기' }).click();
+  await page.getByRole('textbox', { name: '항목 이름' }).fill('세차');
+  await fillAmount(page, '매달 얼마씩?', 0);
+  await page.getByRole('button', { name: '추가하기' }).click();
+  await expect(page.getByText('세차를 추가했어요')).toBeVisible();
+  expect(lineOf(db, 'custom', '세차')?.category ?? null).toBeNull();
+  await expect
+    .poll(() => names(page, '지출'))
+    .toEqual(['용돈', '기타 생활비', '식비', '의류', '월세', '고정지출', '헬스장', '세차']);
 });

@@ -9,6 +9,7 @@ import {
   type Json,
   type SalaryChangeRowResponse,
   type SplitLineDraft,
+  type SpendCategory,
   type Tables,
 } from '@sweetwo/core';
 import { AuthCallError } from './auth';
@@ -173,7 +174,7 @@ export async function setJointCycleDay(day: number) {
 // ── W-01 영수증: 줄마다 바로 저장(2026-11-09, docs/spec/20-salary-plan.md W-01) ─────────────
 // 서버 split_line_set / split_line_add / split_line_delete / split_reorder. 이번 달 체크 안 한 줄은 서버가 맞춤.
 
-/** 고칠 수 없음: 같은 이름, 파트너 것(각자), 해제 대기, 합쳐서 용돈 줄, 직접 추가 줄 10개, 보내기 줄(v2.2 서버 계산) */
+/** 고칠 수 없음: 같은 이름, 파트너 것(각자), 해제 대기, 합쳐서 용돈 줄, 직접 추가 줄 20개(2026-11-27, 예전 10), 보내기 줄(v2.2 서버 계산) */
 export type SplitBlockReason =
   | 'duplicate_line'
   | 'not_owner'
@@ -200,12 +201,16 @@ const failSplit = (e: { message?: string } | null) => {
   fail(e);
 };
 
-/** 줄 하나 금액·이름(이름은 직접 추가 줄만) */
-export async function setSplitLine(line: string, o: { amount?: number; name?: string }) {
+/** 줄 하나 금액·이름(이름은 직접 추가 줄만). category: 지출 묶음(직접 추가 줄만, 없으면 그대로) */
+export async function setSplitLine(
+  line: string,
+  o: { amount?: number; name?: string; category?: SpendCategory },
+) {
   const { error } = await supabase().rpc('split_line_set', {
     p_line: line,
     p_amount: o.amount,
     p_name: o.name,
+    p_category: o.category,
   });
   failSplit(error);
 }
@@ -219,6 +224,8 @@ export async function addSplitLine(
     name?: string;
     userId?: string;
     sort?: number;
+    /** 지출 묶음(직접 추가 줄만, 2026-11-27). 없으면 묶음 없음 */
+    category?: SpendCategory;
   },
 ): Promise<string> {
   const { data, error } = await supabase().rpc('split_line_add', {
@@ -228,6 +235,7 @@ export async function addSplitLine(
     p_name: o.name,
     p_user: o.userId,
     p_sort: o.sort,
+    p_category: o.category,
   });
   failSplit(error);
   const id = splitLineId.safeParse(data);

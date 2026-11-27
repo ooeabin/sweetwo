@@ -19,6 +19,7 @@ import { isOnline } from '@sweetwo/api';
 import {
   amountBand,
   coupleOf,
+  groupSpendLines,
   leftover,
   planChangeTouchesMonth,
   planRatio,
@@ -54,7 +55,7 @@ import { PersonDot } from '../../../shared/person';
 import { quietly, toast } from '../../../shared/toast';
 import { MainFrame } from '../../frame';
 import { goalLineName } from '../check-line';
-import { copy } from '../copy';
+import { copy, spendChipCategory } from '../copy';
 import {
   useAccountNames,
   useChecklists,
@@ -87,7 +88,7 @@ import { toDraft } from '../split-editor';
 type Sheet = { line: SplitLine; from?: 'saving_detail' } | { income: true } | null;
 type Kind = SplitLine['kind'];
 const DEFAULT_KINDS: Kind[] = ['fixed', 'living', 'allowance'];
-const MAX_CUSTOM = 10;
+const MAX_CUSTOM = 20; // 직접 추가 줄 한도(2026-11-27 10 → 20, 서버 too_many_custom)
 
 // W-01 월급 계획 영수증(20 W-01, 2026-11-09). 별도 화면(/salary/plan, 2026-11-18 구간 탭 없앰).
 // 고칠 때마다 바로 저장(줄 RPC) + Toast ‘되돌리기’. 편집 모드: 손잡이·위아래로 순서(‘완료’에서 한 번에), 지우기.
@@ -323,7 +324,9 @@ export function W01Receipt() {
             ? copy.sendName // 5e 한 사람 관리형 ‘보내기’
             : l.kind === 'shared_account'
               ? (l.name ?? accountNames.ofAccount(l.shared_account_id) ?? copy.sharedAccountName) // 5d 같이 쓰는 통장(분담 이름, M7)
-              : copy.lineNames[l.kind];
+              : l.kind === 'living'
+                ? copy.livingOther // 2026-11-27 생활비 묶음 안 생활비 기본 줄
+                : copy.lineNames[l.kind];
   const won = (v: number) => money(v, masked);
   const baseDay = baseDayOf(owner ?? m, sp);
   // 보이는 금액 글자(가리기면 화면 읽기는 “가려진 금액”, 11 9장)
@@ -529,10 +532,12 @@ export function W01Receipt() {
       if (!split) return;
       // 첫 달 묻기 ‘생활비’ 칩은 기본 생활비 줄(kind living, 이름 없음). 그 밖은 직접 추가 줄
       const living = first && chip === 'living';
+      // 2026-11-27 W-01e 이름 칩으로 만든 줄은 그 묶음(category), 글자로 넣은 줄은 묶음 없음
+      const category = chip ? (spendChipCategory(chip) ?? undefined) : undefined;
       const id = await write(() =>
         addSplitLine(
           split.id,
-          living ? { kind: 'living', amount } : { kind: 'custom', name, amount },
+          living ? { kind: 'living', amount } : { kind: 'custom', name, amount, category },
         ),
       );
       // ‘어떻게 챙겨요?’가 새 줄의 기본값(생활비 줄만 목록 끔)과 다르면 바로 설정(split_lines_configure)
@@ -592,6 +597,7 @@ export function W01Receipt() {
               name: l.name ?? undefined,
               userId: l.user_id ?? undefined,
               sort: l.sort,
+              category: l.kind === 'custom' ? (l.category ?? undefined) : undefined,
             }),
           ),
         ),
@@ -617,13 +623,20 @@ export function W01Receipt() {
   // 편집 모드 순서: 같은 묶음 안에서만. 지출 묶음은 용돈 줄(맨 위 고정)과 나머지를 따로 옮김(2026-11-16 R4-3)
   const allowanceLines = spendLines.filter((l) => l.kind === 'allowance');
   const otherSpend = spendLines.filter((l) => l.kind !== 'allowance');
+  // 2026-11-27 ‘대분류 안 소분류’: 지출 묶음(생활비, 주거 …) 순서대로 모으고 묶음 없는 줄은 맨 아래(core groupSpendLines)
+  const spendGrouped = groupSpendLines(otherSpend);
+  const spendBlocks = [
+    allowanceLines,
+    ...spendGrouped.groups.map((g) => g.lines),
+    spendGrouped.rest,
+  ];
   const moveIn = (group: SplitLine[]) => (from: number, to: number) => {
     const ids = group.map((l) => l.id);
     const [id] = ids.splice(from, 1);
     if (!id) return;
     ids.splice(to, 0, id);
     const pick = (g: SplitLine[]) => (g[0] && g[0].id === group[0]?.id ? ids : g.map((l) => l.id));
-    setOrder([...pick(savingLines), ...pick(allowanceLines), ...pick(otherSpend)]);
+    setOrder([...pick(savingLines), ...spendBlocks.flatMap(pick)]);
   };
   const finish = () =>
     void run(async () => {
@@ -745,7 +758,8 @@ export function W01Receipt() {
       ],
       sections: [
         { title: copy.savingGroup, subtotal: won(savingSum), ls: savingLines },
-        { title: copy.spendGroup, subtotal: won(spendSum), ls: spendLines },
+        // 화면과 같은 순서: 용돈 → 지출 묶음(생활비 …) → 묶음 없는 줄
+        { title: copy.spendGroup, subtotal: won(spendSum), ls: spendBlocks.flat() },
       ]
         .filter((x) => x.ls.length > 0)
         .map(({ ls, ...x }) => ({
@@ -1316,11 +1330,34 @@ export function W01Receipt() {
                 labels={rowLabels}
               />
             )}
+            {/* 2026-11-27 ‘대분류 안 소분류’: 묶음 소제목(13/400 slate) + 소계, 그 아래 그 묶음 줄 */}
+            {spendGrouped.groups.map((g) => {
+              const title = copy.spendCategoryNames[g.category];
+              return (
+                <div key={g.category} className="hg-plancard__sub">
+                  <p className="hg-plancard__subhead">
+                    <span>{title}</span>
+                    <span>{shown(won(g.lines.reduce((t, l) => t + l.amount, 0)))}</span>
+                  </p>
+                  <ReceiptRows
+                    label={title}
+                    lines={orderRows(g.lines)}
+                    edit={edit}
+                    onMove={edit ? moveIn(g.lines) : undefined}
+                    labels={rowLabels}
+                  />
+                </div>
+              );
+            })}
             <ReceiptRows
               label={copy.spendGroup}
-              lines={proposalRow ? [...orderRows(otherSpend), proposalRow] : orderRows(otherSpend)}
+              lines={
+                proposalRow
+                  ? [...orderRows(spendGrouped.rest), proposalRow]
+                  : orderRows(spendGrouped.rest)
+              }
               edit={edit}
-              onMove={edit ? moveIn(otherSpend) : undefined}
+              onMove={edit ? moveIn(spendGrouped.rest) : undefined}
               labels={rowLabels}
             />
             {/* 2026-11-27 ‘W-01 빈 묶음 A안’: 지출이 없어도 칩 대신 ‘+ 지출 추가’ 한 줄. 빈 카드면 W-01e가 첫 달 칩(월세 …)으로 열림 */}

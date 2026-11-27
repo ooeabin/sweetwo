@@ -1,6 +1,6 @@
 // 월급 탭 문구(docs/spec/20-salary-plan.md 체크리스트·저금 항목 W-10~W-12, 홈 19-this-month.md H-03). 기획서 “ ” 안 문장 그대로.
 // [확인 필요] 표시는 기획서에 문구가 없어 임시로 둔 것.
-import { formatMonthDay, object } from '@sweetwo/core';
+import { formatMonthDay, object, type SpendCategory } from '@sweetwo/core';
 
 export const copy = {
   // W-01 3b 파트너 탭(각자) 공개 단계(20 W-01 고친 점, 08 6장, PR 11)
@@ -106,11 +106,27 @@ export const copy = {
    */
   spendChipTop: ['food', 'rent', 'maintenance', 'utility', 'phone', 'insurance'] as const,
   spendChipTopTitle: '자주 쓰는 것', // [확인 필요]
+  /** W-01 지출 카드 묶음 소제목(spendChipGroups 제목과 같음, core SPEND_CATEGORIES 순서) */
+  spendCategoryNames: {
+    living: '생활비',
+    housing: '주거',
+    telecom: '통신',
+    subscription: '구독',
+    transport: '교통',
+    car: '차',
+    insurance: '보험',
+    loan: '대출',
+    family: '가족',
+    relation: '관계',
+  } satisfies Record<SpendCategory, string>,
+  /** 생활비 묶음 안 생활비 기본 줄(kind living) 이름(2026-11-27 ‘대분류 안 소분류’, W-01) [확인 필요] */
+  livingOther: '기타 생활비',
   spendChipGroups: [
     // 2026-11-27 사용자 결정: 생활비를 묶음 하나로 두고 그 안에서 식비·의류·화장품처럼 하나씩 계획(칩마다 일반 지출 줄 하나,
     // 기본 생활비 줄 kind living·O-30 같이 쓰는 생활비·추천 계산과는 잇지 않음)
     {
       title: '생활비',
+      category: 'living',
       chips: [
         { name: '식비', code: 'food' },
         { name: '외식', code: 'eat_out' },
@@ -126,6 +142,7 @@ export const copy = {
     },
     {
       title: '주거',
+      category: 'housing',
       chips: [
         { name: '월세', code: 'rent' },
         { name: '관리비', code: 'maintenance' },
@@ -136,6 +153,7 @@ export const copy = {
     },
     {
       title: '통신',
+      category: 'telecom',
       chips: [
         { name: '휴대폰 요금', code: 'phone' },
         { name: '인터넷', code: 'internet' },
@@ -144,15 +162,17 @@ export const copy = {
     },
     {
       title: '구독',
+      category: 'subscription',
       chips: [
         { name: 'OTT 구독', code: 'subscription' },
         { name: '앱 구독', code: 'app_sub' },
         { name: '렌탈', code: 'rental' },
       ],
     },
-    { title: '교통', chips: [{ name: '대중교통비', code: 'transport' }] },
+    { title: '교통', category: 'transport', chips: [{ name: '대중교통비', code: 'transport' }] },
     {
       title: '차',
+      category: 'car',
       chips: [
         { name: '주유비', code: 'fuel' },
         { name: '자동차 보험', code: 'car_insurance' },
@@ -160,9 +180,10 @@ export const copy = {
         { name: '차량 할부', code: 'car_loan' },
       ],
     },
-    { title: '보험', chips: [{ name: '보험료', code: 'insurance' }] },
+    { title: '보험', category: 'insurance', chips: [{ name: '보험료', code: 'insurance' }] },
     {
       title: '대출',
+      category: 'loan',
       chips: [
         { name: '신용대출 상환', code: 'credit_loan' },
         { name: '학자금 상환', code: 'student_loan' },
@@ -170,6 +191,7 @@ export const copy = {
     },
     {
       title: '가족',
+      category: 'family',
       chips: [
         { name: '부모님 용돈', code: 'parents' },
         { name: '자녀 교육비', code: 'child_edu' },
@@ -179,6 +201,7 @@ export const copy = {
     },
     {
       title: '관계',
+      category: 'relation',
       chips: [
         { name: '경조사비', code: 'family_event' },
         { name: '데이트 비용', code: 'date' },
@@ -857,3 +880,9 @@ export const copy = {
   archivePeriod: (start: string, end: string) => `${start} ~ ${end}`,
   archivePeriodCount: (n: number) => `수입 ${n}번`,
 };
+
+/** W-01e 이름 칩 code → 그 칩이 든 지출 묶음(2026-11-27). 칩이 아니면 null */
+export function spendChipCategory(code: string): SpendCategory | null {
+  for (const g of copy.spendChipGroups) if (g.chips.some((c) => c.code === code)) return g.category;
+  return null;
+}
