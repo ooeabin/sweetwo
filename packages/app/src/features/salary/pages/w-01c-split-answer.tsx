@@ -18,12 +18,11 @@ import { copy } from '../copy';
 import { useMe, usePartner, useSpace, useSplits } from '../data';
 
 const t = copy.splitShare;
-/** 내 월급 계획(합쳐서면 공동)의 생활비·고정지출 합. ‘좋아요’ 앞뒤를 견줘 줄어든 줄을 알림(06 3-7 M9, 2026-11-16 B4) */
-const livingFixedOf = (list: readonly SalarySplit[] | undefined, owner: string | null) => {
-  const lines = list?.find((x) => x.owner_user_id === owner)?.split_line ?? [];
-  const sum = (k: string) => lines.filter((l) => l.kind === k).reduce((t, l) => t + l.amount, 0);
-  return { living: sum('living'), fixed: sum('fixed') };
-};
+/** 내 월급 계획(합쳐서면 공동)의 고정지출 합. ‘좋아요’ 앞뒤를 견줘 줄어든 줄을 알림(06 3-7 M9, 2026-11-28 생활비 기본 줄 없앰) */
+const fixedOf = (list: readonly SalarySplit[] | undefined, owner: string | null) =>
+  (list?.find((x) => x.owner_user_id === owner)?.split_line ?? [])
+    .filter((l) => l.kind === 'fixed')
+    .reduce((t, l) => t + l.amount, 0);
 
 const nameCodeOf = (name: string): 'living' | 'date' | 'custom' =>
   name === t.nameChips.living ? 'living' : name === t.nameChips.date ? 'date' : 'custom';
@@ -91,7 +90,7 @@ export function W01cSplitAnswer() {
     if (busy || !online) return;
     setBusy(accept ? 'yes' : 'no');
     const owner = space.data?.salary_mode === 'joint' ? null : (me.data?.id ?? null);
-    const before = livingFixedOf(splits.data, owner);
+    const before = fixedOf(splits.data, owner);
     try {
       const result = await answerSplit(a.id, accept);
       track('split_answered', { name_code: nameCodeOf(a.name), rule: a.rule, result });
@@ -101,17 +100,11 @@ export function W01cSplitAnswer() {
         return home();
       }
       if (result === 'accepted') {
-        const after = livingFixedOf(
+        const after = fixedOf(
           await qc.fetchQuery({ queryKey: qk.splits, queryFn: fetchSplits, staleTime: 0 }),
           owner,
         );
-        const living = after.living < before.living;
-        const fixed = after.fixed < before.fixed;
-        carryToast(
-          living || fixed
-            ? t.acceptedCut(living && fixed ? 'both' : living ? 'living' : 'fixed')
-            : t.accepted,
-        );
+        carryToast(after < before ? t.acceptedCut : t.accepted);
         return nav('/salary/plan', { replace: true });
       }
       home();

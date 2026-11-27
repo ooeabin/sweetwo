@@ -306,7 +306,12 @@ test('W-01 금액 바꾸기 Toast: 이번 달 체크 안 한 줄이 바뀌면 �
   await sheet.getByRole('textbox', { name: '생활비 금액' }).fill('800000');
   await sheet.getByRole('button', { name: '확인' }).click();
   await expect(page.getByText('이번 달 아직 확인하지 않은 것도 바꿨어요')).toBeVisible();
-  expect(linesOf(db).find((l) => l.kind === 'living' && l.state === 'wait')?.planned).toBe(800_000);
+  expect(
+    linesOf(db).find(
+      (l) =>
+        (l.kind === 'living' || (l.kind === 'custom' && l.name === '생활비')) && l.state === 'wait',
+    )?.planned,
+  ).toBe(800_000);
   await page.getByRole('button', { name: '되돌리기' }).click();
   await expect(page.getByRole('button', { name: '생활비 880,000원' })).toBeVisible();
   // 체크한 줄(고정지출)은 이번 달이 안 바뀌므로 예전 Toast

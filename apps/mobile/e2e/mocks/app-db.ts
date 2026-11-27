@@ -143,6 +143,20 @@ const inIds = (url: URL) =>
     .map((x) => x.replace(/"/g, ''));
 
 /** now: 화면 시계를 고정한 시각(첫 플랜을 만든 시각으로 씀) */
+/**
+ * 서버 흉내(20270106090000_living_as_category, 2026-11-28): 생활비 기본 줄(kind living)은 없음.
+ * 시드·테스트가 넣은 kind living 줄은 직접 추가 줄 ‘생활비’(묶음 living)로, 확인 목록 줄도 같은 이름으로
+ */
+function noLivingLines(db: MemDb) {
+  for (const sp of db.splits)
+    for (const l of sp.split_line)
+      if (l.kind === 'living')
+        Object.assign(l, { kind: 'custom', name: l.name ?? '생활비', category: 'living' });
+  for (const c of db.checklists)
+    for (const l of (c.pay_check_line as Record<string, unknown>[] | undefined) ?? [])
+      if (l.kind === 'living') Object.assign(l, { kind: 'custom', name: l.name ?? '생활비' });
+}
+
 export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Promise<MemDb> {
   const db: MemDb = {
     me: {
@@ -405,6 +419,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
   );
 
   await page.route(`${SB}/**`, async (route) => {
+    noLivingLines(db);
     const req = route.request();
     const method = req.method();
     if (method === 'OPTIONS') {
@@ -570,7 +585,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           name: l.name ?? null,
           amount: l.amount,
           sort: i,
-          in_checklist: l.in_checklist ?? !['living', 'allowance'].includes(String(l.kind)),
+          in_checklist: l.in_checklist ?? l.kind !== 'allowance',
           auto_pay: l.auto_pay ?? ['send', 'shared_account'].includes(String(l.kind)),
           auto_day: l.auto_day ?? null,
           // 지출 묶음(2026-11-27 서버 흉내): 넘긴 값, 없으면 같은 줄의 옛 값, 생활비 기본 줄은 늘 living

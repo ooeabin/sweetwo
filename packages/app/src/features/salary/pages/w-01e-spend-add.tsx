@@ -51,9 +51,9 @@ export function W01eSpendAdd({
   const [chip, setChip] = useState<string | null>(initial.chip);
   const [custom, setCustom] = useState(initial.custom);
   const [amount, setAmount] = useState<number | null>(null);
-  // 생활비 칩은 기본 생활비 줄이라 확인 목록 기본 끔, 그 밖은 켬(서버 기본값과 같음)
+  // 확인 목록 기본 켬(서버 기본값과 같음, 2026-11-28 생활비 기본 줄 없앰)
   const [set, setSet] = useState<LineSettings>({
-    inChecklist: initial.chip !== 'living',
+    inChecklist: true,
     autoPay: false,
     autoDay: null,
   });
@@ -84,8 +84,6 @@ export function W01eSpendAdd({
     setCustom(false);
     setName(c.name);
     setChip(c.code);
-    // 생활비 칩으로 바꾸거나 벗어날 때만 확인 목록 기본값을 따라감(구간을 이미 만졌으면 그대로)
-    if (!set.autoPay) setSet({ ...set, inChecklist: c.code !== 'living' });
   };
   return (
     <FormScreen

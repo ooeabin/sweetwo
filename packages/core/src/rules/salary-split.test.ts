@@ -67,21 +67,20 @@ describe('recommendSplit: 추천값으로 다시 채우기(06 3-2 두 번째 예
   it('내 집 마련 월 필요액 246만', () => {
     expect(lines.find((l) => l.goalId === 'h')?.need).toBe(2_460_000);
   });
-  it('이미 있던 고정지출·생활비 88만씩은 지우지 않고 그대로 둔 채 남은 109만(2026-11-15)', () => {
+  // 2026-11-28: 생활비 기본 줄 없앰(직접 추가 줄 ‘생활비’). 직접 추가 줄도 금액 그대로 떼므로 남은 금액은 같음
+  it('이미 있던 고정지출 88만·직접 추가 생활비 88만은 지우지 않고 그대로 둔 채 남은 109만(2026-11-15)', () => {
     const kept = recommendSplit({
       income: 3_500_000,
       people: [{ userId: 'chanwoo', income: 3_500_000 }],
       items: [savings, home],
       current: { s: 300_000, h: 0 },
-      existing: [
-        { kind: 'fixed', amount: 880_000 },
-        { kind: 'living', amount: 880_000 },
-      ],
+      existing: [{ kind: 'fixed', amount: 880_000 }],
+      custom: [{ name: '생활비', amount: 880_000 }],
       now,
     });
     expect(kept.find((l) => l.goalId === 'h')?.amount).toBe(1_090_000);
     expect(leftover(3_500_000, kept)).toBe(0);
-    expect(kept.map((l) => l.kind)).toEqual(['saving', 'saving', 'fixed', 'living', 'allowance']);
+    expect(kept.map((l) => l.kind)).toEqual(['saving', 'saving', 'fixed', 'allowance', 'custom']);
   });
   it('추천 줄이 없으면 남은 285만 → 내 집 마련 월 필요액 246만, 미계획 금액 39만, 저금 줄이 먼저', () => {
     expect(lines.find((l) => l.goalId === 'h')?.amount).toBe(2_460_000);
@@ -255,7 +254,7 @@ describe('v2.2 용돈·보내기·줄 설정(06 3-1, 3-2)', () => {
       autoPay: false,
       autoDay: null,
     });
-    expect(splitLineDefaults('living').inChecklist).toBe(false);
+    expect(splitLineDefaults('living').inChecklist).toBe(true); // 2026-11-28 생활비 기본 줄 없음(서버가 직접 추가 줄로)
     expect(splitLineDefaults('allowance').inChecklist).toBe(false);
     expect(splitLineDefaults('send')).toEqual({ inChecklist: true, autoPay: true, autoDay: null });
     expect(splitLineDefaults('shared_account').autoPay).toBe(true);

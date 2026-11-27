@@ -20,7 +20,7 @@ create function pg_temp.no_backdate() returns void language sql security definer
 $$;
 create function pg_temp.line(k text) returns uuid language sql as $$
   select l.id from public.pay_check_line l left join public.goal g on g.id = l.goal_id
-  where coalesce(g.template, l.kind::text) = k;
+  where coalesce(g.template, case when l.kind = 'custom' and l.name = '생활비' then 'living' else l.kind::text end) = k;
 $$;
 
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');

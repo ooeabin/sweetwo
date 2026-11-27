@@ -120,7 +120,8 @@ test('W-02a 다른 금액: 저장하면 Toast + 되돌리기, 0원은 못 함 To
 }) => {
   const { db } = await open(page);
   await page.goto('/salary');
-  const living = () => linesOf(db).find((l) => l.kind === 'living');
+  const living = () =>
+    linesOf(db).find((l) => l.kind === 'living' || (l.kind === 'custom' && l.name === '생활비'));
   await page.locator('.hg-transfer__open', { hasText: '생활비' }).click();
   await page.getByRole('button', { name: '다른 금액으로 했어요' }).click();
   await expect(page.getByRole('heading', { name: '생활비, 이번 달은 얼마였어요?' })).toBeVisible();

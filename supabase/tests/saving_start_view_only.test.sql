@@ -84,7 +84,7 @@ select throws_ok($$ select public.save_split(jsonb_build_array(
   '42501', 'not_owner', '파트너 월급 계획 지출 줄은 못 고침');
 select throws_ok($$ select public.check_pay_line((select l.id from public.pay_check_line l
     join public.pay_checklist c on c.id = l.checklist_id
-    where c.owner_user_id = '22222222-2222-2222-2222-222222222222' and l.kind = 'living'), 'checked') $$,
+    where c.owner_user_id = '22222222-2222-2222-2222-222222222222' and (l.kind = 'custom' and l.name = '생활비')), 'checked') $$,
   '42501', 'not_owner', '파트너 체크리스트는 체크 못 함');
 update public.goal set name = '찬우가 바꿈' where id = (select id from public.goal where name = '카메라');
 select is((select count(*)::int from public.goal where name = '카메라'), 1, '파트너 저금 이름은 그대로(RLS)');
@@ -95,7 +95,7 @@ select lives_ok($$ select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'living', 'amount', 900000)), auth.uid()) $$, '내 월급 계획은 고침');
 reset role;
 select is((select amount from public.split_line l join public.salary_split s on s.id = l.split_id
-  where s.owner_user_id = '22222222-2222-2222-2222-222222222222' and l.kind = 'living'), 680000::bigint,
+  where s.owner_user_id = '22222222-2222-2222-2222-222222222222' and (l.kind = 'custom' and l.name = '생활비')), 680000::bigint,
   '예빈 생활비 그대로');
 
 -- 파트너 변경 알림 문구: ‘저축·투자’

@@ -16,7 +16,7 @@ create function pg_temp.login_as(uid uuid) returns void language sql as $$
 $$;
 create function pg_temp.sl(p_owner uuid, k text, p_user uuid default null) returns uuid language sql as $$
   select l.id from public.split_line l join public.salary_split s on s.id = l.split_id
-  where s.owner_user_id is not distinct from p_owner and l.kind::text = k and (p_user is null or l.user_id = p_user) limit 1;
+  where s.owner_user_id is not distinct from p_owner and (case when l.kind = 'custom' and l.name = '생활비' then 'living' else l.kind::text end) = k and (p_user is null or l.user_id = p_user) limit 1;
 $$;
 
 -- 찬우(시작한 사람, 25일), 다른 사람(혼자)
@@ -79,9 +79,9 @@ reset role;
 update public.app_user set plan_share = 'all' where id = '11111111-1111-1111-1111-111111111111';
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select is(pg_temp.view_kinds(), 'saving:950000,fixed:680000,living:880000', '모두: 모든 줄');
+select is(pg_temp.view_kinds(), 'saving:950000,fixed:680000,custom:880000', '모두: 모든 줄');
 select is((public.partner_plan_view()->>'income')::bigint, 3500000::bigint, '모두: 수입');
-select is(pg_temp.rls_kinds(), 'saving,fixed,living', '모두: RLS도');
+select is(pg_temp.rls_kinds(), 'saving,fixed,custom', '모두: RLS도');
 select is((select monthly_income from public.partner_profile()), 3500000::bigint, '모두: partner_profile 수입');
 reset role;
 

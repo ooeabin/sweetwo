@@ -19,7 +19,10 @@ async function open(page: Page) {
   seed(db);
   return db;
 }
-const living = (db: MemDb) => db.splits[0]?.split_line.find((l) => l.kind === 'living');
+const living = (db: MemDb) =>
+  db.splits[0]?.split_line.find(
+    (l) => l.kind === 'living' || (l.kind === 'custom' && l.name === '생활비'),
+  );
 const danger = (page: Page) =>
   page.evaluate(() => {
     const d = document.createElement('i');

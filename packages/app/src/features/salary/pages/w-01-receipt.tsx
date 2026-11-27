@@ -88,7 +88,7 @@ import { toDraft } from '../split-editor';
 // from: W-10 ‘매달 금액 바꾸기’(?line=)로 연 시트(분석 entry saving_detail, 주소의 line은 열자마자 지움)
 type Sheet = { line: SplitLine; from?: 'saving_detail' } | { income: true } | null;
 type Kind = SplitLine['kind'];
-const DEFAULT_KINDS: Kind[] = ['fixed', 'living', 'allowance'];
+const DEFAULT_KINDS: Kind[] = ['fixed', 'allowance']; // 2026-11-28 생활비 기본 줄 없앰
 const MAX_CUSTOM = 20; // 직접 추가 줄 한도(2026-11-27 10 → 20, 서버 too_many_custom)
 
 // W-01 월급 계획 영수증(20 W-01, 2026-11-09). 별도 화면(/salary/plan, 2026-11-18 구간 탭 없앰).
@@ -325,9 +325,7 @@ export function W01Receipt() {
             ? copy.sendName // 5e 한 사람 관리형 ‘보내기’
             : l.kind === 'shared_account'
               ? (l.name ?? accountNames.ofAccount(l.shared_account_id) ?? copy.sharedAccountName) // 5d 같이 쓰는 통장(분담 이름, M7)
-              : l.kind === 'living'
-                ? copy.livingOther // 2026-11-27 생활비 묶음 안 생활비 기본 줄
-                : copy.lineNames[l.kind];
+              : copy.lineNames[l.kind];
   const won = (v: number) => money(v, masked);
   const baseDay = baseDayOf(owner ?? m, sp);
   // 보이는 금액 글자(가리기면 화면 읽기는 “가려진 금액”, 11 9장)
@@ -531,18 +529,13 @@ export function W01Receipt() {
   ) =>
     run(async () => {
       if (!split) return;
-      // 첫 달 묻기 ‘생활비’ 칩은 기본 생활비 줄(kind living, 이름 없음). 그 밖은 직접 추가 줄
-      const living = first && chip === 'living';
-      // 2026-11-27 W-01e 이름 칩으로 만든 줄은 그 묶음(category), 글자로 넣은 줄은 묶음 없음
+      // 직접 추가 줄(2026-11-28 생활비 기본 줄 없앰). W-01e 이름 칩으로 만든 줄은 그 묶음(category), 글자로 넣은 줄은 묶음 없음
       const category = chip ? (spendChipCategory(chip) ?? undefined) : undefined;
       const id = await write(() =>
-        addSplitLine(
-          split.id,
-          living ? { kind: 'living', amount } : { kind: 'custom', name, amount, category },
-        ),
+        addSplitLine(split.id, { kind: 'custom', name, amount, category }),
       );
-      // ‘어떻게 챙겨요?’가 새 줄의 기본값(생활비 줄만 목록 끔)과 다르면 바로 설정(split_lines_configure)
-      if (set && (set.autoPay || set.inChecklist !== !living))
+      // ‘어떻게 챙겨요?’가 새 줄의 기본값(확인 목록 켬)과 다르면 바로 설정(split_lines_configure)
+      if (set && (set.autoPay || !set.inChecklist))
         await write(() =>
           configureSplitLines([
             {
@@ -1402,7 +1395,7 @@ export function W01Receipt() {
         }}
         onConfirm={(o) => {
           if (spendLines.some((l) => nameOf(l) === o.name)) return toast(copy.duplicateName);
-          void add(o.name, o.chip, o.amount, spendForm.first && o.chip === 'living', o.settings);
+          void add(o.name, o.chip, o.amount, spendForm.first, o.settings);
         }}
       />
     );
