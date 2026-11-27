@@ -55,8 +55,9 @@ test('온보딩에서 넣은 월급은 W-01 월급 줄에 그대로, 줄을 눌�
   const row = page.getByRole('button', { name: '월급 3,500,000원, 금액 고치기' });
   await expect(row).toBeVisible();
   await expect(page.getByText('월급 알려 주기')).toHaveCount(0);
-  // 용돈 35만 원만 계획: 350만 원이면 미계획 90%
-  await expect(page.getByRole('img', { name: /미계획 90%/ })).toBeVisible();
+  // 용돈 35만 원만 계획: 저축·투자 0원이라 도넛 대신 지출 / 미계획 표(2026-11-27 ‘저축·투자 0원 요약 ①’)
+  const tbl = page.locator('.hg-plansum__table li');
+  await expect(tbl).toHaveText(['지출350,000원', '미계획3,150,000원']);
   await row.click();
   const sheet = page.getByRole('dialog', { name: '월급 금액' });
   // 월급날은 이미 있어 휠 없음
@@ -72,8 +73,8 @@ test('온보딩에서 넣은 월급은 W-01 월급 줄에 그대로, 줄을 눌�
     p_amount: 4_000_000,
     p_from: '2026-10-01',
   });
-  // 미계획 금액은 새 월급 기준으로 바로 다시 계산(400만 원이면 91%)
-  await expect(page.getByRole('img', { name: /미계획 91%/ })).toBeVisible();
+  // 미계획 금액은 새 월급 기준으로 바로 다시 계산
+  await expect(tbl).toHaveText(['지출350,000원', '미계획3,650,000원']);
 });
 
 test('‘지금은 월급이 없어요’: W-01은 월급 0원 줄을 보여 주고 고칠 수 있고, W-02는 막는 카드 없이 안내 한 줄, 홈은 평소 줄', async ({
@@ -100,10 +101,11 @@ test('‘지금은 월급이 없어요’: W-01은 월급 0원 줄을 보여 주
   await heading(page, '월급 계획 템플릿');
   const row = page.getByRole('button', { name: '월급 0원, 금액 고치기' });
   await expect(row).toBeVisible();
-  // 2026-11-19: 요약 카드 “월급 입력하기”, 빈 카드는 칩 + 직접 정하기(블록 추가 버튼은 줄이 생기면)
+  // 2026-11-19: 요약 카드 “월급 입력하기”. 2026-11-27 A안: 빈 카드는 칩 없이 추가 줄 한 줄씩
   await expect(page.getByRole('button', { name: '월급 입력하기' })).toBeVisible();
-  await expect(page.getByRole('group', { name: '무엇을 모을지 골라 보세요' })).toBeVisible();
-  await expect(page.getByRole('group', { name: '매달 나가는 지출을 골라 보세요' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '+ 저축·투자 추가' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '+ 지출 추가' })).toBeVisible();
+  await expect(page.locator('.hg-plancard .hg-chip')).toHaveCount(0);
   await expect(page.getByText('월급을 넣으면 월급 계획을 만들어 드려요')).toHaveCount(0);
   await axe(page);
 
@@ -159,7 +161,7 @@ test('월급 계획 템플릿이 아직 없는 사람(월급 0원)이 W-01·W-11
   await expect(page.getByRole('button', { name: '월급 0원, 금액 고치기' })).toBeVisible();
   await expect(page.getByText('월급을 넣으면 월급 계획을 만들어 드려요')).toHaveCount(0);
   await expect.poll(() => db.splits.length).toBe(1);
-  await expect(page.getByRole('group', { name: '매달 나가는 지출을 골라 보세요' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '+ 지출 추가' })).toBeVisible();
 
   // W-11도 월급 0원이라고 돌려보내지 않음
   db.splits.length = 0;

@@ -321,15 +321,16 @@ test('월급 0원: 요약 카드는 “월급을 입력하면 / 나눌 수 있�
   await expect(sum.getByRole('button', { name: '월급 입력하기' })).toHaveClass(
     /hg-plan__block--soft/,
   );
-  // 빈 카드: 저축·투자 = 이름 칩 + 직접 정하기, 지출 = 지출 칩 + 직접 정하기, 블록 추가 버튼은 없음
+  // 빈 카드(2026-11-27 ‘W-01 빈 묶음 A안’): 칩 없이 머리 + 추가 줄 한 줄, 합계 0원은 숨김
   const saving = page.getByRole('region', { name: '저축·투자', exact: true });
-  await expect(saving.getByRole('group', { name: '무엇을 모을지 골라 보세요' })).toBeVisible();
-  await expect(saving.getByRole('button', { name: '직접 정하기' })).toBeVisible();
   const spend = page.getByRole('region', { name: '지출', exact: true });
-  await expect(spend.getByRole('group', { name: '매달 나가는 지출을 골라 보세요' })).toBeVisible();
-  for (const n of ['월세', '관리비', '통신비', '보험료', '대출 상환', '생활비', '직접 정하기'])
-    await expect(spend.getByRole('button', { name: n, exact: true })).toBeVisible();
-  await expect(page.locator('.hg-plan__block:not(.hg-plan__block--soft)')).toHaveCount(0);
+  for (const r of [saving, spend]) {
+    await expect(r.locator('.hg-chip')).toHaveCount(0);
+    await expect(r.locator('.hg-plancard__sum')).toHaveCount(0);
+  }
+  await expect(saving.getByRole('button', { name: '+ 저축·투자 추가' })).toBeVisible();
+  await expect(spend.getByRole('button', { name: '+ 지출 추가' })).toBeVisible();
+  await expect(page.locator('.hg-plancard .hg-addrow--block')).toHaveCount(2);
   await expect(page.getByText('매달 나가는 지출이 있어요?')).toHaveCount(0); // 맨 위 칩 카드 없음
   await sum.getByRole('button', { name: '월급 입력하기' }).click();
   await expect(page.getByRole('dialog', { name: '월급 금액' })).toBeVisible();
@@ -784,26 +785,36 @@ function noSpend(db: MemDb) {
     );
 }
 
-test('빈 지출 카드(2026-11-19, 예전 첫 달 묻기): 칩 → 금액 직접 → 지출 줄, 이어서 생활비 칩, 다시 열면 칩 없음', async ({
+test('빈 지출 카드(2026-11-27 A안): 칩 없이 ‘+ 지출 추가’ 한 줄 → W-01e 첫 달 칩 → 지출 줄, 이어서 생활비 칩, 다시 열면 보통 칩', async ({
   page,
 }) => {
   const { db, go } = await open(page);
   noSpend(db);
   await go();
   const card = page.getByRole('region', { name: '지출', exact: true });
-  await expect(card.getByRole('group', { name: '매달 나가는 지출을 골라 보세요' })).toBeVisible();
+  // W-01 화면에는 칩이 없음(용돈 줄 + 추가 줄 하나)
+  await expect(card.locator('.hg-chip')).toHaveCount(0);
+  await expect(card.getByRole('button', { name: '+ 지출 추가' })).toBeVisible();
   // 맨 위 칩 카드와 ‘다 넣었어요’ ‘건너뛸게요’는 없음
   await expect(page.getByRole('region', { name: '매달 나가는 지출이 있어요?' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '다 넣었어요' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '건너뛸게요' })).toHaveCount(0);
-  // 가짜 추천 금액 없음: 칩만, 금액은 시트에서 직접
-  await card.getByRole('button', { name: '월세', exact: true }).click();
+  // 빈 카드에서 열면 W-01e는 첫 달 칩(월세 … 생활비) + 직접 정하기
+  await addSpend(page);
+  const chips = page.getByRole('group', { name: '지출 이름' });
+  for (const n of ['월세', '관리비', '통신비', '보험료', '대출 상환', '생활비', '직접 정하기'])
+    await expect(chips.getByRole('button', { name: n, exact: true })).toBeVisible();
+  await axe(page);
+  // 가짜 추천 금액 없음: 칩만, 금액은 직접
+  await chips.getByRole('button', { name: '월세', exact: true }).click();
   await fillAmount(page, '매달 얼마씩?', 500000);
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page.getByText('월세를 추가했어요')).toBeVisible();
   expect(lineOf(db, 'custom', '월세')?.amount).toBe(500_000);
-  // 생활비 칩은 기본 생활비 줄(kind living), 넣은 칩은 숨김
-  await card.getByRole('button', { name: '생활비', exact: true }).click();
+  // 이어서: 같은 화면이면 첫 달 칩 그대로(넣은 이름은 숨김), 생활비 칩은 기본 생활비 줄(kind living)
+  await addSpend(page);
+  await expect(chips.getByRole('button', { name: '월세', exact: true })).toHaveCount(0);
+  await chips.getByRole('button', { name: '생활비', exact: true }).click();
   // 생활비 칩만 처음 값이 ‘확인 안 해요’(생활비 줄 기본)
   await expect(page.getByRole('radio', { name: '확인 안 해요' })).toHaveAttribute(
     'aria-checked',
@@ -812,19 +823,22 @@ test('빈 지출 카드(2026-11-19, 예전 첫 달 묻기): 칩 → 금액 직�
   await fillAmount(page, '매달 얼마씩?', 600000);
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect.poll(() => lineOf(db, 'living')?.amount).toBe(600_000);
-  await expect(card.getByRole('button', { name: '월세', exact: true })).toHaveCount(0);
   await expect.poll(() => names(page, '지출')).toEqual(['용돈', '월세', '생활비']);
   await axe(page);
   await page.reload();
   expect(await planItems(page)).toContain('순서 바꾸기');
-  await expect(page.getByRole('group', { name: '매달 나가는 지출을 골라 보세요' })).toHaveCount(0);
+  // 다시 열면 지출 줄이 있어 보통 칩(구독료 …)
+  await addSpend(page);
+  await expect(chips.getByRole('button', { name: '구독료', exact: true })).toBeVisible();
+  await expect(chips.getByRole('button', { name: '대출 상환', exact: true })).toHaveCount(0);
 });
 
-test('빈 지출 카드: “직접 정하기” → 이름 칸', async ({ page }) => {
+test('빈 지출 카드: ‘+ 지출 추가’ → “직접 정하기” → 이름 칸', async ({ page }) => {
   const { db, go } = await open(page);
   noSpend(db);
   await go();
-  await page.getByRole('button', { name: '직접 정하기' }).last().click();
+  await addSpend(page);
+  await page.getByRole('button', { name: '직접 정하기' }).click();
   await expect(page.getByRole('textbox', { name: '항목 이름' })).toBeVisible();
   await expect(page.getByRole('textbox', { name: '항목 이름' })).toHaveValue('');
 });
@@ -836,7 +850,7 @@ test('지출 줄이 있으면 빈 지출 카드 없음, 같이 쓰는 생활비 
   Object.assign(db.space ?? {}, { shared_living: false });
   await go();
   expect(await planItems(page)).toContain('순서 바꾸기');
-  await expect(page.getByRole('group', { name: '매달 나가는 지출을 골라 보세요' })).toHaveCount(0);
+  await expect(page.locator('.hg-plancard .hg-chip')).toHaveCount(0);
   await expect(page.getByRole('button', { name: '+ 같이 쓰는 통장 추가' })).toHaveCount(0);
   await page.getByRole('button', { name: '+ 지출 추가' }).click();
   // 같이 쓰는 통장을 쓸 수 없으면 시트 없이 바로 지출 추가(칩 끝에 ‘같이 쓰는 통장’)
@@ -870,15 +884,17 @@ test('빈 상태(저축·투자도 지출도 0줄): 머리 ‘편집’·아래 
   const sp = db.splits[0];
   if (sp) sp.split_line = [];
   await go();
-  await expect(page.getByRole('group', { name: '무엇을 모을지 골라 보세요' })).toBeVisible();
-  await expect(page.getByRole('group', { name: '매달 나가는 지출을 골라 보세요' })).toBeVisible();
+  // 2026-11-27 A안: 빈 묶음은 칩 없이 추가 줄 둘
+  await expect(page.locator('.hg-plancard .hg-chip')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '+ 저축·투자 추가' })).toBeVisible();
   // 줄이 없으면 머리 ⋯에 편집·공유하기·추천값 없음(수입 기록 등은 그대로)
   for (const n of ['순서 바꾸기', '공유하기', '추천값으로 다시 채우기'])
     expect(await planItems(page)).not.toContain(n);
   await axe(page);
-  // 줄 하나(칩 → 금액)가 생기면 셋 다 보임
+  // 줄 하나(‘+ 지출 추가’ → 칩 → 금액)가 생기면 셋 다 보임
+  await addSpend(page);
   await page
-    .getByRole('region', { name: '지출', exact: true })
+    .getByRole('group', { name: '지출 이름' })
     .getByRole('button', { name: '월세', exact: true })
     .click();
   await fillAmount(page, '매달 얼마씩?', 500000);
@@ -889,6 +905,44 @@ test('빈 상태(저축·투자도 지출도 0줄): 머리 ‘편집’·아래 
   expect(await planItems(page)).toEqual(
     expect.arrayContaining(['순서 바꾸기', '공유하기', '추천값으로 다시 채우기']),
   );
+});
+
+test('저축·투자 0원 요약 ①(2026-11-27): 도넛·범례 대신 행동 줄 + 지출 / 미계획 표, 줄 → W-11', async ({
+  page,
+}) => {
+  const { db, go } = await open(page);
+  Object.assign(db.me, { monthly_income: 4_000_000 });
+  db.goals.length = 0;
+  const sp0 = db.splits[0];
+  if (sp0)
+    sp0.split_line = sp0.split_line
+      .filter((l) => l.kind === 'allowance')
+      .map((l) => ({ ...l, amount: 400_000 }));
+  await go();
+  const sum = page.locator('.hg-plansum');
+  await expect(sum.locator('.hg-plansum__donut, .hg-plansum__legend')).toHaveCount(0);
+  await expect(sum.locator('.hg-plansum__title')).toHaveCount(0);
+  const start = sum.getByRole('button', { name: '저축·투자 정하고 한 달에 얼마 모을지 확인하기' });
+  await expect(start).toBeVisible();
+  await expect(sum.locator('.hg-plansum__table li')).toHaveText([
+    '지출400,000원',
+    '미계획3,600,000원',
+  ]);
+  await axe(page);
+  await start.click();
+  await expect(page).toHaveURL(/\/salary\/items\/new\?from=split$/);
+});
+
+test('저축·투자 0원 + 지출 0원: 행동 줄 + 미계획 한 줄(0원인 지출 줄은 없음)', async ({ page }) => {
+  const { db, go } = await open(page);
+  db.goals.length = 0;
+  const sp0 = db.splits[0];
+  if (sp0) sp0.split_line = [];
+  await go();
+  const sum = page.locator('.hg-plansum');
+  await expect(sum.locator('.hg-plansum__start')).toBeVisible();
+  // 미계획 = 월급 전부라 표에 미계획 한 줄
+  await expect(sum.locator('.hg-plansum__table li')).toHaveText(['미계획3,500,000원']);
 });
 
 test('월급 0원이어도 줄이 0개면 아래 버튼 숨김', async ({ page }) => {

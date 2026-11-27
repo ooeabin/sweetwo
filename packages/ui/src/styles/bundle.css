@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (d8e0bac0). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (72133e6f). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 /* 2026-11-24 구역 5 설정 검토: 사용자 앱 글자 바탕값 15/22. 클래스 없는 b·p·li가 브라우저 기본 16px로 나오던 것(기준 17/15 밖). 어드민·웹사이트는 data-platform이 없어 그대로 */
@@ -3384,3 +3384,18 @@ button.hg-plansum__sal { cursor: pointer; }
 .hg-archive .hg-listrow__sub { grid-column: 2 / -1; grid-row: 2; min-width: 0; }
 .hg-archive .hg-listrow__value { grid-column: 3; grid-row: 1; }
 .hg-archive .hg-listrow > .hg-chevron { grid-column: 4; grid-row: 1; }
+/* 2026-11-27 사용자 결정 ‘저축·투자 0원 요약 ①’(W-01, PlanSummary.md): 저축·투자 합이 0원이면 도넛·범례 대신
+   행동 줄 하나(왼쪽 + 칸, 두 줄 글자, 오른쪽 ›) + 작은 표 두 줄(지출 / 미계획).
+   왼쪽 40 둥근 사각 칸은 AddRow의 + 와 같은 회색 판 + ink-2 Phosphor plus(UI 아이콘, 그림 칸 아님) */
+.hg-plansum__start { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 56px; margin: var(--gap-box-in) 0 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.hg-plansum__start:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.hg-plansum__starticon { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--surface-alt); color: var(--ink-2); }
+.hg-plansum__starttext { display: flex; flex: 1; min-width: 0; flex-direction: column; }
+.hg-plansum__starttop { font: var(--text-note); color: var(--slate); }
+.hg-plansum__startmain { font: var(--text-value); font-weight: 700; color: var(--ink); }
+.hg-plansum__table { margin: var(--gap-box-in) 0 0; padding: 0; list-style: none; }
+.hg-plansum__start + .hg-plansum__table { margin-top: var(--space-2); }
+.hg-plansum__table li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); height: 40px; font: var(--text-value); }
+.hg-plansum__tname { min-width: 0; color: var(--ink-2); }
+.hg-plansum__tval { flex: none; font-weight: 700; color: var(--ink); }
+.hg-plansum__table li.is-short .hg-plansum__tval { color: var(--danger); }

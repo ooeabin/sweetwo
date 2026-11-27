@@ -356,6 +356,11 @@ export interface PlanImageModel {
     value: string;
     short?: boolean;
   }[];
+  /**
+   * 저축·투자 0원 표(2026-11-27 사용자 결정 ‘저축·투자 0원 요약 ①’): 있으면 도넛·범례 대신 이름 15/400 ink-2 + 오른쪽 값 15/700(short면 danger)
+   * 줄(지출 / 미계획, 0원 줄은 부르는 쪽에서 뺌). 화면의 행동 줄(버튼)은 이미지에 그리지 않음
+   */
+  table?: { name: string; value: string; short?: boolean }[];
   /** 저축·투자, 지출 줄 목록(줄이 없는 묶음은 부르는 쪽에서 뺌). sub = 목표 금액이 있으면 “목표 금액의 62%” */
   sections: {
     title: string;
@@ -472,7 +477,21 @@ function layoutPlan(
       }
       yy += 24;
     }
-    if (m.chart) {
+    if (m.table) {
+      // 저축·투자 0원: 문장 아래(없으면 큰 금액 아래) 24에 표, 줄 높이 40(화면 hg-plansum__table과 같음)
+      if (m.table.length) yy += 24;
+      for (const r of m.table) {
+        const my = yy + 20;
+        put(r.name, left, my, { weight: 400, size: 15, color: t.ink2 });
+        put(r.value, right, my, {
+          weight: 700,
+          size: 15,
+          color: r.short ? t.danger : t.ink,
+          align: 'right',
+        });
+        yy += 40;
+      }
+    } else if (m.chart) {
       // 굵은 문장 아래 24에 도넛 가운데(지름 140, 구멍 약 30%, 가운데 글자 없음,
       // 12시부터 시계 방향 저축·투자 → 지출 → 미계획, 틈 없음, 0%는 안 그림)
       yy += 24;

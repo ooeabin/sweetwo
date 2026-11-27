@@ -3383,3 +3383,18 @@ button.hg-plansum__sal { cursor: pointer; }
 .hg-archive .hg-listrow__sub { grid-column: 2 / -1; grid-row: 2; min-width: 0; }
 .hg-archive .hg-listrow__value { grid-column: 3; grid-row: 1; }
 .hg-archive .hg-listrow > .hg-chevron { grid-column: 4; grid-row: 1; }
+/* 2026-11-27 사용자 결정 ‘저축·투자 0원 요약 ①’(W-01, PlanSummary.md): 저축·투자 합이 0원이면 도넛·범례 대신
+   행동 줄 하나(왼쪽 + 칸, 두 줄 글자, 오른쪽 ›) + 작은 표 두 줄(지출 / 미계획).
+   왼쪽 40 둥근 사각 칸은 AddRow의 + 와 같은 회색 판 + ink-2 Phosphor plus(UI 아이콘, 그림 칸 아님) */
+.hg-plansum__start { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 56px; margin: var(--gap-box-in) 0 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.hg-plansum__start:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.hg-plansum__starticon { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: var(--radius-lg); background: var(--surface-alt); color: var(--ink-2); }
+.hg-plansum__starttext { display: flex; flex: 1; min-width: 0; flex-direction: column; }
+.hg-plansum__starttop { font: var(--text-note); color: var(--slate); }
+.hg-plansum__startmain { font: var(--text-value); font-weight: 700; color: var(--ink); }
+.hg-plansum__table { margin: var(--gap-box-in) 0 0; padding: 0; list-style: none; }
+.hg-plansum__start + .hg-plansum__table { margin-top: var(--space-2); }
+.hg-plansum__table li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); height: 40px; font: var(--text-value); }
+.hg-plansum__tname { min-width: 0; color: var(--ink-2); }
+.hg-plansum__tval { flex: none; font-weight: 700; color: var(--ink); }
+.hg-plansum__table li.is-short .hg-plansum__tval { color: var(--danger); }

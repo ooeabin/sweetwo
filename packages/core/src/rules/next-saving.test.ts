@@ -10,7 +10,6 @@ import {
   SAVING_CHIPS,
   savingArtKey,
   savingChips,
-  savingStartChips,
   type SavingChip,
 } from './next-saving';
 
@@ -51,15 +50,6 @@ it('이름 칩 표(19, 2026-11-18): 두 사람 사이마다 6개', () => {
   for (const m of Object.keys(SAVING_CHIPS) as (keyof typeof SAVING_CHIPS)[]) {
     expect(SAVING_CHIPS[m]).toHaveLength(6);
     expect(new Set(SAVING_CHIPS[m]).size).toBe(6);
-  }
-});
-
-it('H-10 빈 상태 칩: 이름 칩 6개 + 맨 끝 직접 정하기', () => {
-  for (const m of ['engaged', 'married', 'living_together', 'dating', null] as const) {
-    const c = savingStartChips(m);
-    expect(c).toHaveLength(7);
-    expect(c.at(-1)).toBe('custom');
-    expect(c.slice(0, 6)).toEqual(savingChips(m));
   }
 });
 
