@@ -276,7 +276,7 @@ for (const [name, path, prep] of BAR_CASES) {
 test('시트 안 옆 여백 24(화면과 같게)', async ({ page }) => {
   await open(page, '/salary/plan');
   await page
-    .getByRole('button', { name: /^생활비 / })
+    .getByRole('button', { name: /^기타 생활비 / }) // 2026-11-27 생활비 묶음 안 ‘기타 생활비’
     .first()
     .click();
   const sheet = page.getByRole('dialog', { name: '생활비 금액' });
