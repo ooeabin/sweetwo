@@ -2,6 +2,7 @@ import { fetchGoalLines, qk, restoreTrash, trashGoals } from '@sweetwo/api';
 import { formatDateFull, formatYm, kstDateOf as kstDay, savingRemain } from '@sweetwo/core';
 import {
   Badge,
+  Band,
   Button,
   Icon,
   ListRow,
@@ -194,7 +195,7 @@ export function W10SavingItem() {
   ].sort((a, b) => (a.at < b.at ? 1 : -1));
 
   const body = (
-    <div key="l" className="hg-stack hg-goaldetail" style={{ gap: 0 }}>
+    <div key="l" className="hg-stack hg-goaldetail">
       <AchieveWatch />
       <PageHeader
         title={g.name}
@@ -393,7 +394,7 @@ export function W10SavingItem() {
         )}
         {/* 달성했는데 아직 고르지 않았으면 W-12a와 같은 질문(20 W-10 5번) */}
         {i.state === 'achieved' && i.canEdit && <AfterChoice item={i} />}
-        {!hideAmounts && <div className="hg-page__band" aria-hidden="true" />}
+        {!hideAmounts && <Band />}
         {!hideAmounts && (
           <section
             ref={historyRef}
@@ -460,7 +461,7 @@ export function W10SavingItem() {
           </section>
         )}
         {/* 정보(2026-11-23 바탕 기준): 라벨-값 두 줄 */}
-        <div className="hg-page__band" aria-hidden="true" />
+        <Band />
         <section className="hg-page__info" aria-label={copy.info}>
           <div className="hg-fdinfo">
             <span>{copy.createdOnLabel}</span>
