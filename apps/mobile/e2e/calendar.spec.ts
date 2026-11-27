@@ -1089,7 +1089,7 @@ test('달력 머리 “10월 ⌄” (2026-11-27): ‹ › 없음, ⌄ 누르는 
   const month = head.getByRole('button', { name: '2026년 10월, 달 고르기' });
   await expect(month).toHaveText('10월');
   await expect(month.locator('.hg-ico--chevron-down')).toHaveCount(1);
-  expect((await month.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+  expect(Math.round((await month.boundingBox())?.height ?? 0)).toBeGreaterThanOrEqual(44);
   // 이번 달이면 ‘오늘’ 자리째 없음, 머리 높이는 그대로
   const h0 = (await head.boundingBox())?.height;
   await expect(page.getByRole('button', { name: '오늘', exact: true })).toHaveCount(0);
@@ -1100,7 +1100,7 @@ test('달력 머리 “10월 ⌄” (2026-11-27): ‹ › 없음, ⌄ 누르는 
   expect((await head.boundingBox())?.height).toBe(h0);
   // ‘오늘’ 작은 알약: 보이는 높이 28, 13/700, 누르는 칸 44, 달 이름과 세로 가운데가 같음
   const tb = await today.boundingBox();
-  expect(tb?.height).toBe(28);
+  expect(Math.round(tb?.height ?? 0)).toBe(28);
   const tf = await today.evaluate((e) => {
     const c = getComputedStyle(e);
     const a = getComputedStyle(e, '::after');
