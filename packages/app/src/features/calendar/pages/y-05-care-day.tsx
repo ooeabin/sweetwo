@@ -219,7 +219,7 @@ export function Y05CareDay() {
       )}
       <section className="hg-stack" aria-label={copy.alerts}>
         <span className="hg-card__label">{copy.alerts}</span>
-        {/* 2026-11-04 미리 알림은 체크 목록(여러 개 고름, iOS 미리 알림·Rodeo처럼) */}
+        {/* 2026-11-04 미리 알림은 체크 목록(여러 개 고름) */}
         <div className="hg-list" role="group" aria-label={copy.alerts}>
           {ALERTS.map((n) => {
             const on = care.alerts.includes(n);

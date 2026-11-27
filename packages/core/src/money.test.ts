@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ceilTo10k, formatWon, formatWonCap, readWon, readWonCap } from './money';
 
-describe('금액 표기(11 공통 6장, 2026-11-26 토스식)', () => {
+describe('금액 표기(11 공통 6장, 2026-11-26 원 단위 전체)', () => {
   it('원 단위 그대로 쉼표 + 붙여 쓴 원', () => {
     expect(formatWon(0)).toBe('0원');
     expect(formatWon(8_500)).toBe('8,500원');

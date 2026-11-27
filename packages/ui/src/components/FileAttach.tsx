@@ -39,7 +39,7 @@ export interface FileAttachProps {
   removeLabel: (name: string) => string;
   retryLabel: string;
   uploadingLabel: string;
-  /** 사진 칸 3열(2026-11-04 Y-08c, Stoic·AllTrails): 첫 칸 ‘+ 사진 추가’, 올린 사진은 정사각 칸 + ✕ */
+  /** 사진 칸 3열(2026-11-04 Y-08c): 첫 칸 ‘+ 사진 추가’, 올린 사진은 정사각 칸 + ✕ */
   grid?: boolean;
   /** grid: 첫 칸 글자(“사진 추가”) */
   addLabel?: string;

@@ -10,7 +10,7 @@ export interface ChapterProgress {
   name: string;
   /** 챕터 안 진행 0~100. null이면 막대 없이 글자만(온보딩 결과 O-61~67) */
   fill: number | null;
-  /** 넓은 창 칸 막대(Meetup식): 챕터 안 질문 수와 지금까지 연 질문 수 */
+  /** 넓은 창 칸 막대: 챕터 안 질문 수와 지금까지 연 질문 수 */
   steps?: { total: number; done: number };
   /** 이름이 없을 때 화면 읽기 이름 앞말(기본 ‘온보딩’) */
   label?: string;

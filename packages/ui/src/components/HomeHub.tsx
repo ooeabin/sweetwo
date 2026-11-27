@@ -3,7 +3,7 @@ import { Button } from './Button';
 import { cx } from './cx';
 import { Icon } from './Icon';
 
-// 홈 허브(docs/design/components/HomeHub.md, 2026-11-09 GCOO 홈처럼): 회색 바탕 위 크기가 다른 흰 상자.
+// 홈 허브(docs/design/components/HomeHub.md, 2026-11-09 상자로 이동하는 허브 홈): 회색 바탕 위 크기가 다른 흰 상자.
 // Hub(격자) > SaveTogether(H-10 같이 모으기, 따로 파일), HubLine(H-11 이번 달 한 줄, 날짜 없는 사람은 PeriodBar),
 // HubBand(할 일·초대 띠, 코코아 채움, 8번만 글자 버튼 둘 secondary), HubBox(월급 상자 H-15, 2026-11-17, 2026-11-18부터 줄마다 따로 이동),
 // HubTile(반 칸 타일, point = 오렌지 채운 포인트 상자 하나, 2026-11-17부터 자산 관리 타일).

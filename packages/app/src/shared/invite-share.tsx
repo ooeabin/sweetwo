@@ -102,7 +102,7 @@ export function InviteCodeBox({ code, onCopy }: { code: string | undefined; onCo
   );
 }
 
-/** ‘링크 복사’(보조) + ‘카톡으로 보내기’(주) 한 줄(O-07 2026-11-03, Lyft처럼) */
+/** ‘링크 복사’(보조) + ‘카톡으로 보내기’(주) 한 줄(O-07 2026-11-03) */
 export function InviteButtons({
   disabled,
   onLink,

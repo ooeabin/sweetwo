@@ -13,7 +13,7 @@ export function assertWon(value: number): Won {
 const group = (n: number) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
 /**
- * 금액 표기(앱 전체 기본, 2026-11-26 사용자 결정 ‘토스식’, docs/spec/11-common.md 6장 ‘금액 표기’):
+ * 금액 표기(앱 전체 기본, 2026-11-26 사용자 결정 ‘원 단위 전체’, docs/spec/11-common.md 6장 ‘금액 표기’):
  * 원 단위 그대로 세 자리 쉼표 + 붙여 쓴 “원”. 3,500,000 → "3,500,000원", 음수는 빼기 기호 “−1,200,000원”
  */
 export function formatWon(value: Won): string {

@@ -5,7 +5,7 @@ import type { Page } from '@playwright/test';
 // 달성 배지의 color-contrast만 예외로 빼고, 나머지 규칙은 그대로 검사함.
 const BRAND_FILL = /hg-badge--achieved/;
 
-// 2026-11-09 브랜드 색 규칙(당근처럼 오렌지 하나): 흰 바탕 위 오렌지 글자(약 2.7:1)도 알고 씀.
+// 2026-11-09 브랜드 색 규칙(오렌지 하나): 흰 바탕 위 오렌지 글자(약 2.7:1)도 알고 씀.
 // 예외는 14px 이상 + 600 이상의 짧은 강조 숫자, 띠 안 흰 작은 버튼, 고른 바꾸기 칩만(2026-11-09 글자 버튼은 모두 회색이라 예외 없음. tokens.css `--brand` 주석, DESIGN.md 색, CLAUDE.md 브랜드 색).
 // 체크 원, 진행 원·막대, + 버튼(FAB)은 글자가 없는 그래픽이라 axe color-contrast 대상이 아님.
 // 이 선택자에 걸리는 요소(또는 그 안의 글자)만 color-contrast에서 뺌. 나머지 규칙과 요소는 그대로 검사함.

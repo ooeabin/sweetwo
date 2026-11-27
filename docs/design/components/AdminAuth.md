@@ -2,7 +2,6 @@
 
 어드민 로그인과 2단계 인증 화면 틀(2026-11-06). 사용자 앱의 AuthLayout과 따로, 업무 도구답게 작고 조용하게.
 
-- 참고: Laravel Cloud 로그인, Stripe·Buffer 인증 앱 숫자, Copilot·MagicPath ‘메일을 확인해 주세요’.
 - 바탕 `surface-alt` 꽉 채움, 가운데 흰 카드(`hg-adminauth__card`, 최대 400px, 1px `hairline-soft`, `radius-lg`, 안쪽 32px).
 - 카드 위: 워드마크(잉크, 밝은 화면 검정, 다크 화면 흰색, 24px, 2026-11-06) + 태그 “어드민”. 그 아래 32px 띄움.
 - 제목 위 아이콘은 두지 않는다(2026-11-06 없앰). 글만으로 충분하다.

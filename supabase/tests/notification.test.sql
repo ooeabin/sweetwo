@@ -15,7 +15,7 @@ create function pg_temp.login_as(uid uuid) returns void language sql as $$
 $$;
 
 -- 문구 도우미
-select is(public.read_won(300000), '300,000원', '금액 표기(2026-11-26 토스식)');
+select is(public.read_won(300000), '300,000원', '금액 표기(2026-11-26 원 단위 전체)');
 select is(public.read_won(3205000), '3,205,000원', '금액 표기(천 원 단위)');
 select is(public.ko_subj('어머니 생신') || ', ' || public.ko_subj('설날 연휴') || ', ' || public.ko_is('예빈 생일'),
   '어머니 생신이, 설날 연휴가, 예빈 생일이에요', '조사');
