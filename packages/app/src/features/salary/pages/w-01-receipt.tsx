@@ -1346,7 +1346,6 @@ export function W01Receipt() {
   if (spendForm)
     return (
       <W01eSpendAdd
-        chips={spendForm.first ? copy.spendEmpty.chips : copy.spendChips}
         taken={spendLines.map((l) => nameOf(l))}
         initial={spendForm}
         left0={left}

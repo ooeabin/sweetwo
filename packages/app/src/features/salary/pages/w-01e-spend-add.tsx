@@ -5,17 +5,17 @@ import { useState } from 'react';
 import { money } from '../../../shared/mask';
 import { copy } from '../copy';
 import { formHero } from '../form-logic';
+import { NameChipGroups } from '../name-chips';
 import { LineModeBody, PlanLeftHint, type LineSettings } from '../receipt-parts';
 
 const NAME_MAX = 20;
 
 /**
  * W-01e 지출 추가(20 W-01 5b, 2026-11-23 한 화면 입력 FormScreen): 예전 칩 목록 + 금액 시트를 한 화면으로.
- * “어떤 지출이에요?” 이름 칩(+ ‘직접 정하기’ → 이름 칸) / “매달 얼마씩?” 금액 / “어떻게 챙겨요?” 구간(월급날 확인, 자동으로 나가요, 확인 안 해요).
+ * “어떤 지출이에요?” 이름 칩(2026-11-27 ‘자주 쓰는 것’ + ‘더 보기’ 주제 묶음, + ‘직접 정하기’ → 이름 칸) / “매달 얼마씩?” 금액 / “어떻게 챙겨요?” 구간(월급날 확인, 자동으로 나가요, 확인 안 해요).
  * 화면은 W-01 안에서 열고(W-01 상태 그대로, 닫으면 같은 자리) 저장은 W-01 add가 맡음.
  */
 export function W01eSpendAdd({
-  chips,
   taken,
   initial,
   left0,
@@ -27,7 +27,6 @@ export function W01eSpendAdd({
   onFixIncome,
   onConfirm,
 }: {
-  chips: readonly { name: string; code: string }[];
   /** 이미 있는 지출 이름(칩에서 뺌) */
   taken: string[];
   initial: { name: string; chip: string | null; custom: boolean };
@@ -59,7 +58,23 @@ export function W01eSpendAdd({
     autoDay: null,
   });
   const shown = (v: number) => money(v, masked);
-  const shownChips = chips.filter((c) => !taken.includes(c.name));
+  // 2026-11-27 칩 한 벌(copy.spendChipGroups): 맨 위 ‘자주 쓰는 것’ 6개, 나머지 주제 묶음은 ‘더 보기’. 이미 있는 이름은 뺌
+  type SpendChip = { name: string; code: string };
+  const spendGroups: readonly { title: string; chips: readonly SpendChip[] }[] =
+    copy.spendChipGroups;
+  const all: SpendChip[] = spendGroups.flatMap((g) => [...g.chips]);
+  const topCodes: readonly string[] = copy.spendChipTop;
+  const free = (c: SpendChip) => !taken.includes(c.name);
+  const top = all
+    .filter((c) => topCodes.includes(c.code) && free(c))
+    .sort((x, y) => topCodes.indexOf(x.code) - topCodes.indexOf(y.code))
+    .map((c) => ({ key: c.code, name: c.name }));
+  const groups = spendGroups.map((g) => ({
+    title: g.title,
+    chips: g.chips
+      .filter((c) => !topCodes.includes(c.code) && free(c))
+      .map((c) => ({ key: c.code, name: c.name })),
+  }));
   const customOpen = custom || (name.trim() !== '' && chip === null);
   const unit = amount !== null && amount % 10_000 !== 0;
   // 새 줄이라 바꾸기 전 0원: 0원보다 커서 월급을 넘으면 ‘추가하기’를 막음(06 3-3, 2026-11-26)
@@ -94,34 +109,34 @@ export function W01eSpendAdd({
       }
     >
       <FormSection title={copy.formSpendNameQ}>
-        <div className="hg-form__chips" role="group" aria-label={copy.spendChipsLabel}>
-          {shownChips.map((c) => (
-            <Chip
-              key={c.code}
-              small
-              selected={!custom && chip === c.code}
-              onClick={() => pickChip(c)}
-            >
-              {c.name}
-            </Chip>
-          ))}
-          {more && (
-            <Chip small onClick={more.onClick}>
-              {more.label}
-            </Chip>
-          )}
-          <Chip
-            small
-            selected={customOpen}
-            onClick={() => {
-              setCustom(true);
-              if (chip !== null) setName('');
-              setChip(null);
-            }}
-          >
-            {copy.spendEmpty.other}
-          </Chip>
-        </div>
+        <NameChipGroups
+          label={copy.spendChipsLabel}
+          topTitle={copy.spendChipTopTitle}
+          top={top}
+          groups={groups}
+          selected={custom ? null : chip}
+          onPick={(c) => pickChip({ name: c.name, code: c.key })}
+          tail={
+            <>
+              {more && (
+                <Chip small onClick={more.onClick}>
+                  {more.label}
+                </Chip>
+              )}
+              <Chip
+                small
+                selected={customOpen}
+                onClick={() => {
+                  setCustom(true);
+                  if (chip !== null) setName('');
+                  setChip(null);
+                }}
+              >
+                {copy.spendEmpty.other}
+              </Chip>
+            </>
+          }
+        />
         {customOpen && (
           <ShortText
             label={copy.newLineName}

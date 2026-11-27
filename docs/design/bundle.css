@@ -3399,3 +3399,10 @@ button.hg-plansum__sal { cursor: pointer; }
 .hg-plansum__tname { min-width: 0; color: var(--ink-2); }
 .hg-plansum__tval { flex: none; font-weight: 700; color: var(--ink); }
 .hg-plansum__table li.is-short .hg-plansum__tval { color: var(--danger); }
+
+/* 2026-11-27 사용자 결정: 추가 화면(W-11a, W-01e) 이름 칩 묶음. 맨 위 ‘추천’ / ‘자주 쓰는 것’ + 끝 칩은 늘 보이고 나머지 주제 묶음은 ‘더 보기’로 펼침.
+   묶음 제목 13/400 slate, 제목 → 칩 8, 묶음 사이 16, ‘더 보기’는 회색 글자 버튼(hg-btn--link) 왼쪽 맞춤 */
+.hg-chipgroups { display: flex; flex-direction: column; align-items: stretch; }
+.hg-chipgroups__title { margin: 0 0 var(--space-2); font: var(--text-note); color: var(--slate); }
+.hg-chipgroups > div + div { margin-top: var(--space-4); }
+.hg-chipgroups__more.hg-btn--link { align-self: flex-start; display: inline-flex; align-items: center; min-height: 44px; margin-top: var(--space-1); font: var(--text-value); }  /* 누르는 칸 44, 칩 줄과 글자 사이 보이는 간격 약 16 */

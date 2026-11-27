@@ -21,7 +21,19 @@ export type SavingChip =
   | 'appliance'
   | 'anniv_gift'
   | 'date'
-  | 'lump';
+  | 'lump'
+  // 2026-11-27 사용자 결정: 칩 묶음 + 칩 이름은 한 가지만(‘출산·육아’ → childcare ‘육아’ + birth ‘출산’, ‘가전·가구’ → appliance ‘가전’ + furniture ‘가구’)
+  | 'birth'
+  | 'furniture'
+  | 'child_edu'
+  | 'self_dev'
+  | 'family_event'
+  | 'holiday'
+  | 'yearly'
+  | 'housing_sub'
+  | 'installment'
+  | 'invest'
+  | 'pension';
 
 /**
  * 19 ‘이름 칩 표’(H-10 빈 상태, W-11a, W-12b가 같이 씀). 두 사람 사이마다 6개(2026-11-18).
@@ -39,6 +51,49 @@ export const SAVING_CHIPS: Record<MarriageStatus, readonly SavingChip[]> = {
 
 export const savingChips = (m: MarriageStatus | null | undefined): readonly SavingChip[] =>
   SAVING_CHIPS[m ?? 'undecided'];
+
+/** W-11a 칩 묶음(2026-11-27 사용자 결정, 19 ‘이름 칩 표’): ‘추천’(위 두 사람 사이 6개) 다음 주제마다 한 묶음. 묶음 이름은 앱 copy */
+export type SavingChipGroup =
+  | 'marriage'
+  | 'house'
+  | 'together'
+  | 'family'
+  | 'living'
+  | 'emergency'
+  | 'big_spend'
+  | 'finance'
+  | 'retire';
+export const SAVING_CHIP_GROUPS: readonly {
+  group: SavingChipGroup;
+  chips: readonly SavingChip[];
+}[] = [
+  { group: 'marriage', chips: ['wedding', 'honeymoon', 'dowry'] },
+  { group: 'house', chips: ['newlywed_home', 'home', 'moving', 'appliance', 'furniture'] },
+  { group: 'together', chips: ['travel', 'date', 'anniv_gift'] },
+  { group: 'family', chips: ['birth', 'childcare', 'child_edu'] },
+  { group: 'living', chips: ['car', 'self_dev'] },
+  { group: 'emergency', chips: ['emergency', 'lump'] },
+  { group: 'big_spend', chips: ['family_event', 'holiday', 'yearly'] },
+  { group: 'finance', chips: ['housing_sub', 'installment', 'invest'] },
+  { group: 'retire', chips: ['pension', 'retire'] },
+];
+
+/**
+ * 결혼 말 규칙(04, CLAUDE.md ‘결혼 말’): 결혼했어요·결혼 준비 중이 아니면 ‘결혼’ 묶음 전체와 ‘신혼집’ 칩을 숨김(2026-11-27).
+ * ‘추천’ 6개(SAVING_CHIPS)는 표 그대로(연애 중 ‘결혼 비용’ 예외 포함). ‘추천’에 이미 있는 칩은 아래 묶음에서 빼고, 빈 묶음은 없앰
+ */
+export function savingChipGroups(
+  m: MarriageStatus | null | undefined,
+): { group: SavingChipGroup; chips: SavingChip[] }[] {
+  const marriage = m === 'married' || m === 'engaged';
+  const top = new Set(savingChips(m));
+  return SAVING_CHIP_GROUPS.filter((g) => marriage || g.group !== 'marriage')
+    .map((g) => ({
+      group: g.group,
+      chips: g.chips.filter((c) => !top.has(c) && (marriage || c !== 'newlywed_home')),
+    }))
+    .filter((g) => g.chips.length > 0);
+}
 
 /**
  * 저축·투자 그림 키 표(2026-11-26 사용자 결정, docs/spec/19 H-10 ‘그림 자리’, Illustrations.md ‘나중 과제’ 11번).
@@ -61,6 +116,17 @@ export const SAVING_ART: Record<SavingChip, string> = {
   anniv_gift: 'saving-anniv-gift',
   date: 'saving-date',
   lump: 'saving-lump',
+  birth: 'saving-birth',
+  furniture: 'saving-furniture',
+  child_edu: 'saving-child-edu',
+  self_dev: 'saving-self-dev',
+  family_event: 'saving-family-event',
+  holiday: 'saving-holiday',
+  yearly: 'saving-yearly',
+  housing_sub: 'saving-housing-sub',
+  installment: 'saving-installment',
+  invest: 'saving-invest',
+  pension: 'saving-pension',
 };
 /** 직접 정한 이름(칩 이름과 다름) */
 export const SAVING_ART_CUSTOM = 'saving-custom';
@@ -68,11 +134,17 @@ export const SAVING_ART_KEYS = [...Object.values(SAVING_ART), SAVING_ART_CUSTOM]
 
 /**
  * 저축·투자(또는 묶음) 이름 → 그림 키. 저금은 칩 코드를 저장하지 않아 이름이 칩 이름(앱 copy)과 같으면 그 칩,
- * 아니면 직접 정한 이름 공통 키. 칩 이름은 앱 copy가 정하므로 인자로 받음
+ * 아니면 직접 정한 이름 공통 키. 칩 이름은 앱 copy가 정하므로 인자로 받음.
+ * aliases = 예전 칩 이름 → 칩(2026-11-27 ‘출산·육아’ → childcare, ‘가전·가구’ → appliance: 이미 저장된 이름도 같은 그림)
  */
-export function savingArtKey(name: string, chipNames: Record<SavingChip, string>): string {
+export function savingArtKey(
+  name: string,
+  chipNames: Record<SavingChip, string>,
+  aliases: Readonly<Record<string, SavingChip>> = {},
+): string {
   const n = name.trim();
-  const chip = (Object.keys(chipNames) as SavingChip[]).find((c) => chipNames[c] === n);
+  const chip =
+    (Object.keys(chipNames) as SavingChip[]).find((c) => chipNames[c] === n) ?? aliases[n];
   return chip ? SAVING_ART[chip] : SAVING_ART_CUSTOM;
 }
 

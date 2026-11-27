@@ -89,7 +89,7 @@ test('W-11 저금 항목 추가: 이름 → 매달 → 목표 금액 → 기한 
   // 2026-11-23 한 화면 입력: 요약 문장이 고르는 대로 바뀜
   const hero = page.getByRole('heading', { level: 2 });
   await expect(hero).toHaveText('무엇을 매달 얼마씩 모을까요?');
-  // 이름 칩(19 ‘이름 칩 표’): 결혼했어요 → 내 집 마련, 여행, 비상금, 차, 출산·육아, 노후 + ‘직접 정하기’. 누르면 이름을 고름
+  // 이름 칩(19 ‘이름 칩 표’): 결혼했어요 → ‘추천’ 내 집 마련, 여행, 비상금, 차, 육아, 노후 + ‘직접 정하기’(나머지는 ‘더 보기’, 2026-11-27). 누르면 이름을 고름
   // 이미 모으는 중인 ‘내 집 마련’은 칩에서 빠져 있음(2026-11-23)
   await expect(page.getByRole('button', { name: '내 집 마련', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: '여행', exact: true }).click();

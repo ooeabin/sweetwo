@@ -132,3 +132,51 @@ test('선택 항목 접힌 줄: 목표 금액을 정하면 기한 줄이 생기�
   await expect(page.getByRole('button', { name: /^목표 금액,/ })).toContainText('정하기');
   await expect(page.getByRole('button', { name: /^기한,/ })).toHaveCount(0);
 });
+
+test('이름 칩 묶음(2026-11-27): ‘추천’ 6개 + ‘더 보기’ 주제 묶음, 결혼 말은 결혼했어요·준비 중에만, 칩 이름은 한 가지만', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  db.goals.length = 0;
+  Object.assign(db.space ?? {}, { marriage_status: 'married' });
+  await page.goto('/salary/items/new');
+  const chips = page.getByRole('group', { name: '이름 고르기' });
+  await expect(chips.getByText('추천', { exact: true })).toBeVisible();
+  for (const n of ['내 집 마련', '여행', '비상금', '차', '육아', '노후', '직접 정하기'])
+    await expect(chips.getByRole('button', { name: n, exact: true })).toBeVisible();
+  await expect(chips.getByRole('button', { name: '주택청약', exact: true })).toHaveCount(0);
+  await chips.getByRole('button', { name: '더 보기' }).click();
+  await expect(chips.getByRole('button', { name: '접기' })).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  for (const g of ['결혼', '집', '둘이서', '가족', '생활', '비상금', '큰 지출', '재테크', '노후'])
+    await expect(chips.getByRole('group', { name: g, exact: true })).toBeVisible();
+  for (const n of ['신혼집', '가전', '가구', '출산', '경조사', '명절', '주택청약', '연금'])
+    await expect(chips.getByRole('button', { name: n, exact: true })).toBeVisible();
+  // 추천에 있는 칩은 묶음에서 다시 안 보임, ‘A·B’ 묶음 이름 칩 없음
+  await expect(chips.getByRole('button', { name: '여행', exact: true })).toHaveCount(1);
+  await expect(chips.getByRole('button', { name: /·/ })).toHaveCount(0);
+  await chips.getByRole('button', { name: '주택청약', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(
+    '주택청약에 매달 얼마씩 모을까요?',
+  );
+  await expect(page.getByLabel('이름', { exact: true })).toHaveCount(0);
+  await axe(page);
+
+  // 연애 중: ‘결혼’ 묶음과 ‘신혼집’ 칩은 없음(추천의 ‘결혼 비용’은 예외 그대로)
+  Object.assign(db.space ?? {}, { marriage_status: 'dating' });
+  await page.goto('/salary/items/new');
+  await expect(chips.getByRole('button', { name: '결혼 비용', exact: true })).toBeVisible();
+  // 이어 쓰는 이름(주택청약)이 접힌 묶음 칩이면 처음부터 펼쳐 고른 칩이 보임
+  await expect(chips.getByRole('button', { name: '접기' })).toBeVisible();
+  await expect(chips.getByRole('button', { name: '주택청약', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(chips.getByRole('group', { name: '결혼', exact: true })).toHaveCount(0);
+  await expect(chips.getByRole('button', { name: '신혼집', exact: true })).toHaveCount(0);
+  await expect(chips.getByRole('button', { name: '신혼여행', exact: true })).toHaveCount(0);
+});

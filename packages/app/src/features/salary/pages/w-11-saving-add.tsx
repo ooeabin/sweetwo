@@ -12,6 +12,7 @@ import {
   leftover,
   planInputCheck,
   quickChips,
+  savingChipGroups,
   savingChips,
   savingItemInput,
   savingEta,
@@ -19,6 +20,7 @@ import {
   savingNeed,
   thisMonth,
   ymToDate,
+  type SavingChip,
   type YearMonth,
 } from '@sweetwo/core';
 import {
@@ -49,6 +51,7 @@ import { salaryPaths, savingPaths } from '../paths';
 import { readDraft, writeDraft, type SavingDraft } from '../saving-draft';
 import { baseDayOf } from '../cycle';
 import { formHero, savingFormReady } from '../form-logic';
+import { NameChipGroups } from '../name-chips';
 import { LineModeBody, PlanLeftHint } from '../receipt-parts';
 import { trackSharedGoal, useSavingItems } from '../saving';
 import { useHardwareBack } from '../../auth';
@@ -239,11 +242,20 @@ export function W11SavingAdd() {
       ? items.live.filter((x) => x.state === 'saving').map((x) => x.goal.name.trim())
       : [],
   );
-  const chips = savingChips(space.data.marriage_status).filter(
-    (c) => !taken.has(copy.chipNames[c]),
-  );
+  const free = (c: SavingChip) => !taken.has(copy.chipNames[c]);
+  const chips = savingChips(space.data.marriage_status).filter(free);
+  // 2026-11-27: ‘추천’ 아래 주제 묶음(결혼 말 규칙, 추천에 있는 칩은 뺌)은 ‘더 보기’로
+  const groups = savingChipGroups(space.data.marriage_status).map((g) => ({
+    title: copy.chipGroupNames[g.group],
+    chips: g.chips.filter(free).map((c) => ({ key: c, name: copy.chipNames[c] })),
+  }));
   const name = draft.name;
-  const isChip = chips.some((c) => copy.chipNames[c] === name);
+  const allChips = [
+    ...chips.map((c) => ({ key: c, name: copy.chipNames[c] })),
+    ...groups.flatMap((g) => g.chips),
+  ];
+  const isChip = allChips.some((c) => c.name === name);
+  const picked = draft.custom ? null : (allChips.find((c) => c.name === name)?.key ?? null);
   // 이름 칸은 ‘직접 정하기’를 눌렀거나 칩에 없는 이름(이어하기·다른 화면에서 채워 온 이름)일 때
   const customOpen = draft.custom || (name.trim() !== '' && !isChip);
   const baseDay = baseDayOf(me.data, space.data);
@@ -281,25 +293,23 @@ export function W11SavingAdd() {
         onSubmit={() => void save(draft)}
       >
         <FormSection title={copy.formNameQ}>
-          <div className="hg-form__chips" role="group" aria-label={copy.addNameChips}>
-            {chips.map((c) => (
+          <NameChipGroups
+            label={copy.addNameChips}
+            topTitle={copy.chipGroupNames.top}
+            top={chips.map((c) => ({ key: c, name: copy.chipNames[c] }))}
+            groups={groups}
+            selected={picked}
+            onPick={(c) => setDraft({ ...draft, custom: false, name: c.name })}
+            tail={
               <Chip
-                key={c}
                 small
-                selected={!draft.custom && name === copy.chipNames[c]}
-                onClick={() => setDraft({ ...draft, custom: false, name: copy.chipNames[c] })}
+                selected={customOpen}
+                onClick={() => setDraft({ ...draft, custom: true, name: isChip ? '' : draft.name })}
               >
-                {copy.chipNames[c]}
+                {copy.savingEmptyCustom}
               </Chip>
-            ))}
-            <Chip
-              small
-              selected={customOpen}
-              onClick={() => setDraft({ ...draft, custom: true, name: isChip ? '' : draft.name })}
-            >
-              {copy.savingEmptyCustom}
-            </Chip>
-          </div>
+            }
+          />
           {customOpen && (
             <ShortText
               label={copy.formNameLabel}

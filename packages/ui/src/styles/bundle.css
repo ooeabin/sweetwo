@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (72133e6f). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (85348b96). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 /* 2026-11-24 구역 5 설정 검토: 사용자 앱 글자 바탕값 15/22. 클래스 없는 b·p·li가 브라우저 기본 16px로 나오던 것(기준 17/15 밖). 어드민·웹사이트는 data-platform이 없어 그대로 */
@@ -3400,3 +3400,10 @@ button.hg-plansum__sal { cursor: pointer; }
 .hg-plansum__tname { min-width: 0; color: var(--ink-2); }
 .hg-plansum__tval { flex: none; font-weight: 700; color: var(--ink); }
 .hg-plansum__table li.is-short .hg-plansum__tval { color: var(--danger); }
+
+/* 2026-11-27 사용자 결정: 추가 화면(W-11a, W-01e) 이름 칩 묶음. 맨 위 ‘추천’ / ‘자주 쓰는 것’ + 끝 칩은 늘 보이고 나머지 주제 묶음은 ‘더 보기’로 펼침.
+   묶음 제목 13/400 slate, 제목 → 칩 8, 묶음 사이 16, ‘더 보기’는 회색 글자 버튼(hg-btn--link) 왼쪽 맞춤 */
+.hg-chipgroups { display: flex; flex-direction: column; align-items: stretch; }
+.hg-chipgroups__title { margin: 0 0 var(--space-2); font: var(--text-note); color: var(--slate); }
+.hg-chipgroups > div + div { margin-top: var(--space-4); }
+.hg-chipgroups__more.hg-btn--link { align-self: flex-start; display: inline-flex; align-items: center; min-height: 44px; margin-top: var(--space-1); font: var(--text-value); }  /* 누르는 칸 44, 칩 줄과 글자 사이 보이는 간격 약 16 */
