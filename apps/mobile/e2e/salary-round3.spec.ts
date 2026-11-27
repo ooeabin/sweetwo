@@ -171,8 +171,12 @@ test('홈 H-06 띠 7번 ‘첫 저금’(첫 30일)은 초대보다 먼저(초�
   await expect(page.getByRole('button', { name: /상위 몇 %/ })).toHaveCount(0);
   await (await homeTask(page, '무엇을 같이 모을지 정해 볼까요?')).click();
   await expect(page).toHaveURL(/\/salary\/plan\?from=home#saving$/);
-  // 2026-11-18: 홈 빈 상태 대신 W-01 저축·투자 묶음 빈 상태(칩)로
-  await expect(page.getByRole('group', { name: '무엇을 모을지 골라 보세요' })).toBeVisible();
+  // 2026-11-18: 홈 빈 상태 대신 W-01 저축·투자 묶음 빈 상태로(2026-11-27 A안: 칩 없이 추가 줄)
+  await expect(
+    page
+      .getByRole('region', { name: '저축·투자', exact: true })
+      .getByRole('button', { name: '+ 저축·투자 추가' }),
+  ).toBeVisible();
   // 첫 30일이 끝나면(2026-11-13 v2.2 띠 7번) 사라지고 초대 띠(맨 끝)
   db.me.onboarding_done_at = '2026-09-01T01:00:00Z';
   await page.goto('/');

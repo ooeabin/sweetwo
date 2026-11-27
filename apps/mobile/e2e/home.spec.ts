@@ -200,9 +200,14 @@ test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 �
   await page.getByRole('dialog', { name: '할 일' }).locator('.hg-listrow').nth(1).click();
   await expect(page).toHaveURL(/\/salary\/plan\?from=home#saving$/);
   const sec = page.getByRole('region', { name: '저축·투자', exact: true });
-  // 2026-11-26: 안내 한 줄은 없앰, 칩 묶음의 화면 읽기 이름으로만
-  await expect(sec).not.toContainText('무엇을 모을지 골라 보세요');
-  await expect(sec.getByRole('group', { name: '무엇을 모을지 골라 보세요' })).toBeVisible();
+  // 2026-11-27 ‘W-01 빈 묶음 A안’: 빈 묶음은 칩 없이 머리 + “+ 저축·투자 추가” 한 줄, 합계 0원은 숨김
+  await expect(sec.locator('.hg-plancard__sum')).toHaveCount(0);
+  await expect(sec.locator('.hg-chip')).toHaveCount(0);
+  await axe(page);
+  await sec.getByRole('button', { name: '+ 저축·투자 추가' }).click();
+  await expect(page).toHaveURL(/\/salary\/items\/new\?from=split$/);
+  // 이름 칩은 W-11a 안(19 ‘이름 칩 표’, 결혼 준비 중)
+  const chips = page.getByRole('group', { name: '이름 고르기' });
   for (const c of [
     '결혼 비용',
     '신혼집',
@@ -212,15 +217,9 @@ test('저금 0개(2026-11-18): 홈에 H-10 없음 → 첫 저금 띠 → W-01 �
     '내 집 마련',
     '직접 정하기',
   ])
-    await expect(sec.getByRole('button', { name: c, exact: true })).toBeVisible();
-  await expect(sec.getByRole('button', { name: '전세 대출 갚기' })).toHaveCount(0);
-  await axe(page);
-  await sec.getByRole('button', { name: '직접 정하기' }).click();
-  // ‘직접 정하기’ 칩 → 이름 칸이 열린 빈 채로
-  await expect(page.getByLabel('이름', { exact: true })).toHaveValue('');
-  await page.goBack();
-  await sec.getByRole('button', { name: '신혼집' }).click();
-  await expect(page).toHaveURL(/\/salary\/items\/new\?from=split$/);
+    await expect(chips.getByRole('button', { name: c, exact: true })).toBeVisible();
+  await expect(chips.getByRole('button', { name: '전세 대출 갚기' })).toHaveCount(0);
+  await chips.getByRole('button', { name: '신혼집' }).click();
   // 칩으로 들어오면 그 이름을 미리 고름
   await expect(page.getByRole('heading', { level: 2 })).toHaveText(
     '신혼집에 매달 얼마씩 모을까요?',

@@ -86,6 +86,8 @@ export function PlanSummary({
   bar,
   barLabel,
   legend,
+  start,
+  table,
   empty,
 }: {
   /** 이름표(“월급”) */
@@ -116,6 +118,14 @@ export function PlanSummary({
     amount?: ReactNode;
     short?: boolean;
   }[];
+  /**
+   * 저축·투자 0원 행동 줄(2026-11-27 사용자 결정 ‘저축·투자 0원 요약 ①’):
+   * 왼쪽 40 둥근 사각 칸(surface-alt + ink-2 Phosphor plus) + 두 줄(위 13/400 slate, 아래 15/700 ink) + 오른쪽 ›, 줄 전체가 버튼.
+   * 화면 읽기 이름은 두 줄을 이은 문장. 주면 도넛·범례 대신 이 줄 + table
+   */
+  start?: { top: string; main: string; onClick: () => void };
+  /** 저축·투자 0원일 때 도넛·범례 대신 작은 표(지출 / 미계획): 이름 15/400 ink-2 + 오른쪽 값 15/700, short면 값만 danger */
+  table?: { key: string; name: string; amount: ReactNode; short?: boolean }[];
   /** 월급 0원 상태 */
   empty?: { title: ReactNode; action?: { label: string; onClick: () => void } };
 }) {
@@ -196,7 +206,34 @@ export function PlanSummary({
               {title}
             </p>
           )}
-          {(bar || legend) && (
+          {start && (
+            <button
+              type="button"
+              className="hg-plansum__start"
+              aria-label={`${start.top} ${start.main}`}
+              onClick={start.onClick}
+            >
+              <span className="hg-plansum__starticon" aria-hidden="true">
+                <Icon name="plus" size={20} />
+              </span>
+              <span className="hg-plansum__starttext">
+                <span className="hg-plansum__starttop">{start.top}</span>
+                <span className="hg-plansum__startmain">{start.main}</span>
+              </span>
+              <Icon name="chevron-right" size={16} className="hg-plansum__go" />
+            </button>
+          )}
+          {table && table.length > 0 && (
+            <ul className="hg-plansum__table" role="list">
+              {table.map((r) => (
+                <li key={r.key} className={cx(r.short && 'is-short')}>
+                  <span className="hg-plansum__tname">{r.name}</span>
+                  <span className="hg-plansum__tval">{r.amount}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          {!start && !table && (bar || legend) && (
             <div className="hg-plansum__chart">
               {bar && <PlanDonut parts={bar} label={barLabel} />}
               {legend && legend.length > 0 && (
@@ -225,7 +262,8 @@ export function PlanSummary({
 
 /**
  * 묶음 카드(저축·투자, 지출). 머리 = 한 줄 “저축·투자” 왼쪽 + 합계 오른쪽, 둘 다 13/400 slate(2026-11-26 ‘W-01 정리 A안’:
- * 큰 합계 22/700·묶음 ⋯는 없앰, 동작은 화면 머리 ⋯ 하나). 아래 줄들(ReceiptRows)과 끝 ‘+ … 추가’ 줄(AddRow block, 2026-11-27 PlanAdd를 AddRow로 합침).
+ * 큰 합계 22/700·묶음 ⋯는 없앰, 동작은 화면 머리 ⋯ 하나). sum이 없으면 합계를 그리지 않음(W-01은 0원이면 숨김, 2026-11-27).
+ * 아래 줄들(ReceiptRows)과 끝 ‘+ … 추가’ 줄(AddRow block, 2026-11-27 PlanAdd를 AddRow로 합침).
  * id는 주소 `#saving`으로 스크롤할 자리
  */
 export function PlanCard({

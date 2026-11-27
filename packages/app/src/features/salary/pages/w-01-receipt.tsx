@@ -26,12 +26,10 @@ import {
   planSummary,
   savingLineNote,
   salaryChangedTaskOpen,
-  savingStartChips,
   todayKst,
 } from '@sweetwo/core';
 import {
   BottomSheet,
-  Chip,
   Icon,
   ListRow,
   Menu,
@@ -73,7 +71,6 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchPartnerPlanView, fetchSalaryChanges } from '@sweetwo/api';
 import { BundleRow } from '../bundle-parts';
 import { savingPaths, togetherPaths } from '../paths';
-import { EMPTY_DRAFT, writeDraft } from '../saving-draft';
 import { sharePlan, type PlanImageModel } from '../receipt-image';
 import { IncomeSheet, PlanSheet, type LineSettings } from '../receipt-parts';
 import { W01eSpendAdd } from './w-01e-spend-add';
@@ -127,12 +124,13 @@ export function W01Receipt() {
     }
   }, [spendForm]);
   const [pick, setPick] = useState(false); // ‘+ 지출 추가’ 선택 시트(지출 / 같이 쓰는 통장)
+  // 이 화면에서 빈 지출 카드를 한 번 봤으면 나갈 때까지 W-01e를 첫 달 칩(월세 … 생활비)으로 엶(이어서 생활비 등을 넣게)
+  const [spendAsk, setSpendAsk] = useState(false);
   const [stop, setStop] = useState<SplitLine | null>(null);
   const [refill, setRefill] = useState(false);
   const [fold, setFold] = useState(false);
   const [busy, setBusy] = useState(false);
   // 빈 지출 카드 칩: 처음 비었다고 본 뒤에는 줄을 넣어도(생활비 칩 등 이어서 넣게) 화면을 나갈 때까지 둠
-  const [spendAsk, setSpendAsk] = useState(false);
   const [sharing, setSharing] = useState(false);
   const who = params.get('who');
   const lineParam = params.get('line');
@@ -714,13 +712,16 @@ export function W01Receipt() {
               { text: copy.overPlan[1] },
             ]
           : summary.noSaving
-            ? [{ text: copy.summaryNoSaving }]
+            ? [] // 2026-11-27 ‘저축·투자 0원 요약 ①’: 문장 없음, 아래 지출 / 미계획 표만(행동 줄은 이미지에 안 그림)
             : [
                 { text: copy.summarySaving[0] },
                 { text: copy.summaryPct(summary.share), tone: 'save' },
                 { text: copy.summarySaving[1] },
               ],
-      chart: summary.chart,
+      chart: summary.chart && !zeroSaving,
+      table: zeroSaving
+        ? zeroTable.map((r) => ({ name: r.name, value: won(r.value), short: r.short }))
+        : undefined,
       bar: [
         { kind: 'saving', percent: summary.bar.saving },
         { kind: 'spend', percent: summary.bar.spend },
@@ -1028,17 +1029,24 @@ export function W01Receipt() {
     spend: spendSum,
     lines: savingLines.length + spendLines.length,
   });
-  // 빈 저축·투자 카드: 저축·투자 줄도 같이 모으기 묶음도 없고 내 것으로 고칠 수 있을 때(파트너 탭 보기만·편집 모드는 없음)
-  const savingEmpty =
-    !edit && !theirs && canEdit && savingLines.length === 0 && bundleList.length === 0;
-  // 빈 지출 카드: 고정지출·생활비·직접 추가 줄이 하나도 없을 때(용돈·보내기 줄은 셈하지 않음). 처음 보인 뒤에는 spendAsk로 칩을 계속 둠
+  // 2026-11-27 사용자 결정 ‘저축·투자 0원 요약 ①’: 월급이 있고 저축·투자 합이 0원이면 도넛·범례 대신 행동 줄 + 작은 표(지출 / 미계획).
+  // 0원인 줄은 표에서 뺌(둘 다 0원이면 표 없음), 넘치면 미계획 금액만 danger
+  const zeroSaving = !summary.empty && summary.noSaving;
+  const zeroTable = [
+    ...(spendSum !== 0
+      ? [{ key: 'spend', name: copy.spendGroup, value: spendSum, short: false }]
+      : []),
+    ...(left !== 0
+      ? [{ key: 'free', name: copy.legendFreeName, value: left, short: summary.over }]
+      : []),
+  ];
+  // 빈 지출 카드: 고정지출·생활비·직접 추가 줄이 하나도 없을 때(용돈·보내기 줄은 셈하지 않음). ‘+ 지출 추가’가 W-01e를 첫 달 칩(월세 …)으로 엶(spendAsk)
   const spendEmpty =
     !edit &&
     canEdit &&
     !notManager &&
     !spendLines.some((l) => l.kind === 'fixed' || l.kind === 'living' || l.kind === 'custom');
   if (spendEmpty && !spendAsk) setSpendAsk(true);
-  const spendChipsShown = spendAsk && !edit && canEdit && !notManager;
   // 줄이 하나도 없으면(저축·투자도 지출도 0개, 월급 금액과 상관없이) 맨 아래 ‘편집하기’·‘공유하기’·‘추천값으로 다시 채우기’를 숨김(2026-11-19 사용자 결정)
   const planEmpty = savingLines.length === 0 && spendLines.length === 0 && !proposalRow;
   const pv = partnerView.data ?? null;
@@ -1197,8 +1205,29 @@ export function W01Receipt() {
                   ]
                 : undefined
             }
+            // 2026-11-27 ‘저축·투자 0원 요약 ①’: 도넛·범례 대신 행동 줄(내가 고칠 수 있을 때만, ‘+ 저축·투자 추가’와 같은 W-11) + 지출 / 미계획 표
+            start={
+              zeroSaving && canEdit && !edit
+                ? {
+                    top: copy.savingStart[0],
+                    main: copy.savingStart[1],
+                    onClick: () => {
+                      // 오프라인이면 W-11로 가지 않음(20 W-01 ‘오프라인’, S5-08)
+                      if (!offline()) nav(`${savingPaths.add}?from=split`);
+                    },
+                  }
+                : undefined
+            }
+            table={
+              zeroSaving ? zeroTable.map((r) => ({ ...r, amount: shown(won(r.value)) })) : undefined
+            }
           />
-          <PlanCard id="saving" title={copy.savingGroup} sum={shown(won(savingSum))}>
+          {/* 2026-11-27 ‘W-01 빈 묶음 A안’: 합계가 0원이면 머리 합계를 숨김(저축·투자·지출 공통) */}
+          <PlanCard
+            id="saving"
+            title={copy.savingGroup}
+            sum={savingSum !== 0 ? shown(won(savingSum)) : undefined}
+          >
             <ReceiptRows
               label={copy.savingGroup}
               lines={orderRows(savingLines)}
@@ -1241,41 +1270,17 @@ export function W01Receipt() {
                 ))}
               </div>
             )}
-            {savingEmpty ? (
-              <>
-                {/* 2026-11-26 사용자 결정: 안내 한 줄 “무엇을 모을지 골라 보세요”는 없앰(칩만, 화면 읽기 이름으로는 남김) */}
-                <div className="hg-receipt__chips" role="group" aria-label={copy.savingEmptyAsk}>
-                  {savingStartChips(sp.marriage_status).map((c) => {
-                    const name = c === 'custom' ? '' : copy.chipNames[c];
-                    return (
-                      <Chip
-                        key={c}
-                        small
-                        onClick={() => {
-                          // 오프라인이면 W-11로 가지 않음(20 W-01 ‘오프라인’, S5-08)
-                          if (offline()) return;
-                          writeDraft({ ...EMPTY_DRAFT, name, custom: c === 'custom' });
-                          nav(`${savingPaths.add}?from=split`);
-                        }}
-                      >
-                        {c === 'custom' ? copy.savingEmptyCustom : name}
-                      </Chip>
-                    );
-                  })}
-                </div>
-              </>
-            ) : (
-              canEdit && (
-                <AddRow
-                  block
-                  label={copy.addItemInReceipt}
-                  ariaLabel={copy.addItemInReceipt}
-                  onClick={() => {
-                    // 오프라인이면 W-11로 가지 않음(20 W-01 ‘오프라인’, S5-08)
-                    if (!offline()) nav(`${savingPaths.add}?from=split`);
-                  }}
-                />
-              )
+            {/* 2026-11-27 ‘W-01 빈 묶음 A안’: 비어도 이름 칩을 늘어놓지 않고 같은 ‘+ 저축·투자 추가’ 한 줄. 이름 칩은 W-11 안 */}
+            {canEdit && (
+              <AddRow
+                block
+                label={copy.addItemInReceipt}
+                ariaLabel={copy.addItemInReceipt}
+                onClick={() => {
+                  // 오프라인이면 W-11로 가지 않음(20 W-01 ‘오프라인’, S5-08)
+                  if (!offline()) nav(`${savingPaths.add}?from=split`);
+                }}
+              />
             )}
             {/* 그만 모은 저축·투자(옛 W-13 맨 아래와 같음): 접힌 줄, 펼치면 이름 + 모은 금액 → W-10 */}
             {!edit && closed.length > 0 && (
@@ -1300,7 +1305,7 @@ export function W01Receipt() {
                 />
               ))}
           </PlanCard>
-          <PlanCard title={copy.spendGroup} sum={shown(won(spendSum))}>
+          <PlanCard title={copy.spendGroup} sum={spendSum !== 0 ? shown(won(spendSum)) : undefined}>
             {/* 용돈 줄 먼저(맨 위 고정, 2026-11-16 R4-3), 그 아래 나머지 지출 */}
             {allowanceLines.length > 0 && (
               <ReceiptRows
@@ -1318,37 +1323,8 @@ export function W01Receipt() {
               onMove={edit ? moveIn(otherSpend) : undefined}
               labels={rowLabels}
             />
-            {spendChipsShown && (
-              <>
-                {/* 2026-11-26 사용자 결정: 안내 한 줄 “매달 나가는 지출을 골라 보세요”는 없앰(칩만) */}
-                <div className="hg-receipt__chips" role="group" aria-label={copy.spendEmpty.ask}>
-                  {copy.spendEmpty.chips
-                    .filter((c) => !spendLines.some((l) => nameOf(l) === c.name))
-                    .map((c) => (
-                      <Chip
-                        key={c.code}
-                        small
-                        onClick={() => {
-                          if (!offline())
-                            openSpendForm({ name: c.name, chip: c.code, first: true });
-                        }}
-                      >
-                        {c.name}
-                      </Chip>
-                    ))}
-                  <Chip
-                    small
-                    onClick={() => {
-                      if (!offline())
-                        openSpendForm({ name: '', chip: null, first: true, custom: true });
-                    }}
-                  >
-                    {copy.spendEmpty.other}
-                  </Chip>
-                </div>
-              </>
-            )}
-            {!spendEmpty && canEdit && customs < MAX_CUSTOM && (
+            {/* 2026-11-27 ‘W-01 빈 묶음 A안’: 지출이 없어도 칩 대신 ‘+ 지출 추가’ 한 줄. 빈 카드면 W-01e가 첫 달 칩(월세 …)으로 열림 */}
+            {canEdit && customs < MAX_CUSTOM && (
               <AddRow
                 block
                 label={copy.addSpend}
@@ -1357,7 +1333,7 @@ export function W01Receipt() {
                   if (offline()) return;
                   // 같이 쓰는 통장을 쓸 수 있으면 먼저 작은 선택 시트(지출 / 같이 쓰는 통장), 아니면 바로 지출 추가
                   if (sharedOn) setPick(true);
-                  else openSpendForm({ name: '', chip: null, first: false });
+                  else openSpendForm({ name: '', chip: null, first: spendAsk });
                 }}
               />
             )}
@@ -1378,7 +1354,7 @@ export function W01Receipt() {
         baseDay={baseDay}
         busy={busy}
         more={
-          spendForm.first || sharedOn
+          sharedOn
             ? undefined
             : { label: copy.sharedAccountChip, onClick: () => nav('/salary/split/new') }
         }
@@ -1461,7 +1437,7 @@ export function W01Receipt() {
               label={copy.addPick.spend}
               onClick={() => {
                 setPick(false);
-                openSpendForm({ name: '', chip: null, first: false });
+                openSpendForm({ name: '', chip: null, first: spendAsk });
               }}
             />
             <ListRow

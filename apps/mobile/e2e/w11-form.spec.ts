@@ -94,7 +94,7 @@ test('자동으로 나가요 → 나가는 날(월급날 / 다음 날 / 한 줄 
   await expect(page.getByRole('group', { name: '나가는 날 고르기' })).toHaveCount(0);
 });
 
-test('진입점: 빈 묶음 이름 칩은 그 이름을 미리 고르고, 직접 정하기는 이름 칸이 열림', async ({
+test('진입점(2026-11-27 A안): 빈 묶음은 ‘+ 저축·투자 추가’ 한 줄 → W-11a 이름 칩이 이름을 고르고, 직접 정하기는 이름 칸', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -104,14 +104,17 @@ test('진입점: 빈 묶음 이름 칩은 그 이름을 미리 고르고, 직접
   const sp = db.splits[0];
   if (sp) sp.split_line = [];
   await page.goto('/salary/plan');
-  await page.getByRole('button', { name: '비상금', exact: true }).click();
+  // W-01 화면에는 이름 칩이 없음
+  await expect(page.getByRole('button', { name: '비상금', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: '+ 저축·투자 추가' }).click();
   await expect(page).toHaveURL(/\/salary\/items\/new\?from=split$/);
+  const chips = page.getByRole('group', { name: '이름 고르기' });
+  await chips.getByRole('button', { name: '비상금', exact: true }).click();
   await expect(page.getByRole('heading', { level: 2 })).toHaveText(
     '비상금에 매달 얼마씩 모을까요?',
   );
   await expect(page.getByLabel('이름', { exact: true })).toHaveCount(0);
-  await page.goBack();
-  await page.getByRole('button', { name: '직접 정하기', exact: true }).first().click();
+  await chips.getByRole('button', { name: '직접 정하기', exact: true }).click();
   await expect(page.getByLabel('이름', { exact: true })).toHaveValue('');
 });
 

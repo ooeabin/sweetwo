@@ -40,11 +40,6 @@ export const SAVING_CHIPS: Record<MarriageStatus, readonly SavingChip[]> = {
 export const savingChips = (m: MarriageStatus | null | undefined): readonly SavingChip[] =>
   SAVING_CHIPS[m ?? 'undecided'];
 
-/** H-10 빈 상태 칩(2026-11-18): 이름 칩 6개 + 맨 끝 ‘직접 정하기’(W-11a를 이름 칸 빈 채로 엶) */
-export const savingStartChips = (
-  m: MarriageStatus | null | undefined,
-): (SavingChip | 'custom')[] => [...savingChips(m), 'custom'];
-
 /**
  * 저축·투자 그림 키 표(2026-11-26 사용자 결정, docs/spec/19 H-10 ‘그림 자리’, Illustrations.md ‘나중 과제’ 11번).
  * 이름 칩마다 하나 + 직접 정한 이름은 공통 키 하나. 키 = 파일 이름(`packages/ui/src/assets/illustrations/<키>.webp`).
