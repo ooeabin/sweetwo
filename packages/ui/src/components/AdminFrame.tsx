@@ -6,7 +6,6 @@ import { Wordmark } from './Wordmark';
 
 // 어드민 틀(docs/design/components/AdminFrame.md). 2026-11-06 업무 도구답게:
 // 연회색 사이드바(워드마크, 메뉴 묶음, 아래 끝 보는 관리자) + 흰 본문 한 판. 본문 위 상단 바에 통합 검색.
-// 참고: Base44, Square, Shopify, Gumloop 사이드바.
 // 기준 1440, 최소 1280(더 좁으면 가로 스크롤). protect면 본문 글자 선택을 막음(회원 상세 AD-03 복사 방지, 2026-11-12 어드민 전체에서 바꿈).
 export interface AdminMenu {
   key: string;

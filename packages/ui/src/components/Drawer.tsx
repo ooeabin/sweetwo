@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { cx } from './cx';
 import { IconButton } from './IconButton';
 
-// 메뉴 서랍(docs/design/components/Drawer.md, 2026-11-09 GCOO 홈처럼): 오른쪽에서 들어오는 흰 판 + 뒤 막.
+// 메뉴 서랍(docs/design/components/Drawer.md, 2026-11-09 상자로 이동하는 허브 홈): 오른쪽에서 들어오는 흰 판 + 뒤 막.
 // 머리 오른쪽에 닫기 ✕(도구를 주면 그 앞), 본문은 글자만 있는 줄 묶음, 맨 아래 작은 글자(주면).
 // 2026-11-16 2단: 줄에 하위 줄(children)을 주면 그 줄은 굵은 머리 줄(`hg-drawer__item--head`)이 되고,
 // 아래에 들여쓴 하위 줄(`hg-drawer__sub`, 44px)이 늘 펼쳐져 있음(아코디언 아님).

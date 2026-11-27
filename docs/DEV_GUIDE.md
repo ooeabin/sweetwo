@@ -555,7 +555,7 @@ Worker 3개(대시보드 → Workers & Pages → Create → Import a repository 
 
 ### 지킬 것
 
-- 브랜드 색(오렌지)은 2026-11-09부터 사용자 앱의 하나뿐인 포인트 색(당근처럼): 주 버튼(글자는 `on-accent-app-text` 진한 글자, 2026-11-15), 홈 ‘월급 계획’ 포인트 상자 채움(`hg-hubtile--point`, 2026-11-11 사용자 결정, 글자는 `on-accent-app-text`. 홈 할 일·초대 띠는 2026-11-11부터 코코아 `band-cocoa`. + 버튼 FAB는 없앰), 체크한 원과 고른 표시, 저금 진행 원·막대, 짧은 강조 숫자, 띠와 안 읽은 알림의 옅은 판(띠 아이콘, 띠 안 흰 작은 버튼 글자), 새 알림 점, 워드마크, 온보딩 챕터 막대. 화면 규칙은 `accent-app` 계열 토큰으로(어드민은 `hg-admin`이 예전 색으로 되돌림). 글자 버튼은 모두 회색(`hg-btn--link` 기본 `ink-2` 600, 2026-11-09 `hg-btn--accent` 없앰). 대비 예외와 axe 예외는 DESIGN.md ‘색’과 CLAUDE.md. 카드 바탕에 쓰지 않음. 보조 버튼의 옅은 오렌지(`brand-soft`)는 카드 안에만(목표 ‘매달’·‘매년’ 배지도 `brand-soft` + 오렌지 `accent-app-text`, 2026-11-04, 글자는 2026-11-23 brand-ink에서 바꿈)
+- 브랜드 색(오렌지)은 2026-11-09부터 사용자 앱의 하나뿐인 포인트 색: 주 버튼(글자는 `on-accent-app-text` 진한 글자, 2026-11-15), 홈 ‘월급 계획’ 포인트 상자 채움(`hg-hubtile--point`, 2026-11-11 사용자 결정, 글자는 `on-accent-app-text`. 홈 할 일·초대 띠는 2026-11-11부터 코코아 `band-cocoa`. + 버튼 FAB는 없앰), 체크한 원과 고른 표시, 저금 진행 원·막대, 짧은 강조 숫자, 띠와 안 읽은 알림의 옅은 판(띠 아이콘, 띠 안 흰 작은 버튼 글자), 새 알림 점, 워드마크, 온보딩 챕터 막대. 화면 규칙은 `accent-app` 계열 토큰으로(어드민은 `hg-admin`이 예전 색으로 되돌림). 글자 버튼은 모두 회색(`hg-btn--link` 기본 `ink-2` 600, 2026-11-09 `hg-btn--accent` 없앰). 대비 예외와 axe 예외는 DESIGN.md ‘색’과 CLAUDE.md. 카드 바탕에 쓰지 않음. 보조 버튼의 옅은 오렌지(`brand-soft`)는 카드 안에만(목표 ‘매달’·‘매년’ 배지도 `brand-soft` + 오렌지 `accent-app-text`, 2026-11-04, 글자는 2026-11-23 brand-ink에서 바꿈)
 - 아이콘은 Phosphor(굵은 선). 켜진 메뉴와 독 칸만 채운 모양
 - 금액과 날짜 표기는 core의 포맷 함수 하나로만 (디자인 시스템 ‘금액 표기’, ‘날짜·시간 표기’ 장)
 
@@ -847,7 +847,7 @@ supabase/
 - 앱 Realtime(2026-11-12 S8-06): frame `useAssetRealtime`(api `subscribeAssets`)이 `qk.assets`·`partnerAssetSums`·`netWorthHistory`를 다시 읽음. assets `useAssetsData`(F-01~F-04)와 홈에서
 - 응답 검사(2026-11-12 S8-19): api `fetchAssets`·`fetchPartnerAssetSums`·`fetchNetWorthHistory`·`fetchAssetHistory`는 core `schemas/asset.ts` Zod로. `updateAsset`은 `.select('id')`로 고친 행을 받고 0행이면(RLS가 거름) `AssetForbiddenError`, 서버 `not_owner`(42501)도 같음 → 화면은 13-8 “{파트너}님 항목이라 볼 수만 있어요”, 그 밖 실패는 13-10 “저장하지 못했어요”(S8-16)
 - 금리·회차 입력(D5 = A, S8-12): core `parseRate`(0~30%, 소수 1자리)·`parsePaidCount`(0~999) 하나를 F-03·F-04가 같이 씀. 서버 check는 그대로
-- 합계 표기(S8-02): `shared/mask.ts` `money`가 core `formatWonCap`(“3,500,000원”, 999억 원 넘으면 “999억+”, 2026-11-26 토스식). 짧은 표기 `moneyShort`(core `readWonCap`)는 11 공통 6장 예외 표 자리만
+- 합계 표기(S8-02): `shared/mask.ts` `money`가 core `formatWonCap`(“3,500,000원”, 999억 원 넘으면 “999억+”, 2026-11-26 원 단위 전체). 짧은 표기 `moneyShort`(core `readWonCap`)는 11 공통 6장 예외 표 자리만
 - F-01: 순자산 그래프(ui `LineChart`, 서버 `net_worth_history(120)` + 이번 달 지금 값, core `netWorthSeries`. 기간 탭 6개월·1년·3년·전체, 데이터보다 긴 기간 비활성, 고른 탭 기억 `sweetwo.networth-period`) + 자산·부채 합계(→ F-02)
 - F-02: 묶음(F-03a 그룹) 안 정렬 칩(이름, 명의, 금액, 수정일, 기억 `sweetwo.asset-sort`), 줄 배지는 공개 범위(내 항목)와 ‘대신 입력’만, 파트너 금액만 줄(알약 ‘금액만’), 투자 묶음 줄 core `investSummary`
 - F-03 유형별 질문(F-03f~h, 모두 ‘나중에 할게요’ 가능): 적금 = 만기일 → 월 납입액, 청약 = 납입 회차(`paid_count`) → 월 납입액, 보증금 = 계약 만기일, 부채 = 금리 → 월 상환액. 월 납입·상환액은 기록만(월급 계획과 연결 없음). 카드론·현금서비스·리볼빙은 끝나고 ‘목표 만들기’ Toast
@@ -886,6 +886,7 @@ supabase/
 
 - main은 항상 배포 가능. 기능 브랜치는 `feat/`, `fix/`, `chore/`
 - 커밋 메시지는 Conventional Commits (`feat: 월급 체크리스트 줄 동기화`)
+- 커밋 메시지·PR 본문·코드 주석·문서에 디자인 레퍼런스로 쓴 다른 앱·서비스 이름을 쓰지 않는다(2026-11-27 사용자 결정). 결정 이름도 모양을 설명하는 말로(예: ‘원 단위 전체’). 실제 연동 이름(카카오 로그인, Supabase 등)은 그대로.
 - PR은 리뷰 1명 이상. DB 마이그레이션과 RLS를 바꾸는 PR도 같음(2026-11-04 2명 규칙 없앰, 대신 pgTAP 필수)
 - 스키마는 추가만. 이름 바꾸기와 지우기는 2단계(새 컬럼 추가 → 최소 지원 버전이 예전 앱을 넘어선 뒤 예전 컬럼 제거)
 - 큰 기술 결정은 docs/adr에 ADR 한 장으로 남김

@@ -1,7 +1,7 @@
 import { addDays } from '@sweetwo/core';
 import { cx } from './cx';
 
-// 이번 주 날짜 띠(docs/design/components/WeekStrip.md, 현대카드 소비 캘린더 느낌).
+// 이번 주 날짜 띠(docs/design/components/WeekStrip.md).
 // 일~토 7칸, 오늘은 검정 원, 일정 있는 날은 아래 점, 일요일·공휴일은 holiday-ink. 아래 목록이 같은 내용을 읽어 주므로 그림만.
 const DOW = ['일', '월', '화', '수', '목', '금', '토'];
 

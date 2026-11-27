@@ -8,7 +8,7 @@ Phosphor 아이콘(MIT 라이선스) 91개(2026-11-13 `arrows-clockwise`, 2026-1
 - 색은 글자색 그대로(`ink`, `slate`, `stone`). 브랜드 오렌지, 영역색으로 칠하지 않음. 예외: 줄 앞 칸(Lead)과 알림 아이콘 원은 영역 색 원 위 짝 글자색(`*-ink`, 2026-11-09, ListRow ‘Lead 종류 표’).
 - 줄 앞 종류 아이콘(2026-11-09): 줄 앞 칸은 2D 그림 대신 이 세트로 확정. 종류와 아이콘의 짝은 `packages/ui/src/components/lead-kinds.ts` 한 곳.
 - 아이콘만으로 뜻을 전하지 않음: 라벨 또는 `aria-label`을 같이 둠.
-- 예외(2026-11-26 ‘머리 B안’): 뒤로 버튼(`hg-back`) 안의 `chevron-left`만 Regular 선(`bundle.css`가 `--ico`를 덮음). 레퍼런스 앱처럼 머리 꺾쇠를 가볍게.
+- 예외(2026-11-26 ‘머리 B안’): 뒤로 버튼(`hg-back`) 안의 `chevron-left`만 Regular 선(`bundle.css`가 `--ico`를 덮음). 머리 꺾쇠를 가볍게.
 - 필요한 아이콘이 여기 없으면 같은 Phosphor 세트에서 bold와 fill을 함께 추가. 새 아이콘은 클래스 이름을 Phosphor 이름 그대로 씀.
 - 클래스 이름은 지금 것을 그대로 씀(바꾸지 않음). 아래 표가 클래스와 Phosphor 원래 이름의 짝.
 - 뒤로는 모든 화면 `chevron-left`(꺾쇠 <). `arrow-left`는 뒤로에 쓰지 않음. 화면 모드는 `sun`, `moon`.

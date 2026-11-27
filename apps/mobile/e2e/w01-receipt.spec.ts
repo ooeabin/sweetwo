@@ -96,7 +96,7 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
   await expect(sum.locator('.hg-plansum__title')).toHaveText('월급의 40%를 모으고 있어요');
   await expect(sum.locator('.hg-plansum__title em')).toHaveText('40%');
   // 06 3-5: 139만 / 211만 / 0 → 40% / 60% / 0%
-  // 2026-11-26 사용자 결정: 알약 막대 대신 왼쪽 도넛 + 오른쪽 범례(카카오페이 자산 구성형)
+  // 2026-11-26 사용자 결정: 알약 막대 대신 왼쪽 도넛 + 오른쪽 범례
   const donut = sum.locator('svg.hg-plansum__donut');
   await expect(page.getByRole('img', { name: '저축·투자 40%, 지출 60%, 미계획 0%' })).toBeVisible();
   await expect(donut).toHaveAttribute('role', 'img');

@@ -59,7 +59,7 @@ export function GoalPick({
               <img src={t.photo} alt="" />
             </span>
           ) : (
-            // 사진이 아직 없으면 아이콘(2026-11-02, 쿠팡플레이 장르 고르기처럼)
+            // 사진이 아직 없으면 아이콘(2026-11-02)
             <span className="hg-pick__art hg-pick__art--icon" aria-hidden="true" />
           ),
           t.recommended,

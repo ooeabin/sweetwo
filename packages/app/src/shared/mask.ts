@@ -26,7 +26,7 @@ export const useMask = create<{ masked: boolean; toggle: () => void }>((set, get
 
 export const MASKED = '•••';
 /**
- * 금액 표기(가리기 켜면 •••): “3,500,000원”(2026-11-26 토스식, 11 공통 6장). 합계가 999억 원을 넘으면 “999억+”
+ * 금액 표기(가리기 켜면 •••): “3,500,000원”(2026-11-26 원 단위 전체, 11 공통 6장). 합계가 999억 원을 넘으면 “999억+”
  * (2026-11-12 QA 8구간 S8-02: 순자산·자산 합계가 999억을 넘으면 표기가 멈추던 것)
  */
 export const money = (v: Won, masked: boolean) => (masked ? MASKED : formatWonCap(v));
