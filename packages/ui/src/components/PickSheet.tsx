@@ -261,7 +261,7 @@ function PickLine({
 // ── 연·월 ────────────────────────────────────────────────
 
 /**
- * 연·월 칸(시트 안, 달력 시트의 월 머리 ⌄, 달력 머리 “12월 ⌄”): 연도 ‹ › + 12개월 칸.
+ * 연·월 칸(시트 안, 달력 시트의 월 머리 ⌄, 달력 머리 달 이름 “12월”): 연도 ‹ › + 12개월 칸.
  * 연도를 넘겨도 고른 달은 그대로, 달 칸을 누르면 바로 알려 줌
  */
 export function YearMonthPanel({
@@ -284,24 +284,24 @@ export function YearMonthPanel({
       <div className="hg-picksheet__yearhead">
         <button
           type="button"
-          className="hg-picksheet__nav"
+          className="hg-chevnav"
           aria-label={labels.prevYear}
           disabled={y <= minYear}
           onClick={() => onChange(y - 1, m)}
         >
-          <Icon name="chevron-left" size={20} />
+          <Icon name="chevron-left" size={24} />
         </button>
         <span className="hg-picksheet__year" aria-live="polite">
           {labels.yearLine(y)}
         </span>
         <button
           type="button"
-          className="hg-picksheet__nav"
+          className="hg-chevnav"
           aria-label={labels.nextYear}
           disabled={y >= maxYear}
           onClick={() => onChange(y + 1, m)}
         >
-          <Icon name="chevron-right" size={20} />
+          <Icon name="chevron-right" size={24} />
         </button>
       </div>
       <PickGrid<number>

@@ -890,7 +890,7 @@ test('상세(Y-05): 기록을 마친 회차는 요약 + 기록 고치기, 지남
 
 // ── 2026-11-24 K안(한국 금융 앱 달력형) ──────────────────────────────────────────────
 
-test('달력 K안: 머리 “10월 ⌄”, 요약 줄, 모든 칸 높이 같음, 칸 숫자 상태, 고른 날 머리 + 음력, 그림 파일이 없으면 그림 칸 없음', async ({
+test('달력 K안: 머리 ‹ 10월 ›, 요약 줄, 모든 칸 높이 같음, 칸 숫자 상태, 고른 날 머리 + 음력, 그림 파일이 없으면 그림 칸 없음', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -909,8 +909,8 @@ test('달력 K안: 머리 “10월 ⌄”, 요약 줄, 모든 칸 높이 같음,
     care({ id: 'c-past', name: '지난 모임', month: 10, day: 2, budget: 0 }),
   );
   await page.goto('/calendar');
-  // 머리 왼쪽 큰 월 + ⌄, 올해라 연도는 없음. 오늘이 든 달이라 ‘오늘’ 버튼 없음
-  const head = page.getByRole('button', { name: '2026년 10월, 연·월 고르기' });
+  // 머리 왼쪽 ‹ 10월 ›(2026-11-27 달 넘기기 C안, ⌄ 없음), 올해라 연도는 없음. 오늘이 든 달이라 ‘오늘’ 버튼 없음
+  const head = page.getByRole('button', { name: '2026년 10월, 달 고르기' });
   await expect(head).toHaveText('10월');
   await expect(page.getByRole('button', { name: '오늘' })).toHaveCount(0);
   // 요약 한 줄: 그 달 경조사 수 + 금액 메모 합(35만 원이 아니라 30 + 5 = 35만, 금액 0은 합에 영향 없음)
@@ -1038,25 +1038,67 @@ test('달력 K안: 손잡이로 한 주로 접고 펴기(누르기·키보드·�
   ).toBe('0s');
 });
 
-test('달력 K안: “10월 ⌄” → 연·월 휠로 이동, 다른 해는 “2027년 2월” + ‘오늘’', async ({ page }) => {
+test('달력 머리 ‹ 10월 ›(달 넘기기 C안): 달 이름 → 연·월 칸으로 이동, 다른 해는 “2027년 2월” + ‘오늘’', async ({
+  page,
+}) => {
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
   seed(db);
   await page.goto('/calendar');
-  await page.getByRole('button', { name: '2026년 10월, 연·월 고르기' }).click();
+  await page.getByRole('button', { name: '2026년 10월, 달 고르기' }).click();
   const sheet = page.getByRole('dialog', { name: '연·월 고르기' });
   await expect(sheet).toBeVisible();
   await axe(page);
   await setYearMonth(page, 2027, 2);
   await sheet.getByRole('button', { name: '2027년 2월 보기' }).click();
   await expect(sheet).toHaveCount(0);
-  await expect(page.getByRole('button', { name: '2027년 2월, 연·월 고르기' })).toHaveText(
+  await expect(page.getByRole('button', { name: '2027년 2월, 달 고르기' })).toHaveText(
     '2027년 2월',
   );
   await expect(page.getByRole('region', { name: '2027년 2월' })).toBeVisible();
   // 다른 달은 그 달 1일을 고름 + ‘오늘’
   await expect(page.locator('.hg-cal__date b')).toHaveText('2월 1일 월요일');
   await page.getByRole('button', { name: '오늘', exact: true }).click();
-  await expect(page.getByRole('button', { name: '2026년 10월, 연·월 고르기' })).toHaveText('10월');
+  await expect(page.getByRole('button', { name: '2026년 10월, 달 고르기' })).toHaveText('10월');
   await expect(page.getByRole('button', { name: '오늘', exact: true })).toHaveCount(0);
+  // ‘오늘’은 이번 달 + 오늘 날짜를 고름
+  await expect(page.locator('.hg-cal__date b')).toHaveText('10월 7일 수요일');
+});
+
+test('달력 머리 ‹ › (달 넘기기 C안, 2026-11-27): 회색 원 없는 선 꺾쇠 44px, ‘오늘’은 다른 달에만, 누르면 이번 달 + 오늘', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(NOW);
+  const db = await mockOnboarding(page, { now: NOW });
+  seed(db);
+  await page.goto('/calendar');
+  const head = page.locator('.hg-cal__head');
+  const prev = head.getByRole('button', { name: '이전 달' });
+  const next = head.getByRole('button', { name: '다음 달' });
+  // ‹ 10월 › 한 덩어리: 꺾쇠, 달 이름, 꺾쇠 순서
+  await expect(head.locator('.hg-cal__nav > button')).toHaveCount(3);
+  await expect(head.locator('.hg-cal__nav > button').nth(1)).toHaveText('10월');
+  await expect(head.locator('.hg-cal__month .hg-ico')).toHaveCount(0);
+  for (const b of [prev, next]) {
+    await expect(b).toHaveClass(/hg-chevnav/);
+    const box = await b.boundingBox();
+    expect(box?.width).toBeGreaterThanOrEqual(44);
+    expect(box?.height).toBeGreaterThanOrEqual(44);
+    expect(await b.evaluate((e) => getComputedStyle(e).backgroundColor)).toBe('rgba(0, 0, 0, 0)');
+  }
+  // 이번 달이면 ‘오늘’ 자리째 없음, 머리 높이는 그대로
+  const h0 = (await head.boundingBox())?.height;
+  await expect(page.getByRole('button', { name: '오늘', exact: true })).toHaveCount(0);
+  await prev.click();
+  await expect(page.getByRole('button', { name: '2026년 9월, 달 고르기' })).toHaveText('9월');
+  const today = page.getByRole('button', { name: '오늘', exact: true });
+  await expect(today).toBeVisible();
+  expect((await head.boundingBox())?.height).toBe(h0);
+  const tb = await today.boundingBox();
+  expect(tb?.height).toBe(32);
+  await axe(page);
+  await today.click();
+  await expect(page.getByRole('region', { name: '2026년 10월' })).toBeVisible();
+  await expect(page.locator('.hg-cal__date b')).toHaveText('10월 7일 수요일');
+  await expect(today).toHaveCount(0);
 });

@@ -4,8 +4,8 @@
 
 2026-11-24 K안으로 다시 만듦(사용자 결정, 레퍼런스: 한국 금융 앱 달력형: 현대카드 소비 캘린더, 카카오페이 내역·걸음 달력, 카카오톡 캘린더). 그 전 2026-11-04 대형 금융 앱 소비 달력형(칸 안 짧은 이름 글자 + 확인 목록 띠)은 없앰. 카드 없이 화면 폭 전체, 흰 바탕.
 
-- 소비자가 주는 것: 연·월, 달 머리 글자와 ⌄ 동작, 요약 한 줄(없으면 줄 없음), 날짜별 숫자 모양(`tone`)·첫 일정 그림(`art`)·남은 개수(`more`)·공휴일·연휴, 오늘, 고른 날, 접힘(`folded`), 아래 고른 날 일정(children).
-- 머리 `hg-cal__head`(높이 44): 왼쪽 큰 “12월 ⌄”(`hg-cal__month`, 22px 700 `ink` + chevron-down 16 `stone`, 누르는 칸 44. 다른 해면 “2027년 2월”. ⌄를 누르면 연·월 칸 시트 `MonthSheet`(DateSheet.md)). 오른쪽 `hg-cal__nav`: ‘오늘’(다른 달일 때만, `hg-cal__today` 높이 32 `surface-alt` 알약 13px 400 `ink-2`)과 ‹ ›(작은 둥근 아이콘 버튼 `surface-alt`).
+- 소비자가 주는 것: 연·월, 달 이름 글자와 누르면 여는 동작, 요약 한 줄(없으면 줄 없음), 날짜별 숫자 모양(`tone`)·첫 일정 그림(`art`)·남은 개수(`more`)·공휴일·연휴, 오늘, 고른 날, 접힘(`folded`), 아래 고른 날 일정(children).
+- 머리 `hg-cal__head`(높이 44, 2026-11-27 사용자 결정 ‘달 넘기기 C안’: 달 이름 옆 꺾쇠 + 오늘): 왼쪽 `hg-cal__nav` 한 덩어리 ‹ {달} ›. 꺾쇠는 넘기기 꺾쇠 `hg-chevnav`(회색 원 없는 선 꺾쇠, 머리 ‹ 뒤로와 같은 Phosphor Regular 선, `ink-2`, 보이는 크기 24, 누르는 칸 44, 넘길 수 없는 끝이면 `stone` + disabled, DESIGN.md ‘넘기기 꺾쇠’), ‹ 아이콘이 화면 옆 24 줄에 오도록 덩어리 왼쪽 −12. 가운데 달 이름 `hg-cal__month`(17/700 `ink` `--text-amount`, 누르는 칸 높이 44): 올해면 “11월”, 다른 해면 “2027년 2월”. 달 이름을 누르면 연·월 칸 시트 `MonthSheet`(DateSheet.md), ⌄ 아이콘은 없앰, 화면 읽기 이름 “2026년 11월, 달 고르기”. 오른쪽 ‘오늘’(`hg-cal__today`, `Button size="sm"` 회색 보조를 작은 알약으로: 보이는 높이 32, radius full, `surface-alt` + `ink-2` 15/700, 누르는 칸 44): 보는 달이 이번 달이 아닐 때만, 이번 달이면 자리째 없음(머리 높이는 그대로). 누르면 이번 달 + 오늘 날짜 고름. 예전(2026-11-24 K안) 큰 “12월 ⌄”(22/700) + 오른쪽 ‘오늘’·회색 원 ‹ ›(`.hg-cal__nav .hg-iconbtn`)는 없앰.
 - 요약 한 줄 `hg-cal__summary`(머리 아래 4px): 15px 400 `slate`, 개수 “3개”만 700 `ink`. 그 달 연휴가 있으면 맨 앞에 “설 연휴 6~9일”(`hg-cal__streak` 700 `holiday-ink`) + “, ” + 경조사 글자(달을 넘는 연휴는 “추석 연휴 9월 30일~10월 2일”). “경조사 3개(850,000원 예상)”(금액 메모 합), 금액 메모가 없으면 “경조사 3개”, ‘금융 일정’ 필터는 “금융 일정 4개”, 0개면 줄 없음.
 - 요일 13px 400 `stone`. 주말 색은 쓰지 않음(공휴일만 빨강).
 - 주 줄 `hg-cal__week`: 그 달 주만 그림(다음 달만 있는 줄은 뺌). 칸 영역은 좌우 12px를 더 써서 칸이 약 48px(고른 판이 숫자 양옆에 여유). 다른 달 날짜 칸은 비워 둠(`is-muted`, 흐린 숫자는 대비가 모자라서).
@@ -19,6 +19,6 @@
 - 보기 필터(“전체” “경조사·기념일” “금융 일정”)는 달 머리 위 밑줄 탭 `LineTabs`(2026-11-23 바탕 정리 2). 좁은 창 ‘+ 일정 추가’는 ‘다가오는 일정’ 머리 오른쪽 AddRow.
 - 구역 간격은 바탕 기준 32/12(달력 → 8px 띠 → 고른 날 → 8px 띠 → 다음 경조사 카드·다가오는 일정).
 - 날짜 칸 `aria-label`에 날짜, 공휴일 이름, 일정 수(확인 목록 안내 포함). 고른 날 `aria-pressed`, 오늘 `aria-current="date"`. 달력 구역 이름 “2026년 12월”.
-- React 래퍼 `Calendar`(packages/ui): `year`·`month`, `monthText`, `monthMenuLabel`·`onMonthMenu`, `summary`, `days`(`tone`, `art`, `more`, `holiday`), `today`, `selected`, 이전·다음, `todayLabel`·`onToday`, `folded`·`onFoldedChange(folded, via)`, `foldLabel`·`unfoldLabel`. 칸 모양을 정하는 계산(그림 키, 요약 합, 숫자 상태, 접을 주)은 core `rules/calendar-view.ts`.
+- React 래퍼 `Calendar`(packages/ui): `year`·`month`, `monthText`, `monthMenuLabel`·`onMonthMenu`(달 이름 버튼), `summary`, `days`(`tone`, `art`, `more`, `holiday`), `today`, `selected`, 이전·다음(`prevDisabled`·`nextDisabled`: 넘길 수 없는 끝), `todayLabel`·`onToday`, `folded`·`onFoldedChange(folded, via)`, `foldLabel`·`unfoldLabel`. 칸 모양을 정하는 계산(그림 키, 요약 합, 숫자 상태, 접을 주)은 core `rules/calendar-view.ts`.
 - 달력 아래 ‘다가오는 일정’(Y-04, 예전 Y-01 목록)의 줄은 같은 그림(Lead, 있을 때만)과 오른쪽 D-day `hg-cal__dday`(7일 안 `is-near`). 기록할 날 띠 `hg-recband`.
 - 2026-11-27 강약 기준 2차(DESIGN.md ‘강약 기준 2026-11-26’): ‘다가오는 일정’ 위 다음 경조사 상자(StatBlock 큰 값 + 제목)는 굵은 글자가 “D-13” 22/700 하나, 이름은 15/400 `ink`, 날짜·금액 메모 13 `slate`(StatBlock.md). 맨 아래 ‘선물 기록 ›’는 이동만 하는 줄 15/400 `ink-2` + ›(ListRow `nav` = `hg-listrow--nav`, 예전 17/400 `ink`).

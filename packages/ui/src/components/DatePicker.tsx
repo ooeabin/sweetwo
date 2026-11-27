@@ -10,7 +10,6 @@ import {
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import { cx } from './cx';
 import { Icon } from './Icon';
-import { IconButton } from './IconButton';
 
 export interface DatePickerLabels {
   /** 달력 여는 버튼 */
@@ -247,27 +246,29 @@ export function DatePicker({
         {open && (
           <div className="hg-datepick__pop" role="dialog" aria-label={label} onKeyDown={onGridKey}>
             <div className="hg-datepick__head">
-              <IconButton
-                icon="chevron-left"
-                label={labels.prev}
-                small
-                ghost
+              <button
+                type="button"
+                className="hg-chevnav"
+                aria-label={labels.prev}
                 onClick={() => {
                   moved.current = false;
                   setFocus(`${shiftMonth(ym, -1)}-01`);
                 }}
-              />
+              >
+                <Icon name="chevron-left" size={24} />
+              </button>
               <b aria-live="polite">{formatYm(ym)}</b>
-              <IconButton
-                icon="chevron-right"
-                label={labels.next}
-                small
-                ghost
+              <button
+                type="button"
+                className="hg-chevnav"
+                aria-label={labels.next}
                 onClick={() => {
                   moved.current = false;
                   setFocus(`${shiftMonth(ym, 1)}-01`);
                 }}
-              />
+              >
+                <Icon name="chevron-right" size={24} />
+              </button>
             </div>
             <table ref={grid} className="hg-datepick__grid">
               <thead>
