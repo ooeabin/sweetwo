@@ -311,6 +311,11 @@ test('자산·부채 목록: 통장 역할 배지 없음, 투자 묶음 줄, 정
   // 투자 묶음 줄 = 안 판 수익(손익 = 1,000 − 800). 2026-11-04 투자 비중 줄은 뺌
   const invest = page.getByRole('region', { name: '투자' });
   await expect(invest).toContainText('안 판 수익');
+  // 2026-11-27 강약 기준 2차: 누를 수 없는 보조 정보 줄(15/400, 굵은 금액 아님), 자산 줄과 다른 모양
+  const gain = invest.locator('.hg-gainrow');
+  await expect(gain).toHaveCSS('font-size', '15px');
+  await expect(gain.locator('span').last()).toHaveCSS('font-weight', '400');
+  await expect(gain.getByRole('button')).toHaveCount(0);
   await expect(invest).not.toContainText('투자 비중');
   await expect(invest).toContainText('+2,000,000원(+25%)');
 

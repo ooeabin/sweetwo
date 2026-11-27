@@ -103,7 +103,8 @@ export function F01Summary() {
           )}
         </section>
         <section className="hg-card hg-stack" aria-label={copy.monthly}>
-          <h2 className="hg-card__label">{copy.monthly}</h2>
+          {/* 상자 제목 15/700(2026-11-27 강약 기준 2차) */}
+          <h2 className="hg-card__label hg-card__label--head">{copy.monthly}</h2>
           <MonthBars
             label={now ? `${copy.monthly}, ${formatYm(now.month)} ${m(now.net)}` : copy.monthly}
             nowText={now ? short(now.net) : undefined}

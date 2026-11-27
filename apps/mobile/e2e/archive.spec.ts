@@ -73,6 +73,13 @@ test('지난 달 모아보기: 서랍 줄 → 최근 것부터 결과·모은 �
   await expect(rows.nth(0)).toContainText('확인할 것 1개');
   // 오른쪽 큰 숫자 = 그 달 모은 금액, 보조 = 계획한 월급(달마다 다름, 지금 실수령 350만 원이 아님)
   await expect(rows.nth(0)).toContainText('계획한 월급 1,500,000원');
+  // 2026-11-27 강약 기준 2차: 보조는 한 줄(결과, 계획한 월급), 말줄임 없이 줄 폭 끝까지, 줄 높이 64~68
+  const sub = rows.nth(0).locator('.hg-listrow__sub');
+  await expect(sub).toHaveText('확인할 것 1개, 계획한 월급 1,500,000원');
+  expect(await sub.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+  const h = (await rows.nth(0).boundingBox())?.height ?? 0;
+  expect(h).toBeGreaterThanOrEqual(64);
+  expect(h).toBeLessThanOrEqual(68);
   await expect(rows.nth(0).locator('.hg-listrow__value')).toContainText('1,000,000원');
   await expect(rows.nth(1)).toContainText('계획한 월급 2,700,000원');
   await expect(rows.nth(1).locator('.hg-listrow__value')).toContainText('2,700,000원');

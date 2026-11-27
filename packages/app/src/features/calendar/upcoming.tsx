@@ -114,7 +114,7 @@ export function UpcomingSection({ d, filter }: { d: CalData; filter: CalFilter }
     <>
       {filter !== 'money' && next && (
         <section className="hg-card hg-stack" aria-label={copy.nextCare}>
-          {/* 2026-11-04 Y-05와 같게: 큰 D-day + 이름 + 날짜·금액 메모 */}
+          {/* 2026-11-04 Y-05와 같게: 큰 D-day + 이름 + 날짜·금액 메모. 2026-11-27 굵은 글자는 D-day 하나(이름 15/400, StatBlock.md) */}
           <StatBlock
             as="div"
             big={copy.dday(dday(d.today, next.date))}
@@ -204,8 +204,9 @@ export function UpcomingSection({ d, filter }: { d: CalData; filter: CalFilter }
         )}
       </section>
       {filter !== 'money' && !!d.cares.length && (
-        <div className="hg-list">
-          <ListRow label={copy.gifted} onClick={() => nav('/calendar/gifts')} />
+        // 이동만 하는 줄 15/400 ink-2 + ›(2026-11-27 강약 기준 2차, ListRow nav)
+        <div className="hg-list hg-cal__giftlink">
+          <ListRow label={copy.gifted} nav onClick={() => nav('/calendar/gifts')} />
         </div>
       )}
     </>

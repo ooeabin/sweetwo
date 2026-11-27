@@ -6,4 +6,4 @@
 - 손익이 0이면 회색 줄 숨김. 손실은 “−800만”으로, 경고색 없이 `stone`.
 - 좁은 카드(‘이번 달’ 첫 화면)는 회색 줄을 ‘예상 {금액}’ 하나로 줄임. 둘 이상이면 이름표 작게, 값 진하게(`hg-meta`).
 - 변화 알약: 늘면 `hg-pill-up`(초록 `invest`), 줄면 `hg-pill-down`(살구 `goal`). 빨강 없음, 글자로 “늘었어요/줄었어요”도 함께.
-- 마크업: `hg-networth__label`(“순자산”) → `hg-networth__value` → `hg-networth__expected`(예상 순자산, 안 판 수익).
+- 마크업: `hg-networth__label`(“순자산”, 13/400 `slate`, 2026-11-27 강약 기준 2차로 15에서 내림: W-10·W-20b 큰 금액 이름표와 같음) → `hg-networth__value` → `hg-networth__expected`(예상 순자산, 안 판 수익).
