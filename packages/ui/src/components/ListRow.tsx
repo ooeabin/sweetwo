@@ -15,6 +15,7 @@ export function ListRow({
   chevron = Boolean(onClick),
   locked = false,
   soft = false,
+  nav = false,
 }: {
   icon?: IconName;
   lead?: ReactNode;
@@ -28,6 +29,8 @@ export function ListRow({
   locked?: boolean;
   /** 오른쪽 값을 조용하게(바탕 기준 2026-11-23: 값이 설정·상태일 때 15px 400 slate. 금액은 기본 17px 700) */
   soft?: boolean;
+  /** 이동만 하는 줄(값 없이 ›, 강약 기준 2번, 2026-11-27): 이름 15px 400 ink-2 */
+  nav?: boolean;
 }) {
   const inner = (
     <>
@@ -54,11 +57,11 @@ export function ListRow({
     </>
   );
   return onClick ? (
-    <button type="button" className="hg-listrow" onClick={onClick}>
+    <button type="button" className={cx('hg-listrow', nav && 'hg-listrow--nav')} onClick={onClick}>
       {inner}
     </button>
   ) : (
-    <div className="hg-listrow">{inner}</div>
+    <div className={cx('hg-listrow', nav && 'hg-listrow--nav')}>{inner}</div>
   );
 }
 

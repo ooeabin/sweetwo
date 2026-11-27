@@ -58,11 +58,11 @@ export function S20Help() {
       )}
       <div className="hg-list">
         {HELP_ABUSE_ENABLED && <ListRow label={copy.helpAbuse} chevron={false} />}
-        <ListRow label={copy.contact} onClick={() => nav('/settings/help/inquiry')} />
-        <ListRow label={copy.myInquiries} onClick={() => nav('/settings/help/inquiries')} />
-        <ListRow label={copy.terms} onClick={() => openSite('/terms')} />
-        <ListRow label={copy.privacy} onClick={() => openSite('/privacy')} />
-        <ListRow label={copy.version} onClick={() => nav('/settings/about')} />
+        <ListRow label={copy.contact} nav onClick={() => nav('/settings/help/inquiry')} />
+        <ListRow label={copy.myInquiries} nav onClick={() => nav('/settings/help/inquiries')} />
+        <ListRow label={copy.terms} nav onClick={() => openSite('/terms')} />
+        <ListRow label={copy.privacy} nav onClick={() => openSite('/privacy')} />
+        <ListRow label={copy.version} nav onClick={() => nav('/settings/about')} />
       </div>
     </div>
   );

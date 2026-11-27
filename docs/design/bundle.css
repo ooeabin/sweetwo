@@ -2468,13 +2468,13 @@ html:has(.hg-frame--alt), body:has(.hg-frame--alt) { background: var(--surface-a
 .hg-drawer__body { flex: 1; display: flex; flex-direction: column; padding: var(--space-2) 0; }
 .hg-drawer__group { margin: 0; padding: var(--space-2) 0; list-style: none; }
 .hg-drawer__group + .hg-drawer__group { border-top: 1px solid var(--hairline-soft); }
-.hg-drawer__item { display: flex; align-items: center; width: 100%; min-height: 48px; padding: 0 var(--space-6); box-sizing: border-box; font: var(--weight-medium) 17px/24px var(--font-sans); color: var(--ink-2); }
+.hg-drawer__item { display: flex; align-items: center; width: 100%; min-height: 48px; padding: 0 var(--space-6); box-sizing: border-box; font: var(--text-value); font-weight: 700; color: var(--ink); }  /* 2026-11-27 강약 기준 적용 1차 ‘공통’(사용자 결정): 맨 위 층 줄(묶음 이름, 초대하기, 공지, 도움말)은 상자·묶음 제목 규칙 15/700 ink, 하위 줄은 아래 15/400 ink-2 */
 .hg-drawer__item:focus-visible { outline-offset: -2px; }
 /* 2026-11-16 2단 서랍: 메뉴 머리 줄(굵게 ink) + 늘 펼친 들여쓴 하위 줄(44px). 지금 화면 줄은 옅은 회색 판도 */
 .hg-drawer__branch + .hg-drawer__branch { margin-top: var(--space-2); }
-.hg-drawer__item--head { font: var(--text-title-3); color: var(--ink); }
+.hg-drawer__item--head { font: var(--text-value); font-weight: 700; color: var(--ink); }  /* 2026-11-27 17/700 → 15/700 */
 .hg-drawer__subs { margin: 0; padding: 0; list-style: none; }
-.hg-drawer__sub { min-height: 44px; padding-left: calc(var(--space-6) + var(--space-4)); font: var(--text-body); font-weight: var(--weight-medium); color: var(--ink-2); }
+.hg-drawer__sub { min-height: 44px; padding-left: calc(var(--space-6) + var(--space-4)); font: var(--text-value); color: var(--ink-2); }  /* 2026-11-27 이동만 하는 줄 15/400 ink-2 */
 .hg-drawer__item.is-current { background: var(--surface-alt); font-weight: 700; color: var(--ink); }
 .hg-drawer__foot { margin: 0; padding: var(--space-4) var(--space-6) 0; font: var(--text-caption); color: var(--stone); }
 @media (prefers-reduced-motion: no-preference) {
@@ -2844,7 +2844,8 @@ button.hg-datepill { cursor: pointer; }
 .hg-checklist__list { display: flex; flex-direction: column; }
 .hg-foldrow { min-height: 48px; margin-bottom: var(--space-3); padding: 0 var(--space-4); font: var(--text-value); color: var(--ink-2); }
 .hg-checkgroup { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
-.hg-sechead__title { font: var(--text-amount); }
+.hg-sechead__title { font: var(--text-value); font-weight: 700; }  /* 2026-11-27 강약 기준 적용 1차 ‘공통’(사용자 결정): 묶음 제목 17/700 → 15/700(상자·묶음 제목 규칙) */
+.hg-sechead__count { font: var(--text-note); color: var(--slate); }  /* 2026-11-27 같은 결정: 합계·개수 17/700 stone → 13/400 slate(제목과 같은 크기·굵기가 나란히 오지 않게). 카드 안 묶음 머리(--group, W-02 “저축·투자 1/2”)는 위 규칙 그대로 */
 .hg-sechead { padding: var(--space-3) 0 0; }
 /* 수입 한 줄(W-02): 구분선 아래 “이번 달 수입 350만 원 ›” */
 .hg-incomeline { margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--hairline); }
@@ -2855,6 +2856,8 @@ button.hg-datepill { cursor: pointer; }
 .hg-listrow__sub { font: var(--text-note); color: var(--stone); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hg-listrow__value { padding-left: var(--space-3); font: var(--text-amount); }
 .hg-listrow__value.is-soft { font: var(--text-value); color: var(--slate); }
+/* 이동만 하는 줄(2026-11-27 강약 기준 적용 1차 ‘공통’, 사용자 결정, ListRow `nav`): 값 없이 › 하나인 줄은 이름 15/400 ink-2(줄 높이 56 그대로). 첫 적용 설정(S-10·S-11·S-12) */
+.hg-listrow--nav .hg-listrow__label { font: var(--text-value); color: var(--ink-2); }
 .hg-listrow .hg-chevron { margin: 0 var(--space-1) 0 var(--space-3); }
 .hg-listrow:is(button, a):hover { background: none; }
 .hg-listrow:last-child { border-bottom: 0; }
@@ -3321,6 +3324,7 @@ button.hg-plansum__sal { cursor: pointer; }
 .hg-planstage { --gap-plan: 16px; --band-below: var(--gap-plan); gap: 0; }  /* --band-below: ‘홈 밖 흰 바탕 기본’ 띠 아래 간격(기본 --gap-title 12) */
 .hg-plancard__head { display: flex; flex-direction: row; align-items: baseline; justify-content: space-between; gap: var(--space-3); min-height: 0; padding: 0; }
 .hg-plancard__title, .hg-plancard__sum { margin: 0; font: var(--text-note); color: var(--slate); letter-spacing: 0; }
+.hg-plancard__title { font: var(--text-value); font-weight: 700; color: var(--ink); }  /* 2026-11-27 강약 기준 적용 1차 ‘공통’(사용자 결정): 묶음 이름 15/700 ink, 합계는 13/400 slate 그대로(SectionHeader와 같은 규칙) */
 .hg-plancard__sum { margin: 0; font-variant-numeric: normal; white-space: nowrap; }
 .hg-plancard > * + .hg-plan__block:not(.hg-plan__block--soft) { margin-top: 0; }
 .hg-plan__block:not(.hg-plan__block--soft) { margin-bottom: var(--space-2); }

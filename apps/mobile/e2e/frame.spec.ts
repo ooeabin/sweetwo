@@ -237,6 +237,15 @@ test('메뉴 서랍(Drawer, 2026-11-09): 줄 묶음, 지금 화면 굵게, 줄 �
     '도움말',
   ]);
   await expect(drawer.locator('.hg-drawer__sub')).toHaveCount(7);
+  // 강약 기준 적용 1차 ‘공통’(2026-11-27): 맨 위 층 줄(묶음 이름·초대하기·도움말) 15/700 ink, 하위 줄 15/400 ink-2
+  for (const name of ['월급', '초대하기', '도움말']) {
+    const top = drawer.getByRole('button', { name, exact: true });
+    await expect(top).toHaveCSS('font-size', '15px');
+    await expect(top).toHaveCSS('font-weight', '700');
+  }
+  const firstSub = drawer.locator('.hg-drawer__sub').first();
+  await expect(firstSub).toHaveCSS('font-size', '15px');
+  await expect(firstSub).toHaveCSS('font-weight', '400');
   await expect(drawer.locator('.hg-drawer__group')).toHaveCount(3);
   // 2026-11-18: ‘저축·투자’ 줄은 W-01 월급 계획 템플릿 안 묶음으로 합쳐 없앰
   for (const name of ['홈', '문의', '공지', '우리 둘', '내 정보', '설정', '알림', '저축·투자'])

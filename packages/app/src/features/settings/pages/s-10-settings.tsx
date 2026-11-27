@@ -67,6 +67,7 @@ export function S10Settings() {
         <ListRow
           label={copy.rows.couple}
           value={stateValue}
+          soft
           onClick={() => nav('/settings/couple')}
         />
       </div>
@@ -80,12 +81,14 @@ export function S10Settings() {
                 ? copy.planShareJointRow
                 : (copy.planShares[d.me.plan_share] ?? '')
             }
+            soft
             onClick={() => nav('/settings/visibility')}
           />
         )}
         <ListRow
           label={copy.rows.noti}
           value={copy.pushState(prefs.push && pushPerm === 'granted')}
+          soft
           onClick={() => nav('/settings/notifications')}
         />
         <ListRow
@@ -93,14 +96,18 @@ export function S10Settings() {
           value={
             app && lock.data ? (lock.data.hasPin ? copy.rows.lockOn : copy.rows.lockOff) : undefined
           }
+          soft
+          nav={!(app && lock.data)}
           onClick={() => nav('/settings/security')}
         />
         <ListRow
           label={copy.rows.guide}
           value={ck.stage ? copy.checklistCount(ck.count, ck.total) : undefined}
+          soft
+          nav={!ck.stage}
           onClick={() => nav('/settings/guides')}
         />
-        <ListRow label={copy.rows.screen} value={copy.rows.screenValue} />
+        <ListRow label={copy.rows.screen} value={copy.rows.screenValue} soft />
         {/* 금액 가리기(2026-11-03 좁은 창 머리 눈 아이콘 대신 여기서. 기기마다 기억) */}
         <div className="hg-listrow hg-listrow--toggle">
           <Toggle
@@ -114,12 +121,13 @@ export function S10Settings() {
       <div className="hg-list">
         {/* 위젯(S-22): 모바일 앱(위젯 브리지)에서만 */}
         {widgetSettingsAvailable() && (
-          <ListRow label={copy.rows.widgets} onClick={() => nav('/settings/widgets')} />
+          <ListRow label={copy.rows.widgets} nav onClick={() => nav('/settings/widgets')} />
         )}
-        <ListRow label={copy.rows.help} onClick={() => nav('/settings/help')} />
+        <ListRow label={copy.rows.help} nav onClick={() => nav('/settings/help')} />
         <ListRow
           label={copy.rows.data}
           sub={copy.rows.dataSub}
+          nav
           onClick={() => nav('/settings/data')}
         />
         <ListRow
@@ -134,6 +142,8 @@ export function S10Settings() {
             )
           }
           value={app ? (window.sweetwo?.appVersion ?? '') : undefined}
+          soft
+          nav={!app}
           onClick={() => nav(asking ? '/settings/help/inquiries' : '/settings/about')}
         />
       </div>

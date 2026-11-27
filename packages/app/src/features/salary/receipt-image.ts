@@ -364,7 +364,6 @@ export interface PlanImageModel {
   }[];
 }
 
-
 /** 워드마크를 같은 모양 그대로 한 색(잉크)으로 칠한 canvas. 이미지가 없으면 null */
 function inkTint(img: HTMLImageElement | null, color: string): HTMLCanvasElement | null {
   if (!img) return null;
@@ -529,9 +528,10 @@ function layoutPlan(
   y = summaryBottom;
 
   // ── 저축·투자, 지출 카드 ──
-  // 묶음 머리는 화면과 같은 한 줄: 이름 왼쪽 + 합계 오른쪽, 둘 다 13/400 slate(2026-11-26 ‘W-01 정리 A안’).
+  // 묶음 머리는 화면과 같은 한 줄: 이름 15/700 ink 왼쪽 + 합계 13/400 slate 오른쪽(2026-11-26 ‘W-01 정리 A안’,
+  // 2026-11-27 강약 기준 적용 1차 ‘공통’으로 이름만 15/700).
   // 줄은 화면 ReceiptRows와 같은 이름 17/400 ink + 금액 17/700 ink, 보조 줄 13/400 stone
-  const HEAD = 18 + 8;
+  const HEAD = 20 + 8;
   for (const s of m.sections) {
     band(y);
     y += 8;
@@ -539,8 +539,8 @@ function layoutPlan(
     const rowsH = s.rows.reduce((h, r) => h + (r.sub ? 60 : 48), 0);
     const bottom = cardTop + CARD_PAD + HEAD + rowsH + CARD_PAD - 8;
     y = cardTop + CARD_PAD;
-    text(s.title, left, y + 9, { weight: 400, size: 13, color: t.slate });
-    text(s.subtotal, right, y + 9, { weight: 400, size: 13, color: t.slate, align: 'right' });
+    text(s.title, left, y + 10, { weight: 700, size: 15, color: t.ink });
+    text(s.subtotal, right, y + 10, { weight: 400, size: 13, color: t.slate, align: 'right' });
     y += HEAD;
     for (const r of s.rows) {
       ctx.font = font(700, 17);

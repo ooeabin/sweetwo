@@ -112,6 +112,7 @@ export function S15Security() {
               <div className="hg-list">
                 <ListRow
                   label={copy.changePin}
+                  nav
                   onClick={() => {
                     setPinError(false);
                     setPinFor('change');
