@@ -99,26 +99,98 @@ export const copy = {
   allocated: '계획 금액',
   leftoverLabel: '미계획 금액',
   addSpend: '+ 지출 추가',
-  spendChips: [
-    { name: '관리비', code: 'maintenance' },
-    { name: '통신비', code: 'phone' },
-    { name: '보험료', code: 'insurance' },
-    { name: '구독료', code: 'subscription' },
-    { name: '교통비', code: 'transport' },
-    { name: '부모님 용돈', code: 'parents' },
+  /**
+   * W-01e 지출 이름 칩(2026-11-27 사용자 결정 “이 정도로 상세하게”, 통장 쪼개기·고정지출 안내 글 조사): 한 벌로 합침(예전 spendChips·spendEmpty.chips 둘).
+   * 맨 위 ‘자주 쓰는 것’ 6개, 나머지는 ‘더 보기’로 펼치는 주제 묶음(묶음 제목 13/400 slate). 용돈은 기본 줄이라 칩 없음. ‘생활비’는 묶음(식비, 외식 …, 2026-11-27)이고 칩마다 일반 지출 줄.
+   * 칩 이름은 한 가지만(‘A·B’ 묶음 이름 금지, 2026-11-27). code: 예전 것은 그대로(rent, maintenance, phone, insurance, transport, parents, subscription, loan), 새 칩은 새 code
+   */
+  spendChipTop: ['food', 'rent', 'maintenance', 'utility', 'phone', 'insurance'] as const,
+  spendChipTopTitle: '자주 쓰는 것', // [확인 필요]
+  spendChipGroups: [
+    // 2026-11-27 사용자 결정: 생활비를 묶음 하나로 두고 그 안에서 식비·의류·화장품처럼 하나씩 계획(칩마다 일반 지출 줄 하나,
+    // 기본 생활비 줄 kind living·O-30 같이 쓰는 생활비·추천 계산과는 잇지 않음)
+    {
+      title: '생활비',
+      chips: [
+        { name: '식비', code: 'food' },
+        { name: '외식', code: 'eat_out' },
+        { name: '카페', code: 'cafe' },
+        { name: '생활용품', code: 'household' },
+        { name: '의류', code: 'clothes' },
+        { name: '화장품', code: 'cosmetics' },
+        { name: '미용', code: 'beauty' },
+        { name: '병원비', code: 'hospital' },
+        { name: '자기계발', code: 'self_dev' },
+        { name: '운동', code: 'exercise' },
+      ],
+    },
+    {
+      title: '주거',
+      chips: [
+        { name: '월세', code: 'rent' },
+        { name: '관리비', code: 'maintenance' },
+        { name: '공과금', code: 'utility' },
+        { name: '전세대출 이자', code: 'jeonse_interest' },
+        { name: '주택담보대출 상환', code: 'loan' },
+      ],
+    },
+    {
+      title: '통신',
+      chips: [
+        { name: '휴대폰 요금', code: 'phone' },
+        { name: '인터넷', code: 'internet' },
+        { name: 'TV', code: 'tv' },
+      ],
+    },
+    {
+      title: '구독',
+      chips: [
+        { name: 'OTT 구독', code: 'subscription' },
+        { name: '앱 구독', code: 'app_sub' },
+        { name: '렌탈', code: 'rental' },
+      ],
+    },
+    { title: '교통', chips: [{ name: '대중교통비', code: 'transport' }] },
+    {
+      title: '차',
+      chips: [
+        { name: '주유비', code: 'fuel' },
+        { name: '자동차 보험', code: 'car_insurance' },
+        { name: '주차비', code: 'parking' },
+        { name: '차량 할부', code: 'car_loan' },
+      ],
+    },
+    { title: '보험', chips: [{ name: '보험료', code: 'insurance' }] },
+    {
+      title: '대출',
+      chips: [
+        { name: '신용대출 상환', code: 'credit_loan' },
+        { name: '학자금 상환', code: 'student_loan' },
+      ],
+    },
+    {
+      title: '가족',
+      chips: [
+        { name: '부모님 용돈', code: 'parents' },
+        { name: '자녀 교육비', code: 'child_edu' },
+        { name: '육아용품', code: 'baby_goods' },
+        { name: '반려동물', code: 'pet' },
+      ],
+    },
+    {
+      title: '관계',
+      chips: [
+        { name: '경조사비', code: 'family_event' },
+        { name: '데이트 비용', code: 'date' },
+      ],
+    },
   ] as const,
+  chipMore: '더 보기', // [확인 필요] 칩 ‘추천’·‘자주 쓰는 것’ 아래 나머지 묶음 펼치기
+  chipLess: '접기', // [확인 필요]
   spendChipsLabel: '지출 이름',
   allowanceRows: '용돈', // 화면 읽기: W-01 지출 묶음 맨 위 용돈 줄 목록(2026-11-16 R4-3)
-  /** 빈 지출 카드에서 ‘+ 지출 추가’로 연 W-01e 첫 달 이름 칩(2026-11-27 ‘W-01 빈 묶음 A안’: W-01 화면의 칩 두 줄은 없앰, W-01e 안에만) [확인 필요] */
+  /** W-01e 칩 끝 ‘직접 정하기’(이름 칸). 2026-11-27 칩 한 벌로 합치며 예전 첫 달 칩 목록(chips)은 없앰 */
   spendEmpty: {
-    chips: [
-      { name: '월세', code: 'rent' },
-      { name: '관리비', code: 'maintenance' },
-      { name: '통신비', code: 'phone' },
-      { name: '보험료', code: 'insurance' },
-      { name: '대출 상환', code: 'loan' },
-      { name: '생활비', code: 'living' },
-    ] as const,
     other: '직접 정하기',
   },
   addMyShareHint: '내가 내는 몫만 입력해요', // [확인 필요] 2026-11-16 r6 ‘매달 나가는 지출’ 금액 시트 아래 회색 한 줄(월세를 둘이 나눠 내면 내 몫)
@@ -612,14 +684,40 @@ export const copy = {
     home: '내 집 마련',
     travel: '여행',
     car: '차',
-    childcare: '출산·육아',
+    childcare: '육아',
     retire: '노후',
     moving: '이사',
-    appliance: '가전·가구',
+    appliance: '가전',
     anniv_gift: '기념일 선물',
     date: '데이트 비용',
     lump: '목돈',
-  }, // 19 ‘이름 칩 표’ [확인 필요]
+    birth: '출산',
+    furniture: '가구',
+    child_edu: '자녀 교육',
+    self_dev: '자기계발',
+    family_event: '경조사',
+    holiday: '명절',
+    yearly: '연간 큰 지출',
+    housing_sub: '주택청약',
+    installment: '적금',
+    invest: '투자',
+    pension: '연금',
+  }, // 19 ‘이름 칩 표’ [확인 필요]. 2026-11-27 칩 이름은 한 가지만: ‘출산·육아’ → ‘육아’(+ ‘출산’), ‘가전·가구’ → ‘가전’(+ ‘가구’)
+  /** 예전 칩 이름 → 칩(이미 저장된 이름을 칩으로 알아봄, 2026-11-27) */
+  chipAliases: { '출산·육아': 'childcare', '가전·가구': 'appliance' } as const,
+  /** W-11a 칩 묶음 제목(2026-11-27 사용자 결정, 한 주제 한 단어) [확인 필요] */
+  chipGroupNames: {
+    top: '추천',
+    marriage: '결혼',
+    house: '집',
+    together: '둘이서',
+    family: '가족',
+    living: '생활',
+    emergency: '비상금',
+    big_spend: '큰 지출',
+    finance: '재테크',
+    retire: '노후',
+  },
   // W-14 쓸 곳 메모, W-14a
   notesTitle: (name: string) => `쓸 곳 메모 ${name}`, // [확인 필요] 제목 “쓸 곳 메모” + 저금 이름
   notesHelp: '모은 금액을 어디에 쓸지 입력해 두면 캘린더에도 보여요', // [확인 필요]

@@ -189,7 +189,7 @@ celebrate(폭죽 터짐), scene-clap(박수), scene-invite(편지가 올라옴),
 
 ### 11. 저축·투자 그림(2026-11-26 사용자 결정, 홈 H-10 같이 모으기 칸 왼쪽)
 
-홈 H-10 같이 모으기 칸 왼쪽(예전 두 사람 Avatar 자리, 사람 원은 머리 제목 오른쪽으로 옮김)에 그 저축·투자의 그림. 키는 19 ‘이름 칩 표’의 칩마다 하나 + 직접 정한 이름 공통 하나, 키 표는 core `rules/next-saving.ts` `SAVING_ART`·`SAVING_ART_CUSTOM` 한 곳(이름 → 키는 `savingArtKey`, 이름이 칩 이름과 같으면 그 칩). 파일 `packages/ui/src/assets/illustrations/<키>.webp`(512px 정사각, 투명 바탕), 보이는 크기 **40px**(`hg-together__art`, `radius-md`). 40px에서 읽히게 물건 하나, 굵은 덩어리, 1번과 같은 2D 플랫 그림체. 파일이 없으면 자리째 없음(지금 상태). 새로 16장.
+홈 H-10 같이 모으기 칸 왼쪽(예전 두 사람 Avatar 자리, 사람 원은 머리 제목 오른쪽으로 옮김)에 그 저축·투자의 그림. 키는 19 ‘이름 칩 표’의 칩마다 하나 + 직접 정한 이름 공통 하나, 키 표는 core `rules/next-saving.ts` `SAVING_ART`·`SAVING_ART_CUSTOM` 한 곳(이름 → 키는 `savingArtKey`, 이름이 칩 이름과 같으면 그 칩). 파일 `packages/ui/src/assets/illustrations/<키>.webp`(512px 정사각, 투명 바탕), 보이는 크기 **40px**(`hg-together__art`, `radius-md`). 40px에서 읽히게 물건 하나, 굵은 덩어리, 1번과 같은 2D 플랫 그림체. 파일이 없으면 자리째 없음(지금 상태). 새로 16장, 2026-11-27 칩 묶음(19 ‘이름 칩 표’)으로 11장 더해 27장. 예전 칩 이름 ‘출산·육아’·‘가전·가구’로 저장된 저축·투자는 별칭으로 같은 그림(`savingArtKey` aliases).
 
 | # | 키 | 칩 이름 | 그림 주제(뽑을 때 정함) |
 | --- | --- | --- | --- |
@@ -201,20 +201,31 @@ celebrate(폭죽 터짐), scene-clap(박수), scene-invite(편지가 올라옴),
 | 6 | saving-home | 내 집 마련 | 집과 열쇠 |
 | 7 | saving-travel | 여행 | 여행 가방 |
 | 8 | saving-car | 차 | 자동차 |
-| 9 | saving-childcare | 출산·육아 | 아기 우주복 |
+| 9 | saving-childcare | 육아(예전 ‘출산·육아’) | 아기 우주복 |
 | 10 | saving-retire | 노후 | 흔들의자 |
 | 11 | saving-moving | 이사 | 이삿짐 상자 |
-| 12 | saving-appliance | 가전·가구 | 소파 |
+| 12 | saving-appliance | 가전(예전 ‘가전·가구’) | 냉장고 |
 | 13 | saving-anniv-gift | 기념일 선물 | 선물 상자와 하트 |
 | 14 | saving-date | 데이트 비용 | 커피 두 잔 |
 | 15 | saving-lump | 목돈 | 동전 더미 |
 | 16 | saving-custom | 직접 정한 이름(공통) | 저금통 |
+| 17 | saving-birth | 출산 | 아기 젖병 |
+| 18 | saving-furniture | 가구 | 소파 |
+| 19 | saving-child-edu | 자녀 교육 | 책가방 |
+| 20 | saving-self-dev | 자기계발 | 펼친 책 |
+| 21 | saving-family-event | 경조사 | 봉투 |
+| 22 | saving-holiday | 명절 | 선물 보따리 |
+| 23 | saving-yearly | 연간 큰 지출 | 달력 한 장 |
+| 24 | saving-housing-sub | 주택청약 | 통장과 집 |
+| 25 | saving-installment | 적금 | 통장 |
+| 26 | saving-invest | 투자 | 오르는 막대 |
+| 27 | saving-pension | 연금 | 모래시계 |
 
 ### 합계
 
 | 묶음 | 1 | 3 | 4·6·7 | 5 | 8 | 9 | 합 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 새로 뽑기 | 18 | 0 | 37 | 9 | 2 | 3 | **69** + 움직이는 그림 6 + 캘린더 새 4장(10번) + 저축·투자 16장(11번, 2026-11-26) |
+| 새로 뽑기 | 18 | 0 | 37 | 9 | 2 | 3 | **69** + 움직이는 그림 6 + 캘린더 새 4장(10번) + 저축·투자 27장(11번, 2026-11-26 16장, 2026-11-27 11장 더함) |
 
 - 대상 아님: 버튼·띠·+ 추가의 UI 아이콘, 앱 아이콘, 파비콘, 공유 이미지.
 - 2026-11-09 전 합계 57(4번 22, 6번 3, 7번 4 포함). 2026-11-09 저녁 홈 허브 3장(9번)을 더해 28 → 31. 2026-11-10 줄 앞 칸·요약·알림 37장(4·6·7번)을 되살려 31 → 68. 같은 날 O-01 시작 그림(1-17)을 없애 67. 같은 날 상태 화면 아이콘 원을 빈 자리로 되돌리며 A-03 대기(1-18)와 A-07 합류 불가(1-19)를 더해 69.

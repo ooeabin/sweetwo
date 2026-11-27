@@ -368,8 +368,9 @@ test('지출 추가: 이름 칩 → 금액 → 추가하기, 직접 추가 줄�
   await go();
   await addSpend(page);
   const chips = page.getByRole('group', { name: '지출 이름' });
-  for (const n of ['관리비', '통신비', '보험료', '구독료', '교통비', '부모님 용돈'])
-    await expect(chips.getByRole('button', { name: n })).toBeVisible();
+  // 2026-11-27 칩 한 벌: ‘자주 쓰는 것’ 6개 + ‘더 보기’ 주제 묶음
+  for (const n of ['식비', '월세', '관리비', '공과금', '휴대폰 요금', '보험료'])
+    await expect(chips.getByRole('button', { name: n, exact: true })).toBeVisible();
   await chips.getByRole('button', { name: '관리비' }).click();
   await expect(page.getByRole('heading', { level: 2 })).toHaveText('관리비에 매달 얼마씩 쓸까요?');
   // 어떻게 챙겨요?: 지출은 세 칸, 처음 값 월급날 확인
@@ -785,7 +786,7 @@ function noSpend(db: MemDb) {
     );
 }
 
-test('빈 지출 카드(2026-11-27 A안): 칩 없이 ‘+ 지출 추가’ 한 줄 → W-01e 첫 달 칩 → 지출 줄, 이어서 생활비 칩, 다시 열면 보통 칩', async ({
+test('빈 지출 카드(2026-11-27 A안): 칩 없이 ‘+ 지출 추가’ 한 줄 → W-01e 칩(자주 쓰는 것 + 더 보기) → 지출 줄', async ({
   page,
 }) => {
   const { db, go } = await open(page);
@@ -799,11 +800,37 @@ test('빈 지출 카드(2026-11-27 A안): 칩 없이 ‘+ 지출 추가’ 한 �
   await expect(page.getByRole('region', { name: '매달 나가는 지출이 있어요?' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '다 넣었어요' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '건너뛸게요' })).toHaveCount(0);
-  // 빈 카드에서 열면 W-01e는 첫 달 칩(월세 … 생활비) + 직접 정하기
+  // W-01e 칩 한 벌(2026-11-27): ‘자주 쓰는 것’ 6개 + 직접 정하기, 용돈은 기본 줄이라 칩 없음, ‘생활비’는 묶음
   await addSpend(page);
   const chips = page.getByRole('group', { name: '지출 이름' });
-  for (const n of ['월세', '관리비', '통신비', '보험료', '대출 상환', '생활비', '직접 정하기'])
+  await expect(chips.getByText('자주 쓰는 것')).toBeVisible();
+  for (const n of ['식비', '월세', '관리비', '공과금', '휴대폰 요금', '보험료', '직접 정하기'])
     await expect(chips.getByRole('button', { name: n, exact: true })).toBeVisible();
+  await expect(chips.getByRole('button', { name: '생활비', exact: true })).toHaveCount(0);
+  // 나머지 주제 묶음은 ‘더 보기’로 펼침(자주 쓰는 것과 겹치는 칩은 다시 안 보임)
+  await expect(chips.getByRole('button', { name: '반려동물', exact: true })).toHaveCount(0);
+  const more = chips.getByRole('button', { name: '더 보기' });
+  await expect(more).toHaveAttribute('aria-expanded', 'false');
+  await more.click();
+  for (const g of ['생활비', '주거', '통신', '구독', '교통', '차', '대출', '가족', '관계'])
+    await expect(chips.getByRole('group', { name: g, exact: true })).toBeVisible();
+  await expect(chips.getByRole('group', { name: '보험', exact: true })).toHaveCount(0);
+  // 생활비 묶음(2026-11-27): 칩마다 일반 지출 줄, 맨 앞 묶음
+  const living = chips.getByRole('group', { name: '생활비', exact: true });
+  await expect(living.getByRole('button')).toHaveText([
+    '외식',
+    '카페',
+    '생활용품',
+    '의류',
+    '화장품',
+    '미용',
+    '병원비',
+    '자기계발',
+    '운동',
+  ]);
+  await expect(chips.getByRole('group', { name: '나', exact: true })).toHaveCount(0);
+  await expect(chips.getByRole('button', { name: '월세', exact: true })).toHaveCount(1);
+  await expect(chips.getByRole('button', { name: '반려동물', exact: true })).toBeVisible();
   await axe(page);
   // 가짜 추천 금액 없음: 칩만, 금액은 직접
   await chips.getByRole('button', { name: '월세', exact: true }).click();
@@ -811,26 +838,19 @@ test('빈 지출 카드(2026-11-27 A안): 칩 없이 ‘+ 지출 추가’ 한 �
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page.getByText('월세를 추가했어요')).toBeVisible();
   expect(lineOf(db, 'custom', '월세')?.amount).toBe(500_000);
-  // 이어서: 같은 화면이면 첫 달 칩 그대로(넣은 이름은 숨김), 생활비 칩은 기본 생활비 줄(kind living)
+  // 이어서: 넣은 이름은 칩에서 숨김, 펼친 묶음 칩도 고를 수 있음
   await addSpend(page);
   await expect(chips.getByRole('button', { name: '월세', exact: true })).toHaveCount(0);
-  await chips.getByRole('button', { name: '생활비', exact: true }).click();
-  // 생활비 칩만 처음 값이 ‘확인 안 해요’(생활비 줄 기본)
-  await expect(page.getByRole('radio', { name: '확인 안 해요' })).toHaveAttribute(
-    'aria-checked',
-    'true',
+  await chips.getByRole('button', { name: '더 보기' }).click();
+  await chips.getByRole('button', { name: '전세대출 이자', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 2 })).toHaveText(
+    '전세대출 이자에 매달 얼마씩 쓸까요?',
   );
-  await fillAmount(page, '매달 얼마씩?', 600000);
+  await fillAmount(page, '매달 얼마씩?', 300000);
   await page.getByRole('button', { name: '추가하기' }).click();
-  await expect.poll(() => lineOf(db, 'living')?.amount).toBe(600_000);
-  await expect.poll(() => names(page, '지출')).toEqual(['용돈', '월세', '생활비']);
-  await axe(page);
+  await expect.poll(() => names(page, '지출')).toEqual(['용돈', '월세', '전세대출 이자']);
   await page.reload();
   expect(await planItems(page)).toContain('순서 바꾸기');
-  // 다시 열면 지출 줄이 있어 보통 칩(구독료 …)
-  await addSpend(page);
-  await expect(chips.getByRole('button', { name: '구독료', exact: true })).toBeVisible();
-  await expect(chips.getByRole('button', { name: '대출 상환', exact: true })).toHaveCount(0);
 });
 
 test('빈 지출 카드: ‘+ 지출 추가’ → “직접 정하기” → 이름 칸', async ({ page }) => {

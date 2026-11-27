@@ -89,7 +89,7 @@ export function H10SaveTogether({
   type Slide = SaveTogetherSlideProps & { owners?: ReactNode };
   // 칸 왼쪽 그림 40px(파일이 없으면 Illustration이 null → 자리 없음, 2026-11-26)
   const art = (name: string) => (
-    <Illustration name={savingArtKey(name, copy.chips)} className="hg-together__art" />
+    <Illustration name={savingArtKey(name, copy.chips, copy.chipAliases)} className="hg-together__art" />
   );
 
   // C안 문장 한 줄(2026-11-26 사용자 결정 ‘같이 모으기 C안’): 멈춤 → 다 모음 → 목표 금액까지 남은 금액(퍼센트만이면 문장 없음)

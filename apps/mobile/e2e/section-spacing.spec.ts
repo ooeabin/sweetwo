@@ -38,7 +38,8 @@ test('FormScreen(W-11): 섹션 사이 32, 제목과 내용 12, 띠 8 + 아래 �
     await gap(
       page,
       '.hg-form__sec:nth-of-type(1) .hg-form__q',
-      '.hg-form__sec:nth-of-type(1) .hg-form__chips',
+      // 2026-11-27: 이름 칩은 묶음(‘추천’ 제목 + 칩, NameChipGroups)이라 질문 → 칩 묶음 맨 위
+      '.hg-form__sec:nth-of-type(1) .hg-chipgroups',
     ),
   ).toBe(12);
   const folds = page.locator('.hg-form__folds');

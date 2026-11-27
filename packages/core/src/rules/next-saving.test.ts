@@ -7,8 +7,10 @@ import {
   SAVING_ART,
   SAVING_ART_CUSTOM,
   SAVING_ART_KEYS,
+  SAVING_CHIP_GROUPS,
   SAVING_CHIPS,
   savingArtKey,
+  savingChipGroups,
   savingChips,
   type SavingChip,
 } from './next-saving';
@@ -106,13 +108,24 @@ it('저축·투자 그림 키(2026-11-26): 이름 칩마다 하나 + 직접 정�
     home: '내 집 마련',
     travel: '여행',
     car: '차',
-    childcare: '출산·육아',
+    childcare: '육아',
     retire: '노후',
     moving: '이사',
-    appliance: '가전·가구',
+    appliance: '가전',
     anniv_gift: '기념일 선물',
     date: '데이트 비용',
     lump: '목돈',
+    birth: '출산',
+    furniture: '가구',
+    child_edu: '자녀 교육',
+    self_dev: '자기계발',
+    family_event: '경조사',
+    holiday: '명절',
+    yearly: '연간 큰 지출',
+    housing_sub: '주택청약',
+    installment: '적금',
+    invest: '투자',
+    pension: '연금',
   } satisfies Record<SavingChip, string>;
   // 모든 칩(네 사이 표의 칩 전부)에 키가 있고 서로 다름
   const all = new Set(Object.values(SAVING_CHIPS).flat());
@@ -121,4 +134,33 @@ it('저축·투자 그림 키(2026-11-26): 이름 칩마다 하나 + 직접 정�
   expect(savingArtKey('결혼 비용', names)).toBe('saving-wedding');
   expect(savingArtKey(' 신혼여행 ', names)).toBe('saving-honeymoon');
   expect(savingArtKey('우리 강아지', names)).toBe(SAVING_ART_CUSTOM);
+  // 묶음의 모든 칩에도 키가 있음, 예전 이름(‘출산·육아’, ‘가전·가구’)은 별칭으로 같은 그림
+  for (const g of SAVING_CHIP_GROUPS)
+    for (const c of g.chips) expect(SAVING_ART[c]).toMatch(/^saving-/);
+  const aliases = { '출산·육아': 'childcare', '가전·가구': 'appliance' } as const;
+  expect(savingArtKey('출산·육아', names, aliases)).toBe('saving-childcare');
+  expect(savingArtKey('가전·가구', names, aliases)).toBe('saving-appliance');
+  expect(savingArtKey('출산·육아', names)).toBe(SAVING_ART_CUSTOM);
+});
+
+it('칩 묶음(2026-11-27): ‘추천’ 6개는 묶음에서 빼고, 결혼 말은 결혼했어요·준비 중에만, 칩은 한 번씩', () => {
+  const flat = SAVING_CHIP_GROUPS.flatMap((g) => g.chips);
+  expect(new Set(flat).size).toBe(flat.length);
+  // 네 사이 추천 칩은 모두 어느 묶음에 있음
+  for (const c of new Set(Object.values(SAVING_CHIPS).flat())) expect(flat).toContain(c);
+  const dating = savingChipGroups('dating');
+  expect(dating.map((g) => g.group)).not.toContain('marriage');
+  expect(dating.flatMap((g) => g.chips)).not.toContain('newlywed_home');
+  for (const c of savingChips('dating')) expect(dating.flatMap((g) => g.chips)).not.toContain(c);
+  const engaged = savingChipGroups('engaged');
+  // 결혼 준비 중: 결혼 비용·신혼여행·혼수는 추천에 있어 결혼 묶음이 비어 없어짐, 신혼집도 추천
+  expect(engaged.map((g) => g.group)).not.toContain('marriage');
+  const married = savingChipGroups('married');
+  expect(married[0]).toEqual({ group: 'marriage', chips: ['wedding', 'honeymoon', 'dowry'] });
+  expect(married.find((g) => g.group === 'house')?.chips).toEqual([
+    'newlywed_home',
+    'moving',
+    'appliance',
+    'furniture',
+  ]);
 });
