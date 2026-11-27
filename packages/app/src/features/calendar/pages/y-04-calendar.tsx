@@ -59,7 +59,7 @@ const leadOfKey = (key: string | null) => {
 };
 
 // Y-04 달력(24 Y-04, 2026-11-17부터 캘린더 첫 화면. 예전 Y-01 일정 목록 본문은 달력 아래 ‘다가오는 일정’(upcoming.tsx)으로).
-// 2026-11-24 K안(한국 금융 앱 달력형): 머리 ‹ 12월 › + ‘오늘’(2026-11-27 달 넘기기 C안, 달 이름 = 연·월 칸 시트) + 요약 한 줄 “경조사 3개(85만 원 예상)”, 모든 칸 높이 같음 + 숫자 아래 20px 그림 칸(그림 없으면 안 그림),
+// 2026-11-24 K안(한국 금융 앱 달력형): 머리 “12월 ⌄” + ‘오늘’(2026-11-27 사용자 결정: 달 이름 ⌄ = 연·월 칸 시트, 이전·다음 달 ‹ › 없음) + 요약 한 줄 “경조사 3개(85만 원 예상)”, 모든 칸 높이 같음 + 숫자 아래 20px 그림 칸(그림 없으면 안 그림),
 // 일정 있는 날 굵은 숫자, 고른 날 회색 둥근 판, 손잡이로 한 주로 접기. 칸 안 짧은 이름 글자와 확인 목록 안내 띠는 없앰(안내는 고른 날 줄·다가오는 일정 줄로만).
 // 아래는 8px 띠 + 고른 날 머리(“12월 14일 월요일” + 음력) + 일정 줄, 그 아래 ‘이 날에 경조사 추가’ → Y-07.
 export function Y04Calendar() {
@@ -158,10 +158,6 @@ export function Y04Calendar() {
     setYm([ny, nm]);
     // 오늘이 든 달이면 오늘, 아니면 그 달 1일을 고름
     setSelected(ny === ty && nm === tm ? d.today : `${ymText(ny, nm)}-01`);
-  };
-  const move = (n: number) => {
-    const t = y * 12 + (m - 1) + n;
-    goMonth(Math.floor(t / 12), (t % 12) + 1);
   };
 
   // 달 머리 아래 요약 한 줄(“경조사 3개(85만 원 예상)”, ‘금융 일정’ 필터는 “금융 일정 4개”, 0개면 줄 없음)
@@ -284,10 +280,6 @@ export function Y04Calendar() {
         today={d.today}
         selected={selected}
         onSelect={setSelected}
-        onPrev={() => move(-1)}
-        onNext={() => move(1)}
-        prevLabel={copy.prev}
-        nextLabel={copy.next}
         todayLabel={y !== ty || m !== tm ? copy.today : undefined}
         onToday={() => {
           setYm([ty, tm]);

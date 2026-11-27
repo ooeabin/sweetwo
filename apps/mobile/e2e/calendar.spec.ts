@@ -21,6 +21,14 @@ const axe = async (page: Page) => {
   ).toEqual([]);
 };
 const NOW = new Date('2026-10-07T10:00:00+09:00');
+/** Y-04 머리 “10월 ⌄”를 눌러 연·월 칸 시트에서 그 달로 이동(2026-11-27: 머리 ‹ ›는 없음) */
+async function goCalMonth(page: Page, y: number, m: number) {
+  await page.getByRole('button', { name: /, 달 고르기$/ }).click();
+  const sheet = page.getByRole('dialog', { name: '연·월 고르기' });
+  await setYearMonth(page, y, m);
+  await sheet.getByRole('button', { name: `${y}년 ${m}월 보기` }).click();
+  await expect(sheet).toHaveCount(0);
+}
 const PNG = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
   'base64',
@@ -281,7 +289,7 @@ test('달력(Y-04): 금융 일정 점, 확인 목록 안내 띠(→ W-02, W-05 �
   await expect(page).toHaveURL(/\/salary$/);
 
   await page.goto('/calendar');
-  await page.getByRole('button', { name: '다음 달' }).click();
+  await goCalMonth(page, 2026, 11);
   await expect(page.getByRole('region', { name: '2026년 11월' })).toBeVisible();
   // 다른 달이면 ‘오늘’로 돌아오기
   await expect(page.getByRole('button', { name: '오늘' })).toBeVisible();
@@ -555,7 +563,7 @@ test('공휴일: 빨간 숫자와 이름, 설·추석 연휴 띠, 월급날이 �
   await axe(page);
 
   // 9월: 추석 연휴는 칸 바탕 없이 달 머리 요약 줄 맨 앞 글자로(2026-11-26), 고른 날 목록 맨 위에 이름
-  await page.getByRole('button', { name: '이전 달' }).click();
+  await goCalMonth(page, 2026, 9);
   const chuseok = page.getByRole('button', { name: /^9월 25일, 추석/ });
   await expect(chuseok).not.toHaveClass(/is-festive/);
   await expect(page.locator('.hg-cal__summary .hg-cal__streak')).toHaveText('추석 연휴 24~26일');
@@ -583,7 +591,7 @@ test('2026-11-04 사용성: 달력은 보던 날 기억, Y-05 그날엔 ‘다�
   await expect(page.getByRole('heading', { name: '11월', exact: true })).toBeVisible();
 
   await page.goto('/calendar');
-  await page.getByRole('button', { name: '다음 달' }).click();
+  await goCalMonth(page, 2026, 11);
   await page.getByRole('button', { name: /^11월 10일/ }).click();
   await page
     .getByRole('button', { name: /월급날/ })
@@ -956,7 +964,7 @@ test('달력 K안: 머리 ‹ 10월 ›, 요약 줄, 모든 칸 높이 같음, �
   await expect(page.locator('.hg-cal__summary')).toHaveText(/^금융 일정 \d+개$/);
   await page.getByRole('tab', { name: '경조사·기념일', exact: true }).click();
   await expect(page.locator('.hg-cal__summary')).toHaveText('경조사 3개(350,000원 예상)');
-  await page.getByRole('button', { name: '다음 달' }).click();
+  await goCalMonth(page, 2026, 11);
   await expect(page.locator('.hg-cal__summary')).toHaveCount(0);
 });
 
@@ -1038,7 +1046,7 @@ test('달력 K안: 손잡이로 한 주로 접고 펴기(누르기·키보드·�
   ).toBe('0s');
 });
 
-test('달력 머리 ‹ 10월 ›(달 넘기기 C안): 달 이름 → 연·월 칸으로 이동, 다른 해는 “2027년 2월” + ‘오늘’', async ({
+test('달력 머리 “10월 ⌄”: 달 이름 → 연·월 칸으로 이동, 다른 해는 “2027년 2월” + ‘오늘’', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -1065,7 +1073,7 @@ test('달력 머리 ‹ 10월 ›(달 넘기기 C안): 달 이름 → 연·월 �
   await expect(page.locator('.hg-cal__date b')).toHaveText('10월 7일 수요일');
 });
 
-test('달력 머리 ‹ › (달 넘기기 C안, 2026-11-27): 회색 원 없는 선 꺾쇠 44px, ‘오늘’은 다른 달에만, 누르면 이번 달 + 오늘', async ({
+test('달력 머리 “10월 ⌄” (2026-11-27): ‹ › 없음, ⌄ 누르는 칸 44, ‘오늘’은 다른 달에만 작은 알약(28, 13/700, 누르는 칸 44), 누르면 이번 달 + 오늘', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -1073,29 +1081,38 @@ test('달력 머리 ‹ › (달 넘기기 C안, 2026-11-27): 회색 원 없는 
   seed(db);
   await page.goto('/calendar');
   const head = page.locator('.hg-cal__head');
-  const prev = head.getByRole('button', { name: '이전 달' });
-  const next = head.getByRole('button', { name: '다음 달' });
-  // ‹ 10월 › 한 덩어리: 꺾쇠, 달 이름, 꺾쇠 순서
-  await expect(head.locator('.hg-cal__nav > button')).toHaveCount(3);
-  await expect(head.locator('.hg-cal__nav > button').nth(1)).toHaveText('10월');
-  await expect(head.locator('.hg-cal__month .hg-ico')).toHaveCount(0);
-  for (const b of [prev, next]) {
-    await expect(b).toHaveClass(/hg-chevnav/);
-    const box = await b.boundingBox();
-    expect(box?.width).toBeGreaterThanOrEqual(44);
-    expect(box?.height).toBeGreaterThanOrEqual(44);
-    expect(await b.evaluate((e) => getComputedStyle(e).backgroundColor)).toBe('rgba(0, 0, 0, 0)');
-  }
+  // 이전·다음 달 ‹ ›는 없음
+  await expect(page.getByRole('button', { name: '이전 달' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '다음 달' })).toHaveCount(0);
+  await expect(head.locator('.hg-chevnav, .hg-iconbtn')).toHaveCount(0);
+  // 달 이름 + 아래 꺾쇠 ⌄ 한 버튼, 누르는 칸 높이 44
+  const month = head.getByRole('button', { name: '2026년 10월, 달 고르기' });
+  await expect(month).toHaveText('10월');
+  await expect(month.locator('.hg-ico--chevron-down')).toHaveCount(1);
+  expect(Math.round((await month.boundingBox())?.height ?? 0)).toBeGreaterThanOrEqual(44);
   // 이번 달이면 ‘오늘’ 자리째 없음, 머리 높이는 그대로
   const h0 = (await head.boundingBox())?.height;
   await expect(page.getByRole('button', { name: '오늘', exact: true })).toHaveCount(0);
-  await prev.click();
+  await goCalMonth(page, 2026, 9);
   await expect(page.getByRole('button', { name: '2026년 9월, 달 고르기' })).toHaveText('9월');
   const today = page.getByRole('button', { name: '오늘', exact: true });
   await expect(today).toBeVisible();
   expect((await head.boundingBox())?.height).toBe(h0);
+  // ‘오늘’ 작은 알약: 보이는 높이 28, 13/700, 누르는 칸 44, 달 이름과 세로 가운데가 같음
   const tb = await today.boundingBox();
-  expect(tb?.height).toBe(32);
+  expect(Math.round(tb?.height ?? 0)).toBe(28);
+  const tf = await today.evaluate((e) => {
+    const c = getComputedStyle(e);
+    const a = getComputedStyle(e, '::after');
+    return [c.fontSize, c.fontWeight, parseFloat(a.height)] as const;
+  });
+  expect(tf[0]).toBe('13px');
+  expect(tf[1]).toBe('700');
+  expect(tf[2]).toBeGreaterThanOrEqual(44);
+  const mb = await page.getByRole('button', { name: '2026년 9월, 달 고르기' }).boundingBox();
+  expect(
+    Math.abs((tb?.y ?? 0) + (tb?.height ?? 0) / 2 - ((mb?.y ?? 0) + (mb?.height ?? 0) / 2)),
+  ).toBeLessThanOrEqual(1);
   await axe(page);
   await today.click();
   await expect(page.getByRole('region', { name: '2026년 10월' })).toBeVisible();

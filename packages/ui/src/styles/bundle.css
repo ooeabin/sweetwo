@@ -1,4 +1,4 @@
-/* docs/design/bundle.css에서 복사 (d8e0bac0). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
+/* docs/design/bundle.css에서 복사 (72133e6f). 손으로 고치지 말고 원본을 고친 뒤 pnpm ds:sync */
 /* sweeTwo 컴포넌트 스타일: tokens.css 다음에 로드. 모든 값은 토큰에서. */
 .hg-root { font-family: var(--font-sans); color: var(--ink); background: var(--surface); }  /* 2026-11-16 4차 검토: 고정폭 숫자(tabular-nums)를 바탕에서 뺌. 문장·날짜·금액은 기본 숫자(‘2027년 1 1월’처럼 1 옆이 벌어지던 것), 고정폭은 세로로 맞추거나 제자리에서 바뀌는 숫자(표, 키패드, 코드 칸, 달력, 휠, 개수, 입력 금액)만 */
 /* 2026-11-24 구역 5 설정 검토: 사용자 앱 글자 바탕값 15/22. 클래스 없는 b·p·li가 브라우저 기본 16px로 나오던 것(기준 17/15 밖). 어드민·웹사이트는 data-platform이 없어 그대로 */
@@ -657,13 +657,13 @@ body:has(.hg-scrim--sheet) .hg-toasts { top: calc(var(--space-4) + env(safe-area
    고른 날 칸 전체(숫자 + 그림 칸)를 덮는 회색 둥근 판(surface-alt, radius 14), 공휴일 holiday-ink. 숫자 15px, “+1” 13px 700 stone. 칸 안 짧은 이름·확인 목록 띠는 없앰. */
 .hg-cal { box-sizing: border-box; display: flex; flex-direction: column; gap: 0; width: 100%; max-width: 520px; }
 .hg-cal__head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 44px; }
-/* 2026-11-27 ‘달 넘기기 C안’(사용자 결정): 머리 왼쪽 ‹ 11월 › 한 덩어리(선 꺾쇠 hg-chevnav + 달 이름 17/700 ink, ⌄ 없음, 달 이름을 누르면 연·월 칸 시트),
-   오른쪽 ‘오늘’ 작은 회색 알약(Button sm, 보이는 높이 32, 누르는 칸 44, 다른 달일 때만). ‹ 아이콘이 화면 옆 24 줄에 오도록 왼쪽 −12 */
-.hg-cal__nav { display: flex; align-items: center; gap: 0; margin-left: calc(var(--space-3) * -1); }
-.hg-cal__month { display: inline-flex; align-items: center; min-height: 44px; margin: 0; padding: 0; border: 0; background: none; color: var(--ink); cursor: pointer; }
+.hg-cal__month { display: inline-flex; align-items: center; gap: var(--space-1); min-height: 44px; margin: 0; padding: 0; border: 0; background: none; color: var(--ink); cursor: pointer; }
 .hg-cal__month b { font: var(--text-amount); }
+.hg-cal__month .hg-ico { color: var(--stone); }
 .hg-cal__month:focus-visible, .hg-cal__handle:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-.hg-cal__today.hg-btn--sm { flex: none; height: 32px; padding: 0 var(--space-3); border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink-2); font: var(--text-label); font-weight: 700; }
+/* 2026-11-27 사용자 결정: 머리 왼쪽 “11월 ⌄”(달 이름 17/700 ink + 아래 꺾쇠 16 stone, 누르는 칸 높이 44, 누르면 연·월 칸 시트), 이전·다음 달 ‹ ›는 없앰.
+   오른쪽 ‘오늘’ 작은 회색 알약(다른 달일 때만): 보이는 높이 28, 13/700, 좌우 8, 누르는 칸 44는 ‘3차 검토’ ::after */
+.hg-cal__today.hg-btn--sm { flex: none; height: 28px; padding: 0 var(--space-2); border-radius: var(--radius-full); background: var(--surface-alt); color: var(--ink-2); font: var(--text-note); font-weight: 700; }
 .hg-cal__summary { margin: var(--space-1) 0 0; font: var(--text-value); color: var(--slate); }
 .hg-cal__summary b { font-weight: 700; color: var(--ink); }
 .hg-cal__summary b.hg-cal__streak { color: var(--holiday-ink); }
@@ -3200,7 +3200,8 @@ button.hg-datepill { cursor: pointer; }
 :is(.hg-mhead__title, .hg-pagehead__title, .hg-noti--page .hg-noti__title):not(.hg-admin *, .hg-adminauth *, .hg-site *) { font: var(--text-nav-title); letter-spacing: 0; }
 /* ── 넘기기 꺾쇠(2026-11-27 사용자 결정 ‘달 넘기기 C안’): 달·연도를 넘기는 ‹ › 쌍은 모두 이 버튼 하나.
    회색 원 없는 선 꺾쇠(머리 ‹ 뒤로와 같은 Phosphor Regular 선), ink-2, 보이는 크기 24, 누르는 칸 44. 넘길 수 없는 끝은 stone + disabled.
-   쓰는 곳: 달력 Y-04 머리(hg-cal__nav), PickSheet 연도(hg-picksheet__yearhead), DateSheet 달(hg-calsheet__head), DatePicker 달(hg-datepick__head). 배치는 각 자리 그대로 */
+   쓰는 곳: PickSheet 연도(hg-picksheet__yearhead), DateSheet 달(hg-calsheet__head), DatePicker 달(hg-datepick__head). 배치는 각 자리 그대로.
+   달력 Y-04 머리는 같은 날 사용자 결정으로 ‹ ›를 없앰(달 이름 ⌄ + 연·월 칸 시트만) */
 .hg-chevnav { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; flex: none; width: 44px; height: 44px; margin: 0; padding: 0; border: 0; border-radius: var(--radius-full); background: none; color: var(--ink-2); cursor: pointer; }
 .hg-chevnav > .hg-ico { width: 24px; height: 24px; }
 .hg-chevnav:disabled { color: var(--stone); cursor: default; }
