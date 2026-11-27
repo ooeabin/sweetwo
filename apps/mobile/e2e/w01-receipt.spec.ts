@@ -369,7 +369,7 @@ test('지출 추가: 이름 칩 → 금액 → 추가하기, 직접 추가 줄�
   await addSpend(page);
   const chips = page.getByRole('group', { name: '지출 이름' });
   // 2026-11-27 칩 한 벌: ‘자주 쓰는 것’ 6개 + ‘더 보기’ 주제 묶음
-  for (const n of ['월세', '관리비', '공과금', '휴대폰 요금', '보험료', '대중교통비'])
+  for (const n of ['식비', '월세', '관리비', '공과금', '휴대폰 요금', '보험료'])
     await expect(chips.getByRole('button', { name: n, exact: true })).toBeVisible();
   await chips.getByRole('button', { name: '관리비' }).click();
   await expect(page.getByRole('heading', { level: 2 })).toHaveText('관리비에 매달 얼마씩 쓸까요?');
@@ -800,19 +800,11 @@ test('빈 지출 카드(2026-11-27 A안): 칩 없이 ‘+ 지출 추가’ 한 �
   await expect(page.getByRole('region', { name: '매달 나가는 지출이 있어요?' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '다 넣었어요' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: '건너뛸게요' })).toHaveCount(0);
-  // W-01e 칩 한 벌(2026-11-27): ‘자주 쓰는 것’ 6개 + 직접 정하기, 생활비·용돈은 기본 줄이라 칩 없음
+  // W-01e 칩 한 벌(2026-11-27): ‘자주 쓰는 것’ 6개 + 직접 정하기, 용돈은 기본 줄이라 칩 없음, ‘생활비’는 묶음
   await addSpend(page);
   const chips = page.getByRole('group', { name: '지출 이름' });
   await expect(chips.getByText('자주 쓰는 것')).toBeVisible();
-  for (const n of [
-    '월세',
-    '관리비',
-    '공과금',
-    '휴대폰 요금',
-    '보험료',
-    '대중교통비',
-    '직접 정하기',
-  ])
+  for (const n of ['식비', '월세', '관리비', '공과금', '휴대폰 요금', '보험료', '직접 정하기'])
     await expect(chips.getByRole('button', { name: n, exact: true })).toBeVisible();
   await expect(chips.getByRole('button', { name: '생활비', exact: true })).toHaveCount(0);
   // 나머지 주제 묶음은 ‘더 보기’로 펼침(자주 쓰는 것과 겹치는 칩은 다시 안 보임)
@@ -820,9 +812,23 @@ test('빈 지출 카드(2026-11-27 A안): 칩 없이 ‘+ 지출 추가’ 한 �
   const more = chips.getByRole('button', { name: '더 보기' });
   await expect(more).toHaveAttribute('aria-expanded', 'false');
   await more.click();
-  for (const g of ['주거', '통신', '구독', '차', '대출', '가족', '관계', '나'])
+  for (const g of ['생활비', '주거', '통신', '구독', '교통', '차', '대출', '가족', '관계'])
     await expect(chips.getByRole('group', { name: g, exact: true })).toBeVisible();
-  await expect(chips.getByRole('group', { name: '교통', exact: true })).toHaveCount(0);
+  await expect(chips.getByRole('group', { name: '보험', exact: true })).toHaveCount(0);
+  // 생활비 묶음(2026-11-27): 칩마다 일반 지출 줄, 맨 앞 묶음
+  const living = chips.getByRole('group', { name: '생활비', exact: true });
+  await expect(living.getByRole('button')).toHaveText([
+    '외식',
+    '카페',
+    '생활용품',
+    '의류',
+    '화장품',
+    '미용',
+    '병원비',
+    '자기계발',
+    '운동',
+  ]);
+  await expect(chips.getByRole('group', { name: '나', exact: true })).toHaveCount(0);
   await expect(chips.getByRole('button', { name: '월세', exact: true })).toHaveCount(1);
   await expect(chips.getByRole('button', { name: '반려동물', exact: true })).toBeVisible();
   await axe(page);

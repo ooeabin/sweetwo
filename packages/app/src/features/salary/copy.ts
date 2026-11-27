@@ -101,12 +101,29 @@ export const copy = {
   addSpend: '+ 지출 추가',
   /**
    * W-01e 지출 이름 칩(2026-11-27 사용자 결정 “이 정도로 상세하게”, 통장 쪼개기·고정지출 안내 글 조사): 한 벌로 합침(예전 spendChips·spendEmpty.chips 둘).
-   * 맨 위 ‘자주 쓰는 것’ 6개, 나머지는 ‘더 보기’로 펼치는 주제 묶음(묶음 제목 13/400 slate). 생활비·용돈은 기본 줄이라, 식비는 생활비에 들어가 칩 없음.
+   * 맨 위 ‘자주 쓰는 것’ 6개, 나머지는 ‘더 보기’로 펼치는 주제 묶음(묶음 제목 13/400 slate). 용돈은 기본 줄이라 칩 없음. ‘생활비’는 묶음(식비, 외식 …, 2026-11-27)이고 칩마다 일반 지출 줄.
    * 칩 이름은 한 가지만(‘A·B’ 묶음 이름 금지, 2026-11-27). code: 예전 것은 그대로(rent, maintenance, phone, insurance, transport, parents, subscription, loan), 새 칩은 새 code
    */
-  spendChipTop: ['rent', 'maintenance', 'utility', 'phone', 'insurance', 'transport'] as const,
+  spendChipTop: ['food', 'rent', 'maintenance', 'utility', 'phone', 'insurance'] as const,
   spendChipTopTitle: '자주 쓰는 것', // [확인 필요]
   spendChipGroups: [
+    // 2026-11-27 사용자 결정: 생활비를 묶음 하나로 두고 그 안에서 식비·의류·화장품처럼 하나씩 계획(칩마다 일반 지출 줄 하나,
+    // 기본 생활비 줄 kind living·O-30 같이 쓰는 생활비·추천 계산과는 잇지 않음)
+    {
+      title: '생활비',
+      chips: [
+        { name: '식비', code: 'food' },
+        { name: '외식', code: 'eat_out' },
+        { name: '카페', code: 'cafe' },
+        { name: '생활용품', code: 'household' },
+        { name: '의류', code: 'clothes' },
+        { name: '화장품', code: 'cosmetics' },
+        { name: '미용', code: 'beauty' },
+        { name: '병원비', code: 'hospital' },
+        { name: '자기계발', code: 'self_dev' },
+        { name: '운동', code: 'exercise' },
+      ],
+    },
     {
       title: '주거',
       chips: [
@@ -165,14 +182,6 @@ export const copy = {
       chips: [
         { name: '경조사비', code: 'family_event' },
         { name: '데이트 비용', code: 'date' },
-      ],
-    },
-    {
-      title: '나',
-      chips: [
-        { name: '자기계발', code: 'self_dev' },
-        { name: '운동', code: 'exercise' },
-        { name: '미용', code: 'beauty' },
       ],
     },
   ] as const,
