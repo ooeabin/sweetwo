@@ -280,12 +280,12 @@ export function DateSheet({
         <div className="hg-calsheet__head">
           <button
             type="button"
-            className="hg-calsheet__nav"
+            className="hg-chevnav"
             aria-label={labels.prevMonth}
             disabled={!canPrev}
             onClick={() => go(-1)}
           >
-            <Icon name="chevron-left" size={20} />
+            <Icon name="chevron-left" size={24} />
           </button>
           <button
             type="button"
@@ -301,12 +301,12 @@ export function DateSheet({
           </button>
           <button
             type="button"
-            className="hg-calsheet__nav"
+            className="hg-chevnav"
             aria-label={labels.nextMonth}
             disabled={!canNext}
             onClick={() => go(1)}
           >
-            <Icon name="chevron-right" size={20} />
+            <Icon name="chevron-right" size={24} />
           </button>
         </div>
         {ymOpen ? (
@@ -474,7 +474,7 @@ export function DateField({
 }
 
 /**
- * 달력 머리 “12월 ⌄”에서 여는 연·월 시트(Y-04, 2026-11-24 K안): 연·월 칸만. 주 버튼 “2029년 3월 보기”를 누르면 그 달로 이동.
+ * 달력 머리 달 이름 “12월”(2026-11-27 ⌄ 없앰)을 누르면 여는 연·월 시트(Y-04, 2026-11-24 K안): 연·월 칸만. 주 버튼 “2029년 3월 보기”를 누르면 그 달로 이동.
  * DateSheet의 연·월 칸(YearMonthPanel)을 그대로 씀
  */
 export function MonthSheet({
