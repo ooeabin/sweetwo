@@ -13,14 +13,7 @@ update public.pay_check_line
   set kind = 'custom', name = coalesce(nullif(btrim(name), ''), '생활비')
   where kind = 'living';
 
-create or replace function public.split_line_defaults() returns trigger
-language plpgsql set search_path = '' as $$
-begin
-  new.in_checklist := coalesce(new.in_checklist, new.kind <> 'allowance');
-  new.auto_pay := coalesce(new.auto_pay, new.kind in ('send', 'shared_account'));
-  return new;
-end;
-$$;
+-- 확인 목록 기본값(split_line_defaults)은 그대로: 옛 앱이 보낸 kind living은 지금처럼 목록에서 빠진 채(기본 끔) 직접 추가 줄 ‘생활비’가 됨
 
 -- 트리거 이름은 그대로(split_line_living_category, split_line_defaults 다음에 돎)
 create or replace function public.split_line_living_category() returns trigger

@@ -52,7 +52,7 @@ select public.save_split(jsonb_build_array(
 
 -- ① 새 줄 기본값: 생활비·용돈은 확인 목록에서 빠짐, 자동 줄 아님
 select is((select string_agg(kind::text || ':' || in_checklist || ':' || auto_pay, ',' order by sort) from public.split_line),
-  'saving:true:false,saving:true:false,fixed:true:false,custom:true:false,allowance:false:false', '① 줄 기본값(D2, 2026-11-28 생활비는 직접 추가 줄이라 확인 목록에 넣음)');
+  'saving:true:false,saving:true:false,fixed:true:false,custom:false:false,allowance:false:false', '① 줄 기본값(D2, 2026-11-28 kind living은 직접 추가 줄 생활비로, 목록 기본 끔은 그대로)');
 
 -- ⑧ 온보딩(첫 월급 계획)에서는 이미 시작한 사이클 목록을 만들지 않음(D1). 오늘이 1일이면 오늘 시작이라 만듦
 select is(public.start_checklist(auth.uid()) is null, public.kst_today() <> date_trunc('month', public.kst_today())::date,

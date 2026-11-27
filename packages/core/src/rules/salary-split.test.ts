@@ -254,7 +254,7 @@ describe('v2.2 용돈·보내기·줄 설정(06 3-1, 3-2)', () => {
       autoPay: false,
       autoDay: null,
     });
-    expect(splitLineDefaults('living').inChecklist).toBe(true); // 2026-11-28 생활비 기본 줄 없음(서버가 직접 추가 줄로)
+    expect(splitLineDefaults('living').inChecklist).toBe(false);
     expect(splitLineDefaults('allowance').inChecklist).toBe(false);
     expect(splitLineDefaults('send')).toEqual({ inChecklist: true, autoPay: true, autoDay: null });
     expect(splitLineDefaults('shared_account').autoPay).toBe(true);

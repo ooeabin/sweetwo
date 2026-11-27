@@ -142,12 +142,12 @@ export const sendAmount = (income: Won | null, allowance: Won): Won =>
   floor10k(Math.max(0, (income ?? 0) - Math.max(allowance, 0)));
 
 /**
- * 줄 설정 기본값(06 3-1, 서버 split_line_defaults 트리거): ‘체크리스트에 넣기’ = 용돈이 아니면 켬(2026-11-28 생활비 기본 줄 없앰),
+ * 줄 설정 기본값(06 3-1, 서버 split_line_defaults 트리거): ‘체크리스트에 넣기’ = 생활비(옛 kind living, 서버가 직접 추가 줄로 바꿔 넣을 때도 끈 채)·용돈이 아니면 켬,
  * ‘은행에서 자동으로 나가요’ = 보내기·같이 쓰는 통장만 켬. 나가는 날 기본 null(= 월급날, 날짜 없음은 1일).
  * 한 사람 관리형 용돈 자동은 P-05c가 직접 켬. 직접 추가 줄은 만들 때 고름(06 [확인 필요]), 서버 기본은 켬
  */
 export const splitLineDefaults = (kind: SplitKind) => ({
-  inChecklist: kind !== 'allowance',
+  inChecklist: kind !== 'living' && kind !== 'allowance',
   autoPay: kind === 'send' || kind === 'shared_account',
   autoDay: null as number | null,
 });

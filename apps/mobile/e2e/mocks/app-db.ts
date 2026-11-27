@@ -585,7 +585,7 @@ export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Pro
           name: l.name ?? null,
           amount: l.amount,
           sort: i,
-          in_checklist: l.in_checklist ?? l.kind !== 'allowance',
+          in_checklist: l.in_checklist ?? !['living', 'allowance'].includes(String(l.kind)),
           auto_pay: l.auto_pay ?? ['send', 'shared_account'].includes(String(l.kind)),
           auto_day: l.auto_day ?? null,
           // 지출 묶음(2026-11-27 서버 흉내): 넘긴 값, 없으면 같은 줄의 옛 값, 생활비 기본 줄은 늘 living
