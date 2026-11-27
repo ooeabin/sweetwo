@@ -5,7 +5,7 @@ import { Button } from './Button';
 import { Icon } from './Icon';
 
 // 캘린더 달력(docs/design/components/Calendar.md, 2026-11-24 K안, 한국 금융 앱 달력형):
-// 머리 왼쪽 ‹ 11월 ›(선 꺾쇠 + 달 이름, 달 이름을 누르면 연·월 칸 시트, 2026-11-27 ‘달 넘기기 C안’) + 오른쪽 ‘오늘’(다른 달일 때만)
+// 머리 왼쪽 “11월 ⌄”(달 이름 + 아래 꺾쇠, 누르면 연·월 칸 시트, 2026-11-27 사용자 결정: 이전·다음 달 ‹ ›는 없앰) + 오른쪽 ‘오늘’(다른 달일 때만)
 // → 요약 한 줄 → 요일 → 그 달 주만 → 손잡이(한 주로 접기).
 // 칸: 높이가 모두 같고(그림이 없어도 줄이 흐트러지지 않음), 숫자 아래 20px 그림 칸(그림이 없으면 그리지 않음). 일정 있는 날 굵은 ink 숫자,
 // 오늘 오렌지 숫자, 고른 날은 칸 전체를 덮는 회색 둥근 판, 공휴일 빨간 숫자. 다른 달 날짜는 비워 둠.
@@ -40,12 +40,6 @@ export function Calendar({
   today,
   selected,
   onSelect,
-  onPrev,
-  onNext,
-  prevLabel,
-  nextLabel,
-  prevDisabled,
-  nextDisabled,
   todayLabel,
   onToday,
   folded,
@@ -59,7 +53,7 @@ export function Calendar({
   month: number;
   /** 머리 달 이름(“12월”, 다른 해면 “2027년 2월”) */
   monthText: string;
-  /** 달 이름 버튼 화면 읽기 이름(“2026년 12월, 달 고르기”) */
+  /** 달 이름 ⌄ 버튼 화면 읽기 이름(“2026년 12월, 달 고르기”) */
   monthMenuLabel: string;
   onMonthMenu: () => void;
   /** 머리 아래 요약 한 줄(없으면 줄 없음) */
@@ -68,13 +62,6 @@ export function Calendar({
   today: string;
   selected: string | null;
   onSelect: (date: string) => void;
-  onPrev: () => void;
-  onNext: () => void;
-  prevLabel: string;
-  nextLabel: string;
-  /** 넘길 수 없는 끝(꺾쇠를 stone + disabled로) */
-  prevDisabled?: boolean;
-  nextDisabled?: boolean;
   /** 오늘이 든 달이 아니면 ‘오늘’ */
   todayLabel?: string;
   onToday?: () => void;
@@ -125,35 +112,16 @@ export function Calendar({
     <section className={cx('hg-cal', folded && 'is-folded')} aria-label={`${year}년 ${month}월`}>
       {filter}
       <div className="hg-cal__head">
-        <div className="hg-cal__nav">
-          <button
-            type="button"
-            className="hg-chevnav"
-            aria-label={prevLabel}
-            disabled={prevDisabled}
-            onClick={onPrev}
-          >
-            <Icon name="chevron-left" size={24} />
-          </button>
-          <button
-            type="button"
-            className="hg-cal__month"
-            aria-label={monthMenuLabel}
-            aria-haspopup="dialog"
-            onClick={onMonthMenu}
-          >
-            <b aria-hidden="true">{monthText}</b>
-          </button>
-          <button
-            type="button"
-            className="hg-chevnav"
-            aria-label={nextLabel}
-            disabled={nextDisabled}
-            onClick={onNext}
-          >
-            <Icon name="chevron-right" size={24} />
-          </button>
-        </div>
+        <button
+          type="button"
+          className="hg-cal__month"
+          aria-label={monthMenuLabel}
+          aria-haspopup="dialog"
+          onClick={onMonthMenu}
+        >
+          <b aria-hidden="true">{monthText}</b>
+          <Icon name="chevron-down" size={16} />
+        </button>
         {todayLabel && onToday && (
           <Button size="sm" className="hg-cal__today" onClick={onToday}>
             {todayLabel}

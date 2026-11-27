@@ -62,7 +62,7 @@ export const copy = {
   reviewBand: (month: number) => `${month}월 월급날 확인 목록에 남은 게 있어요`,
   monthLabel: (m: number) => `${m}월`,
   yearLabel: (y: number) => `${y}년`,
-  // 달 머리 ‹ 12월 ›(2026-11-27 ‘달 넘기기 C안’, ⌄ 없앰), 다른 해면 “2027년 2월” [확인 필요]
+  // 달 머리 “12월 ⌄”(2026-11-27 사용자 결정: ⌄ 되살림, ‹ › 없앰), 다른 해면 “2027년 2월” [확인 필요]
   monthTextYear: (y: number, m: number) => `${y}년 ${m}월`,
   monthMenu: (y: number, m: number) => `${y}년 ${m}월, 달 고르기`, // 화면 읽기용(달 이름을 누르면 연·월 칸 시트)
   monthSheetTitle: '연·월 고르기', // [확인 필요] 연·월 휠 시트 제목
@@ -76,8 +76,6 @@ export const copy = {
   // 달력 아래 손잡이(한 주로 접기·펴기) 화면 읽기 이름 [확인 필요]
   fold: '한 주만 보기',
   unfold: '한 달 모두 보기',
-  prev: '이전 달',
-  next: '다음 달',
   dayLabel: (m: number, d: number, n: number, holiday?: string) =>
     [`${m}월 ${d}일`, holiday, n ? `일정 ${n}개` : null].filter(Boolean).join(', '),
   agendaEmpty: '이 날은 일정이 없어요', // [확인 필요] 2026-11-04 ‘이 날짜엔 없어요’에서
