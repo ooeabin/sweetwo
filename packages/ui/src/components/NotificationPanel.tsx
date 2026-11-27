@@ -42,6 +42,8 @@ export function NotificationPanel(p: {
   notice?: ReactNode;
   /** 목록 아래 다음 행동 하나(알림이 거의 없을 때 ‘알림 종류 고르기’, 2026-11-25). 목록이 있을 때만 그림 */
   after?: ReactNode;
+  /** 빈 상태(0개) 제목 아래 다음 행동 하나(2026-11-27 ‘버튼·색 정리’ 결정 8: N-02 ‘알림 종류 고르기’, 맨 아래 ‘알림 설정’ 줄 대신) */
+  emptyAction?: ReactNode;
   onItem: (id: string) => void;
   onReadAll: () => void;
   onSettings?: () => void;
@@ -190,6 +192,7 @@ export function NotificationPanel(p: {
             {/* 빈 상태 그림 자리(120px)는 2D 그림이 들어올 때까지 그리지 않음(2026-11-15 3차 검토, 회색 빈 자리 숨김) */}
             <b>{p.labels.emptyTitle}</b>
             {p.labels.emptySub && <span>{p.labels.emptySub}</span>}
+            {p.emptyAction}
           </div>
         ) : (
           <>
@@ -245,14 +248,7 @@ export function NotificationPanel(p: {
           </>
         )}
       </div>
-      {p.variant === 'page' && p.onSettings && (
-        <div className="hg-noti__foot">
-          {/* 회색 글자 버튼(2026-11-27 강약 기준 2차, 예전 굵은 유령 버튼) */}
-          <Button variant="link" onClick={p.onSettings}>
-            {p.labels.settings}
-          </Button>
-        </div>
-      )}
+      {/* 2026-11-27 ‘버튼·색 정리’ 결정 8: N-02 맨 아래 ‘알림 설정’ 줄은 없앰(‘알림 종류 고르기’와 같은 목적지가 둘이라). 넓은 창 시트 머리 설정 아이콘은 그대로 */}
     </aside>
   );
 }

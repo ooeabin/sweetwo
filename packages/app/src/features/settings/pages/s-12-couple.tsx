@@ -197,13 +197,7 @@ export function S12Couple() {
           {inviteCopy.copyLink}
         </Button>
         <div className="hg-row" style={{ justifyContent: 'center' }}>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="hg-btn--link"
-            loading={busy}
-            onClick={() => void make(true)}
-          >
+          <Button variant="link" loading={busy} onClick={() => void make(true)}>
             {copy.newCode}
           </Button>
         </div>

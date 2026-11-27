@@ -34,6 +34,7 @@ import {
   Button,
   StickyBar,
   Icon,
+  IconButton,
   Illustration,
   PageHeader,
   ReceiptRows,
@@ -734,14 +735,8 @@ export function W02PaydayConfirm() {
           <p className="hg-q__help" style={{ flex: 1 }}>
             {copy.madeFromPlan(Number(list.cycle_start.slice(5, 7)))}
           </p>
-          <button
-            type="button"
-            className="hg-btn hg-btn--ghost hg-btn--sm"
-            aria-label={copy.close}
-            onClick={dismissMade}
-          >
-            ×
-          </button>
+          {/* 2026-11-27 ‘버튼·색 정리’ 결정 5: 안내 줄 닫기는 아이콘 버튼(44) */}
+          <IconButton icon="x" label={copy.close} ghost onClick={dismissMade} />
         </div>
       )}
       {changedBy && !dismissed && (
@@ -749,14 +744,8 @@ export function W02PaydayConfirm() {
           <p className="hg-q__help" style={{ flex: 1 }}>
             {copy.partnerChangedSplit(changedBy)}
           </p>
-          <button
-            type="button"
-            className="hg-btn hg-btn--ghost hg-btn--sm"
-            aria-label={copy.close}
-            onClick={dismiss}
-          >
-            ×
-          </button>
+          {/* 2026-11-27 ‘버튼·색 정리’ 결정 5: 안내 줄 닫기는 아이콘 버튼(44) */}
+          <IconButton icon="x" label={copy.close} ghost onClick={dismiss} />
         </div>
       )}
       {finished ? (

@@ -6,7 +6,7 @@
 | [ProviderButton](ProviderButton.md) | Actions | 소셜 로그인 버튼(마크 + 문구 + 최근 사용) |
 | [IconButton](IconButton.md) | Actions | 아이콘만 있는 둥근 버튼 |
 | [Menu](Menu.md) | Actions | ⋯ 버튼으로 여는 동작 목록 |
-| [AddRow](AddRow.md) | Actions | 목록 끝·묶음 머리의 회색 ‘+ … 추가’ 줄(2026-11-09 + 버튼 대신) |
+| [AddRow](AddRow.md) | Actions | 앱의 ‘+ … 추가’ 한 모양(회색 원 + 15/400 ink-2, 2026-11-27 PlanAdd·점선 원 합침, 2026-11-09 + 버튼 대신) |
 | [Drawer](Drawer.md) | Navigation | 좁은 창 홈 머리 ☰ 메뉴 서랍(2026-11-09 하단 탭 막대 대신) |
 | [HomeHub](HomeHub.md) | Layout | 홈 허브: 회색 바탕 위 상자, 할 일 띠, 타일(2026-11-09). 2026-11-13 H-10·H-11·H-12, 띠 글자 버튼 둘 |
 | [SaveTogether](SaveTogether.md) | Layout | 같이 모으기 상자(H-10, 묶음 카드, 퍼센트만 상태, 2026-11-13) |
@@ -76,7 +76,7 @@
 | [SiteLayout](SiteLayout.md) | Layout | 웹사이트 틀(L 화면) |
 | [ListRow](ListRow.md) | Lists | 목록 한 줄 |
 | [ReorderList](ReorderList.md) | Lists | 순서 바꾸기 목록 |
-| [PlanSummary](PlanSummary.md) | Cards | W-01 월급 계획 템플릿 틀(2026-11-19): 회색 바탕 위 둥근 흰 카드 셋, 요약 카드(큰 금액 + 연필, 굵은 문장, 알약 막대, ● 범례, 월급 0원 상태), 묶음 카드 PlanCard, 회색 블록 버튼 PlanAdd |
+| [PlanSummary](PlanSummary.md) | Cards | W-01 월급 계획 템플릿 틀(2026-11-19): 회색 바탕 위 둥근 흰 카드 셋, 요약 카드(큰 금액 + 연필, 굵은 문장, 알약 막대, ● 범례, 월급 0원 상태), 묶음 카드 PlanCard(묶음 끝 ‘+ … 추가’는 2026-11-27부터 AddRow) |
 | [ReceiptCard](ReceiptCard.md) | Cards | W-01 카드 안 줄 ReceiptRows(이름 + 회색 보조 줄 + 굵은 금액, 진행 막대, 편집 모드) |
 | [TransferRow](TransferRow.md) | Lists | 월급 체크리스트 줄 한 행 |
 | [ProgressSteps](ProgressSteps.md) | Navigation | 질문 흐름의 진행 막대 |

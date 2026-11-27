@@ -190,13 +190,7 @@ export function S11fManageStyle() {
           style={{ gap: 'var(--space-2)', alignItems: 'center', justifyContent: 'space-between' }}
         >
           <p className="hg-text hg-text--sub">{copy.styleWaiting(partnerName)}</p>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="hg-btn--link"
-            loading={busy}
-            onClick={() => void cancelReq()}
-          >
+          <Button variant="link" loading={busy} onClick={() => void cancelReq()}>
             {copy.styleCancel}
           </Button>
         </div>
@@ -207,12 +201,7 @@ export function S11fManageStyle() {
           style={{ gap: 'var(--space-2)', alignItems: 'center', justifyContent: 'space-between' }}
         >
           <p className="hg-text hg-text--sub">{copy.styleReceived(partnerName)}</p>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="hg-btn--link"
-            onClick={() => nav(`/settings/couple/style/request/${theirs.id}`)}
-          >
+          <Button variant="link" onClick={() => nav(`/settings/couple/style/request/${theirs.id}`)}>
             {copy.seeRequest}
           </Button>
         </div>

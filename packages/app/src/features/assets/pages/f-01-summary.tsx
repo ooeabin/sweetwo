@@ -57,7 +57,7 @@ export function F01Summary() {
         <RankBanner />
         {/* 2026-11-13 F-03q 빠르게 입력하기 입구(F-01 빈 상태) */}
         <List>
-          <ListRow label={copy.quickEntry} onClick={() => nav('/assets/quick')} />
+          <ListRow label={copy.quickEntry} nav onClick={() => nav('/assets/quick')} />
         </List>
         <section
           className="hg-stack"

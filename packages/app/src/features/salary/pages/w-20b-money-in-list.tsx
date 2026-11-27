@@ -8,16 +8,7 @@ import {
 } from '@sweetwo/api';
 import { isOnline } from '@sweetwo/api';
 import { amountBand, formatDateFull, formatDot2, todayKst } from '@sweetwo/core';
-import {
-  Button,
-  EmptyState,
-  Icon,
-  ListRow,
-  Menu,
-  PageHeader,
-  PlanAdd,
-  SkelRows,
-} from '@sweetwo/ui';
+import { Button, EmptyState, Icon, ListRow, Menu, PageHeader, AddRow, SkelRows } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -135,7 +126,14 @@ export function W20bMoneyInList() {
           speakMasked(m(summaryAmount))
         )}
       </p>
-      {!listEmpty && <PlanAdd onClick={() => nav(togetherPaths.moneyIn)}>{copy.moneyInGo}</PlanAdd>}
+      {!listEmpty && (
+        <AddRow
+          block
+          label={copy.moneyInGo}
+          ariaLabel={copy.moneyInGo}
+          onClick={() => nav(togetherPaths.moneyIn)}
+        />
+      )}
     </section>
   );
   const body = (

@@ -4,7 +4,7 @@ import { Icon } from './Icon';
 import { IconButton } from './IconButton';
 
 // 월급 계획 템플릿 줄 목록(docs/design/components/ReceiptCard.md, 2026-11-09 영수증 줄, 2026-11-19 카드 틀은 PlanTemplate.tsx로).
-// 이 파일은 줄(ReceiptRows)과 줄 모양(ReceiptLine)만: 카드·요약·블록 버튼은 PlanTemplate.tsx(PlanStage, PlanSummary, PlanCard, PlanAdd).
+// 이 파일은 줄(ReceiptRows)과 줄 모양(ReceiptLine)만: 카드·요약·블록 버튼은 PlanTemplate.tsx(PlanStage, PlanSummary, PlanCard. 묶음 끝 ‘+ … 추가’는 AddRow).
 // 숫자·문구·금액 가리기·공개 범위는 쓰는 쪽이 줌.
 
 export interface ReceiptLine {

@@ -56,7 +56,7 @@
 | | `piggy-bank`, `trophy` | `piggy-bank`, `trophy` | `goal` | 〃 |
 | | `shield-check`, `shield-warning`, `user-plus`, `user-minus`, `envelope-simple`(→ `envelope`), `chat-circle-text`, `megaphone`, `bell`(모를 때) | 같은 이름 | 회색 | 〃 |
 
-- ‘+ 추가’ 같은 동작 줄은 `Lead icon="plus"`(회색 원, Y-04는 점선 원 `hg-cal__add`). 종류 표에 넣지 않음.
+- ~~‘+ 추가’ 같은 동작 줄은 `Lead icon="plus"`(회색 원, Y-04는 점선 원 `hg-cal__add`)~~ → 2026-11-27 ‘버튼·색 정리’ 사용자 결정 4: ‘+ … 추가’는 ListRow가 아니라 `AddRow` 한 모양(AddRow.md). 종류 표에 넣지 않음.
 - 묶음 타일(`hg-pick--tiles`) 안의 Lead는 48px 원 + 24px 아이콘(타일이라 밀도 대상 아님). Meter 머리 Lead도 48px 그대로.
 
 ## 진행 원 (2026-11-09)

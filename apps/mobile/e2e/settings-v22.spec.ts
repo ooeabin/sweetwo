@@ -240,7 +240,7 @@ test('상대에게 보이는 모습(S-13p): 저금만이면 저금 줄 금액, �
     created_at: '2026-09-01T00:00:00Z',
   });
   await page.goto('/settings/visibility');
-  await page.getByRole('button', { name: '예빈님에게 보이는 모습 보기 ›' }).click();
+  await page.getByRole('button', { name: '예빈님에게 보이는 모습 보기' }).click();
   await expect(page).toHaveURL(/\/settings\/visibility\/preview$/);
   await expect(page.getByRole('heading', { name: '예빈님에게 보이는 모습' })).toBeVisible();
   // 서버 필터를 ‘상대로서’ 부름

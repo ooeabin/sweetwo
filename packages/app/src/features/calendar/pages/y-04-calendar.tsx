@@ -16,6 +16,7 @@ import {
   solarToLunar,
 } from '@sweetwo/core';
 import {
+  AddRow,
   Band,
   Button,
   type CalDay,
@@ -332,17 +333,15 @@ export function Y04Calendar() {
           {rows.length ? rows : <p className="hg-help hg-empty__line">{copy.agendaEmpty}</p>}
         </div>
         {selected >= d.today && (
-          <div className="hg-list hg-list--plain hg-cal__add">
-            <ListRow
-              lead={<Lead icon="plus" uiIcon />}
-              label={copy.addOnDay}
-              chevron={false}
-              onClick={() => {
-                startCareAdd(selected);
-                nav('/calendar/add/a');
-              }}
-            />
-          </div>
+          // 2026-11-27 ‘버튼·색 정리’ 결정 4: ‘+ … 추가’ 한 모양(AddRow, 예전 점선 원 ListRow)
+          <AddRow
+            block
+            label={copy.addOnDay}
+            onClick={() => {
+              startCareAdd(selected);
+              nav('/calendar/add/a');
+            }}
+          />
         )}
       </section>
       <Band />

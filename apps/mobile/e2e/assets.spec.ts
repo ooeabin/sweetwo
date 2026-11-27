@@ -606,7 +606,7 @@ test('F-04 금액 충돌(30 동기화 2장): 예빈님이 1분 안에 같은 금
   await expect(page.getByRole('region', { name: '금액' })).toContainText('3,500,000원');
 });
 
-test('자산 관리 빈 상태(F-01): 순위 줄 + 묶음 타일로 항목별 등록, 누르면 그 묶음을 고른 F-03a', async ({
+test('자산 관리 빈 상태(F-01): 순위 자리 회색 보조 버튼 + 묶음 타일로 항목별 등록, 누르면 그 묶음을 고른 F-03a', async ({
   page,
 }) => {
   await page.clock.setFixedTime(NOW);
@@ -615,7 +615,11 @@ test('자산 관리 빈 상태(F-01): 순위 줄 + 묶음 타일로 항목별 �
   db.assets.length = 0;
   db.partnerSums.length = 0;
   await page.goto('/assets');
-  await expect(page.getByRole('button', { name: '자산 입력하고 순위 보기' })).toBeVisible();
+  // 2026-11-27 사용자 결정: 자산이 없을 때 순위 자리는 회색 보조 버튼 보통 크기(빈 상태 A안 inline), 누르면 F-03a
+  const rankCta = page.getByRole('button', { name: '자산 입력하고 순위 보기' });
+  await expect(rankCta).toBeVisible();
+  await expect(rankCta).toHaveClass(/hg-btn--secondary/);
+  await expect(rankCta).not.toHaveClass(/hg-btn--sm/);
   await expect(page.getByRole('heading', { name: '무엇부터 입력해 볼까요?' })).toBeVisible();
   await expect(page.getByRole('heading', { name: '부채도 있나요?' })).toBeVisible();
   await axe(page);

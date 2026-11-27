@@ -87,6 +87,12 @@ export function NotiView({ variant, onClose }: { variant: 'sheet' | 'page'; onCl
     nav('/settings/notifications');
   };
 
+  const pickKinds = (
+    <Button variant="secondary" size="sm" onClick={goSettings}>
+      {copy.pickKinds}
+    </Button>
+  );
+
   return (
     <NotificationPanel
       variant={variant}
@@ -114,13 +120,11 @@ export function NotiView({ variant, onClose }: { variant: 'sheet' | 'page'; onCl
         )
       }
       after={
-        // 알림이 거의 없을 때(3개 이하, 더 불러올 것 없음) 다음 행동 하나(2026-11-25 사용자 확정): 알림 종류 고르기 → S-xx 알림 설정
-        rows.length > 0 && rows.length <= 3 && !list.hasNextPage ? (
-          <Button variant="secondary" size="sm" onClick={goSettings}>
-            {copy.pickKinds}
-          </Button>
-        ) : undefined
+        // 알림이 거의 없을 때(3개 이하, 더 불러올 것 없음) 다음 행동 하나(2026-11-25 사용자 확정): 알림 종류 고르기 → S-14 알림 설정
+        rows.length > 0 && rows.length <= 3 && !list.hasNextPage ? pickKinds : undefined
       }
+      // N-02 화면은 빈 상태에서도 같은 버튼 하나(2026-11-27 ‘버튼·색 정리’ 결정 8, 맨 아래 ‘알림 설정’ 줄 대신). N-01 시트는 머리 설정 아이콘
+      emptyAction={variant === 'page' ? pickKinds : undefined}
       onItem={(id) => {
         const n = rows.find((x) => x.id === id);
         if (n) void open(n);

@@ -733,7 +733,7 @@ test('공개 범위(S-13 한 목록): 내 월급 계획 단계, 새 항목 기�
   await expect(row).toContainText('저축·투자만 보여 주기');
   await row.click();
   await expect(page).toHaveURL(/\/settings\/visibility$/);
-  await expect(page.getByRole('button', { name: '예빈님에게 보이는 모습 보기 ›' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '예빈님에게 보이는 모습 보기' })).toBeVisible();
   // 저금마다 공개는 없앰
   await expect(page.getByText('개인 저축·투자')).toHaveCount(0);
   await axe(page);
