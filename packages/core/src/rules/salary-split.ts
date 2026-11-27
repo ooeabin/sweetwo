@@ -57,7 +57,7 @@ export interface RecommendInput {
   /**
    * 이미 있는 고정지출·생활비 줄(2026-11-15: 추천값은 새로 만들지 않고, 있던 줄은 지우지 않고 금액 그대로 돌려줌, 종류마다 합쳐 1줄)
    */
-  existing?: { kind: 'fixed' | 'living'; amount: Won }[];
+  existing?: { kind: 'fixed'; amount: Won }[];
   /**
    * 합쳐서(2026-11-13, 06 3-2): 용돈을 사람마다 같은 금액 = 두 사람 실수령 합 × 10% ÷ 사람 수(1만 원 반올림).
    * 없거나 false면 사람마다 그 사람 실수령 × 10%(각자, 예전)
@@ -80,13 +80,12 @@ export function recommendSplit(o: RecommendInput): SplitLineDraft[] {
     amount: Math.max(c.amount, 0),
   }));
   const customSum = custom.reduce((t, c) => t + c.amount, 0);
-  const spendOf = (kind: 'fixed' | 'living') =>
+  const spendOf = (kind: 'fixed') =>
     (o.existing ?? [])
       .filter((e) => e.kind === kind)
       .reduce((t, e) => t + Math.max(e.amount, 0), 0);
   const fixed = spendOf('fixed');
-  const living = spendOf('living');
-  const hasKind = (kind: 'fixed' | 'living') => (o.existing ?? []).some((e) => e.kind === kind);
+  const hasKind = (kind: 'fixed') => (o.existing ?? []).some((e) => e.kind === kind);
   const same = o.equalAllowance ? equalAllowance(o.people.map((p) => p.income)) : null;
   const allowances = o.people.map((p) => ({
     kind: 'allowance' as const,
@@ -99,8 +98,7 @@ export function recommendSplit(o: RecommendInput): SplitLineDraft[] {
     return { it, need, fixedAmount };
   });
   const kept = plan.reduce((t, p) => t + (p.fixedAmount ?? 0), 0);
-  let left =
-    income - customSum - fixed - living - allowances.reduce((s, a) => s + a.amount, 0) - kept;
+  let left = income - customSum - fixed - allowances.reduce((s, a) => s + a.amount, 0) - kept;
   const savings: SplitLineDraft[] = plan.map(({ it, need, fixedAmount }) => {
     if (fixedAmount !== undefined)
       return { kind: 'saving', goalId: it.id, amount: fixedAmount, need };
@@ -111,7 +109,6 @@ export function recommendSplit(o: RecommendInput): SplitLineDraft[] {
   return [
     ...savings,
     ...(hasKind('fixed') ? [{ kind: 'fixed' as const, amount: fixed }] : []),
-    ...(hasKind('living') ? [{ kind: 'living' as const, amount: living }] : []),
     ...allowances,
     ...custom,
   ];
@@ -145,7 +142,7 @@ export const sendAmount = (income: Won | null, allowance: Won): Won =>
   floor10k(Math.max(0, (income ?? 0) - Math.max(allowance, 0)));
 
 /**
- * 줄 설정 기본값(06 3-1, 서버 split_line_defaults 트리거): ‘체크리스트에 넣기’ = 생활비·용돈이 아니면 켬,
+ * 줄 설정 기본값(06 3-1, 서버 split_line_defaults 트리거): ‘체크리스트에 넣기’ = 생활비(옛 kind living, 서버가 직접 추가 줄로 바꿔 넣을 때도 끈 채)·용돈이 아니면 켬,
  * ‘은행에서 자동으로 나가요’ = 보내기·같이 쓰는 통장만 켬. 나가는 날 기본 null(= 월급날, 날짜 없음은 1일).
  * 한 사람 관리형 용돈 자동은 P-05c가 직접 켬. 직접 추가 줄은 만들 때 고름(06 [확인 필요]), 서버 기본은 켬
  */

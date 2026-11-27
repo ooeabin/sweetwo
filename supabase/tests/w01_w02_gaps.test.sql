@@ -50,7 +50,7 @@ select throws_ok(format($$ select public.save_split(jsonb_build_array(
   current_setting('test.g')), '42501', 'not_owner', '파트너 지출 줄도 못 바꿈(보기만)');
 reset role;
 select is((select amount from public.split_line l join public.salary_split s on s.id = l.split_id
-  where s.owner_user_id = '22222222-2222-2222-2222-222222222222' and l.kind = 'living'), 680000::bigint,
+  where s.owner_user_id = '22222222-2222-2222-2222-222222222222' and (l.kind = 'custom' and l.name = '생활비')), 680000::bigint,
   '예빈 생활비는 그대로');
 
 -- 월급날 바꾸기: 찬우 이번 사이클 끝이 새 기준일 전날로

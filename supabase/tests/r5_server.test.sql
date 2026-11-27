@@ -123,10 +123,11 @@ select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select is(public.answer_split(current_setting('test.s1')::uuid, true), 'accepted', '좋아요');
 reset role;
-select is((select body from public.notification where kind = 'split_result'), '통장에 넣는 만큼 생활비를 줄였어요',
-  '찬우 생활비 88만 → 38만: 결과 알림에 한 줄');
+-- 2026-11-28: 생활비 줄은 직접 추가 줄이라 줄이지 않음(고정지출만), 줄인 게 없으면 결과 알림에 한 줄도 없음
+select is((select body from public.notification where kind = 'split_result'), null,
+  '줄인 줄이 없으면 결과 알림 한 줄 없음');
 select is((select l.amount from public.split_line l join public.salary_split s on s.id = l.split_id
-  where s.owner_user_id = '11111111-1111-1111-1111-111111111111' and l.kind = 'living'), 380000::bigint, '줄어든 생활비');
+  where s.owner_user_id = '11111111-1111-1111-1111-111111111111' and (l.kind = 'custom' and l.name = '생활비')), 880000::bigint, '생활비 줄은 그대로');
 delete from public.notification;
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;

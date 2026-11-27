@@ -53,7 +53,7 @@ export function recommendedDraft(
     .filter((l) => l.kind === 'custom')
     .map((l) => ({ name: l.name ?? '', amount: l.amount }));
   const existing = (o.current ?? []).flatMap((l) =>
-    l.kind === 'fixed' || l.kind === 'living' ? [{ kind: l.kind, amount: l.amount }] : [],
+    l.kind === 'fixed' ? [{ kind: l.kind, amount: l.amount }] : [],
   );
   return recommendSplit({
     income: incomes.reduce((s, p) => s + p.income, 0),

@@ -15,11 +15,16 @@ const axe = async (page: Page) => {
     r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`),
   ).toEqual([]);
 };
+// 2026-11-28 생활비 기본 줄 없앰: 'living'은 직접 추가 줄 ‘생활비’(서버·목업이 바꿈, 바뀌기 전 시드도 찾음)
+const isKind = (l: Record<string, unknown>, kind: string) =>
+  kind === 'living'
+    ? l.kind === 'living' || (l.kind === 'custom' && l.name === '생활비')
+    : l.kind === kind;
 const lineOf = (db: MemDb, kind: string, name?: string) =>
-  db.splits[0]?.split_line.find((l) => l.kind === kind && (!name || l.name === name));
-const waitLine = (db: MemDb, kind: string) =>
+  db.splits[0]?.split_line.find((l) => isKind(l, kind) && (!name || l.name === name));
+const waitLine = (db: MemDb, kind: string, name?: string) =>
   (db.checklists[0]?.pay_check_line as Record<string, unknown>[]).find(
-    (l) => l.kind === kind && l.state === 'wait',
+    (l) => isKind(l, kind) && l.state === 'wait' && (!name || l.name === name),
   );
 const listNames = (page: Page, group: string) =>
   page
@@ -153,7 +158,7 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
   await expect(sum.locator('.hg-plansum__pen')).toHaveCount(0);
   await expect(sum.locator('.hg-plansum__label .hg-plansum__go')).toBeVisible();
   expect(await names(page, '저축·투자')).toEqual(['청약', '내 집 마련']);
-  expect(await names(page, '지출')).toEqual(['용돈', '기타 생활비', '고정지출']);
+  expect(await names(page, '지출')).toEqual(['용돈', '생활비', '고정지출']);
   await expect(page.locator('.hg-plancard__sum')).toHaveText(['1,390,000원', '2,110,000원']);
   await expect(page.locator('.hg-fab')).toHaveCount(0);
   // 2026-11-26 ‘W-01 정리 A안’: 동작 입구는 머리 오른쪽 ⋯(“더 보기”) 하나. 글자 ‘편집’·묶음 ⋯·맨 아래 글자 버튼은 없음
@@ -350,8 +355,8 @@ test('금액 바꾸기: 시트(미계획 금액 미리보기) → 바로 저장 
   await expect(sheet.getByText('미계획 금액 0원')).toBeVisible();
   await sheet.getByRole('textbox', { name: '생활비 금액' }).fill('800000');
   await expect(sheet.getByText('미계획 금액 80,000원')).toBeVisible();
-  // 기본 줄은 이름을 바꾸지 않음
-  await expect(sheet.getByLabel('항목 이름')).toHaveCount(0);
+  // 2026-11-28 생활비 줄은 직접 추가 줄이라 이름도 바꿀 수 있음
+  await expect(sheet.getByLabel('항목 이름')).toHaveValue('생활비');
   await axe(page);
   await sheet.getByRole('button', { name: '확인' }).click();
   // 이번 달 체크 안 한 줄도 바뀌어 Toast가 그 말로(2026-11-09)
@@ -390,9 +395,9 @@ test('지출 추가: 이름 칩 → 금액 → 추가하기, 직접 추가 줄�
   await page.getByRole('button', { name: '추가하기' }).click();
   await expect(page.getByText('관리비를 추가했어요')).toBeVisible();
   // 2026-11-27 ‘관리비’ 칩은 주거 묶음이라 묶음 없는 고정지출보다 위
-  expect(await names(page, '지출')).toEqual(['용돈', '기타 생활비', '관리비', '고정지출']);
+  expect(await names(page, '지출')).toEqual(['용돈', '생활비', '관리비', '고정지출']);
   expect(lineOf(db, 'custom', '관리비')?.amount).toBe(100_000);
-  expect(waitLine(db, 'custom')?.planned).toBe(100_000);
+  expect(waitLine(db, 'custom', '관리비')?.planned).toBe(100_000);
   // 이미 있는 이름은 칩에서 숨김, 글자로 넣으면 막음
   await addSpend(page);
   await expect(chips.getByRole('button', { name: '관리비' })).toHaveCount(0);
@@ -422,14 +427,14 @@ test('기본 줄 지우기 + 되돌리기(같은 자리), 저금 줄 지우기�
     .getByRole('button', { name: '고정지출 항목 지우기' })
     .click();
   await expect(page.getByText('고정지출을 지웠어요')).toBeVisible();
-  expect(await names(page, '지출')).toEqual(['용돈', '기타 생활비']);
+  expect(await names(page, '지출')).toEqual(['용돈', '생활비']);
   expect(lineOf(db, 'fixed')).toBeUndefined();
   expect(waitLine(db, 'fixed')).toBeUndefined();
   await expect(
     page.getByRole('img', { name: '저축·투자 40%, 지출 35%, 미계획 25%' }),
   ).toBeVisible();
   await page.getByRole('button', { name: '되돌리기' }).click();
-  await expect.poll(() => names(page, '지출')).toEqual(['용돈', '기타 생활비', '고정지출']);
+  await expect.poll(() => names(page, '지출')).toEqual(['용돈', '생활비', '고정지출']);
   // 저금 줄: 확인 Modal → 그만 모음
   // 저축·투자 줄을 누르면 W-10 상세로 가고(2026-11-18), 줄 시트는 W-10 ‘매달 금액 바꾸기’(?line=)나 편집하기에서
   await page.goto('/salary/plan?line=goal-e');
@@ -476,7 +481,7 @@ test('순서 바꾸기(2026-11-26, 예전 편집 모드): 키보드 위·아래�
   await expect(up).toBeVisible();
   await page.keyboard.press('Enter');
   await expect(page.getByText('관리비, 1번째')).toBeAttached();
-  expect(await names(page, '지출')).toEqual(['용돈', '기타 생활비', '관리비', '고정지출']);
+  expect(await names(page, '지출')).toEqual(['용돈', '생활비', '관리비', '고정지출']);
   // 아직 저장 전
   expect(db.rpc.includes('split_reorder')).toBe(false);
   await page.getByRole('button', { name: '완료' }).click();
@@ -486,7 +491,7 @@ test('순서 바꾸기(2026-11-26, 예전 편집 모드): 키보드 위·아래�
     [...(db.splits[0]?.split_line ?? [])]
       .sort((a, b) => Number(a.sort) - Number(b.sort))
       .map((l) => l.kind),
-  ).toEqual(['saving', 'saving', 'allowance', 'living', 'custom', 'fixed']);
+  ).toEqual(['saving', 'saving', 'allowance', 'custom', 'custom', 'fixed']);
   // 이번 달 체크리스트도 같은 순서
   await page.goto('/salary'); // 2026-11-19 W-01 머리 링크 없앰
   await expect(page.locator('.hg-transfer__label').nth(2)).toHaveText('용돈');
@@ -698,7 +703,7 @@ test('추천값으로 다시 채우기(D1): 직접 추가 줄과 이미 있는 �
   await expect.poll(() => lineOf(db, 'custom', '관리비')?.amount).toBe(150_000);
   expect(lineOf(db, 'fixed')?.amount).toBe(880_000);
   expect(lineOf(db, 'living')?.amount).toBe(880_000);
-  expect(await names(page, '지출')).toEqual(['용돈', '기타 생활비', '고정지출', '관리비']);
+  expect(await names(page, '지출')).toEqual(['용돈', '생활비', '고정지출', '관리비']);
 });
 
 test('Toast ‘되돌리기’를 누르면 토스트가 닫힘(S5-03)', async ({ page }) => {
@@ -1022,7 +1027,7 @@ test('공유 이미지: 저축·투자 줄 보조 줄이 화면과 같은 글(�
   expect(drawn.filter((t) => t === '1,390,000원')).toHaveLength(1); // 묶음 머리 합계만(범례 금액 없음)
 });
 
-test('지출 묶음(2026-11-27 ‘대분류 안 소분류’): 묶음 소제목 + 소계, 생활비 기본 줄은 ‘기타 생활비’, 묶음 없는 줄은 맨 아래, 칩으로 넣으면 그 묶음', async ({
+test('지출 묶음(2026-11-27 ‘대분류 안 소분류’): 묶음 소제목 + 소계, 생활비 줄(2026-11-28 직접 추가 줄)도 생활비 묶음, 묶음 없는 줄은 맨 아래, 칩으로 넣으면 그 묶음', async ({
   page,
 }) => {
   const { db, go } = await open(page);
@@ -1053,7 +1058,7 @@ test('지출 묶음(2026-11-27 ‘대분류 안 소분류’): 묶음 소제목 
   await expect(card.locator('.hg-plancard__subhead').first()).toHaveCSS('font-size', '13px');
   expect(await names(page, '지출')).toEqual([
     '용돈',
-    '기타 생활비',
+    '생활비',
     '식비',
     '월세',
     '고정지출',
@@ -1082,5 +1087,5 @@ test('지출 묶음(2026-11-27 ‘대분류 안 소분류’): 묶음 소제목 
   expect(lineOf(db, 'custom', '세차')?.category ?? null).toBeNull();
   await expect
     .poll(() => names(page, '지출'))
-    .toEqual(['용돈', '기타 생활비', '식비', '의류', '월세', '고정지출', '헬스장', '세차']);
+    .toEqual(['용돈', '생활비', '식비', '의류', '월세', '고정지출', '헬스장', '세차']);
 });

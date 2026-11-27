@@ -144,7 +144,9 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
   await axe(page);
   const y = db.splits.find((s) => s.owner_user_id === 'yebin');
   expect(
-    (y?.split_line as Record<string, unknown>[]).find((l) => l.kind === 'living')?.amount,
+    (y?.split_line as Record<string, unknown>[]).find(
+      (l) => l.kind === 'living' || (l.kind === 'custom' && l.name === '생활비'),
+    )?.amount,
   ).toBe(680_000);
 
   // 내 탭: 직접 추가 줄 → 이름 바꾸기, 큰 금액 → S-11

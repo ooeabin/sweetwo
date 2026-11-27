@@ -17,7 +17,7 @@ create function pg_temp.login_as(uid uuid) returns void language sql as $$
 $$;
 create function pg_temp.line(owner uuid, k text) returns uuid language sql as $$
   select l.id from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
-  where c.owner_user_id = owner and c.cycle_start >= '2027-03-01' and c.cycle_start < '2027-04-01' and l.kind::text = k limit 1;
+  where c.owner_user_id = owner and c.cycle_start >= '2027-03-01' and c.cycle_start < '2027-04-01' and (case when l.kind = 'custom' and l.name = '생활비' then 'living' else l.kind::text end) = k limit 1;
 $$;
 
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');

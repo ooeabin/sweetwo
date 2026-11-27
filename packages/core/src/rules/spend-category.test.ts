@@ -16,8 +16,9 @@ it('지출 묶음 code: 서버 check 제약과 같은 10개', () => {
   ]);
 });
 
-it('줄의 묶음: 생활비 기본 줄은 늘 living, 직접 추가 줄은 저장된 값, 그 밖은 없음', () => {
-  expect(spendCategoryOf({ kind: 'living', category: null })).toBe('living');
+it('줄의 묶음: 직접 추가 줄은 저장된 값, 그 밖은 없음(2026-11-28 생활비 기본 줄 없음)', () => {
+  expect(spendCategoryOf({ kind: 'custom', category: 'living' })).toBe('living');
+  expect(spendCategoryOf({ kind: 'living', category: null })).toBeNull();
   expect(spendCategoryOf({ kind: 'custom', category: 'housing' })).toBe('housing');
   expect(spendCategoryOf({ kind: 'custom', category: null })).toBeNull();
   expect(spendCategoryOf({ kind: 'custom', category: 'snack' })).toBeNull();
@@ -30,7 +31,7 @@ it('W-01 묶기: 묶음 순서대로, 줄 순서 그대로, 묶음 없는 줄은
     { id: 'a', kind: 'custom', category: 'housing' },
     { id: 'b', kind: 'fixed', category: null },
     { id: 'c', kind: 'custom', category: 'living' },
-    { id: 'd', kind: 'living', category: null },
+    { id: 'd', kind: 'custom', category: 'living' },
     { id: 'e', kind: 'custom', category: null },
   ];
   const g = groupSpendLines(lines);

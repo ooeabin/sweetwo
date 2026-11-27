@@ -21,14 +21,13 @@ export type SpendCategory = (typeof SPEND_CATEGORIES)[number];
 export const spendCategorySchema = z.enum(SPEND_CATEGORIES);
 
 /**
- * 지출 줄의 묶음. 생활비 기본 줄(kind living)은 늘 living(서버 트리거와 같음), 직접 추가 줄은 저장된 값(모르는 값이면 null),
+ * 지출 줄의 묶음. 직접 추가 줄은 저장된 값(모르는 값이면 null), 2026-11-28 생활비 기본 줄(kind living)은 없앰(서버가 직접 추가 줄 ‘생활비’로),
  * 그 밖(고정지출, 용돈, 보내기, 같이 쓰는 통장, 저축·투자)은 묶음 없음
  */
 export function spendCategoryOf(l: {
   kind: string;
   category?: string | null;
 }): SpendCategory | null {
-  if (l.kind === 'living') return 'living';
   if (l.kind !== 'custom') return null;
   const c = spendCategorySchema.safeParse(l.category);
   return c.success ? c.data : null;

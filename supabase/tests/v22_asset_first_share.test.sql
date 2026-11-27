@@ -15,7 +15,7 @@ create function pg_temp.login_as(uid uuid) returns void language sql as $$
 $$;
 create function pg_temp.sl(p_owner uuid, k text, p_user uuid default null) returns uuid language sql as $$
   select l.id from public.split_line l join public.salary_split s on s.id = l.split_id
-  where s.owner_user_id is not distinct from p_owner and l.kind::text = k and (p_user is null or l.user_id = p_user) limit 1;
+  where s.owner_user_id is not distinct from p_owner and (case when l.kind = 'custom' and l.name = '생활비' then 'living' else l.kind::text end) = k and (p_user is null or l.user_id = p_user) limit 1;
 $$;
 
 -- 찬우(시작한 사람, 25일), 다른 사람(혼자)

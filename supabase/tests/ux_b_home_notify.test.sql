@@ -55,7 +55,7 @@ select results_eq(
   $$ select l.kind::text, public.pay_line_mine(l.kind::text, l.user_id, null, l.space_id, '11111111-1111-1111-1111-111111111111'),
        public.pay_line_mine(l.kind::text, l.user_id, null, l.space_id, '22222222-2222-2222-2222-222222222222')
      from public.pay_check_line l where l.checklist_id = current_setting('test.cl')::uuid order by l.sort $$,
-  $$ values ('fixed', true, false), ('living', true, false), ('send', true, true), ('allowance', true, true) $$,
+  $$ values ('fixed', true, false), ('custom', true, false), ('send', true, true), ('allowance', true, true) $$,
   '관리하는 사람은 모든 줄, 관리하지 않는 쪽은 자기 줄만');
 
 -- 2. 월급날 09:00: 찬우만 월급날 알림, 예빈은 없음(진행 소식 대상)
@@ -128,8 +128,8 @@ reset role;
 select results_eq(
   $$ select l.kind::text, l.amount from public.split_line l join public.salary_split s on s.id = l.split_id
      where s.owner_user_id = '11111111-1111-1111-1111-111111111111' order by l.kind::text $$,
-  $$ values ('fixed', 580000::bigint), ('living', 0::bigint), ('shared_account', 500000::bigint) $$,
-  '찬우 몫 50만 원: 생활비 40만 → 0, 남은 10만은 고정지출에서');
+  $$ values ('custom', 400000::bigint), ('fixed', 180000::bigint), ('shared_account', 500000::bigint) $$,
+  '찬우 몫 50만 원: 고정지출에서만 줄임(2026-11-28 생활비 줄은 직접 추가 줄, 줄이지 않음)');
 select results_eq(
   $$ select l.kind::text, l.amount from public.split_line l join public.salary_split s on s.id = l.split_id
      where s.owner_user_id = '22222222-2222-2222-2222-222222222222' order by l.kind::text $$,

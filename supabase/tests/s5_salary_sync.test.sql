@@ -50,14 +50,14 @@ select public.add_saving_item('청약', 440000);
 select public.add_saving_item('여행', 300000);
 select public.add_saving_item('적금', 200000, 1000000);
 select cmp_ok(pg_temp.ver(auth.uid()), '>', current_setting('test.v')::integer, '저금 추가: 월급 계획 version 올림');
-select is(pg_temp.order_of(auth.uid()), '청약,여행,적금,fixed,living,allowance,관리비,통신비', '새 저금은 저금 묶음 맨 아래');
+select is(pg_temp.order_of(auth.uid()), '청약,여행,적금,fixed,생활비,allowance,관리비,통신비', '새 저금은 저금 묶음 맨 아래');
 
 -- S5-09: 가운데 저금 ‘그만 모음’ → 되돌리기 = 원래 자리, 원래 금액
 select public.saving_item_stop(pg_temp.item('여행'));
-select is(pg_temp.order_of(auth.uid()), '청약,적금,fixed,living,allowance,관리비,통신비', '그만 모으면 줄이 빠짐');
+select is(pg_temp.order_of(auth.uid()), '청약,적금,fixed,생활비,allowance,관리비,통신비', '그만 모으면 줄이 빠짐');
 select set_config('test.v', pg_temp.ver(auth.uid())::text, true);
 select public.saving_item_reopen(pg_temp.item('여행'));
-select is(pg_temp.order_of(auth.uid()), '청약,여행,적금,fixed,living,allowance,관리비,통신비', '되돌리면 원래 자리');
+select is(pg_temp.order_of(auth.uid()), '청약,여행,적금,fixed,생활비,allowance,관리비,통신비', '되돌리면 원래 자리');
 select is((select amount from public.split_line where goal_id = pg_temp.item('여행')), 300000::bigint, '되돌리면 원래 금액');
 select cmp_ok(pg_temp.ver(auth.uid()), '>', current_setting('test.v')::integer, '되돌리기: version 올림');
 select is((select count(*)::int from public.split_line where split_id = (select id from public.salary_split where owner_user_id = auth.uid()))
@@ -103,9 +103,9 @@ reset role; select public.set_salary_mode('joint'); set local role authenticated
 select is((select amount from public.split_line where kind = 'custom' and name = '관리비'), 200000::bigint,
   '같은 이름 직접 추가 줄은 금액을 더해 한 줄(15만 + 5만)');
 select is((select count(*)::int from public.split_line where kind = 'custom' and name = '관리비'), 1, '관리비는 한 줄');
-select is((select count(*)::int from public.split_line where kind = 'custom'), 11, '합쳐 11줄이어도 모두 둠');
+select is((select count(*)::int from public.split_line where kind = 'custom'), 12, '합쳐 12줄(2026-11-28 생활비도 직접 추가 줄)이어도 모두 둠');
 select is((select string_agg(name, ',' order by sort) from public.split_line where kind = 'custom'),
-  '관리비,구독료,헬스장,교통비,보험료,정수기,부모님 용돈,학원비,병원비,세차,통신비', '순서는 바꾼 사람 것 먼저');
+  '생활비,관리비,구독료,헬스장,교통비,보험료,정수기,부모님 용돈,학원비,병원비,세차,통신비', '순서는 바꾼 사람 것 먼저');
 -- 2026-11-27: 직접 추가 줄 한도 10 → 20(지출 묶음). 11줄이면 더 넣을 수 있음
 select lives_ok(
   $$ select public.split_line_add((select id from public.salary_split where owner_user_id is null), 'custom', 10000, '세탁비') $$,

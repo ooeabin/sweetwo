@@ -71,7 +71,7 @@ set local role authenticated;
 select public.save_split('[{"kind":"allowance","amount":350000},{"kind":"fixed","amount":100000},{"kind":"living","amount":50000}]'::jsonb,
   auth.uid());
 reset role;
-select is(pg_temp.yorder(), 'allowance,fixed,living,send', '각자 save_split 뒤에도 보내기 줄은 맨 뒤(예전 sort 0으로 맨 위)');
+select is(pg_temp.yorder(), 'allowance,fixed,custom,send', '각자 save_split 뒤에도 보내기 줄은 맨 뒤(예전 sort 0으로 맨 위)');
 select is((select count(distinct sort)::int from public.split_line l join public.salary_split s on s.id = l.split_id
   where s.owner_user_id = '22222222-2222-2222-2222-222222222222'), 4, '순서 번호가 겹치지 않음');
 select results_eq($$ select amount, auto_day, in_checklist, auto_pay from public.split_line where kind = 'send' $$,
