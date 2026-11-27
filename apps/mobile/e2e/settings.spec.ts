@@ -126,6 +126,15 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   // 우리 둘(S-12) 줄은 두 사람 카드 바로 아래, 보조 글 “연결됨”(2026-11-16 서랍에서 옮김)
   await expect(page.locator('main .hg-listrow').nth(1)).toContainText('우리 둘');
   await expect(page.getByRole('button', { name: /^우리 둘/ })).toContainText('연결됨');
+  // 강약 기준 적용 1차 ‘공통’(2026-11-27): 상태 글자 값은 15/400 slate, 값 없이 ›만 있는 줄은 이름 15/400 ink-2
+  const stateValue = page.getByRole('button', { name: /^우리 둘/ }).locator('.hg-listrow__value');
+  await expect(stateValue).toHaveClass(/is-soft/);
+  await expect(stateValue).toHaveCSS('font-size', '15px');
+  await expect(stateValue).toHaveCSS('font-weight', '400');
+  const helpRow = page.locator('main').getByRole('button', { name: '도움말', exact: true });
+  await expect(helpRow).toHaveClass(/hg-listrow--nav/);
+  await expect(helpRow.locator('.hg-listrow__label')).toHaveCSS('font-size', '15px');
+  await expect(helpRow.locator('.hg-listrow__label')).toHaveCSS('font-weight', '400');
   await axe(page);
   await me.click();
 
@@ -141,6 +150,15 @@ test('설정 홈(S-10) → 내 정보(S-11): 이름, 알림 이메일, 결혼·�
   await expect(partnerRow.getByRole('button')).toHaveCount(0);
   await expect(page.getByRole('button', { name: /월급 관리 방식/ })).toContainText('각자 써요');
   await expect(page.getByRole('button', { name: /월급날 확인 목록 만드는 날/ })).toHaveCount(0);
+  // 상태 글자 값은 15/400(2026-11-27), 금액 값(내 월급)은 17/700 그대로, 묶음 제목 ‘월급’ 15/700
+  await expect(
+    page.getByRole('button', { name: /월급 관리 방식/ }).locator('.hg-listrow__value'),
+  ).toHaveCSS('font-weight', '400');
+  await expect(salary.locator('.hg-listrow__value')).toHaveCSS('font-size', '17px');
+  await expect(salary.locator('.hg-listrow__value')).toHaveCSS('font-weight', '700');
+  const salaryHead = page.getByRole('heading', { name: '월급', exact: true });
+  await expect(salaryHead).toHaveCSS('font-size', '15px');
+  await expect(salaryHead).toHaveCSS('font-weight', '700');
   // 알림 이메일(S-11b, 2026-11-04 줄 → 화면): 형식 오류면 저장 안 됨
   await page.getByRole('button', { name: /알림 이메일/ }).click();
   await expect(page).toHaveURL(/\/settings\/me\/email$/);

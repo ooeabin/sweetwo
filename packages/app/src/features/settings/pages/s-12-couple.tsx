@@ -169,6 +169,7 @@ export function S12Couple() {
     <div className="hg-list">
       <ListRow
         label={copy.haveCode}
+        nav
         onClick={() => nav(paths.joinCode, { state: { from: '/settings/couple' } })}
       />
     </div>
@@ -320,7 +321,7 @@ export function S12Couple() {
   const newInviteBlock =
     state === 'solo' ? (
       <div className="hg-list">
-        <ListRow label={copy.newInvite} onClick={() => void newInvite()} />
+        <ListRow label={copy.newInvite} nav onClick={() => void newInvite()} />
       </div>
     ) : null;
 
@@ -344,6 +345,7 @@ export function S12Couple() {
             }
             label={names.join(' ')}
             value={stateText}
+            soft
             chevron={false}
           />
           {wedding && (engaged || sp.marriage_status === 'married') && (
@@ -360,6 +362,7 @@ export function S12Couple() {
                   )}
                 </>
               }
+              soft
               chevron={false}
             />
           )}
@@ -371,8 +374,8 @@ export function S12Couple() {
         {(state === 'not_joined' && !reserved) || state === 'solo' ? haveCode : null}
         {state === 'connected' && (
           <div className="hg-list">
-            <ListRow label={copy.activityLog} onClick={() => nav('/notifications')} />
-            <ListRow label={copy.unlink} onClick={() => nav('/settings/couple/unlink')} />
+            <ListRow label={copy.activityLog} nav onClick={() => nav('/notifications')} />
+            <ListRow label={copy.unlink} nav onClick={() => nav('/settings/couple/unlink')} />
           </div>
         )}
         {live && (

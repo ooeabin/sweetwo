@@ -169,6 +169,7 @@ export function S11Me() {
         <ListRow
           label={copy.nickname}
           value={c.myName}
+          soft
           onClick={() => nav('/settings/me/nickname')}
         />
         {/* 3번 로그인: 제공자 배지 + 소셜 계정 이메일, 보기만(이메일을 못 읽으면 “카카오로 로그인했어요”) */}
@@ -187,6 +188,7 @@ export function S11Me() {
         <ListRow
           label={copy.notifyEmail}
           value={me.notify_email ?? ''}
+          soft
           onClick={() => nav('/settings/me/email')}
         />
       </div>
@@ -196,6 +198,7 @@ export function S11Me() {
             label={copy.marriage}
             // 예전 값 ‘아직 안 정했어요’는 옮기지 않고 비워 보여 S-11g에서 다시 고르게 함(2026-11-16 문구 리뷰)
             value={sp.marriage_status === 'undecided' ? '' : copy.marriageValue[sp.marriage_status]}
+            soft
             onClick={() => nav('/settings/me/marriage')}
           />
         )}
@@ -203,12 +206,14 @@ export function S11Me() {
           <ListRow
             label={copy.weddingDay[married ? 'married' : 'engaged']}
             value={weddingText}
+            soft
             onClick={() => nav('/settings/me/wedding')}
           />
         )}
         <ListRow
           label={copy.birthYearRow}
           value={me.birth_year ? copy.birthYearValue(me.birth_year) : ''}
+          soft
           onClick={() => nav('/settings/me/birth-year')}
         />
       </div>
@@ -283,6 +288,7 @@ export function S11Me() {
                         sp.manager_user_id === me.id,
                     )
               }
+              soft
               onClick={locked ? undefined : () => nav('/settings/couple/style')}
             />
           )}
@@ -300,6 +306,7 @@ export function S11Me() {
                   )}
                 </>
               }
+              soft
               onClick={locked ? undefined : () => nav('/settings/me/plan-day')}
             />
           )}
@@ -318,7 +325,7 @@ export function S11Me() {
         />
         {/* 10번 월급 계획: 2026-11-04 다른 줄과 같은 목록 줄로 */}
         <div className="hg-list">
-          <ListRow label={copy.openSplit} onClick={() => nav('/salary/plan')} />
+          <ListRow label={copy.openSplit} nav onClick={() => nav('/salary/plan')} />
         </div>
       </section>
       {/* 11번 로그아웃: 2026-11-04 맨 아래 목록 줄 */}

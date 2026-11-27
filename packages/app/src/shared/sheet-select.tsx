@@ -33,6 +33,7 @@ export function SheetSelect<V extends string | number>({
       <ListRow
         label={rowLabel ?? nameOf(value)}
         value={rowLabel ? nameOf(value) : undefined}
+        soft
         onClick={disabled ? undefined : () => setOpen(true)}
       />
       {open && (

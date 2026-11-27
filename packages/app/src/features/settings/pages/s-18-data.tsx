@@ -238,6 +238,7 @@ export function S18Data() {
           <ListRow
             label={copy.trash}
             value={copy.trashCount(trash.data?.length ?? 0)}
+            soft
             onClick={() => nav('/settings/trash')}
           />
         </div>
@@ -254,7 +255,7 @@ export function S18Data() {
           />
         </section>
         <div className="hg-list">
-          <ListRow label={copy.deleteAccount} onClick={() => nav('/settings/data/delete')} />
+          <ListRow label={copy.deleteAccount} nav onClick={() => nav('/settings/data/delete')} />
         </div>
         {/* 2026-11-24 구역 5: 본문 중간 오렌지 채움 대신 아래 고정 주 버튼(본인 확인 입력 중·실패 안내 중에는 숨김) */}
         {step !== 'pin' && step !== 'failed' && (

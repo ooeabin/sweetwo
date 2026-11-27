@@ -187,11 +187,13 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
   ]);
   await axe(page);
   await page.keyboard.press('Escape');
-  // 묶음 머리: 한 줄 “저축·투자” 왼쪽 + 합계 오른쪽, 둘 다 13/400 slate(요약 이름표와 같은 단계)
+  // 묶음 머리: 한 줄 “저축·투자” 왼쪽 + 합계 오른쪽. 이름 15/700(2026-11-27 강약 기준 적용 1차 ‘공통’), 합계 13/400 slate
   const savingCard = page.getByRole('region', { name: '저축·투자', exact: true });
   const title = savingCard.locator('.hg-plancard__title');
   const total = savingCard.locator('.hg-plancard__sum');
-  for (const l of [title, total, sum.locator('.hg-plansum__label')]) {
+  await expect(title).toHaveCSS('font-size', '15px');
+  await expect(title).toHaveCSS('font-weight', '700');
+  for (const l of [total, sum.locator('.hg-plansum__label')]) {
     await expect(l).toHaveCSS('font-size', '13px');
     await expect(l).toHaveCSS('font-weight', '400');
   }
@@ -202,7 +204,7 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
   };
   const tb = await box(title);
   const sb = await box(total);
-  expect(Math.abs(sb.y - tb.y)).toBeLessThanOrEqual(1); // 한 줄
+  expect(Math.abs(sb.y + sb.height / 2 - (tb.y + tb.height / 2))).toBeLessThanOrEqual(2); // 한 줄(기준선 맞춤)
   const cardBox = await box(savingCard);
   expect(Math.round(sb.x + sb.width)).toBe(Math.round(cardBox.x + cardBox.width));
   // 간격 한 값(보이는 간격 16): 머리 → 첫 줄 상자 0, 마지막 줄 → ‘+ 추가’ 0, ‘+ 추가’ → 띠 8 + 원 안쪽 8
@@ -925,9 +927,7 @@ test('공유 이미지: 저축·투자 줄 보조 줄이 화면과 같은 글(�
   const drawn = await page.evaluate(() => (window as unknown as { __drawn: string[] }).__drawn);
   expect(drawn).toContain(note);
   // 2026-11-26 요약은 화면과 같은 세로 목록 범례: 이름 + 오른쪽 값(퍼센트, 미계획은 금액), 범례 금액 열은 없음
-  expect(drawn).toEqual(
-    expect.arrayContaining(['저축·투자', '40%', '지출', '60%']),
-  );
+  expect(drawn).toEqual(expect.arrayContaining(['저축·투자', '40%', '지출', '60%']));
   expect(drawn).not.toContain('미계획'); // 2026-11-26: 미계획 0원이면 줄 없음
   expect(drawn.filter((t) => t === '1,390,000원')).toHaveLength(1); // 묶음 머리 합계만(범례 금액 없음)
 });

@@ -23,16 +23,16 @@ export function S19About() {
         onBack={() => nav('/settings')}
       />
       <div className="hg-list">
-        <ListRow label={copy.version} value={version} chevron={false} />
-        <ListRow label={copy.whatsNew} onClick={() => openSite('/releases')} />
+        <ListRow label={copy.version} value={version} soft chevron={false} />
+        <ListRow label={copy.whatsNew} nav onClick={() => openSite('/releases')} />
       </div>
       <div className="hg-list">
-        <ListRow label={copy.terms} onClick={() => openSite('/terms')} />
-        <ListRow label={copy.privacy} onClick={() => openSite('/privacy')} />
+        <ListRow label={copy.terms} nav onClick={() => openSite('/terms')} />
+        <ListRow label={copy.privacy} nav onClick={() => openSite('/privacy')} />
       </div>
       <div className="hg-list">
-        <ListRow label={copy.contact} onClick={() => nav('/settings/help/inquiry')} />
-        <ListRow label={copy.myInquiries} onClick={() => nav('/settings/help/inquiries')} />
+        <ListRow label={copy.contact} nav onClick={() => nav('/settings/help/inquiry')} />
+        <ListRow label={copy.myInquiries} nav onClick={() => nav('/settings/help/inquiries')} />
       </div>
     </div>
   );

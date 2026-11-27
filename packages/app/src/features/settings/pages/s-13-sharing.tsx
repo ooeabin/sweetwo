@@ -184,7 +184,7 @@ export function S13Sharing() {
               }}
             />
           ) : (
-            <ListRow label={copy.visDefault} value={copy.assetDefaultNone} chevron={false} />
+            <ListRow label={copy.visDefault} value={copy.assetDefaultNone} soft chevron={false} />
           )}
         </div>
         {me.asset_share_default && copy.assetVisHelp[me.asset_share_default] && (

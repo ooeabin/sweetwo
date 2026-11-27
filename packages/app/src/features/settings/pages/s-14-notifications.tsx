@@ -183,9 +183,10 @@ export function S14Notifications() {
         )}
       </section>
       <section className="hg-card hg-stack" aria-label={copy.notiTopics} style={{ gap: 0 }}>
-        <span className="hg-card__label" style={{ marginBottom: 'var(--space-3)' }}>
+        {/* 구역 제목은 설정 묶음 제목과 같은 꼴 15/700(2026-11-27 강약 기준 적용 1차 ‘공통’) */}
+        <h2 className="hg-sechead__title" style={{ marginBottom: 'var(--space-3)' }}>
           {copy.notiTopics}
-        </span>
+        </h2>
         {kindRow('care', copy.kinds.care, copy.kindsHelp.care)}
         {manual && kindRow('payday', copy.kinds.payday)}
         {kindRow('achieved', copy.kinds.achieved)}
@@ -202,20 +203,20 @@ export function S14Notifications() {
         <p className="hg-help" style={{ margin: 0 }}>
           {copy.lockScreenNote}
         </p>
-        <span
-          className="hg-card__label"
+        <h2
+          className="hg-sechead__title"
           style={{ marginTop: 'var(--space-4)', marginBottom: 'var(--space-3)' }}
         >
           {copy.otherAlerts}
-        </span>
+        </h2>
         {topicRow('money', copy.groups.money)}
         {topicRow('invite', copy.groups.invite)}
-        <span
-          className="hg-card__label"
+        <h2
+          className="hg-sechead__title"
           style={{ marginTop: 'var(--space-4)', marginBottom: 'var(--space-3)' }}
         >
           {copy.careAlerts}
-        </span>
+        </h2>
         {/* 경조사는 시점 체크 목록(Y-05 미리 알림과 같은 모양) */}
         <div className="hg-list hg-list--plain" role="group" aria-label={copy.careAlerts}>
           {CARE.map((t) => {
@@ -247,6 +248,7 @@ export function S14Notifications() {
         <ListRow
           label={copy.quiet}
           value={copy.quietValue(hourLabel(me.quiet_start ?? 22), hourLabel(me.quiet_end ?? 8))}
+          soft
           onClick={() => nav('/settings/notifications/quiet')}
         />
       </div>
