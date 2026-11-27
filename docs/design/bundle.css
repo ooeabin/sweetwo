@@ -3368,8 +3368,7 @@ button.hg-plansum__sal { cursor: pointer; }
 .hg-statblock__big ~ .hg-statblock__title { font: var(--text-value); color: var(--ink); }
 /* Y-04 고른 날 머리 “10월 7일 수요일” = 묶음 제목 15/700(예전 17/700) */
 .hg-cal__agenda .hg-cal__date b { font: var(--text-value); font-weight: 700; }
-/* Y-04 맨 아래 ‘선물 기록 ›’ = 이동만 하는 줄 15/400 ink-2 */
-.hg-cal__giftlink .hg-listrow__label { font: var(--text-value); color: var(--ink-2); }
+/* Y-04 맨 아래 ‘선물 기록 ›’ = 이동만 하는 줄 15/400 ink-2: 공통 ListRow `nav`(hg-listrow--nav) */
 /* N-02 알림 줄: 문장 15/400 ink(안 읽음 700) + 시간 13 그대로. 화면(page)은 줄 글자가 다른 흰 화면처럼 본문 왼쪽 24에서 시작(예전 44),
    새 알림 점은 본문 오른쪽 끝, ‘알림 설정’은 회색 글자 버튼(hg-btn--link) */
 .hg-noti__msg { font: var(--text-value); }

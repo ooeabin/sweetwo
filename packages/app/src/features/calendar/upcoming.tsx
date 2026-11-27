@@ -204,9 +204,9 @@ export function UpcomingSection({ d, filter }: { d: CalData; filter: CalFilter }
         )}
       </section>
       {filter !== 'money' && !!d.cares.length && (
-        // 이동만 하는 줄 15/400 ink-2 + ›(2026-11-27 강약 기준 2차)
+        // 이동만 하는 줄 15/400 ink-2 + ›(2026-11-27 강약 기준 2차, ListRow nav)
         <div className="hg-list hg-cal__giftlink">
-          <ListRow label={copy.gifted} onClick={() => nav('/calendar/gifts')} />
+          <ListRow label={copy.gifted} nav onClick={() => nav('/calendar/gifts')} />
         </div>
       )}
     </>

@@ -21,4 +21,4 @@
 - 날짜 칸 `aria-label`에 날짜, 공휴일 이름, 일정 수(확인 목록 안내 포함). 고른 날 `aria-pressed`, 오늘 `aria-current="date"`. 달력 구역 이름 “2026년 12월”.
 - React 래퍼 `Calendar`(packages/ui): `year`·`month`, `monthText`, `monthMenuLabel`·`onMonthMenu`, `summary`, `days`(`tone`, `art`, `more`, `holiday`), `today`, `selected`, 이전·다음, `todayLabel`·`onToday`, `folded`·`onFoldedChange(folded, via)`, `foldLabel`·`unfoldLabel`. 칸 모양을 정하는 계산(그림 키, 요약 합, 숫자 상태, 접을 주)은 core `rules/calendar-view.ts`.
 - 달력 아래 ‘다가오는 일정’(Y-04, 예전 Y-01 목록)의 줄은 같은 그림(Lead, 있을 때만)과 오른쪽 D-day `hg-cal__dday`(7일 안 `is-near`). 기록할 날 띠 `hg-recband`.
-- 2026-11-27 강약 기준 2차(DESIGN.md ‘강약 기준 2026-11-26’): ‘다가오는 일정’ 위 다음 경조사 상자(StatBlock 큰 값 + 제목)는 굵은 글자가 “D-13” 22/700 하나, 이름은 15/400 `ink`, 날짜·금액 메모 13 `slate`(StatBlock.md). 맨 아래 ‘선물 기록 ›’는 이동만 하는 줄 15/400 `ink-2` + ›(`hg-cal__giftlink`, 예전 17/400 `ink`).
+- 2026-11-27 강약 기준 2차(DESIGN.md ‘강약 기준 2026-11-26’): ‘다가오는 일정’ 위 다음 경조사 상자(StatBlock 큰 값 + 제목)는 굵은 글자가 “D-13” 22/700 하나, 이름은 15/400 `ink`, 날짜·금액 메모 13 `slate`(StatBlock.md). 맨 아래 ‘선물 기록 ›’는 이동만 하는 줄 15/400 `ink-2` + ›(ListRow `nav` = `hg-listrow--nav`, 예전 17/400 `ink`).
