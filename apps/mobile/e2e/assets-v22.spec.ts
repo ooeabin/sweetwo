@@ -176,7 +176,9 @@ test('F-03q 빠르게 입력하기 + F-03e 처음 공개 선택: 미리 고른 �
   await page.goto('/assets');
   await page.getByRole('button', { name: /큰 항목만 빠르게 입력하기/ }).click();
   await expect(page).toHaveURL(/\/assets\/quick$/);
-  await expect(page.getByRole('heading', { name: '큰 항목만 빠르게 입력해 볼까요?' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: '큰 항목만 빠르게 입력해 볼까요?' }),
+  ).toBeVisible();
   const next = page.getByRole('button', { name: '다음', exact: true });
   await expect(next).toBeDisabled();
   // 적금을 어디에 넣는지 + 저금과 두 번 세지 않음(실구동)
@@ -263,11 +265,24 @@ test('F-08 (나) 순위 없음: 또래 가구 중간값 한 줄(광고 없음) �
   await expect(banner).toHaveText('또래 가구 중간값 보기');
   await expect(banner.locator('.hg-rankrow__badge')).toHaveCount(0);
   await expect(banner.locator('.hg-chevron')).toBeVisible();
+  // 2026-11-27 강약 기준 2차: 제목만인 순위 줄은 이동만 하는 줄 15/400(순자산 큰 값보다 먼저 눈이 가지 않게), 순자산 이름표 13
+  await expect(banner.locator('.hg-rankrow__title')).toHaveCSS('font-size', '15px');
+  await expect(banner.locator('.hg-rankrow__title')).toHaveCSS('font-weight', '400');
+  await expect(page.locator('.hg-networth__label')).toHaveCSS('font-size', '13px');
   await banner.click();
   await expect(page).toHaveURL(/\/assets\/rank$/);
   // 1993년생 → 30대 중간값
   await expect(page.getByText('또래 가구 중간값은 155,850,000원이에요')).toBeVisible();
   await expect(page.getByText(/상위 \d+%/)).toHaveCount(0);
+  // 2026-11-27: 머리 아래 24(예전 머리에 붙음)
+  const headBottom = await page
+    .locator('.hg-pagehead')
+    .evaluate((el) => el.getBoundingClientRect().bottom);
+  const titleTop = await page
+    .locator('.hg-statblock')
+    .evaluate((el) => el.getBoundingClientRect().top);
+  expect(titleTop - headBottom).toBeGreaterThanOrEqual(23);
+  expect(titleTop - headBottom).toBeLessThanOrEqual(25);
   await axe(page);
   // 2026-11-24 ‘같이 순위 보기’는 아래 고정 주 버튼
   await expect(
@@ -646,7 +661,10 @@ test('F-08 직접 열기: 자산이 하나도 없으면 순위 없이 “아직 
   await expect(page.getByText(/상위 \d+%/)).toHaveCount(0);
   expect(db.rpc).not.toContain('record_rank_view');
   await axe(page);
-  await page.locator('.hg-stickybar').getByRole('button', { name: '자산 입력하고 순위 보기' }).click();
+  await page
+    .locator('.hg-stickybar')
+    .getByRole('button', { name: '자산 입력하고 순위 보기' })
+    .click();
   await expect(page).toHaveURL(/\/assets\/new/);
 });
 

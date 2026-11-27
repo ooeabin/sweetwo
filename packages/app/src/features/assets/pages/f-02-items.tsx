@@ -267,14 +267,17 @@ export function F02Items() {
           />
           <div className="hg-list">
             {g.key === 'invest' && inv.gain !== null && inv.gain !== 0 && (
-              // 9번 투자 묶음 줄(누를 수 없음): “안 판 수익 +200만 원(+25%)”. 2026-11-04 투자 비중은 뜻이 어려워 뺌
-              <ListRow
-                label={copy.investGainLabel}
-                value={copy.investGain(
-                  `${inv.gain > 0 ? '+' : '−'}${m(Math.abs(inv.gain))}`,
-                  inv.gainPct,
-                )}
-              />
+              // 9번 투자 묶음 줄(누를 수 없음): “안 판 수익 +200만 원(+25%)”. 2026-11-04 투자 비중은 뜻이 어려워 뺌.
+              // 2026-11-27 강약 기준 2차: 자산 줄과 같은 17/400 + 17/700이면 항목처럼 보여 보조 정보 줄(15/400 slate 이름 + 15/400 값)
+              <div className="hg-gainrow">
+                <span>{copy.investGainLabel}</span>
+                <span>
+                  {copy.investGain(
+                    `${inv.gain > 0 ? '+' : '−'}${m(Math.abs(inv.gain))}`,
+                    inv.gainPct,
+                  )}
+                </span>
+              </div>
             )}
             {rows.map(row)}
             {partner && (

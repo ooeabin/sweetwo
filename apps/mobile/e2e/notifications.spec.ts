@@ -169,6 +169,16 @@ test('알림 센터: 종 점, 오늘·이번 주·이전, 누르면 읽음 + 그
     '어머니 생신이 한 달 남았어요',
   );
   await expect(panel.getByRole('region', { name: '이전' })).toContainText('9월 22일');
+  // 2026-11-27 강약 기준 2차: 알림 문장 15(시간 13과 크기로 갈림), 안 읽음 700
+  const msg0 = today.locator('.hg-noti__msg').first();
+  await expect(msg0).toHaveCSS('font-size', '15px');
+  await expect(msg0).toHaveCSS('font-weight', '700');
+  await expect(today.locator('.hg-noti__time').first()).toHaveCSS('font-size', '13px');
+  if (narrow) {
+    // 좁은 창 알림 화면: 줄 글자는 다른 흰 화면처럼 왼쪽 24에서 시작(예전 44), ‘알림 설정’은 회색 글자 버튼
+    expect(await msg0.evaluate((e) => Math.round(e.getBoundingClientRect().left))).toBe(24);
+    await expect(panel.getByRole('button', { name: '알림 설정' })).toHaveClass(/hg-btn--link/);
+  }
   // 열리면 첫 줄 포커스, ↓로 다음 줄(넓은 창). 좁은 창은 손가락이라 첫 줄에 포커스 테두리를 두지 않음(2026-11-03)
   if (!narrow) {
     await expect(today.getByRole('button').first()).toBeFocused();

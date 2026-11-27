@@ -49,6 +49,13 @@ test('W-02 저금 줄 진행, 시트 ‘저금 보기’ → W-10 상세(목표 
   await expect(deadline).toContainText('2031년 10월');
   expect((await page.locator('.hg-page--w10').innerText()).match(/2031년 10월/g)).toHaveLength(1);
   await expect(page.locator('#w-10-more')).toHaveCount(0);
+  // 2026-11-27 강약 기준 2차: 속성 줄(값 15/400) 묶음 안에 ‘이번 달’ 상태 줄(17/700)을 섞지 않음 — 자세히 보기 다음, 구분선 아래 따로
+  await expect(page.locator('.hg-list--plain .hg-w10now')).toHaveCount(0);
+  await expect(deadline.locator('.hg-listrow__value')).toHaveCSS('font-weight', '400');
+  const now = page.locator('.hg-w10now');
+  await expect(now).toContainText('이번 달');
+  const foldY = (await page.getByRole('button', { name: '자세히 보기' }).boundingBox())?.y ?? 0;
+  expect((await now.boundingBox())?.y ?? 0).toBeGreaterThan(foldY);
   await page.getByRole('button', { name: '자세히 보기' }).click();
   await expect(page.getByRole('button', { name: '접기' })).toHaveAttribute('aria-expanded', 'true');
   await expect(page.locator('#w-10-more')).toContainText('매달');

@@ -326,22 +326,6 @@ export function W10SavingItem() {
                 }
               />
             )}
-            {!closed && i.thisMonth && (
-              <div className="hg-checklist__list">
-                <CheckLine
-                  line={i.thisMonth}
-                  goalName={g.name}
-                  name={copy.thisMonth}
-                  personName={nameOf}
-                  meId={d.meId}
-                  entry="w10"
-                  // W-02와 같은 상태 줄(2026-11-23 ‘바탕 정리 2’): 할 일은 오렌지 점 + ›, 끝남은 ✓. 줄을 누르면 줄 시트
-                  sub=""
-                  // 각자 모드 파트너 줄은 보기만(2026-11-03 대신 체크 없앰). 합쳐서는 공동 체크리스트라 누구나(D1)
-                  viewOnly={i.owner === 'partner' && !d.joint}
-                />
-              </div>
-            )}
           </div>
         )}
         {!hideAmounts &&
@@ -390,6 +374,23 @@ export function W10SavingItem() {
               )}
             </>
           )}
+        {!hideAmounts && !g.bundle_id && !closed && i.thisMonth && (
+          // ‘이번 달’ 상태 줄(금액 17/700)은 속성 줄(값 15/400) 묶음과 나눔(2026-11-27 강약 기준 2차): 구분선 아래 따로, 자세히 보기 다음
+          <div className="hg-checklist__list hg-w10now">
+            <CheckLine
+              line={i.thisMonth}
+              goalName={g.name}
+              name={copy.thisMonth}
+              personName={nameOf}
+              meId={d.meId}
+              entry="w10"
+              // W-02와 같은 상태 줄(2026-11-23 ‘바탕 정리 2’): 할 일은 오렌지 점 + ›, 끝남은 ✓. 줄을 누르면 줄 시트
+              sub=""
+              // 각자 모드 파트너 줄은 보기만(2026-11-03 대신 체크 없앰). 합쳐서는 공동 체크리스트라 누구나(D1)
+              viewOnly={i.owner === 'partner' && !d.joint}
+            />
+          </div>
+        )}
         {/* 달성했는데 아직 고르지 않았으면 W-12a와 같은 질문(20 W-10 5번) */}
         {i.state === 'achieved' && i.canEdit && <AfterChoice item={i} />}
         {!hideAmounts && <div className="hg-page__band" aria-hidden="true" />}

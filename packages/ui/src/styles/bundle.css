@@ -3349,3 +3349,45 @@ button.hg-plansum__sal { cursor: pointer; }
 .hg-together__body > .hg-together__amount { margin-top: var(--space-1); }
 .hg-together__say { margin-top: var(--space-2); font: var(--text-value); color: var(--ink); word-break: keep-all; overflow-wrap: anywhere; }
 .hg-together__em { font-weight: 700; color: var(--accent-app-text); }
+
+/* ── 강약 기준 적용 2차 ‘화면별’(2026-11-27 사용자 결정, DESIGN.md ‘강약 기준 2026-11-26’ 적용 범위) ──
+   F-01·F-02·F-08·N-02·Y-04·W-10·W-21 화면 전용. 공통 묶음 머리(hg-sechead)·설정 값·서랍은 따로(공통 PR). */
+/* RankRow 제목만 있는 줄(“또래 가구 중간값 보기”, 빈 상태 “자산 입력하고 순위 보기”) = 이동만 하는 줄 15/400 ink-2 + ›, 높이 56.
+   보조 줄이 있는 줄(“상위 38%예요” + “10월 기준, 자세히 보기”)은 값이 주인공이라 17/700 그대로 */
+.hg-rankrow--link { min-height: 56px; }
+.hg-rankrow--link .hg-rankrow__title { font: var(--text-value); color: var(--ink-2); }
+/* F-01·F-02 순자산 큰 값의 이름표 13/400 slate(W-10·W-20b 큰 금액 이름표와 같게, 예전 15) */
+.hg-networth__label { font: var(--text-note); color: var(--slate); }
+/* 상자·구역 제목(F-01 ‘달마다 순자산’) 15/700 ink. 이름표 hg-card__label(15/400 slate)과 나눔 */
+.hg-card__label.hg-card__label--head { font: var(--text-value); font-weight: 700; color: var(--ink); }
+/* F-02 투자 묶음 ‘안 판 수익’(누를 수 없는 정보 줄) = 보조 정보 줄: 이름 15/400 slate + 값 15/400 ink, 높이 40.
+   자산 줄(이름 17/400 + 금액 17/700 + ›)과 크기로 갈리고, 묶음 안 굵은 금액은 항목 금액만 남음 */
+.hg-gainrow { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); min-height: 40px; font: var(--text-value); color: var(--ink); }
+.hg-gainrow > span:first-child { color: var(--slate); }
+.hg-gainrow > span:last-child { white-space: nowrap; }
+/* StatBlock 큰 값 + 제목(Y-04 다음 경조사 상자 “D-13 / 어머니 생신”): 눈이 갈 곳은 큰 값 하나, 제목은 15/400 ink(예전 17/700) */
+.hg-statblock__big ~ .hg-statblock__title { font: var(--text-value); color: var(--ink); }
+/* Y-04 고른 날 머리 “10월 7일 수요일” = 묶음 제목 15/700(예전 17/700) */
+.hg-cal__agenda .hg-cal__date b { font: var(--text-value); font-weight: 700; }
+/* Y-04 맨 아래 ‘선물 기록 ›’ = 이동만 하는 줄 15/400 ink-2 */
+.hg-cal__giftlink .hg-listrow__label { font: var(--text-value); color: var(--ink-2); }
+/* N-02 알림 줄: 문장 15/400 ink(안 읽음 700) + 시간 13 그대로. 화면(page)은 줄 글자가 다른 흰 화면처럼 본문 왼쪽 24에서 시작(예전 44),
+   새 알림 점은 본문 오른쪽 끝, ‘알림 설정’은 회색 글자 버튼(hg-btn--link) */
+.hg-noti__msg { font: var(--text-value); }
+.hg-noti--page .hg-noti__body { padding-inline: 0; }
+.hg-noti--page .hg-noti__group { padding-inline: 0; }
+.hg-noti--page .hg-noti__item { padding-left: 0; padding-right: var(--space-5); }
+.hg-noti--page .hg-noti__dot { right: 0; }
+.hg-noti--page :is(.hg-noti__undo, .hg-noti__after) { padding-inline: 0; }
+.hg-noti--page .hg-noti__foot { padding-inline: 0; }
+/* W-10 ‘이번 달’ 상태 줄(금액 17/700)은 속성 줄(값 15/400 slate) 묶음과 나눔: 구분선 + 위 8 */
+.hg-page--w10 .hg-w10now { margin-top: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--hairline-soft); }
+/* W-21 지난 달 모아보기 줄: 보조 한 줄(결과, 계획한 월급)이 이름 칸 폭만으로는 말줄임이 돼 줄 폭 끝까지(금액·› 아래까지) 씀.
+   금액·›는 이름 줄 높이에 맞춤. 줄 높이 12 + 24 + 18 + 12 = 66(예전 보조 두 줄 84) */
+.hg-archive .hg-listrow { grid-template-rows: auto auto; row-gap: 0; align-items: center; }
+.hg-archive .hg-listrow > :first-child { grid-row: 1 / span 2; }
+.hg-archive .hg-listrow__text { display: contents; }
+.hg-archive .hg-listrow__label { grid-column: 2; grid-row: 1; min-width: 0; }
+.hg-archive .hg-listrow__sub { grid-column: 2 / -1; grid-row: 2; min-width: 0; }
+.hg-archive .hg-listrow__value { grid-column: 3; grid-row: 1; }
+.hg-archive .hg-listrow > .hg-chevron { grid-column: 4; grid-row: 1; }

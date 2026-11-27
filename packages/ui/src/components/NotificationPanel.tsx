@@ -247,7 +247,8 @@ export function NotificationPanel(p: {
       </div>
       {p.variant === 'page' && p.onSettings && (
         <div className="hg-noti__foot">
-          <Button variant="ghost" size="sm" onClick={p.onSettings}>
+          {/* 회색 글자 버튼(2026-11-27 강약 기준 2차, 예전 굵은 유령 버튼) */}
+          <Button variant="link" onClick={p.onSettings}>
             {p.labels.settings}
           </Button>
         </div>

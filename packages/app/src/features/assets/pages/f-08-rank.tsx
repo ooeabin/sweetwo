@@ -146,7 +146,8 @@ export function F08Rank() {
     const fromPartner = req && req.from_user !== r.me.id;
     const partner = c?.partnerName || '';
     const body = (
-      <div key="r" className="hg-stack hg-detail" style={{ gap: 0 }}>
+      // 머리 아래 24(다른 흰 화면과 같게, 2026-11-27): 열 간격을 0으로 두면 머리의 −8 margin 때문에 제목이 머리에 붙음
+      <div key="r" className="hg-stack hg-detail">
         {header}
         <div className="hg-page" style={{ gap: 'var(--space-6)' }}>
           {p.median !== null && p.band ? (

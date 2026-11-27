@@ -138,22 +138,21 @@ export function W21MonthArchive() {
           )}
         </div>
       ) : (
-        <div className="hg-list">
+        // 보조 한 줄은 줄 폭 끝까지(금액·› 아래까지) 써서 결과와 계획한 월급이 말줄임 없이 들어가게(2026-11-27, bundle.css ‘강약 기준 적용 2차’)
+        <div className="hg-list hg-archive">
           {(past.data ?? []).map((l) => {
             const late = lateOpen(l, today, base, shownPayday) ? lateLines(l).length : 0;
             const r = archiveRow({ lines: l.pay_check_line, lateCount: late });
             return row(
               l.id,
               cycleName(shownPayday(l.cycle_start)),
+              // 보조 한 줄(2026-11-27 강약 기준 2차, 줄 높이 64): 결과 + “, ” + 계획한 월급. 기획서 두 문구를 쉼표로 이음 [확인 필요]
               <>
-                <span style={{ display: 'block' }}>
-                  {r.result === 'late'
-                    ? copy.archiveResult.late(r.lateCount)
-                    : copy.archiveResult[r.result]}
-                </span>
-                <span style={{ display: 'block' }}>
-                  {speakMasked(copy.archivePlanned(m(r.planned)))}
-                </span>
+                {r.result === 'late'
+                  ? copy.archiveResult.late(r.lateCount)
+                  : copy.archiveResult[r.result]}
+                {', '}
+                {speakMasked(copy.archivePlanned(m(r.planned)))}
               </>,
               r.saved,
               () => nav(`${salaryPaths.checklist}?cycle=${l.id}`, { state: { from: 'archive' } }),

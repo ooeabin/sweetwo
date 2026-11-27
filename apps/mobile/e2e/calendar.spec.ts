@@ -941,6 +941,13 @@ test('달력 K안: 머리 “10월 ⌄”, 요약 줄, 모든 칸 높이 같음,
   await page.getByRole('button', { name: /^10월 12일/ }).click();
   await expect(page.locator('.hg-cal__date b')).toHaveText('10월 12일 월요일');
   await expect(page.locator('.hg-cal__date span')).toHaveText(/^음력 \d+월 \d+일$/);
+  // 2026-11-27 강약 기준 2차: 고른 날 머리 15/700, 다음 경조사 상자는 D-day만 굵게(이름 15/400), ‘선물 기록 ›’ 15/400
+  await expect(page.locator('.hg-cal__date b')).toHaveCSS('font-size', '15px');
+  const nextCare = page.getByRole('region', { name: '다음 경조사' });
+  await expect(nextCare.locator('.hg-statblock__big')).toHaveCSS('font-weight', '700');
+  await expect(nextCare.locator('.hg-statblock__title')).toHaveCSS('font-size', '15px');
+  await expect(nextCare.locator('.hg-statblock__title')).toHaveCSS('font-weight', '400');
+  await expect(page.locator('.hg-cal__giftlink .hg-listrow__label')).toHaveCSS('font-size', '15px');
   await expect(page.locator('.hg-cal__agenda .hg-list:not(.hg-cal__add) .hg-lead')).toHaveCount(0); // 줄 앞 그림 칸도 그림이 있을 때만
   await axe(page);
 
