@@ -3516,3 +3516,9 @@ button.hg-plansum__sal { cursor: pointer; }
 @media (max-width: 767px), (hover: none), (pointer: coarse) { .hg-auth:not(:has(> .hg-lock)) { padding-bottom: calc(var(--gap-bottom-bar) + env(safe-area-inset-bottom, 0px)); } }
 /* 3) W-02 빈 상태(첫 사용 안내)도 머리 아래 24에서 바로 시작 */
 .hg-w02guide { padding-top: 0; }
+
+/* 2026-11-27 사용자 결정 ‘대분류 안 소분류’(W-01 지출 카드, PlanSummary.md PlanCard): 지출 묶음마다 소제목 한 줄
+   왼쪽 묶음 이름 + 오른쪽 소계, 둘 다 13/400 slate(묶음 머리 15/700보다 한 단계 아래). 소제목 위 16, 아래 줄 상자까지 0 */
+.hg-plancard__sub { display: block; }
+.hg-plancard__subhead { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); margin: var(--space-4) 0 0; font: var(--text-note); color: var(--slate); }
+.hg-plancard__subhead > span:last-child { flex: none; font-variant-numeric: normal; }

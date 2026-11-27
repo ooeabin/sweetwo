@@ -3104,6 +3104,7 @@ export type Database = {
           amount: number
           auto_day: number | null
           auto_pay: boolean
+          category: string | null
           goal_id: string | null
           id: string
           in_checklist: boolean
@@ -3120,6 +3121,7 @@ export type Database = {
           amount: number
           auto_day?: number | null
           auto_pay: boolean
+          category?: string | null
           goal_id?: string | null
           id?: string
           in_checklist: boolean
@@ -3135,6 +3137,7 @@ export type Database = {
           amount?: number
           auto_day?: number | null
           auto_pay?: boolean
+          category?: string | null
           goal_id?: string | null
           id?: string
           in_checklist?: boolean
@@ -4792,6 +4795,7 @@ export type Database = {
       split_line_add: {
         Args: {
           p_amount: number
+          p_category?: string
           p_kind: Database["public"]["Enums"]["split_line_kind"]
           p_name?: string
           p_sort?: number
@@ -4802,7 +4806,7 @@ export type Database = {
       }
       split_line_delete: { Args: { p_line: string }; Returns: undefined }
       split_line_set: {
-        Args: { p_amount?: number; p_line: string; p_name?: string }
+        Args: { p_amount?: number; p_category?: string; p_line: string; p_name?: string }
         Returns: undefined
       }
       split_line_visible: {

@@ -1,7 +1,7 @@
 -- pgTAP: QA 5구간 서버(2026-11-12). 찬우, 예빈
 -- S5-04 저금 추가·그만 모음 되돌리기·W-12a가 월급 계획 변경 신호(version)를 올림
 -- S5-09 그만 모음 되돌리기는 원래 자리로
--- S5-05(D2) 각자 → 합쳐서: 직접 추가 줄은 같은 이름끼리 더해 한 줄, 10줄이 넘어도 모두 두고 추가만 막힘
+-- S5-05(D2) 각자 → 합쳐서: 직접 추가 줄은 같은 이름끼리 더해 한 줄, 한도(2026-11-27부터 20줄)가 넘어도 모두 두고 추가만 막힘
 -- S5-18 관리 방식 알림 링크
 begin;
 create extension if not exists pgtap with schema extensions;
@@ -106,9 +106,10 @@ select is((select count(*)::int from public.split_line where kind = 'custom' and
 select is((select count(*)::int from public.split_line where kind = 'custom'), 11, '합쳐 11줄이어도 모두 둠');
 select is((select string_agg(name, ',' order by sort) from public.split_line where kind = 'custom'),
   '관리비,구독료,헬스장,교통비,보험료,정수기,부모님 용돈,학원비,병원비,세차,통신비', '순서는 바꾼 사람 것 먼저');
-select throws_ok(
+-- 2026-11-27: 직접 추가 줄 한도 10 → 20(지출 묶음). 11줄이면 더 넣을 수 있음
+select lives_ok(
   $$ select public.split_line_add((select id from public.salary_split where owner_user_id is null), 'custom', 10000, '세탁비') $$,
-  '22023', 'too_many_custom', '10줄이 넘으면 더 추가만 막힘');
+  '20줄 한도라 11줄이어도 더 추가할 수 있음');
 select is((select count(*)::int from public.split_line where kind = 'allowance'), 2, '용돈은 사람마다 1줄 그대로');
 reset role;
 select is((select target from public.notification where kind = 'salary_mode' order by created_at desc limit 1), '/salary?view=plan',
