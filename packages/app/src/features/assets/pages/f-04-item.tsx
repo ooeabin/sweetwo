@@ -20,13 +20,14 @@ import {
 } from '@sweetwo/core';
 import {
   AmountInput,
-  Field,
   Badge,
+  Band,
   BottomSheet,
   Button,
   ChoiceCards,
   ConflictChoice,
   DateSheet,
+  Field,
   LineChart,
   ListRow,
   Menu,
@@ -418,7 +419,7 @@ export function F04Item() {
         )}
         {points.length >= 2 && (
           <>
-            <div className="hg-page__band" aria-hidden="true" />
+            <Band />
             <LineChart
               flat
               label={copy.graph}
@@ -429,7 +430,7 @@ export function F04Item() {
             />
           </>
         )}
-        <div className="hg-page__band" aria-hidden="true" />
+        <Band />
         <div className="hg-list hg-list--plain">
           <ListRow
             label={copy.owner}
@@ -511,7 +512,7 @@ export function F04Item() {
             options={shareOptions()}
           />
         )}
-        <div className="hg-page__band" aria-hidden="true" />
+        <Band />
         <section
           className="hg-stack"
           aria-label={copy.history}

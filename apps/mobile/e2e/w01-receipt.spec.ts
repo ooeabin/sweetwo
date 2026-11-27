@@ -207,18 +207,18 @@ test('보기: 머리 제목 ‘월급 계획 템플릿’, 요약 카드(문장�
   expect(Math.abs(sb.y + sb.height / 2 - (tb.y + tb.height / 2))).toBeLessThanOrEqual(2); // 한 줄(기준선 맞춤)
   const cardBox = await box(savingCard);
   expect(Math.round(sb.x + sb.width)).toBe(Math.round(cardBox.x + cardBox.width));
-  // 간격 한 값(보이는 간격 16): 머리 → 첫 줄 상자 0, 마지막 줄 → ‘+ 추가’ 0, ‘+ 추가’ → 띠 8 + 원 안쪽 8
+  // 간격(보이는 간격 16): 머리 → 첫 줄 상자 0, 마지막 줄 → ‘+ 추가’ 0. 묶음 끝은 ‘+ 추가’ 상자(2026-11-27 간격 정리: 띠 위아래는 앱 전체 32/24)
   const firstRow = await box(savingCard.locator('.hg-receipt__row').first());
   expect(Math.round(firstRow.y - (tb.y + tb.height))).toBe(0);
   const lastRow = await box(savingCard.locator('.hg-receipt__row').last());
   const addBox = await box(page.getByRole('button', { name: '+ 저축·투자 추가' }));
   expect(Math.round(addBox.y - (lastRow.y + lastRow.height))).toBe(0);
-  expect(Math.round(cardBox.y + cardBox.height - (addBox.y + addBox.height))).toBe(8);
+  expect(Math.round(cardBox.y + cardBox.height - (addBox.y + addBox.height))).toBe(0);
   const spendTitle = await box(
     page.getByRole('region', { name: '지출', exact: true }).locator('.hg-plancard__title'),
   );
-  // 묶음 끝 바로 아래 띠(8), 띠 아래 머리까지 16(띠 위 16은 ‘+ 추가’ 아래 8 + 원 안쪽 8)
-  expect(Math.round(spendTitle.y - (cardBox.y + cardBox.height))).toBe(8 + 16);
+  // 묶음 끝 → 띠: 보이는 32(원 안쪽 8 + 상자 24), 띠 8, 띠 → 다음 묶음 머리 글자 24(2026-11-27 간격 정리)
+  expect(Math.round(spendTitle.y - (cardBox.y + cardBox.height))).toBe(24 + 8 + 24);
   // ‘+ … 추가’: 앱 공통 AddRow 한 줄(높이 48, 회색 원 32, 글자 15 ink-2, 2026-11-27 PlanAdd를 합침)
   for (const n of ['+ 저축·투자 추가', '+ 지출 추가']) {
     const add = page.getByRole('button', { name: n });

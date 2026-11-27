@@ -3406,3 +3406,113 @@ button.hg-plansum__sal { cursor: pointer; }
 .hg-chipgroups__title { margin: 0 0 var(--space-2); font: var(--text-note); color: var(--slate); }
 .hg-chipgroups > div + div { margin-top: var(--space-4); }
 .hg-chipgroups__more.hg-btn--link { align-self: flex-start; display: inline-flex; align-items: center; min-height: 44px; margin-top: var(--space-1); font: var(--text-value); }  /* 누르는 칸 44, 칩 줄과 글자 사이 보이는 간격 약 16 */
+/* ── 간격 정리(2026-11-27 사용자 결정 ‘간격 정리’, DESIGN.md ‘간격 정리 2026-11-27’) ──
+   보이는 간격 = 글자 줄 상자 사이. 56 줄(ListRow·TransferRow)은 위아래 끝에서 글자 줄까지 16(--row-inset = 안쪽 12 + 가운데 4). 숫자는 tokens.css.
+   1) 띠 하나: 흰 화면 묶음 사이 회색 띠는 두께 8(--band), 화면 끝까지, surface-alt. 띠 위 보이는 32(--gap-band-above), 아래 24(--gap-band-below).
+      줄이 띠에 닿는 쪽은 줄 안쪽(16)을 빼 준다(--lead 첫 줄 위, --trail 마지막 줄 아래). 부모 스택 간격은 --pg로 빼 준다.
+      그리는 방법은 둘뿐: 이어진 묶음 사이 ::before(아래 G + G 규칙) 또는 `Band`(hg-band, hr). 옛 hg-page__band는 같은 규칙(이름만 남김).
+   2) 제목 있는 묶음(section + 묶음 머리)도 묶음(G)이라 사이에 띠.
+   3) 머리 하나: 좁은 창 머리(메뉴 첫 화면 hg-frame__mhead, 하위 화면 hg-pagehead, 알림 hg-noti__head)는 화면 맨 위 0에서 높이 56, ‹ 칸 왼쪽 8.
+      머리 아래 첫 내용(상자)까지 24(--gap-head). 사람 탭(알약 Tabs)은 머리 → 탭 16, 탭 → 첫 내용 24.
+   4) 묶음 머리 글자 → 첫 줄 보이는 16(--gap-sechead). 마지막 줄 → ‘+ … 추가’ 줄은 상자 간격 0(줄 바로 아래 한 줄).
+   5) 시트 안 옆 여백 24(화면과 같게).
+   6) 아래 고정 주 버튼 아래 끝 → 화면 아래 16(--gap-bottom-bar) + 안전 영역. 본문 아래 여백은 버튼이 있으면 0. */
+
+/* 부모 스택 간격을 자식 쪽 변수(--pg)로(띠·머리·묶음 머리 계산이 부모 간격을 빼도록). 자식에 두어야 스택 안 스택이 덮어쓰지 않음 */
+.hg-stack > * { --pg: var(--space-3); }
+.hg-frame:not(.hg-frame--alt) .hg-body__col > .hg-stack > * { --pg: var(--gap-area); }
+.hg-frame section.hg-stack:has(> .hg-sechead) > * { --pg: var(--gap-title); }
+:is(.hg-planstage, .hg-page) > * { --pg: 0px; }
+.hg-form > * { --pg: var(--gap-area); }
+.hg-stack[style*="gap: 0"] > *, .hg-frame .hg-body__col > .hg-stack[style*="gap: 0"] > * { --pg: 0px; }  /* 간격 0 스택(F-04·F-08 빈 상태·Y-05 상세 틀) */
+/* 묶음 머리 오른쪽에 누르는 칸 44 동작(‘+ 일정 추가’ 등)이 있어도 머리 상자는 글자 줄 높이로(위아래 넘침을 음수 여백으로) */
+.hg-frame:not(.hg-frame--alt) .hg-sechead:not(.hg-sechead--group):has(> .hg-sechead__action, > .hg-addrow, > .hg-btn--link) { margin-block: calc((44px - 22px) / -2); }
+/* 묶음이 띠에 닿는 쪽 안쪽(줄이면 12) */
+.hg-frame :is(.hg-list, .hg-checklist) { --lead: var(--row-inset); --trail: var(--row-inset); }
+.hg-frame :is(.hg-card, .hg-plancard, section.hg-stack) { --lead: 0px; --trail: 0px; }
+.hg-frame :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard, section.hg-stack) { --prev-trail: 0px; }  /* 기본값은 묶음 자신에(물려받지 않게), 앞 묶음에 따라 아래 규칙이 덮음 */
+.hg-frame section.hg-stack:has(> :is(.hg-list, .hg-checklist):last-child), .hg-frame section.hg-stack:has(> .hg-stack:last-child > .hg-list:last-child) { --trail: var(--row-inset); }
+.hg-frame section.hg-stack:has(> :is(.hg-list, .hg-checklist):first-child) { --lead: var(--row-inset); }
+
+/* 1·2) 이어진 묶음(G) 사이 띠: G = 카드·목록·체크 카드·W-01 묶음·제목 있는 묶음(section) */
+.hg-frame:not(.hg-frame--alt) :is(.hg-stack, .hg-planstage) > :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard, section.hg-stack:has(> .hg-sechead)):not(.hg-card--tint, .hg-card--fill, .hg-list--plain) + :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard, section.hg-stack:has(> .hg-sechead)):not(.hg-card--tint, .hg-card--fill, .hg-list--plain) {
+  position: relative;
+  margin-top: calc(var(--gap-band-above) - var(--pg, 0px) - var(--prev-trail) + var(--band) + var(--gap-band-below) - var(--lead));
+}
+.hg-frame:not(.hg-frame--alt) :is(.hg-stack, .hg-planstage) > :is(.hg-list, .hg-checklist, section.hg-stack:has(> .hg-sechead):has(> :is(.hg-list, .hg-checklist):last-child), section.hg-stack:has(> .hg-sechead):has(> .hg-stack:last-child > .hg-list:last-child)):not(.hg-list--plain) + :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard, section.hg-stack:has(> .hg-sechead)):not(.hg-card--tint, .hg-card--fill, .hg-list--plain) { --prev-trail: var(--row-inset); }
+.hg-frame:not(.hg-frame--alt) :is(.hg-stack, .hg-planstage) > :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard, section.hg-stack:has(> .hg-sechead)):not(.hg-card--tint, .hg-card--fill, .hg-list--plain) + :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard, section.hg-stack:has(> .hg-sechead)):not(.hg-card--tint, .hg-card--fill, .hg-list--plain)::before {
+  content: ""; position: absolute; left: calc(var(--space-6) * -1); right: calc(var(--space-6) * -1); height: var(--band); background: var(--surface-alt);
+  top: calc(0px - var(--band) - var(--gap-band-below) + var(--lead));
+}
+/* 띠에 닿는 카드(흰 화면은 바탕 없는 본문이라)의 안쪽 위아래 여백은 0: 보이는 간격을 띠 규칙 하나가 정함 */
+.hg-frame:not(.hg-frame--alt) :is(.hg-stack, .hg-planstage) > :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard, section.hg-stack:has(> .hg-sechead)):not(.hg-card--tint, .hg-card--fill, .hg-list--plain) + .hg-card:not(.hg-card--tint, .hg-card--fill) { padding-top: 0; }
+.hg-frame:not(.hg-frame--alt) :is(.hg-stack, .hg-planstage) > .hg-card:not(.hg-card--tint, .hg-card--fill):is(:has(+ :is(.hg-card, .hg-list, .hg-checklist, .hg-plancard):not(.hg-card--tint, .hg-card--fill, .hg-list--plain)), :has(+ section.hg-stack > .hg-sechead)) { padding-bottom: 0; }
+/* Band 앞뒤 카드도 같음 */
+.hg-frame:not(.hg-frame--alt) :is(.hg-band, .hg-page__band) + .hg-card:not(.hg-card--tint, .hg-card--fill) { padding-top: 0; }
+.hg-frame:not(.hg-frame--alt) .hg-card:not(.hg-card--tint, .hg-card--fill):has(+ :is(.hg-band, .hg-page__band)) { padding-bottom: 0; }
+
+/* 1) Band(hg-band, 옛 hg-page__band): 같은 띠 하나. 위 32·아래 24(보이는 간격), 부모 간격과 줄 안쪽을 뺌 */
+:is(.hg-band, .hg-page__band):not(.hg-admin *, .hg-site *) {
+  --prev-trail: 0px; --next-lead: 0px;
+  display: block; box-sizing: border-box; height: var(--band); border: 0; border-radius: 0; background: var(--surface-alt);
+  margin: calc(var(--gap-band-above) - var(--pg, 0px) - var(--prev-trail)) calc(var(--space-6) * -1) calc(var(--gap-band-below) - var(--pg, 0px) - var(--next-lead));
+}
+:is(.hg-list, .hg-checklist, .hg-checklist__list, section:has(> :is(.hg-list, .hg-checklist):last-child)) + :is(.hg-band, .hg-page__band) { --prev-trail: var(--row-inset); }
+:is(.hg-band, .hg-page__band):is(:has(+ :is(.hg-list, .hg-checklist, .hg-page__info)), :has(+ section > :is(.hg-list, .hg-checklist):first-child)) { --next-lead: var(--row-inset); }
+/* 달력(Y-04) 아래 접기 손잡이(누르는 칸 44, 보이는 막대 4): 보이는 막대 → 띠 32 */
+.hg-cal + :is(.hg-band, .hg-page__band) { --prev-trail: 20px; }
+/* ‘+ … 추가’(AddRow 줄 48, 원 32)로 끝나는 묶음 → 띠: 원 끝에서 32 */
+:is(.hg-addrow, section:has(> .hg-addrow:last-child)) + :is(.hg-band, .hg-page__band) { --prev-trail: var(--space-2); }
+/* 밑줄 탭을 감싼 달력 도구 줄(Y-04) 아래 첫 상자도 24 */
+.hg-frame:not(.hg-frame--alt) .hg-cal__tools + * { margin-top: calc(var(--gap-head) - var(--pg, 0px)); }
+.hg-stack > .hg-band { margin-block: calc(var(--gap-band-above) - var(--pg, 0px) - var(--prev-trail)) calc(var(--gap-band-below) - var(--pg, 0px) - var(--next-lead)); }
+.hg-page--w10 > :is(.hg-goalbox, .hg-page__section) + :is(.hg-band, .hg-page__band) { margin-top: calc(var(--gap-band-above) - var(--prev-trail)); }
+@media (min-width: 768px) { :is(.hg-band, .hg-page__band):not(.hg-admin *, .hg-site *) { margin-inline: 0; } }
+/* 띠(접힌 선택 줄 위, FormScreen): 같은 두께, 아래 첫 줄 보이는 24 */
+.hg-form__folds::before { height: var(--band); }
+.hg-form__folds { padding-top: calc(var(--band) + var(--gap-band-below) - var(--row-inset)); margin-top: calc(var(--gap-band-above) - var(--pg, 0px)); }
+
+/* 4) 묶음 머리 글자 → 첫 줄 16, 마지막 줄 → ‘+ … 추가’ 상자 간격 0 */
+.hg-frame:not(.hg-frame--alt) .hg-sechead:not(.hg-sechead--group) { min-height: 0; }
+.hg-frame:not(.hg-frame--alt) .hg-sechead:not(.hg-sechead--group) + * { margin-top: calc(var(--gap-sechead) - var(--pg, 0px)); }
+.hg-frame:not(.hg-frame--alt) .hg-sechead:not(.hg-sechead--group) + :is(.hg-list, .hg-checklist) { margin-top: calc(var(--gap-sechead) - var(--row-inset) - var(--pg, 0px)); }
+.hg-frame:not(.hg-frame--alt) .hg-stack > :is(.hg-list:has(.hg-listrow), .hg-checklist, section.hg-stack:has(> :is(.hg-list, .hg-checklist):last-child)) + .hg-addrow { margin-top: calc(0px - var(--pg, 0px)); }
+
+/* 3) 머리 하나(좁은 창): 맨 위 0, 높이 56, ‹ 칸 왼쪽 8(화면 옆 24에서 −16), 오른쪽 ⋯ 칸 끝 = 화면 오른쪽 8. 머리 아래 첫 상자까지 24 */
+@media (max-width: 767px) {
+  .hg-frame:not(.hg-frame--alt) .hg-body { padding-top: var(--gap-head); }
+  .hg-frame:not(.hg-frame--alt) .hg-body:has(> .hg-body__col:first-child > .hg-stack:first-child > .hg-pagehead:first-child),
+  .hg-frame:not(.hg-frame--alt) .hg-body:has(> .hg-body__col:first-child > .hg-stack:first-child > :is(.hg-form, .hg-page):first-child > .hg-pagehead:first-child),
+  .hg-frame:not(.hg-frame--alt) .hg-body:has(> .hg-body__col:first-child > .hg-noti--page:first-child) { padding-top: 0; }
+  .hg-pagehead { min-height: var(--head-h); }
+  .hg-pagehead > .hg-back { margin-left: -16px; }
+  .hg-pagehead > :last-child:not(.hg-pagehead__text):not(.hg-pagehead__icon):is(.hg-iconbtn, :has(> .hg-iconbtn:only-child)) { margin-right: -16px; }
+}
+.hg-frame .hg-body__col > .hg-stack > .hg-pagehead, .hg-form > .hg-pagehead { margin-bottom: calc(var(--gap-head) - var(--pg, 0px)); }
+.hg-form > .hg-pagehead + .hg-form__hero { margin-top: 0; }
+/* 큰 금액 머리(W-10, W-20b): 머리 아래 24에서 바로 이름표(위 여백 없음) */
+.hg-fdhero { padding-top: 0; }
+/* W-10 정보 줄(만든 날·만든 사람): 줄 높이 56(예전 48 + 위아래 12 = 72) */
+.hg-fdinfo { box-sizing: border-box; min-height: 56px; }
+/* W-01: 요약(범례 줄 40, 글자 22) → 띠, 묶음 끝 ‘+ … 추가’(원 32, 줄 48) → 띠도 같은 32 */
+.hg-planstage > .hg-plansum { padding-bottom: 0; }
+.hg-planstage > .hg-plansum + .hg-plancard { --prev-trail: calc((40px - 22px) / 2); }
+.hg-planstage > .hg-plancard + .hg-plancard { --prev-trail: var(--space-2); }
+.hg-planstage .hg-plancard > .hg-addrow { margin-bottom: 0; }  /* 묶음 끝 ‘+ … 추가’(줄 48, 원 32): 원 끝 → 띠 32는 위 --prev-trail 8이 맞춤 */
+/* 3) 사람 탭(알약 Tabs, W-01·W-02): 머리 → 탭 16, 탭 → 첫 내용 24. W-02 큰 금액 머리는 위 여백 없이 머리(또는 탭) 아래 24에서 */
+.hg-frame:not(.hg-frame--alt) :is(.hg-body__col > .hg-stack:first-child, .hg-body__col > .hg-stack:first-child > .hg-page:first-child) > .hg-tabs:first-child { margin-top: calc(var(--gap-sechead) - var(--gap-head)); }
+.hg-frame:not(.hg-frame--alt) .hg-tabs:has(+ *) { margin-bottom: 0; }
+.hg-frame:not(.hg-frame--alt) .hg-tabs + * { margin-top: calc(var(--gap-head) - var(--pg, 0px)); }
+.hg-w02hero { padding-top: 0; }
+.hg-w02hero__saved + * { margin-top: var(--space-4); }  /* W-02 다 확인: “저축·투자 n원 모았어요” → ‘공유하기’ 보이는 16(글자 버튼 누르는 칸은 음수 여백) */
+/* FormScreen(앱 틀 밖 한 화면 입력): 머리도 맨 위 0 */
+@media (max-width: 767px) { .hg-form { padding-top: 0; } }
+/* 6) 아래 고정 주 버튼: 버튼 아래 끝 → 화면 아래 16 + 안전 영역. 버튼이 있는 본문은 아래 여백 0(본문 여백이 바 아래에 또 붙지 않게) */
+.hg-stickybar { padding-bottom: calc(var(--gap-bottom-bar) + env(safe-area-inset-bottom, 0px)); }
+@media (max-width: 767px) { .hg-body:has(.hg-stickybar) { padding-bottom: 0; } }
+/* 5) 시트 안 옆 여백 24(화면과 같게). 좁은 창 시트는 화면 폭 그대로라 옆 테두리 없음 */
+@media (max-width: 767px) { .hg-scrim--sheet > .hg-sheet { padding-inline: var(--space-6); border-inline: 0; } }
+/* 6) 로그인·상태 화면(AuthLayout, 좁은 창·터치)도 아래 버튼 묶음 아래 끝 → 화면 아래 16 + 안전 영역(PIN·잠금은 키패드라 그대로) */
+@media (max-width: 767px), (hover: none), (pointer: coarse) { .hg-auth:not(:has(> .hg-lock)) { padding-bottom: calc(var(--gap-bottom-bar) + env(safe-area-inset-bottom, 0px)); } }
+/* 3) W-02 빈 상태(첫 사용 안내)도 머리 아래 24에서 바로 시작 */
+.hg-w02guide { padding-top: 0; }
