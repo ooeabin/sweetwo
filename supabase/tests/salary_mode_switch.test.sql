@@ -27,7 +27,7 @@ select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'hobby'), 'amount', 100000),
   jsonb_build_object('kind', 'fixed', 'amount', 880000),
-  jsonb_build_object('kind', 'living', 'amount', 880000),
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'amount', 350000)
 ), auth.uid());
 select public.start_checklist(auth.uid());
@@ -49,7 +49,7 @@ set local role authenticated;
 select public.complete_join(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', current_setting('test.home')::uuid, 'amount', 1070000),
   jsonb_build_object('kind', 'fixed', 'amount', 680000),
-  jsonb_build_object('kind', 'living', 'amount', 680000),
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 680000),
   jsonb_build_object('kind', 'allowance', 'amount', 270000)
 ));
 

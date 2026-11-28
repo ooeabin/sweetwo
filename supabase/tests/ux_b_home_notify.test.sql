@@ -40,10 +40,11 @@ select is((select body from public.notification where kind = 'partner_joined'), 
 update public.couple_space set salary_mode = 'joint', manager_user_id = '11111111-1111-1111-1111-111111111111',
   joint_cycle_day = 25 where id = current_setting('test.space')::uuid;
 insert into public.salary_split (space_id, owner_user_id, checklist_from) values (current_setting('test.space')::uuid, null, '2027-01-01');
-insert into public.split_line (split_id, space_id, kind, amount, sort, user_id, in_checklist, auto_pay)
-select s.id, s.space_id, v.kind::public.split_line_kind, v.amount, v.sort, v.uid, true, v.auto
+insert into public.split_line (split_id, space_id, kind, name, category, amount, sort, user_id, in_checklist, auto_pay)
+select s.id, s.space_id, v.kind::public.split_line_kind, case when v.kind = 'custom' then '식비' end,
+  case when v.kind = 'custom' then 'living' end, v.amount, v.sort, v.uid, true, v.auto
 from public.salary_split s,
-  (values ('fixed', 680000, 0, null::uuid, false), ('living', 880000, 1, null::uuid, false),
+  (values ('fixed', 680000, 0, null::uuid, false), ('custom', 880000, 1, null::uuid, false),
           ('send', 2400000, 2, '22222222-2222-2222-2222-222222222222'::uuid, true),
           ('allowance', 400000, 3, '22222222-2222-2222-2222-222222222222'::uuid, true)) v(kind, amount, sort, uid, auto)
 where s.space_id = current_setting('test.space')::uuid and s.owner_user_id is null;
@@ -118,7 +119,7 @@ update public.couple_space set salary_mode = 'separate' where id = current_setti
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 680000),
-  jsonb_build_object('kind', 'living', 'amount', 400000)), auth.uid());
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 400000)), auth.uid());
 select set_config('test.acc', public.propose_split('데이트 통장', 1000000, 'half')::text, true);
 reset role;
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');

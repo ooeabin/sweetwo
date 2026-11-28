@@ -5,7 +5,7 @@ import { checkRow, doneRow, goRow, skippedRow } from './w02-row';
 
 // QA 6구간(2026-11-12): W-02 다 끝난 달 한 줄(W-02 끝 없앰), 상대가 끝내도 이동 없음, 달성 되돌린 뒤 같은 화면 다시 축하,
 // W-02a Toast·되돌리기·뒤로, W-05 그 체크리스트만(옛 링크·기간 밖·끝난 사이클), W-05 Realtime 강조.
-// 찬우 350만 원 25일, 9월 월급(9.25 ~ 10.24): 청약 44만·내 집 마련 95만·고정지출 88만·생활비 88만·용돈 35만
+// 찬우 350만 원 25일, 9월 월급(9.25 ~ 10.24): 청약 44만·내 집 마련 95만·고정지출 88만·식비(생활비 묶음) 88만·용돈 35만
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 const REVIEW = new Date('2026-10-22T20:30:00+09:00');
 type Line = Record<string, unknown>;
@@ -120,16 +120,15 @@ test('W-02a 다른 금액: 저장하면 Toast + 되돌리기, 0원은 못 함 To
 }) => {
   const { db } = await open(page);
   await page.goto('/salary');
-  const living = () =>
-    linesOf(db).find((l) => l.kind === 'living' || (l.kind === 'custom' && l.name === '생활비'));
-  await page.locator('.hg-transfer__open', { hasText: '생활비' }).click();
+  const living = () => linesOf(db).find((l) => l.kind === 'custom' && l.name === '식비');
+  await page.locator('.hg-transfer__open', { hasText: '식비' }).click();
   await page.getByRole('button', { name: '다른 금액으로 했어요' }).click();
-  await expect(page.getByRole('heading', { name: '생활비, 이번 달은 얼마였어요?' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '식비, 이번 달은 얼마였어요?' })).toBeVisible();
   // 하드웨어(브라우저) 뒤로 = W-02
   await page.goBack();
   await expect(page.locator('.hg-datepill')).toHaveText('9월 25일 월급');
   await expect(page).toHaveURL(/\/salary$/);
-  await page.locator('.hg-transfer__open', { hasText: '생활비' }).click();
+  await page.locator('.hg-transfer__open', { hasText: '식비' }).click();
   await page.getByRole('button', { name: '다른 금액으로 했어요' }).click();
   const input = page.getByRole('textbox', { name: '얼마를 보냈어요?' });
   await input.fill('');

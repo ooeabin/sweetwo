@@ -144,17 +144,17 @@ const inIds = (url: URL) =>
 
 /** now: 화면 시계를 고정한 시각(첫 플랜을 만든 시각으로 씀) */
 /**
- * 서버 흉내(20270106090000_living_as_category, 2026-11-28): 생활비 기본 줄(kind living)은 없음.
- * 시드·테스트가 넣은 kind living 줄은 직접 추가 줄 ‘생활비’(묶음 living)로, 확인 목록 줄도 같은 이름으로
+ * 서버 흉내(20270107090000_drop_living_lines, 2026-11-28): kind living 줄은 없음(서버는 무시).
+ * 테스트가 직접 넣은 kind living 줄은 생활비 묶음 칩 줄 ‘식비’로 바꿔 둠(시드 호환), 확인 목록 줄도 같은 이름으로
  */
 function noLivingLines(db: MemDb) {
   for (const sp of db.splits)
     for (const l of sp.split_line)
       if (l.kind === 'living')
-        Object.assign(l, { kind: 'custom', name: l.name ?? '생활비', category: 'living' });
+        Object.assign(l, { kind: 'custom', name: l.name ?? '식비', category: 'living' });
   for (const c of db.checklists)
     for (const l of (c.pay_check_line as Record<string, unknown>[] | undefined) ?? [])
-      if (l.kind === 'living') Object.assign(l, { kind: 'custom', name: l.name ?? '생활비' });
+      if (l.kind === 'living') Object.assign(l, { kind: 'custom', name: l.name ?? '식비' });
 }
 
 export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Promise<MemDb> {

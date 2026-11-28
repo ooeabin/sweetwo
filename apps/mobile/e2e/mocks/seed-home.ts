@@ -3,12 +3,13 @@ import type { MemDb } from './app-db';
 
 // 홈·월급 e2e 공통 준비: 온보딩을 마친 찬우(혼자, 각자, 실수령 350만, 월급날 25일), 저금 항목 청약(목표 금액 없음)·내 집 마련,
 // 월급 계획과 9월 월급 체크리스트(9월 25일 ~ 10월 24일).
-const LINES: [string, string | null, number][] = [
-  ['saving', 'goal-e', 440_000],
-  ['saving', 'goal-h', 950_000],
-  ['fixed', null, 880_000],
-  ['living', null, 880_000],
-  ['allowance', null, 350_000],
+// 2026-11-28 생활비 기본 줄 없앰: 생활비 자리는 생활비 묶음 칩 줄 ‘식비’(직접 추가 줄, 묶음 living, 예전처럼 확인 목록 기본 끔은 아님)
+const LINES: [string, string | null, number, string | null][] = [
+  ['saving', 'goal-e', 440_000, null],
+  ['saving', 'goal-h', 950_000, null],
+  ['fixed', null, 880_000, null],
+  ['custom', null, 880_000, '식비'],
+  ['allowance', null, 350_000, null],
 ];
 
 /** 온보딩을 마친 찬우: 저금 항목(청약, 내 집 마련), 월급 계획, 9월 월급 체크리스트 */
@@ -69,15 +70,16 @@ export function seed(db: MemDb) {
     goal('goal-e', '청약', 0, null, null),
     goal('goal-h', '내 집 마련', 1, 150_000_000, '2031-10-01'),
   );
-  const split_line = LINES.map(([kind, goal_id, amount], i) => ({
+  const split_line = LINES.map(([kind, goal_id, amount, name], i) => ({
     id: `split-1-line-${i}`,
     split_id: 'split-1',
     kind,
     goal_id,
     user_id: kind === 'allowance' ? chanwoo.id : null,
-    name: null,
+    name,
     amount,
     sort: i,
+    category: name ? 'living' : null,
   }));
   db.splits.push({ id: 'split-1', owner_user_id: chanwoo.id, split_line });
   db.checklists.push({

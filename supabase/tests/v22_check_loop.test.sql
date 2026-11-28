@@ -21,14 +21,14 @@ $$;
 create function pg_temp.sl(p_owner uuid, k text, g text default null) returns uuid language sql as $$
   select l.id from public.split_line l join public.salary_split s on s.id = l.split_id
   left join public.goal x on x.id = l.goal_id
-  where s.owner_user_id is not distinct from p_owner and (case when l.kind = 'custom' and l.name = '생활비' then 'living' else l.kind::text end) = k and (g is null or x.name = g) limit 1;
+  where s.owner_user_id is not distinct from p_owner and (case when l.kind = 'custom' and l.name = '식비' then 'living' else l.kind::text end) = k and (g is null or x.name = g) limit 1;
 $$;
 create function pg_temp.cl(p_owner uuid, p_start date) returns uuid language sql as $$
   select id from public.pay_checklist where owner_user_id is not distinct from p_owner and cycle_start = p_start;
 $$;
 create function pg_temp.line(list uuid, k text, g text default null) returns uuid language sql as $$
   select l.id from public.pay_check_line l left join public.goal x on x.id = l.goal_id
-  where l.checklist_id = list and (case when l.kind = 'custom' and l.name = '생활비' then 'living' else l.kind::text end) = k and (g is null or x.name = g) limit 1;
+  where l.checklist_id = list and (case when l.kind = 'custom' and l.name = '식비' then 'living' else l.kind::text end) = k and (g is null or x.name = g) limit 1;
 $$;
 
 -- ── 찬우: 월급 계획 ──
@@ -46,7 +46,7 @@ select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'trip'), 'amount', 500000),
   jsonb_build_object('kind', 'fixed', 'amount', 680000),
-  jsonb_build_object('kind', 'living', 'amount', 880000),
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'amount', 350000)
 ), auth.uid());
 
@@ -71,7 +71,7 @@ select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'trip'), 'amount', 500000),
   jsonb_build_object('kind', 'fixed', 'amount', 700000),
-  jsonb_build_object('kind', 'living', 'amount', 880000),
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'amount', 350000)
 ), auth.uid());
 select is((select auto_pay || ':' || auto_day from public.split_line where id = pg_temp.sl(auth.uid(), 'fixed')), 'true:26',
@@ -189,7 +189,7 @@ insert into public.goal (space_id, template, name, kind, priority, target_amount
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'rainy'), 'amount', 500000,
     'auto_pay', true),
-  jsonb_build_object('kind', 'living', 'amount', 1000000)), auth.uid());
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 1000000)), auth.uid());
 select is(public.start_checklist(auth.uid()), null, '⑦ 날짜 없음 → 확인 목록 없음');
 reset role;
 select is(public.cycle_day((select space_id from public.app_user where id = '33333333-3333-3333-3333-333333333333'),

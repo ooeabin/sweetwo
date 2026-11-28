@@ -20,7 +20,7 @@ create function pg_temp.cl(p_owner uuid, p_start date) returns uuid language sql
 $$;
 create function pg_temp.line(list uuid, k text, g text default null) returns uuid language sql as $$
   select l.id from public.pay_check_line l left join public.goal x on x.id = l.goal_id
-  where l.checklist_id = list and (case when l.kind = 'custom' and l.name = '생활비' then 'living' else l.kind::text end) = k and (g is null or x.name = g) limit 1;
+  where l.checklist_id = list and (case when l.kind = 'custom' and l.name = '식비' then 'living' else l.kind::text end) = k and (g is null or x.name = g) limit 1;
 $$;
 create function pg_temp.autos(p_owner uuid) returns integer language sql as $$
   select count(*)::int from public.money_in where owner_user_id = p_owner and source = 'payday_auto' and deleted_at is null;

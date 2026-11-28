@@ -32,9 +32,9 @@ select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'custom', 'name', '헬스장', 'amount', 50000)
 ), auth.uid());
 
--- 2026-11-28: 생활비 기본 줄은 없음. 옛 앱이 보낸 kind living은 직접 추가 줄 ‘생활비’(묶음 living)로 들어감
+-- 2026-11-28: 옛 앱이 보낸 kind living은 무시(줄을 만들지 않음)
 select is((select count(*)::int from public.split_line where kind = 'living'), 0, 'kind living 줄은 만들어지지 않음');
-select is(pg_temp.cat('생활비'), 'living', 'kind living은 직접 추가 줄 생활비(묶음 living)로');
+select is((select count(*)::int from public.split_line where kind = 'custom' and name = '생활비'), 0, 'kind living은 무시(생활비 줄도 없음)');
 select is(pg_temp.cat('식비'), 'living', 'save_split: 넘긴 묶음 저장');
 select is(pg_temp.cat('헬스장'), null, '묶음 없이 넣은 직접 추가 줄은 null');
 select is((select category from public.split_line where kind = 'allowance'), null, '용돈 줄은 묶음 없음');
@@ -69,7 +69,7 @@ select is(pg_temp.cat('헬스장'), 'family', 'split_line_set: 묶음 바꿈');
 -- 한도 20: 19줄까지 더 넣고(직접 추가 20줄), 21번째는 막힘
 select lives_ok($$
   select public.split_line_add(pg_temp.split(auth.uid()), 'custom', 10000, '항목' || g, null, null, null)
-  from generate_series(1, 15) g $$, '직접 추가 줄 20줄까지');
+  from generate_series(1, 16) g $$, '직접 추가 줄 20줄까지');
 select is((select count(*)::int from public.split_line where kind = 'custom'), 20, '직접 추가 줄 20줄');
 select throws_ok(
   $$ select public.split_line_add(pg_temp.split(auth.uid()), 'custom', 10000, '항목21') $$,
@@ -77,14 +77,14 @@ select throws_ok(
 select set_config('test.code', (select code from public.create_invite()), true);
 reset role;
 
--- 관리 형태 각자 → 합쳐서: 직접 추가 줄 묶음 보존(같은 이름은 바꾼 사람 것 먼저), 생활비 기본 줄은 living
+-- 관리 형태 각자 → 합쳐서: 직접 추가 줄 묶음 보존(같은 이름은 바꾼 사람 것 먼저)
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 3000000, payday = 10 where id = auth.uid();
 select public.complete_join(jsonb_build_array(
-  jsonb_build_object('kind', 'living', 'amount', 300000),
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 300000),
   jsonb_build_object('kind', 'allowance', 'amount', 300000),
   jsonb_build_object('kind', 'custom', 'name', '카페', 'amount', 50000)
 ));
@@ -94,9 +94,9 @@ select public.set_salary_mode('joint');
 select is((select category from public.split_line l join public.salary_split s on s.id = l.split_id
   where s.owner_user_id is null and l.kind = 'custom' and l.name = '월세'), 'housing', '합쳐서로 옮겨도 묶음 보존');
 select is((select category from public.split_line l join public.salary_split s on s.id = l.split_id
-  where s.owner_user_id is null and l.kind = 'custom' and l.name = '생활비'), 'living', '합친 생활비 줄(직접 추가 줄, 같은 이름끼리 더함)은 living');
+  where s.owner_user_id is null and l.kind = 'custom' and l.name = '식비'), 'living', '합친 식비 줄(같은 이름끼리 더함)은 living');
 select is((select amount from public.split_line l join public.salary_split s on s.id = l.split_id
-  where s.owner_user_id is null and l.kind = 'custom' and l.name = '생활비'), 700000::bigint, '생활비 40만 + 30만');
+  where s.owner_user_id is null and l.kind = 'custom' and l.name = '식비'), 1000000::bigint, '식비 70만(찬우) + 30만(예빈)');
 
 select * from finish();
 rollback;

@@ -26,7 +26,7 @@ insert into public.goal (space_id, template, name, kind, priority)
   select space_id, 'home', '내 집 마련', 'once', 1 from public.app_user where id = auth.uid();
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
-  jsonb_build_object('kind', 'living', 'amount', 880000)
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000)
 ), auth.uid());
 insert into public.asset (space_id, side, grp, kind, name, amount, owner, owner_user_id, maturity_date)
   select space_id, 'asset', 'deposit', 'term_deposit', '결혼자금 적금', 10000000, 'person', auth.uid(), '2027-05-24'
@@ -45,7 +45,7 @@ set local role authenticated;
 select public.complete_join(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', current_setting('test.home')::uuid, 'amount', 1070000),
   jsonb_build_object('kind', 'fixed', 'amount', 680000),
-  jsonb_build_object('kind', 'living', 'amount', 680000),
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 680000),
   jsonb_build_object('kind', 'allowance', 'amount', 270000)
 ));
 reset role;

@@ -38,7 +38,7 @@ select set_config('test.split', public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'emergency'), 'amount', 440000),
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
   jsonb_build_object('kind', 'fixed', 'amount', 880000),
-  jsonb_build_object('kind', 'living', 'amount', 880000),
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'amount', 350000),
   jsonb_build_object('kind', 'custom', 'name', '부모님 용돈', 'amount', 0)
 ), auth.uid())::text, true);

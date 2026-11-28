@@ -35,7 +35,7 @@ test('토스트가 아래 고정 주 버튼 위에 뜸: W-02 줄 확인 두 번(
   );
   expect(parseInt(barH, 10)).toBeGreaterThan(40);
 
-  await page.locator('.hg-transfer__open', { hasText: '생활비' }).click();
+  await page.locator('.hg-transfer__open', { hasText: '식비' }).click();
   await page.getByRole('button', { name: '다른 금액으로 했어요' }).click();
   await page.getByRole('textbox', { name: '얼마를 보냈어요?' }).fill('700000');
   await page.getByRole('button', { name: '다음' }).click();
