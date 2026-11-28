@@ -226,7 +226,7 @@ test('W-01 연결 해제 대기 중이면 보기만', async ({ page }) => {
   await expect(
     page.getByText('연결 해제를 기다리는 동안에는 월급 계획을 고칠 수 없어요'),
   ).toBeVisible();
-  await expect(page.getByRole('button', { name: /^고정지출/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^공과금/ })).toHaveCount(0);
   for (const n of ['+ 지출 추가', '+ 저축·투자 추가'])
     await expect(page.getByRole('button', { name: n, exact: true })).toHaveCount(0);
   const items = await planItems(page);

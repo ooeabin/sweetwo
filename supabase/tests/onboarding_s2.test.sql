@@ -25,7 +25,7 @@ update public.app_user set monthly_income = 3500000,
   payday = case when extract(day from public.kst_today()) >= 20 then 5 else 25 end where id = auth.uid();
 
 -- 1) 온보딩 중 다시 만들기: 지우고 새로 저장 → 체크리스트도 새 월급날로
-select public.save_split('[{"kind":"fixed","amount":880000},{"kind":"custom","name":"식비","category":"living","in_checklist":false,"amount":880000}]'::jsonb, auth.uid());
+select public.save_split('[{"kind":"custom","name":"공과금","category":"housing","amount":880000},{"kind":"custom","name":"식비","category":"living","in_checklist":false,"amount":880000}]'::jsonb, auth.uid());
 select is(public.start_checklist(auth.uid()), null::uuid,
   'v2.2(D1): 온보딩 중 이미 시작한 사이클 목록은 만들지 않음(첫 월급날부터)');
 select pg_temp.no_backdate();
@@ -35,7 +35,7 @@ select public.onboarding_reset_plan();
 select is((select count(*) from public.salary_split), 0::bigint, '온보딩 중이면 월급 계획을 지움');
 select is((select count(*) from public.pay_checklist), 0::bigint, '체크리스트도 지움');
 update public.app_user set payday = 10 where id = auth.uid();
-select public.save_split('[{"kind":"fixed","amount":1250000}]'::jsonb, auth.uid());
+select public.save_split('[{"kind":"custom","name":"공과금","category":"housing","amount":1250000}]'::jsonb, auth.uid());
 select pg_temp.no_backdate();
 select public.start_checklist(auth.uid());
 select is((select count(*) from public.pay_checklist), 1::bigint, '다시 하나');

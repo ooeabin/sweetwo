@@ -77,9 +77,9 @@ export const receiptAutoNote = (
 export const nextDayOf = (base: BaseDay | null): number | null =>
   base === null ? null : base === 'last' || base >= 31 ? 1 : base + 1;
 
-/** W-01d 목록에 나오는 줄(20 W-01d 2번): 저금, 고정지출, 같이 쓰는 통장 */
+/** W-01d 목록에 나오는 줄(20 W-01d 2번): 저금, 직접 추가 지출(2026-11-28 고정지출 기본 줄 대신), 같이 쓰는 통장 */
 export const autoPickable = (l: Pick<SplitLine, 'kind'>) =>
-  l.kind === 'saving' || l.kind === 'fixed' || l.kind === 'shared_account';
+  l.kind === 'saving' || l.kind === 'custom' || l.kind === 'shared_account';
 
 /** 확인 목록 이름(07 1장 “10월 25일 월급”): 사이클 시작일 */
 export const cycleName = (start: string) => copy.cycleOf(start);

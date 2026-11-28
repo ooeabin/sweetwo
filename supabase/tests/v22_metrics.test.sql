@@ -33,7 +33,7 @@ insert into public.goal (space_id, template, name, kind, priority, target_amount
   select space_id, 'home', '내 집 마련', 'once', 1, 100000000 from public.app_user where id = auth.uid();
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
-  jsonb_build_object('kind', 'fixed', 'amount', 680000)
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000)
 ), auth.uid());
 select set_config('test.code', (select code from public.create_invite()), true);
 reset role;
@@ -68,10 +68,10 @@ select is(pg_temp.yorder(), 'allowance,send', '보내요: 보내기 줄은 뒤')
 update public.split_line set auto_day = 15 where kind = 'send';
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select public.save_split('[{"kind":"allowance","amount":350000},{"kind":"fixed","amount":100000},{"kind":"custom","name":"식비","category":"living","in_checklist":false,"amount":50000}]'::jsonb,
+select public.save_split('[{"kind":"allowance","amount":350000},{"kind":"custom","name":"공과금","category":"housing","amount":100000},{"kind":"custom","name":"식비","category":"living","in_checklist":false,"amount":50000}]'::jsonb,
   auth.uid());
 reset role;
-select is(pg_temp.yorder(), 'allowance,fixed,custom,send', '각자 save_split 뒤에도 보내기 줄은 맨 뒤(예전 sort 0으로 맨 위)');
+select is(pg_temp.yorder(), 'allowance,custom,custom,send', '각자 save_split 뒤에도 보내기 줄은 맨 뒤(예전 sort 0으로 맨 위)');
 select is((select count(distinct sort)::int from public.split_line l join public.salary_split s on s.id = l.split_id
   where s.owner_user_id = '22222222-2222-2222-2222-222222222222'), 4, '순서 번호가 겹치지 않음');
 select results_eq($$ select amount, auto_day, in_checklist, auto_pay from public.split_line where kind = 'send' $$,
@@ -92,12 +92,12 @@ insert into public.pay_check_line (id, checklist_id, space_id, kind, goal_id, pl
   ('d0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', current_setting('test.sp')::uuid,
    'saving', (select id from public.goal where template = 'home'), 950000, 0, false, null, 'wait'),
   ('d0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001', current_setting('test.sp')::uuid,
-   'fixed', null, 680000, 1, true, public.kst_today(), 'wait'),
+   'custom', null, 680000, 1, true, public.kst_today(), 'wait'),
   ('d0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000002', current_setting('test.sp')::uuid,
-   'fixed', null, 100000, 0, false, null, 'wait');
+   'custom', null, 100000, 0, false, null, 'wait');
 select ok(public.auto_confirm_due_lines(public.kst_today()) >= 1, '자동 줄 나가는 날 확인');
 select results_eq($$ select user_id, props from public.server_event where name = 'auto_line_confirmed' $$,
-  $$ values ('11111111-1111-1111-1111-111111111111'::uuid, '{"kind": "fixed"}'::jsonb) $$, 'auto_line_confirmed {kind}');
+  $$ values ('11111111-1111-1111-1111-111111111111'::uuid, '{"kind": "custom"}'::jsonb) $$, 'auto_line_confirmed {kind}');
 -- 사람이 다시 확인한 줄은 이벤트 없음
 update public.pay_check_line set state = 'wait' where id = 'd0000000-0000-0000-0000-000000000002';
 update public.pay_check_line set state = 'checked', checked_by = '11111111-1111-1111-1111-111111111111', actual = 700000
@@ -106,7 +106,7 @@ select is(pg_temp.ev('auto_line_confirmed'), 1::bigint, '사람이 확인하면 
 -- 날짜 없는 사람의 자동 저금(goal_move auto)
 insert into public.goal_move (space_id, goal_id, kind, amount, reason_code, auto_line_id, auto_on)
   select current_setting('test.solo')::uuid, g.id, 'in', 100000, 'auto',
-    (select id from public.split_line where kind = 'fixed' limit 1), public.kst_today()
+    (select id from public.split_line where kind = 'custom' and name = '공과금' limit 1), public.kst_today()
   from public.goal g where g.template = 'trip';
 select is(pg_temp.ev('auto_line_confirmed'), 2::bigint, '날짜 없는 자동 저금도 auto_line_confirmed {saving}');
 -- 진행 소식

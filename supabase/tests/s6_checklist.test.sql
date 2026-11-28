@@ -17,7 +17,7 @@ create function pg_temp.login_as(uid uuid) returns void language sql as $$
 $$;
 create function pg_temp.line(owner uuid, k text) returns uuid language sql as $$
   select l.id from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
-  where c.owner_user_id = owner and c.cycle_start >= '2027-03-01' and c.cycle_start < '2027-04-01' and (case when l.kind = 'custom' and l.name = '식비' then 'living' else l.kind::text end) = k limit 1;
+  where c.owner_user_id = owner and c.cycle_start >= '2027-03-01' and c.cycle_start < '2027-04-01' and (case when l.kind = 'custom' and l.name = '식비' then 'living' when l.kind = 'custom' and l.name = '공과금' then 'fixed' else l.kind::text end) = k limit 1;
 $$;
 
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
@@ -42,7 +42,7 @@ select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 2700000, payday = 10 where id = auth.uid();
 set local role authenticated;
 select public.complete_join(jsonb_build_array(
-  jsonb_build_object('kind', 'fixed', 'amount', 680000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000),
   jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 680000)
 ));
 reset role;

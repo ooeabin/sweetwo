@@ -88,7 +88,7 @@ import { toDraft } from '../split-editor';
 // from: W-10 ‘매달 금액 바꾸기’(?line=)로 연 시트(분석 entry saving_detail, 주소의 line은 열자마자 지움)
 type Sheet = { line: SplitLine; from?: 'saving_detail' } | { income: true } | null;
 type Kind = SplitLine['kind'];
-const DEFAULT_KINDS: Kind[] = ['fixed', 'allowance']; // 2026-11-28 생활비 기본 줄 없앰
+const DEFAULT_KINDS: Kind[] = ['allowance']; // 2026-11-28 생활비·고정지출 기본 줄 없앰
 const MAX_CUSTOM = 20; // 직접 추가 줄 한도(2026-11-27 10 → 20, 서버 too_many_custom)
 
 // W-01 월급 계획 영수증(20 W-01, 2026-11-09). 별도 화면(/salary/plan, 2026-11-18 구간 탭 없앰).
@@ -1053,7 +1053,7 @@ export function W01Receipt() {
     !edit &&
     canEdit &&
     !notManager &&
-    !spendLines.some((l) => l.kind === 'fixed' || l.kind === 'living' || l.kind === 'custom');
+    !spendLines.some((l) => l.kind === 'custom');
   if (spendEmpty && !spendAsk) setSpendAsk(true);
   // 줄이 하나도 없으면(저축·투자도 지출도 0개, 월급 금액과 상관없이) 맨 아래 ‘편집하기’·‘공유하기’·‘추천값으로 다시 채우기’를 숨김(2026-11-19 사용자 결정)
   const planEmpty = savingLines.length === 0 && spendLines.length === 0 && !proposalRow;

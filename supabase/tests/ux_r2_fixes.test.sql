@@ -20,7 +20,7 @@ select public.ensure_my_space();
 update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 10 where id = auth.uid();
 select is(public.request_mode_change(true, true, 'me'), 'applied', '혼자면 바로');
 select public.save_split(jsonb_build_array(
-  jsonb_build_object('kind', 'fixed', 'amount', 1000000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 1000000),
   jsonb_build_object('kind', 'allowance', 'amount', 300000, 'user_id', '11111111-1111-1111-1111-111111111111')), null);
 select set_config('test.code', (select code from public.create_invite()), true);
 reset role;

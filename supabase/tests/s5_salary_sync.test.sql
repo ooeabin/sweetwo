@@ -35,7 +35,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
 update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 25 where id = auth.uid();
 select public.save_split(jsonb_build_array(
-  jsonb_build_object('kind', 'fixed', 'amount', 880000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 880000),
   jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'amount', 350000),
   jsonb_build_object('kind', 'custom', 'name', '관리비', 'amount', 150000),
@@ -50,14 +50,14 @@ select public.add_saving_item('청약', 440000);
 select public.add_saving_item('여행', 300000);
 select public.add_saving_item('적금', 200000, 1000000);
 select cmp_ok(pg_temp.ver(auth.uid()), '>', current_setting('test.v')::integer, '저금 추가: 월급 계획 version 올림');
-select is(pg_temp.order_of(auth.uid()), '청약,여행,적금,fixed,식비,allowance,관리비,통신비', '새 저금은 저금 묶음 맨 아래');
+select is(pg_temp.order_of(auth.uid()), '청약,여행,적금,공과금,식비,allowance,관리비,통신비', '새 저금은 저금 묶음 맨 아래');
 
 -- S5-09: 가운데 저금 ‘그만 모음’ → 되돌리기 = 원래 자리, 원래 금액
 select public.saving_item_stop(pg_temp.item('여행'));
-select is(pg_temp.order_of(auth.uid()), '청약,적금,fixed,식비,allowance,관리비,통신비', '그만 모으면 줄이 빠짐');
+select is(pg_temp.order_of(auth.uid()), '청약,적금,공과금,식비,allowance,관리비,통신비', '그만 모으면 줄이 빠짐');
 select set_config('test.v', pg_temp.ver(auth.uid())::text, true);
 select public.saving_item_reopen(pg_temp.item('여행'));
-select is(pg_temp.order_of(auth.uid()), '청약,여행,적금,fixed,식비,allowance,관리비,통신비', '되돌리면 원래 자리');
+select is(pg_temp.order_of(auth.uid()), '청약,여행,적금,공과금,식비,allowance,관리비,통신비', '되돌리면 원래 자리');
 select is((select amount from public.split_line where goal_id = pg_temp.item('여행')), 300000::bigint, '되돌리면 원래 금액');
 select cmp_ok(pg_temp.ver(auth.uid()), '>', current_setting('test.v')::integer, '되돌리기: version 올림');
 select is((select count(*)::int from public.split_line where split_id = (select id from public.salary_split where owner_user_id = auth.uid()))
@@ -83,7 +83,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 2700000, payday = 10 where id = auth.uid();
 select public.complete_join(jsonb_build_array(
-  jsonb_build_object('kind', 'fixed', 'amount', 680000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000),
   jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 680000),
   jsonb_build_object('kind', 'allowance', 'amount', 270000),
   jsonb_build_object('kind', 'custom', 'name', '관리비', 'amount', 50000),

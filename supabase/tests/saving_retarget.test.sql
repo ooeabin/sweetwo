@@ -31,7 +31,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
 update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 25 where id = auth.uid();
 select public.save_split(jsonb_build_array(
-  jsonb_build_object('kind', 'fixed', 'amount', 880000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 880000),
   jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'amount', 350000)
 ), auth.uid());

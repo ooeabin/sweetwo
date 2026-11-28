@@ -23,7 +23,7 @@ $$;
 create function pg_temp.sl(o uuid, k text, n text default null) returns uuid language sql as $$
   select l.id from public.split_line l join public.salary_split s on s.id = l.split_id
   left join public.goal g on g.id = l.goal_id
-  where s.owner_user_id is not distinct from o and (case when l.kind = 'custom' and l.name = '식비' then 'living' else l.kind::text end) = k
+  where s.owner_user_id is not distinct from o and (case when l.kind = 'custom' and l.name = '식비' then 'living' when l.kind = 'custom' and l.name = '공과금' then 'fixed' else l.kind::text end) = k
     and (n is null or l.name = n or g.name = n) limit 1;
 $$;
 create function pg_temp.split(o uuid) returns uuid language sql as $$
@@ -33,7 +33,7 @@ $$;
 create function pg_temp.cl(o uuid, k text, n text default null) returns table (state text, planned bigint) language sql as $$
   select x.state, x.planned from public.pay_check_line x join public.pay_checklist c on c.id = x.checklist_id
   left join public.goal g on g.id = x.goal_id
-  where c.owner_user_id is not distinct from o and (case when x.kind = 'custom' and x.name = '식비' then 'living' else x.kind::text end) = k and (n is null or x.name = n or g.name = n)
+  where c.owner_user_id is not distinct from o and (case when x.kind = 'custom' and x.name = '식비' then 'living' when x.kind = 'custom' and x.name = '공과금' then 'fixed' else x.kind::text end) = k and (n is null or x.name = n or g.name = n)
     and c.cycle_start <= public.kst_today() and c.cycle_end >= public.kst_today()
   order by x.state;
 $$;
@@ -50,7 +50,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
 update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 25 where id = auth.uid();
 select public.save_split(jsonb_build_array(
-  jsonb_build_object('kind', 'fixed', 'amount', 880000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 880000),
   jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'in_checklist', true, 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'in_checklist', true, 'amount', 350000)
 ), auth.uid());
@@ -59,7 +59,7 @@ select public.start_checklist(auth.uid());
 select public.add_saving_item('청약', 440000);
 select public.add_saving_item('내 집 마련', 950000);
 select set_config('test.code', (select code from public.create_invite()), true);
-select is(pg_temp.order_of(auth.uid()), '청약,내 집 마련,fixed,식비,allowance', '저금 줄(만든 순서) → 지출 줄');
+select is(pg_temp.order_of(auth.uid()), '청약,내 집 마련,공과금,식비,allowance', '저금 줄(만든 순서) → 지출 줄');
 
 -- 줄 하나 금액(생활비 88만 → 80만): 월급 계획 + 이번 달 체크 안 한 줄
 select set_config('test.v', (select version::text from public.salary_split where id = pg_temp.split(auth.uid())), true);
@@ -71,11 +71,11 @@ select ok((select version > current_setting('test.v')::int and updated_by = auth
   from public.salary_split where id = pg_temp.split(auth.uid())), '고친 사람·버전(Realtime 신호)');
 select throws_ok(format('select public.split_line_set(%L, 15000)', pg_temp.sl(auth.uid(), 'living')), '22023', 'bad_amount',
   '1만 원 단위');
-select throws_ok(format('select public.split_line_set(%L, null, %L)', pg_temp.sl(auth.uid(), 'fixed'), '집세'), '22023', 'bad_name',
-  '기본 줄 이름은 그대로');
+select throws_ok(format('select public.split_line_set(%L, null, %L)', pg_temp.sl(auth.uid(), 'allowance'), '집세'), '22023', 'bad_name',
+  '기본 줄(용돈) 이름은 그대로');
 
 -- 체크한 줄은 그대로(고정지출 체크 → 90만으로 바꿈)
-select public.check_pay_line((select x.id from public.pay_check_line x where x.kind = 'fixed'
+select public.check_pay_line((select x.id from public.pay_check_line x where (x.kind = 'custom' and x.name = '공과금')
   and x.space_id = (select space_id from public.app_user where id = auth.uid())), 'checked');
 select public.split_line_set(pg_temp.sl(auth.uid(), 'fixed'), 900000);
 select results_eq($$ select * from pg_temp.cl(auth.uid(), 'fixed') $$, $$ values ('checked', 880000::bigint) $$,
@@ -84,13 +84,13 @@ select results_eq($$ select * from pg_temp.cl(auth.uid(), 'fixed') $$, $$ values
 -- 지출 줄 추가(관리비 10만): 지출 묶음 맨 아래 + 이번 달 체크 안 한 줄
 select lives_ok(format('select public.split_line_add(%L, %L, 100000, %L)', pg_temp.split(auth.uid()), 'custom', '관리비'),
   '직접 추가 줄');
-select is(pg_temp.order_of(auth.uid()), '청약,내 집 마련,fixed,식비,allowance,관리비', '지출 묶음 맨 아래');
+select is(pg_temp.order_of(auth.uid()), '청약,내 집 마련,공과금,식비,allowance,관리비', '지출 묶음 맨 아래');
 select results_eq($$ select * from pg_temp.cl(auth.uid(), 'custom', '관리비') $$, $$ values ('wait', 100000::bigint) $$,
   '이번 달 체크리스트에도');
 select throws_ok(format('select public.split_line_add(%L, %L, 0, %L)', pg_temp.split(auth.uid()), 'custom', '관리비'),
   '22023', 'duplicate_line', '같은 이름 없음');
 select throws_ok(format('select public.split_line_add(%L, %L, 0)', pg_temp.split(auth.uid()), 'fixed'),
-  '22023', 'duplicate_line', '고정지출은 하나');
+  '22023', 'bad_kind', '고정지출 기본 줄은 없음(2026-11-28)');
 select throws_ok(format('select public.split_line_add(%L, %L, 0)', pg_temp.split(auth.uid()), 'saving'),
   '22023', 'bad_kind', '저금 줄은 add_saving_item으로');
 select throws_ok(format('select public.split_line_add(%L, %L, 0, %L)', pg_temp.split(auth.uid()), 'custom', ''),
@@ -109,10 +109,10 @@ select lives_ok(format('select public.split_reorder(%L, %L::uuid[])', pg_temp.sp
   pg_temp.sl(auth.uid(), 'saving', '내 집 마련'), pg_temp.sl(auth.uid(), 'saving', '청약'),
   pg_temp.sl(auth.uid(), 'allowance'), pg_temp.sl(auth.uid(), 'fixed'), pg_temp.sl(auth.uid(), 'living'),
   pg_temp.sl(auth.uid(), 'custom', '아파트 관리비')]), '순서 바꾸기');
-select is(pg_temp.order_of(auth.uid()), '내 집 마련,청약,allowance,fixed,식비,아파트 관리비', '새 순서');
+select is(pg_temp.order_of(auth.uid()), '내 집 마련,청약,allowance,공과금,식비,아파트 관리비', '새 순서');
 select is((select string_agg(coalesce(g.name, x.name, x.kind::text), ',' order by x.sort)
   from public.pay_check_line x join public.pay_checklist c on c.id = x.checklist_id left join public.goal g on g.id = x.goal_id
-  where c.owner_user_id = auth.uid()), '내 집 마련,청약,allowance,fixed,식비,관리비', '이번 달 체크리스트도(체크한 줄 포함)');
+  where c.owner_user_id = auth.uid()), '내 집 마련,청약,allowance,공과금,식비,관리비', '이번 달 체크리스트도(체크한 줄 포함)');
 select throws_ok(format('select public.split_reorder(%L, %L::uuid[])', pg_temp.split(auth.uid()), array[
   pg_temp.sl(auth.uid(), 'saving', '청약')]), '22023', 'bad_lines', '모든 줄이 있어야 함');
 select throws_ok(format('select public.split_reorder(%L, %L::uuid[])', pg_temp.split(auth.uid()), array[
@@ -148,7 +148,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 2700000, payday = 10 where id = auth.uid();
 select public.complete_join(jsonb_build_array(
-  jsonb_build_object('kind', 'fixed', 'amount', 680000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000),
   jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 680000),
   jsonb_build_object('kind', 'allowance', 'amount', 270000)
 ));
@@ -203,7 +203,7 @@ select lives_ok(format('select public.split_line_add(%L, %L, 300000, %L)', pg_te
 -- 합쳐서 → 각자: 공동에 고정지출이 없으면 각자에도 없음, 용돈은 사람마다
 reset role; select public.set_salary_mode('separate'); set local role authenticated; -- 앱 역할은 못 부름(20261205090000)
 select is((select count(*)::int from public.split_line l join public.salary_split s on s.id = l.split_id
-  where s.space_id = (select space_id from public.app_user where id = auth.uid()) and l.kind = 'fixed'), 0,
+  where s.space_id = (select space_id from public.app_user where id = auth.uid()) and (l.kind = 'custom' and l.name = '공과금')), 0,
   '없는 고정지출은 각자에도 없음');
 select is((select count(*)::int from public.split_line l join public.salary_split s on s.id = l.split_id
   where s.owner_user_id is not null and l.kind = 'allowance' and l.user_id = s.owner_user_id), 2, '용돈은 자기 월급 계획으로');

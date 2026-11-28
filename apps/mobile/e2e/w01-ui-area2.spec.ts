@@ -18,8 +18,8 @@ async function open(page: Page, url: string, h = 640) {
 test('줄 고치기 시트가 낮은 화면보다 길어도 ‘확인’은 화면 안(본문만 스크롤)', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' }); // 올라오는 움직임이 끝난 자리로 잼
   await open(page, '/salary/plan', 420);
-  await page.getByRole('button', { name: /^고정지출/ }).click();
-  const sheet = page.getByRole('dialog', { name: '고정지출 금액' });
+  await page.getByRole('button', { name: /^공과금/ }).click();
+  const sheet = page.getByRole('dialog', { name: '공과금 금액' });
   await expect(sheet).toBeVisible();
   const ok = sheet.getByRole('button', { name: '확인', exact: true });
   await expect(ok).toBeVisible();
@@ -165,9 +165,9 @@ test('순서 바꾸기(2026-11-26): 줄 지우기 버튼 없음, 머리 오른�
 
 test('금액 시트의 빨간 버튼은 “항목 지우기”', async ({ page }) => {
   await open(page, '/salary/plan');
-  await page.getByRole('button', { name: /^고정지출/ }).click();
-  const sheet = page.getByRole('dialog', { name: '고정지출 금액' });
-  const del = sheet.getByRole('button', { name: '고정지출 항목 지우기' });
+  await page.getByRole('button', { name: /^공과금/ }).click();
+  const sheet = page.getByRole('dialog', { name: '공과금 금액' });
+  const del = sheet.getByRole('button', { name: '공과금 항목 지우기' });
   await expect(del).toBeVisible();
   await expect(del).toHaveText('항목 지우기');
   await expect(sheet.getByText('줄 지우기')).toHaveCount(0);

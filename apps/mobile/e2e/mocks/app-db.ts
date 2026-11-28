@@ -145,16 +145,19 @@ const inIds = (url: URL) =>
 /** now: 화면 시계를 고정한 시각(첫 플랜을 만든 시각으로 씀) */
 /**
  * 서버 흉내(20270107090000_drop_living_lines, 2026-11-28): kind living 줄은 없음(서버는 무시).
- * 테스트가 직접 넣은 kind living 줄은 생활비 묶음 칩 줄 ‘식비’로 바꿔 둠(시드 호환), 확인 목록 줄도 같은 이름으로
+ * 테스트가 직접 넣은 kind living·fixed 줄은 칩 줄 ‘식비’(생활비)·‘공과금’(주거)으로 바꿔 둠(시드 호환, 2026-11-28 고정지출도 없앰), 확인 목록 줄도 같은 이름으로
  */
 function noLivingLines(db: MemDb) {
   for (const sp of db.splits)
     for (const l of sp.split_line)
       if (l.kind === 'living')
         Object.assign(l, { kind: 'custom', name: l.name ?? '식비', category: 'living' });
+      else if (l.kind === 'fixed')
+        Object.assign(l, { kind: 'custom', name: l.name ?? '공과금', category: 'housing' });
   for (const c of db.checklists)
     for (const l of (c.pay_check_line as Record<string, unknown>[] | undefined) ?? [])
       if (l.kind === 'living') Object.assign(l, { kind: 'custom', name: l.name ?? '식비' });
+      else if (l.kind === 'fixed') Object.assign(l, { kind: 'custom', name: l.name ?? '공과금' });
 }
 
 export async function mockOnboarding(page: Page, opts: { now?: Date } = {}): Promise<MemDb> {

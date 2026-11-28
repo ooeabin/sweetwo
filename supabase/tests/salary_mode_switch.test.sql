@@ -26,7 +26,7 @@ insert into public.goal (space_id, template, name, kind, priority, owner_user_id
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'hobby'), 'amount', 100000),
-  jsonb_build_object('kind', 'fixed', 'amount', 880000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 880000),
   jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'amount', 350000)
 ), auth.uid());
@@ -48,7 +48,7 @@ select set_config('test.home', (select id::text from public.goal where template 
 set local role authenticated;
 select public.complete_join(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', current_setting('test.home')::uuid, 'amount', 1070000),
-  jsonb_build_object('kind', 'fixed', 'amount', 680000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000),
   jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 680000),
   jsonb_build_object('kind', 'allowance', 'amount', 270000)
 ));
@@ -58,7 +58,7 @@ reset role; select public.set_salary_mode('joint'); set local role authenticated
 select is((select count(*) from public.salary_split), 1::bigint, '월급 계획 하나');
 select is((select amount from public.split_line where goal_id = (select id from public.goal where template = 'home')),
   2020000::bigint, '같은 목표 줄은 더함');
-select is((select amount from public.split_line where kind = 'fixed'), 1560000::bigint, '고정지출 더함');
+select is((select amount from public.split_line where (kind = 'custom' and name = '공과금')), 1560000::bigint, '고정지출 더함');
 select is((select count(*) from public.split_line where kind = 'allowance'), 2::bigint, '용돈은 사람마다');
 select is((select amount from public.split_line where goal_id = (select id from public.goal where template = 'hobby')),
   100000::bigint, '내 목표 줄 그대로');
@@ -77,7 +77,7 @@ select lives_ok($$ select public.set_joint_cycle_day(10::smallint) $$, '예빈 �
 reset role; select public.set_salary_mode('separate'); set local role authenticated; -- 앱 역할은 못 부름(20261205090000)
 select is((select count(*) from public.salary_split), 2::bigint, '월급 계획 둘');
 select is((select array_agg(l.amount order by s.owner_user_id) from public.split_line l join public.salary_split s on s.id = l.split_id
-  where l.kind = 'fixed'), array[880000, 680000]::bigint[], '고정지출을 수입 비율로(156만 × 270/620 = 68만, 나머지 88만)');
+  where (l.kind = 'custom' and l.name = '공과금')), array[880000, 680000]::bigint[], '고정지출을 수입 비율로(156만 × 270/620 = 68만, 나머지 88만)');
 select is((select s.owner_user_id::text from public.split_line l join public.salary_split s on s.id = l.split_id
   where l.goal_id = (select id from public.goal where template = 'hobby')), '11111111-1111-1111-1111-111111111111', '내 목표 줄은 주인에게');
 reset role;

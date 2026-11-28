@@ -21,14 +21,14 @@ $$;
 create function pg_temp.sl(p_owner uuid, k text, g text default null) returns uuid language sql as $$
   select l.id from public.split_line l join public.salary_split s on s.id = l.split_id
   left join public.goal x on x.id = l.goal_id
-  where s.owner_user_id is not distinct from p_owner and (case when l.kind = 'custom' and l.name = '식비' then 'living' else l.kind::text end) = k and (g is null or x.name = g) limit 1;
+  where s.owner_user_id is not distinct from p_owner and (case when l.kind = 'custom' and l.name = '식비' then 'living' when l.kind = 'custom' and l.name = '공과금' then 'fixed' else l.kind::text end) = k and (g is null or x.name = g) limit 1;
 $$;
 create function pg_temp.cl(p_owner uuid, p_start date) returns uuid language sql as $$
   select id from public.pay_checklist where owner_user_id is not distinct from p_owner and cycle_start = p_start;
 $$;
 create function pg_temp.line(list uuid, k text, g text default null) returns uuid language sql as $$
   select l.id from public.pay_check_line l left join public.goal x on x.id = l.goal_id
-  where l.checklist_id = list and (case when l.kind = 'custom' and l.name = '식비' then 'living' else l.kind::text end) = k and (g is null or x.name = g) limit 1;
+  where l.checklist_id = list and (case when l.kind = 'custom' and l.name = '식비' then 'living' when l.kind = 'custom' and l.name = '공과금' then 'fixed' else l.kind::text end) = k and (g is null or x.name = g) limit 1;
 $$;
 
 -- ── 찬우: 월급 계획 ──
@@ -45,14 +45,14 @@ insert into public.goal (space_id, template, name, kind, priority, target_amount
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'trip'), 'amount', 500000),
-  jsonb_build_object('kind', 'fixed', 'amount', 680000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000),
   jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'amount', 350000)
 ), auth.uid());
 
 -- ① 새 줄 기본값: 생활비·용돈은 확인 목록에서 빠짐, 자동 줄 아님
 select is((select string_agg(kind::text || ':' || in_checklist || ':' || auto_pay, ',' order by sort) from public.split_line),
-  'saving:true:false,saving:true:false,fixed:true:false,custom:false:false,allowance:false:false', '① 줄 기본값(D2, 2026-11-28 kind living은 직접 추가 줄 생활비로, 목록 기본 끔은 그대로)');
+  'saving:true:false,saving:true:false,custom:true:false,custom:false:false,allowance:false:false', '① 줄 기본값(D2, 2026-11-28 kind living은 직접 추가 줄 생활비로, 목록 기본 끔은 그대로)');
 
 -- ⑧ 온보딩(첫 월급 계획)에서는 이미 시작한 사이클 목록을 만들지 않음(D1). 오늘이 1일이면 오늘 시작이라 만듦
 select is(public.start_checklist(auth.uid()) is null, public.kst_today() <> date_trunc('month', public.kst_today())::date,
@@ -70,7 +70,7 @@ select throws_ok(format($$ select public.split_lines_configure(jsonb_build_array
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'trip'), 'amount', 500000),
-  jsonb_build_object('kind', 'fixed', 'amount', 700000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 700000),
   jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'amount', 350000)
 ), auth.uid());
@@ -86,7 +86,7 @@ select set_config('test.mar', pg_temp.cl('11111111-1111-1111-1111-111111111111',
 select results_eq(
   $$ select l.kind::text, l.auto, l.auto_due, l.state from public.pay_check_line l
      where l.checklist_id = current_setting('test.mar')::uuid order by l.sort $$,
-  $$ values ('saving', false, null::date, 'wait'), ('saving', true, '2027-03-01'::date, 'checked'), ('fixed', true, '2027-03-26'::date, 'wait') $$,
+  $$ values ('saving', false, null::date, 'wait'), ('saving', true, '2027-03-01'::date, 'checked'), ('custom', true, '2027-03-26'::date, 'wait') $$,
   '① 생활비·용돈 없음, 월급날 자동 줄은 만들 때 바로 확인');
 
 -- ② 자동 줄: 나가는 날 전엔 그대로, 그날 checked(누가 체크했는지 없음), 저금이면 모은 금액 + 달성
@@ -147,7 +147,7 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 2700000, payday = 10 where id = auth.uid();
-select public.complete_join(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 680000)));
+select public.complete_join(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000)));
 select throws_ok(format('select public.confirm_payday(%L)', pg_temp.cl('11111111-1111-1111-1111-111111111111', '2027-04-01')),
   '42501', 'not_owner', '④ 각자: 파트너 목록은 한 번 확인 못 함');
 reset role;
@@ -211,7 +211,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
 update public.couple_space set holiday_shift = false; -- 앞당기기(20261214090000 계약 3)와 상관없이 원래 날로 봄
 update public.app_user set monthly_income = 3000000, payday = 1 where id = auth.uid();
-select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 500000),
+select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 500000),
   jsonb_build_object('kind', 'custom', 'name', '관리비', 'amount', 200000)), auth.uid());
 reset role;
 update public.salary_split set checklist_from = null where owner_user_id = '44444444-4444-4444-4444-444444444444';

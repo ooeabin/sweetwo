@@ -26,7 +26,7 @@ begin
   update public.couple_space set holiday_shift = false where id = (select space_id from public.app_user where id = uid);
   update public.app_user set nickname = nick, monthly_income = pay, payday = 1 where id = uid;
   perform public.save_split(jsonb_build_array(
-    jsonb_build_object('kind', 'fixed', 'amount', 700000),
+    jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 700000),
     jsonb_build_object('kind', 'custom', 'name', '관리비', 'amount', 200000)), uid);
   reset role;
 end $$;
@@ -97,7 +97,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
 update public.couple_space set holiday_shift = false;
 update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 1 where id = auth.uid();
-select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 680000)), auth.uid());
+select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000)), auth.uid());
 select set_config('test.code', (select code from public.create_invite()), true);
 reset role;
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
@@ -105,7 +105,7 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 2800000, payday = 1 where id = auth.uid();
-select public.complete_join(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 680000)));
+select public.complete_join(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000)));
 reset role;
 select public.set_salary_mode('joint');
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
