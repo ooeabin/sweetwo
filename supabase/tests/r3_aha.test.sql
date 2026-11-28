@@ -20,7 +20,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
 update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 25,
   onboarding_done_at = now() where id = auth.uid();
-select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'living', 'amount', 880000)), auth.uid());
+select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000)), auth.uid());
 select set_config('test.cg', public.add_saving_item('결혼 비용', 500000, 30000000, null, 10000000)::text, true);
 select set_config('test.code', (select code from public.create_invite()), true);
 reset role;
@@ -30,7 +30,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 2700000, payday = 10 where id = auth.uid();
 select public.complete_join(jsonb_build_array(
-  jsonb_build_object('kind', 'living', 'amount', 680000),
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 680000),
   jsonb_build_object('kind', 'allowance', 'amount', 300000)));
 reset role;
 delete from public.notification;

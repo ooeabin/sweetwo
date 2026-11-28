@@ -33,7 +33,7 @@ insert into public.goal (space_id, template, name, kind, priority, owner_user_id
 select set_config('test.g', (select id::text from public.goal where name = '예빈 카메라'), true);
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', current_setting('test.g'), 'amount', 100000),
-  jsonb_build_object('kind', 'living', 'amount', 680000)
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 680000)
 ), auth.uid());
 reset role;
 
@@ -42,21 +42,21 @@ select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select throws_ok(format($$ select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', %L, 'amount', 200000),
-  jsonb_build_object('kind', 'living', 'amount', 680000)), '22222222-2222-2222-2222-222222222222') $$,
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 680000)), '22222222-2222-2222-2222-222222222222') $$,
   current_setting('test.g')), '42501', 'not_owner', '파트너 저금 줄 금액은 못 바꿈');
 select throws_ok(format($$ select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', %L, 'amount', 100000),
-  jsonb_build_object('kind', 'living', 'amount', 700000)), '22222222-2222-2222-2222-222222222222') $$,
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 700000)), '22222222-2222-2222-2222-222222222222') $$,
   current_setting('test.g')), '42501', 'not_owner', '파트너 지출 줄도 못 바꿈(보기만)');
 reset role;
 select is((select amount from public.split_line l join public.salary_split s on s.id = l.split_id
-  where s.owner_user_id = '22222222-2222-2222-2222-222222222222' and (l.kind = 'custom' and l.name = '생활비')), 680000::bigint,
+  where s.owner_user_id = '22222222-2222-2222-2222-222222222222' and (l.kind = 'custom' and l.name = '식비')), 680000::bigint,
   '예빈 생활비는 그대로');
 
 -- 월급날 바꾸기: 찬우 이번 사이클 끝이 새 기준일 전날로
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
-select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'living', 'amount', 880000)), auth.uid());
+select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000)), auth.uid());
 reset role;
 insert into public.pay_checklist (space_id, owner_user_id, cycle_start, cycle_end, label)
   select space_id, id, public.kst_today() - 5, public.kst_today() + 25, '이번 달' from public.app_user

@@ -276,10 +276,10 @@ for (const [name, path, prep] of BAR_CASES) {
 test('시트 안 옆 여백 24(화면과 같게)', async ({ page }) => {
   await open(page, '/salary/plan');
   await page
-    .getByRole('button', { name: /^생활비 / })
+    .getByRole('button', { name: /^식비 / })
     .first()
     .click();
-  const sheet = page.getByRole('dialog', { name: '생활비 금액' });
+  const sheet = page.getByRole('dialog', { name: '식비 금액' });
   await expect(sheet).toBeVisible();
   const pad = await sheet.evaluate((d) => {
     const s = (d.closest('.hg-sheet') ?? d) as HTMLElement;

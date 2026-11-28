@@ -22,7 +22,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
 update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 25,
   onboarding_done_at = now() where id = auth.uid();
-select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'living', 'amount', 880000)), auth.uid());
+select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000)), auth.uid());
 select set_config('test.cg', public.add_saving_item('결혼 비용', 500000, 30000000, null, 0)::text, true);
 insert into public.asset (space_id, side, grp, kind, name, amount, owner, owner_user_id)
   select space_id, 'asset', 'deposit', 'saving', '찬우 적금', 5000000, 'person', id from public.app_user where id = auth.uid();
@@ -38,7 +38,7 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 2700000, payday = 10 where id = auth.uid();
-select public.complete_join(jsonb_build_array(jsonb_build_object('kind', 'living', 'amount', 680000)));
+select public.complete_join(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 680000)));
 reset role;
 update public.app_user set onboarding_done_at = now() where onboarding_done_at is null;
 delete from public.notification;
@@ -127,7 +127,7 @@ reset role;
 select is((select body from public.notification where kind = 'split_result'), null,
   '줄인 줄이 없으면 결과 알림 한 줄 없음');
 select is((select l.amount from public.split_line l join public.salary_split s on s.id = l.split_id
-  where s.owner_user_id = '11111111-1111-1111-1111-111111111111' and (l.kind = 'custom' and l.name = '생활비')), 880000::bigint, '생활비 줄은 그대로');
+  where s.owner_user_id = '11111111-1111-1111-1111-111111111111' and (l.kind = 'custom' and l.name = '식비')), 880000::bigint, '생활비 줄은 그대로');
 delete from public.notification;
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;

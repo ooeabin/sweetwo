@@ -3,7 +3,7 @@ import { axe as runAxe } from './axe';
 import { chanwoo, emptyV22, type MemDb, mockOnboarding, seed } from './mocks';
 
 // 월급 계획 템플릿(W-01)·이번 달 월급 체크(W-02) 상황별 수정(2026-11-19 사용자 결정, 20 W-01 3·5c번, W-02 2·3·8·9번, W-02a 키패드).
-// 찬우 350만 원 25일, 10월 7일. 월급 체크리스트(9월 25일): 저금 청약 44만·내 집 마련 95만, 지출 고정지출 88만·생활비 88만·용돈 35만.
+// 찬우 350만 원 25일, 10월 7일. 월급 체크리스트(9월 25일): 저금 청약 44만·내 집 마련 95만, 지출 고정지출 88만·식비(생활비 묶음) 88만·용돈 35만.
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 const axe = async (page: Page) => {
   const r = await runAxe(page);
@@ -211,7 +211,7 @@ test.describe('W-02a 키패드(좁은 창)', () => {
   async function openOther(page: Page) {
     await open(page);
     await page.goto('/salary');
-    await page.locator('.hg-transfer__open', { hasText: '생활비' }).click();
+    await page.locator('.hg-transfer__open', { hasText: '식비' }).click();
     await page.getByRole('button', { name: '다른 금액으로 했어요' }).click();
     await expect(page.getByRole('heading', { name: /이번 달은 얼마였어요/ })).toBeVisible();
   }

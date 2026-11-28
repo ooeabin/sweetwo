@@ -68,7 +68,7 @@ select is(pg_temp.yorder(), 'allowance,send', '보내요: 보내기 줄은 뒤')
 update public.split_line set auto_day = 15 where kind = 'send';
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select public.save_split('[{"kind":"allowance","amount":350000},{"kind":"fixed","amount":100000},{"kind":"living","amount":50000}]'::jsonb,
+select public.save_split('[{"kind":"allowance","amount":350000},{"kind":"fixed","amount":100000},{"kind":"custom","name":"식비","category":"living","in_checklist":false,"amount":50000}]'::jsonb,
   auth.uid());
 reset role;
 select is(pg_temp.yorder(), 'allowance,fixed,custom,send', '각자 save_split 뒤에도 보내기 줄은 맨 뒤(예전 sort 0으로 맨 위)');

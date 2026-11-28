@@ -20,7 +20,7 @@ create function pg_temp.no_backdate() returns void language sql security definer
 $$;
 create function pg_temp.line(k text) returns uuid language sql as $$
   select l.id from public.pay_check_line l left join public.goal g on g.id = l.goal_id
-  where coalesce(g.template, case when l.kind = 'custom' and l.name = '생활비' then 'living' else l.kind::text end) = k;
+  where coalesce(g.template, case when l.kind = 'custom' and l.name = '식비' then 'living' else l.kind::text end) = k;
 $$;
 
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
@@ -33,7 +33,7 @@ insert into public.goal (space_id, template, name, kind, priority, target_amount
   select space_id, 'home', '내 집 마련', 'once', 1, 150000000 from public.app_user where id = auth.uid();
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
-  jsonb_build_object('kind', 'living', 'in_checklist', true, 'amount', 880000)
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'in_checklist', true, 'amount', 880000)
 ), auth.uid());
 select pg_temp.no_backdate();
 select public.start_checklist(auth.uid());
@@ -45,7 +45,7 @@ select is((select state from public.pay_checklist), 'open', '남은 줄이 있�
 -- 월급 계획을 고치면 체크 안 한 줄(생활비)만 새 금액, 체크한 줄은 그대로
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 500000),
-  jsonb_build_object('kind', 'living', 'in_checklist', true, 'amount', 700000)
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'in_checklist', true, 'amount', 700000)
 ), auth.uid());
 select is((select planned from public.pay_check_line where id = pg_temp.line('home')), 950000::bigint, '체크한 줄은 그대로');
 select is((select planned from public.pay_check_line where id = pg_temp.line('living')), 700000::bigint, '체크 안 한 줄은 새 금액');

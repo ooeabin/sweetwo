@@ -5,7 +5,9 @@ import { mockOnboarding, seed } from './mocks';
 test.use({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 });
 const NOW = new Date('2026-10-07T10:00:00+09:00');
 
-test('W-11: 고르기는 F 떠 있는 흰 알약, 글자 칸은 밑줄, 빠른 금액 칩은 늘 회색', async ({ page }, info) => {
+test('W-11: 고르기는 F 떠 있는 흰 알약, 글자 칸은 밑줄, 빠른 금액 칩은 늘 회색', async ({
+  page,
+}, info) => {
   test.skip(info.project.name !== 'light', '색 수치는 light만');
   await page.clock.setFixedTime(NOW);
   const db = await mockOnboarding(page, { now: NOW });
@@ -18,7 +20,9 @@ test('W-11: 고르기는 F 떠 있는 흰 알약, 글자 칸은 밑줄, 빠른 �
     const css = (e: Element | null) => getComputedStyle(e as HTMLElement);
     const box = document.querySelector('.hg-choice:not(.hg-choice--rows)');
     const sel = document.querySelector('.hg-choice:not(.hg-choice--rows) .hg-choice__item.is-on');
-    const off = document.querySelector('.hg-choice:not(.hg-choice--rows) .hg-choice__item:not(.is-on)');
+    const off = document.querySelector(
+      '.hg-choice:not(.hg-choice--rows) .hg-choice__item:not(.is-on)',
+    );
     const r0 = sel?.getBoundingClientRect();
     const r1 = off?.getBoundingClientRect();
     return {
@@ -38,8 +42,18 @@ test('W-11: 고르기는 F 떠 있는 흰 알약, 글자 칸은 밑줄, 빠른 �
   });
   // F 떠 있는 흰 알약: 판 radius 16·안쪽 4·칸 사이 4·칸 높이 44 radius 12, 테두리 없음, 고른 칸 흰 바탕 + 그림자 + 700
   expect(m).toEqual({
-    plateRadius: '16px', platePad: '4px', plateBg: 'rgb(243, 244, 246)', gap: 4, h: 44, radius: '12px',
-    offBorder: '0px', offBg: 'rgba(0, 0, 0, 0)', onBg: 'rgb(255, 255, 255)', onShadow: true, onWeight: '700', offWeight: '400',
+    plateRadius: '16px',
+    platePad: '4px',
+    plateBg: 'rgb(243, 244, 246)',
+    gap: 4,
+    h: 44,
+    radius: '12px',
+    offBorder: '0px',
+    offBg: 'rgba(0, 0, 0, 0)',
+    onBg: 'rgb(255, 255, 255)',
+    onShadow: true,
+    onWeight: '700',
+    offWeight: '400',
   });
   // 직접 정하기 → 이름 칸은 테두리 상자가 아니라 아래 2px 밑줄
   await page.getByRole('button', { name: '직접 정하기', exact: true }).click();
@@ -47,11 +61,18 @@ test('W-11: 고르기는 F 떠 있는 흰 알약, 글자 칸은 밑줄, 빠른 �
   await expect(name).toBeVisible();
   const u = await name.evaluate((e) => {
     const c = getComputedStyle(e);
-    return { top: c.borderTopWidth, left: c.borderLeftWidth, bottom: c.borderBottomWidth, radius: c.borderTopLeftRadius };
+    return {
+      top: c.borderTopWidth,
+      left: c.borderLeftWidth,
+      bottom: c.borderBottomWidth,
+      radius: c.borderTopLeftRadius,
+    };
   });
   expect(u).toEqual({ top: '0px', left: '0px', bottom: '2px', radius: '0px' });
   // 빠른 금액 칩(10만 원)은 눌러도 고른 표시·aria-pressed 없음
-  const quick = page.getByRole('group', { name: /빠른 금액/ }).getByRole('button', { name: '10만 원' });
+  const quick = page
+    .getByRole('group', { name: /빠른 금액/ })
+    .getByRole('button', { name: '10만 원' });
   await quick.click();
   await expect(page.locator('.hg-quick .is-selected')).toHaveCount(0);
   await expect(quick).not.toHaveAttribute('aria-pressed', /.*/);

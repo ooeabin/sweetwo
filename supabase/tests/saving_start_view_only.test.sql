@@ -30,7 +30,7 @@ select public.ensure_my_space();
 update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 25 where id = auth.uid();
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'fixed', 'amount', 880000),
-  jsonb_build_object('kind', 'living', 'in_checklist', true, 'amount', 880000),
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'in_checklist', true, 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'amount', 350000)
 ), auth.uid());
 select pg_temp.no_backdate();
@@ -67,7 +67,7 @@ select public.join_space(current_setting('test.code'));
 select public.finish_join();
 update public.app_user set nickname = '예빈', monthly_income = 2700000, payday = 10 where id = auth.uid();
 select public.save_split(jsonb_build_array(
-  jsonb_build_object('kind', 'living', 'in_checklist', true, 'amount', 680000)
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'in_checklist', true, 'amount', 680000)
 ), auth.uid());
 select pg_temp.no_backdate();
 select public.start_checklist(auth.uid());
@@ -80,11 +80,11 @@ update public.app_user set plan_share = 'all';
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select throws_ok($$ select public.save_split(jsonb_build_array(
-  jsonb_build_object('kind', 'living', 'amount', 500000)), '22222222-2222-2222-2222-222222222222') $$,
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 500000)), '22222222-2222-2222-2222-222222222222') $$,
   '42501', 'not_owner', '파트너 월급 계획 지출 줄은 못 고침');
 select throws_ok($$ select public.check_pay_line((select l.id from public.pay_check_line l
     join public.pay_checklist c on c.id = l.checklist_id
-    where c.owner_user_id = '22222222-2222-2222-2222-222222222222' and (l.kind = 'custom' and l.name = '생활비')), 'checked') $$,
+    where c.owner_user_id = '22222222-2222-2222-2222-222222222222' and (l.kind = 'custom' and l.name = '식비')), 'checked') $$,
   '42501', 'not_owner', '파트너 체크리스트는 체크 못 함');
 update public.goal set name = '찬우가 바꿈' where id = (select id from public.goal where name = '카메라');
 select is((select count(*)::int from public.goal where name = '카메라'), 1, '파트너 저금 이름은 그대로(RLS)');
@@ -92,10 +92,10 @@ select throws_ok($$ select public.saving_item_stop((select id from public.goal w
   '42501', 'not_owner', '파트너 저금 그만 모으기 못 함');
 select lives_ok($$ select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', pg_temp.item('내 집 마련'), 'amount', 950000),
-  jsonb_build_object('kind', 'living', 'amount', 900000)), auth.uid()) $$, '내 월급 계획은 고침');
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 900000)), auth.uid()) $$, '내 월급 계획은 고침');
 reset role;
 select is((select amount from public.split_line l join public.salary_split s on s.id = l.split_id
-  where s.owner_user_id = '22222222-2222-2222-2222-222222222222' and (l.kind = 'custom' and l.name = '생활비')), 680000::bigint,
+  where s.owner_user_id = '22222222-2222-2222-2222-222222222222' and (l.kind = 'custom' and l.name = '식비')), 680000::bigint,
   '예빈 생활비 그대로');
 
 -- 파트너 변경 알림 문구: ‘저축·투자’

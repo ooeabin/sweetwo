@@ -23,7 +23,7 @@ insert into public.goal (space_id, template, name, kind, priority, target_amount
   select space_id, 'home', '내 집 마련', 'once', 1, 100000000 from public.app_user where id = auth.uid();
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
-  jsonb_build_object('kind', 'living', 'amount', 880000)
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000)
 ), auth.uid());
 insert into public.asset (space_id, side, grp, kind, name, amount, owner)
   select space_id, 'asset', 'deposit', 'deposit_money', '전세 보증금', 200000000, 'joint' from public.app_user where id = auth.uid();
@@ -40,7 +40,7 @@ select set_config('test.home', (select id::text from public.goal where template 
 set local role authenticated;
 select public.complete_join(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', current_setting('test.home')::uuid, 'amount', 1070000),
-  jsonb_build_object('kind', 'living', 'amount', 680000)
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 680000)
 ));
 insert into public.goal (space_id, template, name, kind, priority, owner_user_id)
   select space_id, 'hobby', '자기계발', 'once', 2, auth.uid() from public.app_user where id = auth.uid();
@@ -68,7 +68,7 @@ select is(public.flush_partner_changes(now() + interval '11 minutes'), 0, '되�
 -- v2.2(B8): 각자 계열 월급 계획 금액·월급 금액은 알리지 않음, 자산 금액은 활동 기록(인앱만)
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 1070000),
-  jsonb_build_object('kind', 'living', 'amount', 700000)
+  jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 700000)
 ), '22222222-2222-2222-2222-222222222222');
 update public.app_user set monthly_income = 2800000 where id = '22222222-2222-2222-2222-222222222222';
 update public.asset set amount = 220000000 where name = '전세 보증금';

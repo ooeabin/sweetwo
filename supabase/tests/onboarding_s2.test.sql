@@ -25,7 +25,7 @@ update public.app_user set monthly_income = 3500000,
   payday = case when extract(day from public.kst_today()) >= 20 then 5 else 25 end where id = auth.uid();
 
 -- 1) 온보딩 중 다시 만들기: 지우고 새로 저장 → 체크리스트도 새 월급날로
-select public.save_split('[{"kind":"fixed","amount":880000},{"kind":"living","amount":880000}]'::jsonb, auth.uid());
+select public.save_split('[{"kind":"fixed","amount":880000},{"kind":"custom","name":"식비","category":"living","in_checklist":false,"amount":880000}]'::jsonb, auth.uid());
 select is(public.start_checklist(auth.uid()), null::uuid,
   'v2.2(D1): 온보딩 중 이미 시작한 사이클 목록은 만들지 않음(첫 월급날부터)');
 select pg_temp.no_backdate();

@@ -135,7 +135,7 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
   await expect(page.locator('.hg-plansum__amt')).toHaveText('2,700,000원');
   await expect(page.getByText('예빈님 월급 계획이에요. 보기만 할 수 있어요')).toBeVisible();
   // 줄은 누를 수 없고 자물쇠
-  await expect(page.getByRole('button', { name: /^생활비/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /^식비/ })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^예빈 카메라/ })).toHaveCount(0);
   await expect(page.locator('.hg-receipt__lock')).toHaveCount(3);
   await expect(page.getByRole('button', { name: '+ 지출 추가', exact: true })).toHaveCount(0);
@@ -145,7 +145,7 @@ test('W-01 파트너 탭은 보기만(2026-11-09): 회색 한 줄, 줄마다 자
   const y = db.splits.find((s) => s.owner_user_id === 'yebin');
   expect(
     (y?.split_line as Record<string, unknown>[]).find(
-      (l) => l.kind === 'living' || (l.kind === 'custom' && l.name === '생활비'),
+      (l) => l.kind === 'custom' && l.name === '식비',
     )?.amount,
   ).toBe(680_000);
 
