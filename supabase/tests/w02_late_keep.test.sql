@@ -37,12 +37,12 @@ select is((select count(*)::int from public.pay_check_line l join public.pay_che
 select public.make_checklist((select space_id from public.app_user where id = '44444444-4444-4444-4444-444444444444'),
   '44444444-4444-4444-4444-444444444444', '2027-03-05');
 select is((select l.state::text from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
-  where c.cycle_start = '2027-01-01' and l.kind = 'custom'), 'skipped', '3월이 되면(늦은 확인 기간 끝) 남은 줄이 건너뜀');
+  where c.cycle_start = '2027-01-01' and l.kind = 'custom' and l.name = '관리비'), 'skipped', '3월이 되면(늦은 확인 기간 끝) 남은 줄이 건너뜀');
 select is((select l.state::text from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
   where c.cycle_start = '2027-01-01' and (l.kind = 'custom' and l.name = '공과금')), 'checked', '확인한 줄은 그대로');
 select is((select state::text from public.pay_checklist where cycle_start = '2027-01-01'), 'closed', '1월 목록 닫힘');
 select is((select l.state::text from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
-  where c.cycle_start = '2027-02-01' and l.kind = 'custom'), 'wait', '2월 목록은 3월 시작에도 대기(다음 사이클 끝까지)');
+  where c.cycle_start = '2027-02-01' and l.kind = 'custom' and l.name = '관리비'), 'wait', '2월 목록은 3월 시작에도 대기(다음 사이클 끝까지)');
 
 select * from finish();
 rollback;
