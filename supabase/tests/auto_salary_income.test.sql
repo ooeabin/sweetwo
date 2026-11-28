@@ -20,7 +20,7 @@ create function pg_temp.cl(p_owner uuid, p_start date) returns uuid language sql
 $$;
 create function pg_temp.line(list uuid, k text, g text default null) returns uuid language sql as $$
   select l.id from public.pay_check_line l left join public.goal x on x.id = l.goal_id
-  where l.checklist_id = list and (case when l.kind = 'custom' and l.name = '식비' then 'living' else l.kind::text end) = k and (g is null or x.name = g) limit 1;
+  where l.checklist_id = list and (case when l.kind = 'custom' and l.name = '식비' then 'living' when l.kind = 'custom' and l.name = '공과금' then 'fixed' else l.kind::text end) = k and (g is null or x.name = g) limit 1;
 $$;
 create function pg_temp.autos(p_owner uuid) returns integer language sql as $$
   select count(*)::int from public.money_in where owner_user_id = p_owner and source = 'payday_auto' and deleted_at is null;
@@ -37,7 +37,7 @@ insert into public.goal (space_id, template, name, kind, priority, target_amount
   select space_id, 'trip', '여행', 'once', 1, 9000000, 500000 from public.app_user where id = auth.uid();
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'trip'), 'amount', 500000),
-  jsonb_build_object('kind', 'fixed', 'amount', 700000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 700000),
   jsonb_build_object('kind', 'custom', 'name', '관리비', 'amount', 200000)), auth.uid());
 reset role;
 update public.salary_split set checklist_from = null where owner_user_id = '44444444-4444-4444-4444-444444444444';
@@ -114,7 +114,7 @@ reset role;
 select public.make_checklist((select space_id from public.app_user where id = '44444444-4444-4444-4444-444444444444'),
   '44444444-4444-4444-4444-444444444444', '2027-03-01');
 update public.pay_check_line set auto = true, auto_due = '2027-03-26', state = 'wait'
-  where checklist_id = pg_temp.cl('44444444-4444-4444-4444-444444444444', '2027-03-01') and kind = 'fixed';
+  where checklist_id = pg_temp.cl('44444444-4444-4444-4444-444444444444', '2027-03-01') and (kind = 'custom' and name = '공과금');
 select is(public.auto_confirm_due_lines('2027-03-26'), 1, '자동 줄이 나가는 날 자동 확인');
 select is((select auto_income_at from public.pay_checklist where id = pg_temp.cl('44444444-4444-4444-4444-444444444444', '2027-03-01')), null,
   '자동 확인만으로는 수입 기록 안 넣음');
@@ -126,7 +126,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
 update public.couple_space set holiday_shift = false;
 update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 1 where id = auth.uid();
-select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 680000),
+select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000),
   jsonb_build_object('kind', 'custom', 'name', '관리비', 'amount', 200000)), auth.uid());
 select set_config('test.code', (select code from public.create_invite()), true);
 reset role;
@@ -135,7 +135,7 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 2800000, payday = 1 where id = auth.uid();
-select public.complete_join(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 680000)));
+select public.complete_join(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000)));
 reset role;
 select public.set_salary_mode('joint');
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
@@ -158,7 +158,7 @@ select isnt(current_setting('test.jprev'), current_setting('test.jcur'), '공동
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select public.check_pay_line((select l.id from public.pay_check_line l where l.checklist_id = current_setting('test.jprev')::uuid
-  and l.kind = 'fixed' limit 1), 'checked');
+  and (l.kind = 'custom' and l.name = '공과금') limit 1), 'checked');
 reset role;
 select results_eq(
   $$ select owner_user_id::text, amount, source from public.money_in where source = 'payday_auto'

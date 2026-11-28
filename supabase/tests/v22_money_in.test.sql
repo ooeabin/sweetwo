@@ -16,7 +16,7 @@ create function pg_temp.login_as(uid uuid) returns void language sql as $$
 $$;
 create function pg_temp.sl(p_owner uuid, k text, p_user uuid default null) returns uuid language sql as $$
   select l.id from public.split_line l join public.salary_split s on s.id = l.split_id
-  where s.owner_user_id is not distinct from p_owner and (case when l.kind = 'custom' and l.name = '식비' then 'living' else l.kind::text end) = k and (p_user is null or l.user_id = p_user) limit 1;
+  where s.owner_user_id is not distinct from p_owner and (case when l.kind = 'custom' and l.name = '식비' then 'living' when l.kind = 'custom' and l.name = '공과금' then 'fixed' else l.kind::text end) = k and (p_user is null or l.user_id = p_user) limit 1;
 $$;
 
 -- 찬우(시작한 사람, 25일), 다른 사람(혼자)
@@ -29,7 +29,7 @@ insert into public.goal (space_id, template, name, kind, priority, target_amount
   select space_id, 'home', '내 집 마련', 'once', 1, 100000000 from public.app_user where id = auth.uid();
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
-  jsonb_build_object('kind', 'fixed', 'amount', 680000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000),
   jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000)
 ), auth.uid());
 select set_config('test.code', (select code from public.create_invite()), true);
@@ -44,7 +44,7 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 2700000, payday = 10 where id = auth.uid();
-select public.complete_join(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 680000)));
+select public.complete_join(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000)));
 reset role;
 delete from public.notification;
 create function pg_temp.p(d date) returns jsonb language sql as $$ select public.money_in_period(null, d) $$;

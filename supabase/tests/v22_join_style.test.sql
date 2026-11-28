@@ -57,7 +57,7 @@ reset role;
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
 select public.save_split(jsonb_build_array(
-  jsonb_build_object('kind', 'fixed', 'amount', 1000000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 1000000),
   jsonb_build_object('kind', 'allowance', 'amount', 300000, 'user_id', '11111111-1111-1111-1111-111111111111')), null);
 reset role;
 select results_eq($$ select l.user_id, l.amount, l.auto_pay from public.split_line l where l.kind = 'send' $$,

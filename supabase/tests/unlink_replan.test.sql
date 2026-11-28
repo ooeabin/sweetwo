@@ -22,7 +22,7 @@ select public.ensure_my_space();
 update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 25 where id = auth.uid();
 insert into public.goal (space_id, template, name, kind, priority)
   select space_id, 'home', '내 집 마련', 'once', 1 from public.app_user where id = auth.uid();
-select public.save_split('[{"kind":"fixed","amount":880000}]', auth.uid());
+select public.save_split('[{"kind":"custom","name":"공과금","category":"housing","amount":880000}]', auth.uid());
 select set_config('test.code', (select code from public.create_invite()), true);
 select set_config('test.space', (select space_id::text from public.app_user where id = auth.uid()), true);
 select throws_ok($$ select public.request_unlink('연결 해제') $$, '42501', 'not_connected', '미합류는 해제 요청 없음');
@@ -34,7 +34,7 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 2700000, payday = 10 where id = auth.uid();
-select public.complete_join('[{"kind":"fixed","amount":680000}]'::jsonb);
+select public.complete_join('[{"kind":"custom","name":"공과금","category":"housing","amount":680000}]'::jsonb);
 reset role;
 
 -- 찬우 요청
@@ -43,7 +43,7 @@ set local role authenticated;
 select throws_ok($$ select public.request_unlink('연결해제') $$, 'P0001', 'confirm_mismatch', '“연결 해제”와 다르면 거절');
 select lives_ok($$ select public.request_unlink('연결 해제') $$, '해제 요청');
 select is((select couple_state::text from public.couple_space), 'unlink_pending', '해제 대기');
-select throws_ok($$ select public.save_split('[{"kind":"fixed","amount":900000}]', auth.uid()) $$, '42501', 'unlink_pending',
+select throws_ok($$ select public.save_split('[{"kind":"custom","name":"공과금","category":"housing","amount":900000}]', auth.uid()) $$, '42501', 'unlink_pending',
   '대기 중엔 월급 계획 못 고침');
 select throws_ok($$ select public.request_mode_change(true, null, 'together') $$, '42501', 'unlink_pending', '대기 중엔 관리 방식 못 바꿈');
 -- 취소하면 연결로, 다시 요청

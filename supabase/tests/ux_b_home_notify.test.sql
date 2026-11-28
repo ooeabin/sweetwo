@@ -20,7 +20,7 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
 update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 25, onboarding_done_at = now() where id = auth.uid();
-select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 680000)), auth.uid());
+select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000)), auth.uid());
 select set_config('test.code', (select code from public.create_invite()), true);
 reset role;
 select set_config('test.space', (select space_id::text from public.app_user where id = '11111111-1111-1111-1111-111111111111'), true);
@@ -31,7 +31,7 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 2800000, payday = 25 where id = auth.uid();
-select public.complete_join(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 500000)));
+select public.complete_join(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 500000)));
 reset role;
 select is((select body from public.notification where kind = 'partner_joined'), '이제 저축·투자를 같이 봐요',
   '합류 알림은 합류한 사람 공개 단계대로(저축·투자만)');
@@ -41,12 +41,11 @@ update public.couple_space set salary_mode = 'joint', manager_user_id = '1111111
   joint_cycle_day = 25 where id = current_setting('test.space')::uuid;
 insert into public.salary_split (space_id, owner_user_id, checklist_from) values (current_setting('test.space')::uuid, null, '2027-01-01');
 insert into public.split_line (split_id, space_id, kind, name, category, amount, sort, user_id, in_checklist, auto_pay)
-select s.id, s.space_id, v.kind::public.split_line_kind, case when v.kind = 'custom' then '식비' end,
-  case when v.kind = 'custom' then 'living' end, v.amount, v.sort, v.uid, true, v.auto
+select s.id, s.space_id, v.kind::public.split_line_kind, v.nm, v.cat, v.amount, v.sort, v.uid, true, v.auto
 from public.salary_split s,
-  (values ('fixed', 680000, 0, null::uuid, false), ('custom', 880000, 1, null::uuid, false),
-          ('send', 2400000, 2, '22222222-2222-2222-2222-222222222222'::uuid, true),
-          ('allowance', 400000, 3, '22222222-2222-2222-2222-222222222222'::uuid, true)) v(kind, amount, sort, uid, auto)
+  (values ('custom', '공과금', 'housing', 680000, 0, null::uuid, false), ('custom', '식비', 'living', 880000, 1, null::uuid, false),
+          ('send', null, null, 2400000, 2, '22222222-2222-2222-2222-222222222222'::uuid, true),
+          ('allowance', null, null, 400000, 3, '22222222-2222-2222-2222-222222222222'::uuid, true)) v(kind, nm, cat, amount, sort, uid, auto)
 where s.space_id = current_setting('test.space')::uuid and s.owner_user_id is null;
 select set_config('test.cl', public.make_checklist(current_setting('test.space')::uuid, null, '2027-01-25')::text, true);
 delete from public.notification;
@@ -56,7 +55,7 @@ select results_eq(
   $$ select l.kind::text, public.pay_line_mine(l.kind::text, l.user_id, null, l.space_id, '11111111-1111-1111-1111-111111111111'),
        public.pay_line_mine(l.kind::text, l.user_id, null, l.space_id, '22222222-2222-2222-2222-222222222222')
      from public.pay_check_line l where l.checklist_id = current_setting('test.cl')::uuid order by l.sort $$,
-  $$ values ('fixed', true, false), ('custom', true, false), ('send', true, true), ('allowance', true, true) $$,
+  $$ values ('custom', true, false), ('custom', true, false), ('send', true, true), ('allowance', true, true) $$,
   '관리하는 사람은 모든 줄, 관리하지 않는 쪽은 자기 줄만');
 
 -- 2. 월급날 09:00: 찬우만 월급날 알림, 예빈은 없음(진행 소식 대상)
@@ -80,7 +79,7 @@ select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
 select throws_ok(
   format($$ select public.check_pay_line(%L, 'checked') $$,
-    (select id from public.pay_check_line where checklist_id = current_setting('test.cl')::uuid and kind = 'fixed')),
+    (select id from public.pay_check_line where checklist_id = current_setting('test.cl')::uuid and kind = 'custom' and name = '공과금')),
   '42501', 'not_owner', '관리하지 않는 쪽은 관리하는 사람 줄을 확인 못 함');
 reset role;
 update public.pay_checklist set cycle_end = '2099-12-31' where id = current_setting('test.cl')::uuid;
@@ -118,7 +117,7 @@ select ok(public.noti_inapp_only('partner_activity'), '경조사 추가·메모 
 update public.couple_space set salary_mode = 'separate' where id = current_setting('test.space')::uuid;
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
-select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 680000),
+select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000),
   jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 400000)), auth.uid());
 select set_config('test.acc', public.propose_split('데이트 통장', 1000000, 'half')::text, true);
 reset role;
@@ -128,14 +127,14 @@ select is(public.answer_split(current_setting('test.acc')::uuid, true), 'accepte
 reset role;
 select results_eq(
   $$ select l.kind::text, l.amount from public.split_line l join public.salary_split s on s.id = l.split_id
-     where s.owner_user_id = '11111111-1111-1111-1111-111111111111' order by l.kind::text $$,
-  $$ values ('custom', 400000::bigint), ('fixed', 180000::bigint), ('shared_account', 500000::bigint) $$,
-  '찬우 몫 50만 원: 고정지출에서만 줄임(2026-11-28 생활비 줄은 직접 추가 줄, 줄이지 않음)');
+     where s.owner_user_id = '11111111-1111-1111-1111-111111111111' order by l.kind::text, l.amount $$,
+  $$ values ('custom', 400000::bigint), ('custom', 680000::bigint), ('shared_account', 500000::bigint) $$,
+  '찬우 몫 50만 원: 다른 줄은 줄이지 않음(2026-11-28, 넘치면 W-01 넘김 표시)');
 select results_eq(
   $$ select l.kind::text, l.amount from public.split_line l join public.salary_split s on s.id = l.split_id
      where s.owner_user_id = '22222222-2222-2222-2222-222222222222' order by l.kind::text $$,
-  $$ values ('fixed', 0::bigint), ('shared_account', 500000::bigint) $$,
-  '예빈(생활비 없음): 고정지출 50만 → 0');
+  $$ values ('custom', 500000::bigint), ('shared_account', 500000::bigint) $$,
+  '예빈: 공과금 50만 그대로');
 
 select * from finish();
 rollback;

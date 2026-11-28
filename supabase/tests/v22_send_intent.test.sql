@@ -16,7 +16,7 @@ create function pg_temp.login_as(uid uuid) returns void language sql as $$
 $$;
 create function pg_temp.sl(p_owner uuid, k text, p_user uuid default null) returns uuid language sql as $$
   select l.id from public.split_line l join public.salary_split s on s.id = l.split_id
-  where s.owner_user_id is not distinct from p_owner and (case when l.kind = 'custom' and l.name = '식비' then 'living' else l.kind::text end) = k and (p_user is null or l.user_id = p_user) limit 1;
+  where s.owner_user_id is not distinct from p_owner and (case when l.kind = 'custom' and l.name = '식비' then 'living' when l.kind = 'custom' and l.name = '공과금' then 'fixed' else l.kind::text end) = k and (p_user is null or l.user_id = p_user) limit 1;
 $$;
 
 -- 찬우(시작한 사람, 25일), 다른 사람(혼자)
@@ -29,7 +29,7 @@ insert into public.goal (space_id, template, name, kind, priority, target_amount
   select space_id, 'home', '내 집 마련', 'once', 1, 100000000 from public.app_user where id = auth.uid();
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
-  jsonb_build_object('kind', 'fixed', 'amount', 680000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000),
   jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000)
 ), auth.uid());
 select set_config('test.code', (select code from public.create_invite()), true);
@@ -70,7 +70,7 @@ select results_eq($$ select l.user_id, l.amount, l.in_checklist, l.auto_pay, l.a
 -- 2. 예빈이 계획을 다시 저장(용돈 35만) → 서버가 보내기 줄을 다시 둠, 직접 저장은 거절
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select public.save_split('[{"kind":"allowance","amount":350000},{"kind":"fixed","amount":100000}]'::jsonb, auth.uid());
+select public.save_split('[{"kind":"allowance","amount":350000},{"kind":"custom","name":"공과금","category":"housing","amount":100000}]'::jsonb, auth.uid());
 select throws_ok($$ select public.save_split('[{"kind":"send","amount":100000}]'::jsonb, auth.uid()) $$, '42501', 'send_locked',
   '보내기 직접 저장 거절');
 reset role;

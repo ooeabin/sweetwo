@@ -268,8 +268,8 @@ test('첫 월급날 전(소급 없음): 월급 상자 첫 줄 “10월 23일부�
   await expect(page).toHaveURL(/\/salary\/auto-lines$/);
   const sheet = page.getByRole('dialog', { name: '자동으로 나가는 걸 골라 주세요' });
   await expect(sheet).toBeVisible();
-  // 저금·고정지출 줄만(생활비·용돈은 없음)
-  await expect(sheet.getByRole('checkbox')).toHaveCount(3);
+  // 저금·직접 추가 지출 줄(2026-11-28 고정지출 기본 줄 대신, 시드 식비·공과금), 용돈은 없음
+  await expect(sheet.getByRole('checkbox')).toHaveCount(4);
   await sheet.getByRole('checkbox', { name: /^내 집 마련/ }).click();
   await sheet.getByRole('button', { name: '다음 날' }).click();
   await axe(page);
@@ -311,16 +311,16 @@ test('자동 줄뿐인 사람: 월급 상자 첫 줄 “자동으로 나가요�
     '자동으로 나가요',
   );
   // 자동 확인된 줄은 “자동으로 나갔어요”(2026-11-23 C안)
-  await expect(page.locator('.hg-transfer', { hasText: '고정지출' })).toContainText(
+  await expect(page.locator('.hg-transfer', { hasText: '공과금' })).toContainText(
     '자동으로 나갔어요',
   );
-  await expect(doneRow(page, '고정지출')).toBeVisible();
+  await expect(doneRow(page, '공과금')).toBeVisible();
   await axe(page);
   // 자동 확인된 줄도 시트에서 건너뜀
-  await page.locator('.hg-transfer__open', { hasText: '고정지출' }).click();
+  await page.locator('.hg-transfer__open', { hasText: '공과금' }).click();
   await page.getByRole('button', { name: '이번 달은 건너뛸게요' }).click();
-  await expect(page.locator('.hg-toast')).toContainText('고정지출, 이번 달은 건너뛰었어요');
-  expect(lines(db).find((l) => l.kind === 'fixed')?.state).toBe('skipped');
+  await expect(page.locator('.hg-toast')).toContainText('공과금, 이번 달은 건너뛰었어요');
+  expect(lines(db).find((l) => l.name === '공과금')?.state).toBe('skipped');
 });
 
 test('지난 달 늦은 확인: 월급 상자 첫 줄 “지난달 2개 남음”, W-02 지난 달은 건너뜀만 남아 주 버튼 없음, 건너뜀 줄 시트로 다시 확인', async ({
@@ -486,7 +486,8 @@ test('월급날 확인 목록 기간(v2.2, W-05 화면은 2026-11-15 없앰): �
     page,
     (d) => {
       for (const l of lines(d))
-        if (l.kind === 'fixed') Object.assign(l, { auto: true, auto_due: '2026-09-25' });
+        if (l.kind === 'fixed' || l.name === '공과금')
+          Object.assign(l, { auto: true, auto_due: '2026-09-25' });
     },
     REVIEW,
   );
@@ -495,7 +496,7 @@ test('월급날 확인 목록 기간(v2.2, W-05 화면은 2026-11-15 없앰): �
   await monthLine(page).click();
   await expect(page).toHaveURL(/\/salary$/);
   // 2026-11-19 한 목록: 자동 줄도 같은 목록에(보조 줄 “자동으로 나가요”), 큰 숫자·보조 줄은 남은 손 줄과 별개로 전체 줄 수
-  await expect(page.locator('.hg-transfer', { hasText: '고정지출' })).toContainText(
+  await expect(page.locator('.hg-transfer', { hasText: '공과금' })).toContainText(
     '자동으로 나가요',
   );
   await axe(page);
@@ -638,8 +639,8 @@ test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동
   page,
 }) => {
   const db = await open(page, undefined, NOW, '/salary/plan');
-  await page.getByRole('button', { name: '고정지출 880,000원' }).click();
-  const sheet = page.getByRole('dialog', { name: '고정지출 금액' });
+  await page.getByRole('button', { name: '공과금 880,000원' }).click();
+  const sheet = page.getByRole('dialog', { name: '공과금 금액' });
   // 2026-11-23: 스위치 둘 대신 ‘어떻게 챙겨요?’ 구간 선택(지출 줄은 세 칸)
   await expect(sheet.getByRole('radio')).toHaveCount(3);
   await expect(sheet.getByRole('radio', { name: '월급날 확인' })).toHaveAttribute(
@@ -668,13 +669,11 @@ test('W-01 줄 설정(7a): 체크리스트에 넣기 끄기, 은행에서 자동
     .click();
   await expect(sheet.getByRole('button', { name: '나가는 날, 매달 27일' })).toBeVisible();
   await sheet.getByRole('button', { name: '확인' }).click();
-  await expect(page.locator('.hg-toast')).toContainText('고정지출 설정을 바꿨어요');
+  await expect(page.locator('.hg-toast')).toContainText('공과금 설정을 바꿨어요');
   expect(db.v22?.calls.at(-1)?.body).toEqual({
     p_items: [{ id: 'split-1-line-2', in_checklist: true, auto_pay: true, auto_day: 27 }],
   });
-  await expect(page.locator('.hg-receipt__row', { hasText: '고정지출' })).toContainText(
-    '27일 자동',
-  );
+  await expect(page.locator('.hg-receipt__row', { hasText: '공과금' })).toContainText('27일 자동');
   // 저금 줄 시트에는 ‘확인 안 해요’가 없음(늘 목록에 넣음)
   await page.goto('/salary/plan?line=goal-e'); // W-10 ‘매달 금액 바꾸기’로 그 저금 줄 시트를 엶
   await expect(page.getByRole('dialog', { name: '청약 금액' })).toBeVisible();
@@ -930,7 +929,7 @@ test('한 사람 관리형(찬우 관리): 예빈 홈은 자동 문장, W-02는 
   // 2026-11-23: 관리하는 사람(찬우)의 손 줄은 “찬우님이 확인해요” 묶음에 보기만(점·› 없이 상태만, 보조 줄 “대기”)
   const group = page.getByRole('region', { name: '찬우님이 확인해요' });
   await expect(group).toBeVisible();
-  await expect(group.locator('.hg-transfer', { hasText: '고정지출' })).toBeVisible();
+  await expect(group.locator('.hg-transfer', { hasText: '공과금' })).toBeVisible();
   await expect(group.locator('.hg-transfer__dot.is-on')).toHaveCount(0);
   await expect(group.getByText('대기').first()).toBeVisible();
   await expect(page.getByRole('button', { name: '모두 계획대로 됐어요' })).toHaveCount(0);

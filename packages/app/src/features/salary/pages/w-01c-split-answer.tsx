@@ -1,11 +1,4 @@
-import {
-  answerSplit,
-  fetchSharedAccounts,
-  fetchSplits,
-  qk,
-  splitAccountKeys,
-  type SalarySplit,
-} from '@sweetwo/api';
+import { answerSplit, fetchSharedAccounts, qk, splitAccountKeys } from '@sweetwo/api';
 import { coupleOf, formatWon } from '@sweetwo/core';
 import { QuestionLayout, QuestionSkeleton } from '@sweetwo/ui';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -18,12 +11,6 @@ import { copy } from '../copy';
 import { useMe, usePartner, useSpace, useSplits } from '../data';
 
 const t = copy.splitShare;
-/** 내 월급 계획(합쳐서면 공동)의 고정지출 합. ‘좋아요’ 앞뒤를 견줘 줄어든 줄을 알림(06 3-7 M9, 2026-11-28 생활비 기본 줄 없앰) */
-const fixedOf = (list: readonly SalarySplit[] | undefined, owner: string | null) =>
-  (list?.find((x) => x.owner_user_id === owner)?.split_line ?? [])
-    .filter((l) => l.kind === 'fixed')
-    .reduce((t, l) => t + l.amount, 0);
-
 const nameCodeOf = (name: string): 'living' | 'date' | 'custom' =>
   name === t.nameChips.living ? 'living' : name === t.nameChips.date ? 'date' : 'custom';
 
@@ -89,8 +76,6 @@ export function W01cSplitAnswer() {
   const answer = async (accept: boolean) => {
     if (busy || !online) return;
     setBusy(accept ? 'yes' : 'no');
-    const owner = space.data?.salary_mode === 'joint' ? null : (me.data?.id ?? null);
-    const before = fixedOf(splits.data, owner);
     try {
       const result = await answerSplit(a.id, accept);
       track('split_answered', { name_code: nameCodeOf(a.name), rule: a.rule, result });
@@ -100,11 +85,8 @@ export function W01cSplitAnswer() {
         return home();
       }
       if (result === 'accepted') {
-        const after = fixedOf(
-          await qc.fetchQuery({ queryKey: qk.splits, queryFn: fetchSplits, staleTime: 0 }),
-          owner,
-        );
-        carryToast(after < before ? t.acceptedCut : t.accepted);
+        // 2026-11-28 분담은 다른 줄을 줄이지 않음(06 3-7): 결과는 늘 같은 한 줄
+        carryToast(t.accepted);
         return nav('/salary/plan', { replace: true });
       }
       home();

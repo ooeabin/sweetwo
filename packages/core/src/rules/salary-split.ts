@@ -51,13 +51,9 @@ export interface RecommendInput {
   keep?: Record<string, Won>;
   /**
    * 직접 추가한 지출 줄(W-01 ‘추천값으로 다시 채우기’, 2026-11-12 QA 5구간 D1). 금액 그대로 두고 지출 줄 맨 뒤에 그대로 돌려줌.
-   * 저금은 수입에서 이 줄들과 이미 있는 고정지출·생활비·용돈을 뺀 남은 금액에서(06 3-2)
+   * 저금은 수입에서 이 줄들과 용돈을 뺀 남은 금액에서(06 3-2, 2026-11-28 고정지출·생활비 기본 줄 없앰: 지출은 모두 직접 추가 줄)
    */
   custom?: { name: string; amount: Won }[];
-  /**
-   * 이미 있는 고정지출·생활비 줄(2026-11-15: 추천값은 새로 만들지 않고, 있던 줄은 지우지 않고 금액 그대로 돌려줌, 종류마다 합쳐 1줄)
-   */
-  existing?: { kind: 'fixed'; amount: Won }[];
   /**
    * 합쳐서(2026-11-13, 06 3-2): 용돈을 사람마다 같은 금액 = 두 사람 실수령 합 × 10% ÷ 사람 수(1만 원 반올림).
    * 없거나 false면 사람마다 그 사람 실수령 × 10%(각자, 예전)
@@ -68,7 +64,7 @@ export interface RecommendInput {
 
 /**
  * 처음 채우는 값(O-50, W-01 ‘추천값으로 다시 채우기’).
- * 직접 추가한 지출 줄(custom)과 이미 있는 고정지출·생활비 줄(existing)은 금액 그대로 두고 먼저 뗌(새로 만들지 않음, 2026-11-15).
+ * 직접 추가한 지출 줄(custom)은 금액 그대로 두고 먼저 뗌(2026-11-28 고정지출·생활비 기본 줄은 없음).
  * 용돈 = 사람마다 실수령 × 10%. 그대로 두는 저금 줄(keep, 월 필요액이 없는 항목의 지금 금액)을
  * 먼저 떼고, 남은 금액을 저금 묶음 순서대로 월 필요액만큼(모자라면 남은 만큼, 그다음은 0원). 저금 항목이 없으면 여유 자금.
  */
@@ -80,12 +76,6 @@ export function recommendSplit(o: RecommendInput): SplitLineDraft[] {
     amount: Math.max(c.amount, 0),
   }));
   const customSum = custom.reduce((t, c) => t + c.amount, 0);
-  const spendOf = (kind: 'fixed') =>
-    (o.existing ?? [])
-      .filter((e) => e.kind === kind)
-      .reduce((t, e) => t + Math.max(e.amount, 0), 0);
-  const fixed = spendOf('fixed');
-  const hasKind = (kind: 'fixed') => (o.existing ?? []).some((e) => e.kind === kind);
   const same = o.equalAllowance ? equalAllowance(o.people.map((p) => p.income)) : null;
   const allowances = o.people.map((p) => ({
     kind: 'allowance' as const,
@@ -98,7 +88,7 @@ export function recommendSplit(o: RecommendInput): SplitLineDraft[] {
     return { it, need, fixedAmount };
   });
   const kept = plan.reduce((t, p) => t + (p.fixedAmount ?? 0), 0);
-  let left = income - customSum - fixed - allowances.reduce((s, a) => s + a.amount, 0) - kept;
+  let left = income - customSum - allowances.reduce((s, a) => s + a.amount, 0) - kept;
   const savings: SplitLineDraft[] = plan.map(({ it, need, fixedAmount }) => {
     if (fixedAmount !== undefined)
       return { kind: 'saving', goalId: it.id, amount: fixedAmount, need };
@@ -108,7 +98,6 @@ export function recommendSplit(o: RecommendInput): SplitLineDraft[] {
   });
   return [
     ...savings,
-    ...(hasKind('fixed') ? [{ kind: 'fixed' as const, amount: fixed }] : []),
     ...allowances,
     ...custom,
   ];

@@ -31,7 +31,7 @@ insert into public.goal (space_id, template, name, kind, priority, target_amount
   select space_id, 'home', '내 집 마련', 'once', 1, 150000000 from public.app_user where id = auth.uid();
 select public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
-  jsonb_build_object('kind', 'fixed', 'amount', 880000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'amount', 350000)
 ), auth.uid());
 select pg_temp.no_backdate();
@@ -61,7 +61,7 @@ select throws_ok(format($$ select public.complete_join('[]'::jsonb, %s) $$, curr
   'P0001', 'split_changed', '월급 계획이 바뀌었으면 다시');
 select public.complete_join(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (public.join_context()->'joint'->'items'->0->>'id')::uuid, 'amount', 2500000),
-  jsonb_build_object('kind', 'fixed', 'amount', 880000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'user_id', '11111111-1111-1111-1111-111111111111', 'amount', 350000),
   jsonb_build_object('kind', 'allowance', 'user_id', '22222222-2222-2222-2222-222222222222', 'amount', 270000)
 ), current_setting('test.v')::int);

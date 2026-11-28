@@ -20,7 +20,7 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
 update public.app_user set nickname = '찬우', monthly_income = 3500000, payday = 25 where id = auth.uid();
-select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 680000)), auth.uid());
+select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000)), auth.uid());
 select set_config('test.code', (select code from public.create_invite()), true);
 reset role;
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
@@ -28,7 +28,7 @@ set local role authenticated;
 select public.complete_signup('kakao', null, false, 'v1');
 select public.join_space(current_setting('test.code'));
 update public.app_user set nickname = '예빈', monthly_income = 2700000, payday = 10 where id = auth.uid();
-select public.complete_join(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 680000)));
+select public.complete_join(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 680000)));
 reset role;
 delete from public.notification;
 -- 예빈 저금 둘: 여행(목표 1,000만, 시작 300만), 결혼 비용(묶을 것, 목표 2,000만, 시작 500만). 찬우 결혼 비용(시작 1,000만)

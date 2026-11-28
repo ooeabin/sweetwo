@@ -37,7 +37,7 @@ select throws_ok($$ select public.save_split('[]') $$, '22023', 'bad_owner', '�
 select set_config('test.split', public.save_split(jsonb_build_array(
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'emergency'), 'amount', 440000),
   jsonb_build_object('kind', 'saving', 'goal_id', (select id from public.goal where template = 'home'), 'amount', 950000),
-  jsonb_build_object('kind', 'fixed', 'amount', 880000),
+  jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 880000),
   jsonb_build_object('kind', 'custom', 'name', '식비', 'category', 'living', 'in_checklist', false, 'amount', 880000),
   jsonb_build_object('kind', 'allowance', 'amount', 350000),
   jsonb_build_object('kind', 'custom', 'name', '부모님 용돈', 'amount', 0)
@@ -46,9 +46,9 @@ select is((select count(*) from public.split_line), 6::bigint, '줄 6개 저장'
 select is((select user_id::text from public.split_line where kind = 'allowance'), '11111111-1111-1111-1111-111111111111', '용돈 줄 주인 = 나');
 select is((select array_agg(amount order by sort) from public.split_line),
   array[440000, 950000, 880000, 880000, 350000, 0]::bigint[], '줄 순서 = 배열 순서');
-select throws_ok($$ select public.save_split('[{"kind":"fixed","amount":12345}]', auth.uid()) $$, '23514', null, '1만 원 단위만');
+select throws_ok($$ select public.save_split('[{"kind":"custom","name":"공과금","category":"housing","amount":12345}]', auth.uid()) $$, '23514', null, '1만 원 단위만');
 select throws_ok($$ insert into public.split_line (split_id, space_id, kind, amount, sort)
-  select id, space_id, 'fixed', 10000, 9 from public.salary_split $$, '42501', null, '직접 쓰기는 막음');
+  select id, space_id, 'allowance', 10000, 9 from public.salary_split $$, '42501', null, '직접 쓰기는 막음');
 
 -- 첫 체크리스트: 오늘이 든 사이클, 0원 줄과 v2.2 기본 제외(생활비·용돈, D2) 빼고 3줄
 select pg_temp.no_backdate();
@@ -60,7 +60,7 @@ select pg_temp.no_backdate();
 select is(public.start_checklist(auth.uid()), (select id from public.pay_checklist), '두 번 불러도 하나');
 
 -- 저장하면 줄이 바뀜(통째로 교체)
-select public.save_split('[{"kind":"fixed","amount":1000000}]', auth.uid());
+select public.save_split('[{"kind":"custom","name":"공과금","category":"housing","amount":1000000}]', auth.uid());
 select is((select count(*) from public.split_line), 1::bigint, '다시 저장하면 줄 교체');
 reset role;
 

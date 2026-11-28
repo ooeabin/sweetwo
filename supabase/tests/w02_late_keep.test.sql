@@ -16,7 +16,7 @@ select public.complete_signup('kakao', null, false, 'v1');
 select public.ensure_my_space();
 update public.couple_space set holiday_shift = false;
 update public.app_user set monthly_income = 3000000, payday = 1 where id = auth.uid();
-select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'fixed', 'amount', 500000),
+select public.save_split(jsonb_build_array(jsonb_build_object('kind', 'custom', 'name', '공과금', 'category', 'housing', 'amount', 500000),
   jsonb_build_object('kind', 'custom', 'name', '관리비', 'amount', 200000)), auth.uid());
 reset role;
 update public.salary_split set checklist_from = null;
@@ -24,11 +24,11 @@ select public.make_checklist((select space_id from public.app_user where id = '4
   '44444444-4444-4444-4444-444444444444', '2027-01-05');
 -- 1월 목록의 줄 하나는 확인, 하나는 대기로 둠
 update public.pay_check_line set state = 'checked', checked_by = '44444444-4444-4444-4444-444444444444', checked_at = now()
-  where kind = 'fixed';
+  where (kind = 'custom' and name = '공과금');
 select public.make_checklist((select space_id from public.app_user where id = '44444444-4444-4444-4444-444444444444'),
   '44444444-4444-4444-4444-444444444444', '2027-02-05');
 select is((select l.state::text from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
-  where c.cycle_start = '2027-01-01' and l.kind = 'custom'), 'wait', '2월이 되어도 1월 손 줄은 대기로 남음');
+  where c.cycle_start = '2027-01-01' and l.kind = 'custom' and l.name = '관리비'), 'wait', '2월이 되어도 1월 손 줄은 대기로 남음');
 select isnt((select state::text from public.pay_checklist where cycle_start = '2027-01-01'), 'closed', '1월 목록은 안 닫힘');
 select is(public.late_check_until((select id from public.pay_checklist where cycle_start = '2027-01-01')), '2027-02-28'::date,
   '늦은 확인 마지막 날 = 2월 끝');
@@ -37,12 +37,12 @@ select is((select count(*)::int from public.pay_check_line l join public.pay_che
 select public.make_checklist((select space_id from public.app_user where id = '44444444-4444-4444-4444-444444444444'),
   '44444444-4444-4444-4444-444444444444', '2027-03-05');
 select is((select l.state::text from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
-  where c.cycle_start = '2027-01-01' and l.kind = 'custom'), 'skipped', '3월이 되면(늦은 확인 기간 끝) 남은 줄이 건너뜀');
+  where c.cycle_start = '2027-01-01' and l.kind = 'custom' and l.name = '관리비'), 'skipped', '3월이 되면(늦은 확인 기간 끝) 남은 줄이 건너뜀');
 select is((select l.state::text from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
-  where c.cycle_start = '2027-01-01' and l.kind = 'fixed'), 'checked', '확인한 줄은 그대로');
+  where c.cycle_start = '2027-01-01' and (l.kind = 'custom' and l.name = '공과금')), 'checked', '확인한 줄은 그대로');
 select is((select state::text from public.pay_checklist where cycle_start = '2027-01-01'), 'closed', '1월 목록 닫힘');
 select is((select l.state::text from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
-  where c.cycle_start = '2027-02-01' and l.kind = 'custom'), 'wait', '2월 목록은 3월 시작에도 대기(다음 사이클 끝까지)');
+  where c.cycle_start = '2027-02-01' and l.kind = 'custom' and l.name = '관리비'), 'wait', '2월 목록은 3월 시작에도 대기(다음 사이클 끝까지)');
 
 select * from finish();
 rollback;

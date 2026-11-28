@@ -53,7 +53,7 @@ insert into public.goal (id, space_id, template, name, kind, priority, target_am
   values ('a0000000-0000-0000-0000-000000000001', current_setting('test.sp')::uuid, 'home', '내 집 마련', 'once', 1, 100000000);
 select pg_temp.login_as('11111111-1111-1111-1111-111111111111');
 set local role authenticated;
-select public.save_split('[{"kind":"fixed","amount":680000},{"kind":"custom","name":"식비","category":"living","in_checklist":false,"amount":880000}]'::jsonb, null);
+select public.save_split('[{"kind":"custom","name":"공과금","category":"housing","amount":680000},{"kind":"custom","name":"식비","category":"living","in_checklist":false,"amount":880000}]'::jsonb, null);
 reset role;
 delete from public.partner_change;
 delete from public.notification;
@@ -107,7 +107,7 @@ select ok(not pg_temp.can(current_setting('test.n2')::uuid), '그 뒤 또 바뀌
 -- 3. 공동 월급 계획 줄 금액(save_split) → 돌리면 줄 금액이 원래대로 + 확인 목록 맞춤
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
 set local role authenticated;
-select public.save_split('[{"kind":"fixed","amount":700000},{"kind":"custom","name":"식비","category":"living","in_checklist":false,"amount":880000}]'::jsonb, null);
+select public.save_split('[{"kind":"custom","name":"공과금","category":"housing","amount":700000},{"kind":"custom","name":"식비","category":"living","in_checklist":false,"amount":880000}]'::jsonb, null);
 reset role;
 select pg_temp.flush();
 select set_config('test.n3', pg_temp.last_noti('11111111-1111-1111-1111-111111111111')::text, true);
@@ -117,7 +117,7 @@ set local role authenticated;
 select is(public.revert_partner_change(current_setting('test.n3')::uuid), 1, '줄 하나 돌림');
 reset role;
 select is((select l.amount from public.split_line l join public.salary_split s on s.id = l.split_id
-  where s.owner_user_id is null and l.kind = 'fixed'), 680000::bigint, '고정지출 원래 금액');
+  where s.owner_user_id is null and (l.kind = 'custom' and l.name = '공과금')), 680000::bigint, '고정지출 원래 금액');
 
 -- 4. 원래 값이 없는 예전 기록, 해제 대기 중에는 돌리지 않음
 select pg_temp.login_as('22222222-2222-2222-2222-222222222222');
