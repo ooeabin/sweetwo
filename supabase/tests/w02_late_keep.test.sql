@@ -28,7 +28,7 @@ update public.pay_check_line set state = 'checked', checked_by = '44444444-4444-
 select public.make_checklist((select space_id from public.app_user where id = '44444444-4444-4444-4444-444444444444'),
   '44444444-4444-4444-4444-444444444444', '2027-02-05');
 select is((select l.state::text from public.pay_check_line l join public.pay_checklist c on c.id = l.checklist_id
-  where c.cycle_start = '2027-01-01' and l.kind = 'custom'), 'wait', '2월이 되어도 1월 손 줄은 대기로 남음');
+  where c.cycle_start = '2027-01-01' and l.kind = 'custom' and l.name = '관리비'), 'wait', '2월이 되어도 1월 손 줄은 대기로 남음');
 select isnt((select state::text from public.pay_checklist where cycle_start = '2027-01-01'), 'closed', '1월 목록은 안 닫힘');
 select is(public.late_check_until((select id from public.pay_checklist where cycle_start = '2027-01-01')), '2027-02-28'::date,
   '늦은 확인 마지막 날 = 2월 끝');

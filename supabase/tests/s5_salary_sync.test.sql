@@ -103,9 +103,9 @@ reset role; select public.set_salary_mode('joint'); set local role authenticated
 select is((select amount from public.split_line where kind = 'custom' and name = '관리비'), 200000::bigint,
   '같은 이름 직접 추가 줄은 금액을 더해 한 줄(15만 + 5만)');
 select is((select count(*)::int from public.split_line where kind = 'custom' and name = '관리비'), 1, '관리비는 한 줄');
-select is((select count(*)::int from public.split_line where kind = 'custom'), 12, '합쳐 12줄(2026-11-28 생활비도 직접 추가 줄)이어도 모두 둠');
+select is((select count(*)::int from public.split_line where kind = 'custom'), 13, '합쳐 13줄(2026-11-28 식비·공과금도 직접 추가 줄)이어도 모두 둠');
 select is((select string_agg(name, ',' order by sort) from public.split_line where kind = 'custom'),
-  '식비,관리비,구독료,헬스장,교통비,보험료,정수기,부모님 용돈,학원비,병원비,세차,통신비', '순서는 바꾼 사람 것 먼저');
+  '공과금,식비,관리비,구독료,헬스장,교통비,보험료,정수기,부모님 용돈,학원비,병원비,세차,통신비', '순서는 바꾼 사람 것 먼저');
 -- 2026-11-27: 직접 추가 줄 한도 10 → 20(지출 묶음). 11줄이면 더 넣을 수 있음
 select lives_ok(
   $$ select public.split_line_add((select id from public.salary_split where owner_user_id is null), 'custom', 10000, '세탁비') $$,

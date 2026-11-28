@@ -57,7 +57,7 @@ select throws_ok(
   $$ select public.split_line_add(pg_temp.split(auth.uid()), 'custom', 10000, '간식', null, null, 'snack') $$,
   '23514', null, '칩 표에 없는 묶음 code는 거절');
 select throws_ok(
-  $$ select public.split_line_add(pg_temp.split(auth.uid()), 'allowance', 10000, null, null, null, 'housing') $$,
+  $$ select public.split_line_set((select id from public.split_line where kind = 'allowance' limit 1), null, null, 'housing') $$,
   '22023', 'bad_category', '직접 추가 줄이 아니면 묶음을 받지 않음');
 
 -- split_line_set: null이면 그대로, 값이면 바꿈
